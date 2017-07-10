@@ -33,20 +33,25 @@ theta0=extrudedUnitCell.theta;
 for iter=1:length(opt.angleConstrFinal)
     extrudedUnitCell.angleConstr=opt.angleConstrFinal(iter).val;
     V(:,1,iter)=u0;
-    
+    fprintf('load: %d\n', iter);
     for inter=1:opt.interval
-        fprintf('load: %d, step: %1.2f',iter,inter/opt.interval)
+%         fprintf('load: %d, step: %1.2f',iter,inter/opt.interval)
         tic
         if size(opt.angleConstrFinal(iter).val,1)~=0
             extrudedUnitCell.angleConstr(:,2)=theta0(extrudedUnitCell.angleConstr(:,1))+inter*(-theta0(extrudedUnitCell.angleConstr(:,1))+opt.angleConstrFinal(iter).val(:,2))/opt.interval;
         end
         %Determine new equilibrium
+%         fprintf('angle constrain antes: %d\t%d\n', extrudedUnitCell.angleConstr(1,2),theta0(extrudedUnitCell.angleConstr(1,1)))
         [V(:,inter+1,iter),~,exfl]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
         u0=V(:,inter+1,iter);
+        
         %Determine energy of that equilibrium
-        [E(inter+1,iter),~,Eedge(inter+1,iter),Eface(inter+1,iter),Ehinge(inter+1,iter),EtargetAngle(inter+1,iter)]=Energy(u0,extrudedUnitCell,opt);
+        [E(inter+1,iter),~,Eedge(inter+1,iter),Eface(inter+1,iter),Ehinge(inter+1,iter),EtargetAngle(inter+1,iter), theta]=Energy(u0,extrudedUnitCell,opt);
+%         fprintf('angle constrain despues: %d\t%d\n', extrudedUnitCell.angleConstr(1,2),theta(extrudedUnitCell.angleConstr(1,1)))
         t=toc;
-        fprintf(', time: %1.2f, exitflag: %d\n',t,exfl)
+        
+%         fprintf(', time: %1.2f, exitflag: %d\n',t,exfl)
+        fprintf('%d\t%d\t%d\t%d\t%d\n',extrudedUnitCell.angleConstr(1,2),theta(extrudedUnitCell.angleConstr(1,1)),Eedge(inter+1,iter),Eface(inter+1,iter),Ehinge(inter+1,iter) );
     end
     %update angle starting point
     [~,~,~,~,~,~,theta0]=Energy(u0,extrudedUnitCell,opt);
@@ -101,6 +106,7 @@ else
     dE=dE+opt.KtargetAngle*Jhinge(extrudedUnitCell.angleConstr(:,1),:)'*dtheta;
 end
 EtargetAngle=1/2*opt.KtargetAngle*sum(dtheta.^2);
+% fprintf('%d\t%d\t%d\n',dtheta,theta(extrudedUnitCell.angleConstr(:,1)),extrudedUnitCell.angleConstr(:,2)) 
 
 %TOTAL ENERGY
 E=Eedge+Eface+Ehinge+EtargetAngle;
