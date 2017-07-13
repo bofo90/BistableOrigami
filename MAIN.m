@@ -18,16 +18,16 @@ switch SimCase
                     'plot','result',...
                     'interval', 20,'saveFig','off','periodic','off',...
                     'constrFace','off','constrEdge','off',...
-                    'Khinge',0.01,'Kedge',1,'Kface',1,'KtargetAngle',100,...
+                    'Khinge',0.0,'Kedge',1,'Kface',1,'KtargetAngle',100,...
                     'constAnglePerc',0.99);
         opt.angleConstrFinal(1).val=[3  0
                                      18  0];
-        opt.angleConstrFinal(2).val=[3  -1.230959417
-                                     18 -1.230959417];
-        opt.angleConstrFinal(3).val=[3  -pi
-                                     18  -pi];
-        opt.angleConstrFinal(4).val=[3  -1.230959417
-                                     18 -1.230959417];
+%         opt.angleConstrFinal(2).val=[3  -1.230959417
+%                                      18 -1.230959417];
+%         opt.angleConstrFinal(3).val=[3  -pi
+%                                      18  -pi];
+%         opt.angleConstrFinal(4).val=[3  -1.230959417
+%                                      18 -1.230959417];
 %         opt.angleConstrFinal(3).val=[1 -pi*0.985
 %                                      2 -pi*0.985
 %                                      19 -pi*0.985];
