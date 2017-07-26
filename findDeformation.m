@@ -4,17 +4,17 @@ function [result,extrudedUnitCell]=findDeformation(unitCell,extrudedUnitCell,opt
 if strcmp(opt.plot,'info')
     result=[];
 else
-    [V,extrudedUnitCell,result]=nonlinearFolding(unitCell,extrudedUnitCell,opt);
-    result.numMode=size(V,3);
+    [~,extrudedUnitCell,result]=nonlinearFolding(unitCell,extrudedUnitCell,opt);
+    result.numMode=length(opt.angleConstrFinal);
     %Create different way of storing results
-    for i=1:result.numMode
-        result.deform(i).V=[V(1:3:end,end,i) V(2:3:end,end,i) V(3:3:end,end,i)];
-        result.deform(i).Ve=V(:,end,i);
-        for j=1:size(V,2)
-            result.deform(i).interV(j).V=[V(1:3:end,j,i) V(2:3:end,j,i) V(3:3:end,j,i)];
-            result.deform(i).interV(j).Ve=V(:,j,i);
-        end
-    end
+%     for i=1:result.numMode
+%         result.deform(i).V=[V(1:3:end,end,i) V(2:3:end,end,i) V(3:3:end,end,i)];
+%         result.deform(i).Ve=V(:,end,i);
+%         for j=1:size(V,2)
+%             result.deform(i).interV(j).V=[V(1:3:end,j,i) V(2:3:end,j,i) V(3:3:end,j,i)];
+%             result.deform(i).interV(j).Ve=V(:,j,i);
+%         end
+%     end
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -30,29 +30,56 @@ function [V,extrudedUnitCell,result]=nonlinearFolding(unitCell,extrudedUnitCell,
 %FIND DEFORMATION
 u0=zeros(3*size(extrudedUnitCell.node,1),1);
 theta0=extrudedUnitCell.theta;
+max_iter = 100000;
 for iter=1:length(opt.angleConstrFinal)
     extrudedUnitCell.angleConstr=opt.angleConstrFinal(iter).val;
-    V(:,1,iter)=u0;
+    clearvars V;
+    V(:,1)=u0;
     fprintf('load: %d\n', iter);
-    for inter=1:opt.interval
-%         fprintf('load: %d, step: %1.2f',iter,inter/opt.interval)
-        tic
-        if size(opt.angleConstrFinal(iter).val,1)~=0
+    if ~isempty(extrudedUnitCell.angleConstr)
+        for inter=1:opt.interval
+            fprintf('load: %d, step: %1.2f',iter,inter/opt.interval)
+            tic
+%             if size(opt.angleConstrFinal(iter).val,1)~=0
             extrudedUnitCell.angleConstr(:,2)=theta0(extrudedUnitCell.angleConstr(:,1))+inter*(-theta0(extrudedUnitCell.angleConstr(:,1))+opt.angleConstrFinal(iter).val(:,2))/opt.interval;
+%             end
+            %Determine new equilibrium
+    %         fprintf('angle constrain antes: %d\t%d\n', extrudedUnitCell.angleConstr(1,2),theta0(extrudedUnitCell.angleConstr(1,1)))
+            [V(:,inter+1),~,exfl]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
+    %         [V(:,inter+1,iter), exfl] = gradDescent(extrudedUnitCell, opt, u0, max_iter);
+
+            u0 = V(:,inter+1);
+
+            %Determine energy of that equilibrium
+            [E(inter+1,iter),~,Eedge(inter+1,iter),Eface(inter+1,iter),Ehinge(inter+1,iter),EtargetAngle(inter+1,iter), theta]=Energy(u0,extrudedUnitCell,opt);
+    %         fprintf('angle constrain despues: %d\t%d\n', extrudedUnitCell.angleConstr(1,2),theta(extrudedUnitCell.angleConstr(1,1)))
+            t=toc;
+
+            fprintf(', time: %1.2f, exitflag: %d\n',t,exfl)
+    %         fprintf('%d\t%d\t%d\t%d\t%d\n',extrudedUnitCell.angleConstr(1,2),theta(extrudedUnitCell.angleConstr(1,1)),Eedge(inter+1,iter),Eface(inter+1,iter),Ehinge(inter+1,iter) );
         end
-        %Determine new equilibrium
-%         fprintf('angle constrain antes: %d\t%d\n', extrudedUnitCell.angleConstr(1,2),theta0(extrudedUnitCell.angleConstr(1,1)))
-        [V(:,inter+1,iter),~,exfl]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
-        u0=V(:,inter+1,iter);
-        
-        %Determine energy of that equilibrium
-        [E(inter+1,iter),~,Eedge(inter+1,iter),Eface(inter+1,iter),Ehinge(inter+1,iter),EtargetAngle(inter+1,iter), theta]=Energy(u0,extrudedUnitCell,opt);
-%         fprintf('angle constrain despues: %d\t%d\n', extrudedUnitCell.angleConstr(1,2),theta(extrudedUnitCell.angleConstr(1,1)))
+    else
+        [E(1,iter),~,Eedge(1,iter),Eface(1,iter),Ehinge(1,iter),EtargetAngle(1,iter), theta]=Energy(u0,extrudedUnitCell,opt);
+        fprintf('load: %d, step: 1.00',iter)
+        tic
+%         [V(:,inter+1,iter),~,exfl]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
+        [V, exfl] = gradDescent(extrudedUnitCell, opt, u0, max_iter);
+        u0=V(:,end);
+        [E(2,iter),~,Eedge(2,iter),Eface(2,iter),Ehinge(2,iter),EtargetAngle(2,iter), theta]=Energy(u0,extrudedUnitCell,opt);
         t=toc;
         
-%         fprintf(', time: %1.2f, exitflag: %d\n',t,exfl)
-        fprintf('%d\t%d\t%d\t%d\t%d\n',extrudedUnitCell.angleConstr(1,2),theta(extrudedUnitCell.angleConstr(1,1)),Eedge(inter+1,iter),Eface(inter+1,iter),Ehinge(inter+1,iter) );
+        fprintf(', time: %1.2f, exitflag: %d\n',t,exfl)
+%         fprintf('%d\t%d\t%d\t%d\t%d\n',extrudedUnitCell.angleConstr(1,2),theta(extrudedUnitCell.angleConstr(1,1)),Eedge(inter+1,iter),Eface(inter+1,iter),Ehinge(inter+1,iter) );
+    end 
+    
+    
+    result.deform(iter).V=[V(1:3:end,end) V(2:3:end,end) V(3:3:end,end)];
+    result.deform(iter).Ve=V(:,end);
+    for j=1:size(V,2)
+        result.deform(iter).interV(j).V=[V(1:3:end,j) V(2:3:end,j) V(3:3:end,j)];
+        result.deform(iter).interV(j).Ve=V(:,j);
     end
+        
     %update angle starting point
     [~,~,~,~,~,~,theta0]=Energy(u0,extrudedUnitCell,opt);
 end
@@ -280,3 +307,84 @@ for i=1:size(extrudedUnitCell.nodeHingeEx,1)
     index(3:3:12)=3*extrudedUnitCell.nodeHingeEx(i,:);
     [Jhinge(i,index),theta(i)]=JacobianHinge(extrudedUnitCell.node(extrudedUnitCell.nodeHingeEx(i,:),:));
 end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%         YUN's addition                                        %%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function [deformationV, exitFlag] = ...
+    gradDescent(original_extrudedUnitCell, opt, u0, max_iter)
+% gradient descent method with a penalty imposed for preventing faces from
+% corssing over each other.
+% ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+% INPUT
+% original_extrudedUnitCell - extruded unit cell without applying any
+%                             deformations
+% opt      - options
+% u0       - coordinates of all nodes
+% max_iter - maximum number of iterations
+% ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+% OUTPUT
+% deformationV - an array containing the deformation in each iteration
+% exitFlag     - if exitFlag = 1, convergence occured within max_iter
+%                if exitFlag = 0, max_iter is reached without convergence
+% ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+% last modified on May 22, 2017
+% yun
+
+
+%%original_extrudedUnitCell.angleConstr = [];
+exitFlag = 2;
+
+% getting ready for the loop
+tol = 1e-9;
+step = 1e-3; % step size
+u = u0(:);
+deformationV(:,1) = u0(:);
+ct = 0;
+% numdef = 1
+difference = Inf;
+e_prev = Inf;
+% fprintf('\n_ %d _',difference)
+while ct <= max_iter && difference > tol
+    % energy of current u
+    [e, de, ~, ~, ~, ~, theta] = Energy(u, original_extrudedUnitCell, opt);
+    % uses penalty to prevent faces from crossing over
+    e = e + penalty(theta);
+   
+    
+    % get the new solution from jacobian
+    u_new = u - step .* de(:);
+    
+    % calculate difference between two consecutive solutions
+    difference = abs(e - e_prev) / ...
+        size(original_extrudedUnitCell.edge,1); % normalised to the number of hinges
+    
+    % prepare for next step
+    ct = ct + 1;
+    u = u_new;
+    if isequal(mod(ct,int16(max_iter/opt.interval)), 1)
+%         numdef = numdef+1;
+        deformationV(:,size(deformationV,2)+1) = u(:);
+    end
+    e_prev = e;
+%     fprintf(' %d_\n', e)
+end
+
+if ct > max_iter
+    exitFlag = 0;
+end
+
+if difference <= tol
+    exitFlag = 1;
+end
+
+function ePen = penalty(theta)
+% A penalty function which punished theta value outside the range of
+% [-0.95*pi, 0.95*pi].
+% The range is not [-pi, pi]
+% ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+% last modified on May 22, 2017
+% yun
+
+ePen = sum(max(0, 0.5 .* (theta - 0.95*pi) .* (theta + 0.95*pi)));

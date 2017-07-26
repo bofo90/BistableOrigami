@@ -95,7 +95,7 @@ if strcmp(opt.plot,'result')
         Imin=-1;
         for nMode=1:result.numMode
             fram=0;
-            for framMode=[0:opt.interval]
+            for framMode=[0:size(result.deform(nMode).interV,2)-1]
                 fram=fram+1;
                 for nc=1:size(extrudedUnitCell.latVec,1)
                     plotextrudedUnitCell.mode(nMode).frame(fram).lat(nc).coor=extrudedUnitCell.node+result.deform(nMode).interV(framMode+1).V+ones(size(extrudedUnitCell.node,1),1)*(extrudedUnitCell.latVec(nc,:)-refVec(nMode).interV(framMode+1).val(nc,:));

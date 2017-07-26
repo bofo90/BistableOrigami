@@ -14,24 +14,25 @@ SimCase=1
 switch SimCase
     case 1
         opt=initOpt('inputType','individual',...
-                    'template','truncated tetrahedron',...
+                    'template','tetrahedron',...
                     'plot','result',...
-                    'interval', 20,'saveFig','off','periodic','off',...
+                    'interval', 50 ,'saveFig','off','periodic','off',...
                     'constrFace','off','constrEdge','off',...
-                    'Khinge',0.0,'Kedge',1,'Kface',1,'KtargetAngle',100,...
-                    'constAnglePerc',0.99);
-        opt.angleConstrFinal(1).val=[3  0
-                                     18  0];
+                    'Khinge',0.0005,'Kedge',1,'Kface',1,'KtargetAngle',1000,...
+                    'constAnglePerc',0.95);
+        opt.angleConstrFinal(1).val=[1  -pi*0.95
+                                     2 -pi*0.95
+                                     3 -pi*0.95];
 %         opt.angleConstrFinal(2).val=[3  -1.230959417
 %                                      18 -1.230959417];
-%         opt.angleConstrFinal(3).val=[3  -pi
-%                                      18  -pi];
+%         opt.angleConstrFinal(3).val=[3  -pi*0.99
+%                                      18  -pi*0.99];
 %         opt.angleConstrFinal(4).val=[3  -1.230959417
 %                                      18 -1.230959417];
 %         opt.angleConstrFinal(3).val=[1 -pi*0.985
 %                                      2 -pi*0.985
 %                                      19 -pi*0.985];
-%         opt.angleConstrFinal(4).val=[];
+        opt.angleConstrFinal(2).val=[];
     case 2
         opt=initOpt('inputType','individual',...
                     'template','cuboctahedron',...
@@ -104,7 +105,10 @@ switch SimCase
 end
 
 %SOLVER OPTIONS
-opt.options=optimoptions('fmincon','GradConstr','on','GradObj','on','tolfun',1e-5','tolx',1e-9,'tolcon',1e-5,'Display','off','DerivativeCheck','off','maxfunevals',100000);
+opt.options=optimoptions('fmincon','GradConstr','on','GradObj','on',...
+                         'tolfun',1e-5','tolx',1e-10,'tolcon',1e-5,...
+                         'Display','off','DerivativeCheck','off',...
+                          'maxfunevals',100000);%%%%%%,'Algorithm', 'sqp');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %BUILD
