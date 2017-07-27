@@ -245,7 +245,7 @@ if strcmp(opt.plot,'result')
             end
         end
         axis equal
-        printHigRes(f,opt,'polyhedra',nameFolder)
+%         printHigRes(f,opt,'polyhedra',nameFolder)
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %PLOT MOVING OF POLYHEDRA
@@ -278,7 +278,7 @@ if strcmp(opt.plot,'result')
         for nc=1:size(unitCell.Polyhedron(1).latVec,1)
             for ne=1:length(unitCell.Polyhedron)
                 for i=3:10
-                    if length(plotunitCell.Init(1).polFace(i).indexs)~=0
+                    if ~isempty(plotunitCell.Init(1).polFace(i).indexs)
                         c=(plotunitCell.Init(ne).polFace(i).normal(plotunitCell.Init(ne).polFace(i).indexs,:)*viewCoor')>0;
                         set(his{ne,nc,i},'facealpha',1,'edgealpha',1,'facevertexCData',(c*colt(4,:)+abs(1-c)*colt(5,:)));
                     end
@@ -286,7 +286,7 @@ if strcmp(opt.plot,'result')
             end
         end
         set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);  
-        printHigRes(f,opt,'facetype',nameFolder)
+%         printHigRes(f,opt,'facetype',nameFolder)
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %PLOT EXTRUSION
@@ -309,7 +309,7 @@ if strcmp(opt.plot,'result')
             end
         end
         set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);
-        printHigRes(f,opt,'undeformed',nameFolder)     
+        printHigRes(f,opt,'0_undeformed',nameFolder)     
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %PLOT MODES INDIVIDUALLY
@@ -326,9 +326,9 @@ if strcmp(opt.plot,'result')
                     end
                 end
 
-                printGif(opt,framMode,f,nameFolder);
-                if framMode==Imax
-                    printHigRes(f,opt,['deformed_'],nameFolder)     
+                printGif(opt,framMode,f,nameFolder,[num2str(nMode),'_deformed']);
+                if framMode==length(plotextrudedUnitCell.mode(nMode).frame)
+                    printHigRes(f,opt,[num2str(nMode),'_deformed'],nameFolder)     
                 end
             end
             
@@ -366,7 +366,7 @@ function latVec=detLatVec(perVec,opt)
     
 function refVec=detrefVec(unitCell,result,opt,ref)
     for nMode=1:length(result.deform)
-        for fram=0:opt.interval
+        for fram=0:size(result.deform(nMode).interV,2)
             refVec(nMode).interV(fram+1).val=[];
             switch size(unitCell.l,1);
                 case 0
@@ -434,10 +434,10 @@ function hl2=plotOpt(opt)
     set(gca,'cameraviewanglemode','manual');
     %set(gca,'outerposition',[0 0 1.0 1.0])
     
-function printGif(opt,fram,f,nameFolder)
+function printGif(opt,fram,f,nameFolder,nam)
     pause(1/opt.frames)
     if strcmp(opt.saveMovie,'on')
-        name=[nameFolder,'/',opt.template];
+        name=[nameFolder,'/',opt.template,'_', nam];
         switch opt.plot
             case 'modes'
                 name=[name,'_Modes_'];
@@ -471,7 +471,8 @@ function printHigRes(f,opt,nam,nameFolder)
     pause(1/opt.frames)
     switch opt.saveFig
         case 'on'
-            name=[nameFolder,'/',opt.template,'_',num2str(opt.plotPer),'_',nam];
+%             name=[nameFolder,'/',opt.template,'_',num2str(opt.plotPer),'_',nam];
+            name=[nameFolder,'/',opt.template,'_',nam];
             figpos=getpixelposition(f); %dont need to change anything here
             resolution=get(0,'ScreenPixelsPerInch'); %dont need to change anything here
             set(f,'paperunits','inches','papersize',figpos(3:4)/resolution,...

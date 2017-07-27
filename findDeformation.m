@@ -62,15 +62,28 @@ for iter=1:length(opt.angleConstrFinal)
         [E(1,iter),~,Eedge(1,iter),Eface(1,iter),Ehinge(1,iter),EtargetAngle(1,iter), theta]=Energy(u0,extrudedUnitCell,opt);
         fprintf('load: %d, step: 1.00',iter)
         tic
-%         [V(:,inter+1,iter),~,exfl]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
-        [V, exfl] = gradDescent(extrudedUnitCell, opt, u0, max_iter);
+        switch opt.relAlgor
+            case 'gradDesc'
+                [V, exfl] = gradDescent(extrudedUnitCell, opt, u0, max_iter);
+            case 'interior-point'
+                prev = opt.options.Algorithm;
+                opt.options.Algorithm = 'interior-point';
+                [V(:,2),~,exfl]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
+                opt.options.Algorithm = prev;
+            case 'sqp'
+                prev = opt.options.Algorithm;
+                opt.options.Algorithm = 'sqp';
+                [V(:,2),~,exfl]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
+                opt.options.Algorithm = prev;
+        end
+        
         u0=V(:,end);
         [E(2,iter),~,Eedge(2,iter),Eface(2,iter),Ehinge(2,iter),EtargetAngle(2,iter), theta]=Energy(u0,extrudedUnitCell,opt);
         t=toc;
-        
+
         fprintf(', time: %1.2f, exitflag: %d\n',t,exfl)
-%         fprintf('%d\t%d\t%d\t%d\t%d\n',extrudedUnitCell.angleConstr(1,2),theta(extrudedUnitCell.angleConstr(1,1)),Eedge(inter+1,iter),Eface(inter+1,iter),Ehinge(inter+1,iter) );
-    end 
+%         fprintf('%d\t%d\t%d\t%d\t%d\n',extrudedUnitCell.angleConstr(1,2),theta(extrudedUnitCell.angleConstr(1,1)),Eedge(inter+1,iter),Eface(inter+1,iter),Ehinge(inter+1,iter) );   
+    end
     
     
     result.deform(iter).V=[V(1:3:end,end) V(2:3:end,end) V(3:3:end,end)];
@@ -333,28 +346,25 @@ function [deformationV, exitFlag] = ...
 % yun
 
 
-%%original_extrudedUnitCell.angleConstr = [];
+% % original_extrudedUnitCell.angleConstr = [];
 exitFlag = 2;
 
 % getting ready for the loop
-tol = 1e-9;
-step = 1e-3; % step size
 u = u0(:);
 deformationV(:,1) = u0(:);
 ct = 0;
-% numdef = 1
 difference = Inf;
 e_prev = Inf;
 % fprintf('\n_ %d _',difference)
-while ct <= max_iter && difference > tol
+while ct <= max_iter && difference > opt.gradDescTol
     % energy of current u
     [e, de, ~, ~, ~, ~, theta] = Energy(u, original_extrudedUnitCell, opt);
     % uses penalty to prevent faces from crossing over
-    e = e + penalty(theta);
+%     e = e + penalty(theta);
    
     
     % get the new solution from jacobian
-    u_new = u - step .* de(:);
+    u = u - opt.gradDescStep .* de(:);
     
     % calculate difference between two consecutive solutions
     difference = abs(e - e_prev) / ...
@@ -362,9 +372,7 @@ while ct <= max_iter && difference > tol
     
     % prepare for next step
     ct = ct + 1;
-    u = u_new;
-    if isequal(mod(ct,int16(max_iter/opt.interval)), 1)
-%         numdef = numdef+1;
+    if isequal(mod(ct,1000), 0)
         deformationV(:,size(deformationV,2)+1) = u(:);
     end
     e_prev = e;
@@ -373,10 +381,12 @@ end
 
 if ct > max_iter
     exitFlag = 0;
+    deformationV(:,size(deformationV,2)+1) = u(:);
 end
 
-if difference <= tol
+if difference <= opt.gradDescTol
     exitFlag = 1;
+    deformationV(:,size(deformationV,2)+1) = u(:);
 end
 
 function ePen = penalty(theta)
