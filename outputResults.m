@@ -25,7 +25,7 @@ opt.tranPol=0.5;
 %Check if output folder is required, and create it if it doesn't exist
  nameFolder=[pwd,'/Results/',opt.template,'/',opt.relAlgor];
 if or(strcmp(opt.saveFig,'on'),strcmp(opt.saveMovie,'on'))
-    if exist(nameFolder)==0
+    if exist(nameFolder, 'dir')==0
         mkdir(nameFolder)
     end
 end
@@ -309,7 +309,7 @@ if strcmp(opt.plot,'result')
             end
         end
         set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);
-        printHigRes(f,opt,'0_undeformed',nameFolder)     
+        printHigRes(f,opt,'_0_undeformed',nameFolder);     
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %PLOT MODES INDIVIDUALLY
@@ -325,19 +325,9 @@ if strcmp(opt.plot,'result')
                         set(hs{nc,i},'Vertices',plotextrudedUnitCell.mode(nMode).frame(framMode).lat(nc).coor,'facecolor','flat','facevertexCData',c*colt(4,:)+abs(1-c)*colt(5,:),'facealpha',1.0);
                     end
                 end
-%                 if isempty(opt.angleConstrFinal(nMode))
-%                     printGif(opt,framMode,f,nameFolder,['_[',num2str(opt.angleConstrFinal(nMode-1).val(:,1)'),']_',num2str(nMode),'_deformed']);
-%                 else
-%                     printGif(opt,framMode,f,nameFolder,['_[',num2str(opt.angleConstrFinal(nMode).val(:,1)'),']_',num2str(nMode),'_deformed']);
-%                 end
-                printGif(opt,framMode,f,nameFolder,[num2str(nMode),'_deformed']);
+                printGif(opt,framMode,f,nameFolder,['_',mat2str(extrudedUnitCell.angleConstr(:,1)'),'_',num2str(nMode),'_deformed']);
                 if framMode==length(plotextrudedUnitCell.mode(nMode).frame)
-                    printHigRes(f,opt,[num2str(nMode),'_deformed'],nameFolder)
-%                     if isempty(opt.angleConstrFinal(nMode))
-%                         printHigRes(f,opt,['_[',num2str(opt.angleConstrFinal(nMode-1).val(:,1)'),']_',num2str(nMode),'_deformed'],nameFolder)     
-%                     else
-%                         printHigRes(f,opt,['_[',num2str(opt.angleConstrFinal(nMode).val(:,1)'),']_',num2str(nMode),'_deformed'],nameFolder)
-%                     end
+                    printHigRes(f,opt,['_',mat2str(extrudedUnitCell.angleConstr(:,1)'),'_',num2str(nMode),'_deformed'],nameFolder);
                 end
             end
             
@@ -446,7 +436,7 @@ function hl2=plotOpt(opt)
 function printGif(opt,fram,f,nameFolder,nam)
     pause(1/opt.frames)
     if strcmp(opt.saveMovie,'on')
-        name=[nameFolder,'/',opt.template,'_[',num2str(opt.angleConstrFinal(1).val(:,1)'),']_', nam];
+        name=[nameFolder,'/',opt.template, nam];
         switch opt.plot
             case 'modes'
                 name=[name,'_Modes_'];
@@ -466,7 +456,7 @@ function printGif(opt,fram,f,nameFolder,nam)
         end
         im = frame2im(frame);
         [imind,cm] = rgb2ind(im,256);
-        if fram==1;
+        if fram==1
             imwrite(imind,cm,name,'gif', 'Loopcount',inf,'delaytime',0.04);
         else
             imwrite(imind,cm,name,'gif','WriteMode','append','delaytime',0.04);
@@ -481,7 +471,7 @@ function printHigRes(f,opt,nam,nameFolder)
     switch opt.saveFig
         case 'on'
 %             name=[nameFolder,'/',opt.template,'_',num2str(opt.plotPer),'_',nam];
-            name=[nameFolder,'/',opt.template,'_[',num2str(opt.angleConstrFinal(1).val(:,1)'),']_',nam];
+            name=[nameFolder,'/',opt.template,nam];
             figpos=getpixelposition(f); %dont need to change anything here
             resolution=get(0,'ScreenPixelsPerInch'); %dont need to change anything here
             set(f,'paperunits','inches','papersize',figpos(3:4)/resolution,...
