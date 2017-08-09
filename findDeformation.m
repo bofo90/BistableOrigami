@@ -1,11 +1,10 @@
 function [extrudedUnitCell]=findDeformation(unitCell,extrudedUnitCell,opt)
 
 %Show details geometries (if requested)
-if strcmp(opt.plot,'info')
-    result=[];
-else
+if strcmp(opt.plot,'result')
     [~,extrudedUnitCell]=nonlinearFolding(unitCell,extrudedUnitCell,opt);
 end
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -18,7 +17,6 @@ function [V,extrudedUnitCell]=nonlinearFolding(unitCell,extrudedUnitCell,opt)
 [Aeq, Beq]=linearConstr(unitCell,extrudedUnitCell,opt);
 
 %FIND DEFORMATION
-u0=zeros(3*size(extrudedUnitCell.node,1),1);
 theta0=extrudedUnitCell.theta;
 max_iter = 100000;
 extrudedUnitCell.angleConstr=[];
@@ -30,27 +28,24 @@ end
 
 for iter=1:length(opt.angleConstrFinal)
     clearvars V;
+    u0=zeros(3*size(extrudedUnitCell.node,1),1);
     V(:,1)=u0;
     [E(1,1),~,Eedge(1,1),Eface(1,1),Ehinge(1,1),EtargetAngle(1,1), ~]=Energy(u0,extrudedUnitCell,opt);
+    exfl(1,1) = 1;
     fprintf(['angle contrain:', mat2str(opt.angleConstrFinal(iter).val(:,1)') ,'\n']);
     tic
     extrudedUnitCell.angleConstr=opt.angleConstrFinal(iter).val;
     for inter=1:opt.interval
         fprintf('load: %d, step: %1.2f',2*iter-1,inter/opt.interval);
         t1 = toc;
-%             if size(opt.angleConstrFinal(iter).val,1)~=0
         extrudedUnitCell.angleConstr(:,2)=theta0(extrudedUnitCell.angleConstr(:,1))+inter*(-theta0(extrudedUnitCell.angleConstr(:,1))+opt.angleConstrFinal(iter).val(:,2))/opt.interval;
-%             end
         %Determine new equilibrium
-        [V(:,inter+1),~,exfl]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
+        [V(:,inter+1),~,exfl(inter+1,1)]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
         u0 = V(:,inter+1);
-
         %Determine energy of that equilibrium
         [E(inter+1,1),~,Eedge(inter+1,1),Eface(inter+1,1),Ehinge(inter+1,1),EtargetAngle(inter+1,1), ~]=Energy(u0,extrudedUnitCell,opt);
         t2 = toc;
-
-        fprintf(', time: %1.2f, exitflag: %d\n',t2-t1,exfl);
-%         fprintf('%d\t%d\t%d\t%d\t%d\n',extrudedUnitCell.angleConstr(1,2),theta(extrudedUnitCell.angleConstr(1,1)),Eedge(inter+1,iter),Eface(inter+1,iter),Ehinge(inter+1,iter) );
+        fprintf(', time: %1.2f, exitflag: %d\n',t2-t1,exfl(inter+1,1));
     end
     
     result.deform(1).V=[V(1:3:end,end) V(2:3:end,end) V(3:3:end,end)];
@@ -68,37 +63,33 @@ for iter=1:length(opt.angleConstrFinal)
             fprintf('load: %d, step: 1.00',2*iter)
             extrudedUnitCell.angleConstr=[];
             [E(1,2),~,Eedge(1,2),Eface(1,2),Ehinge(1,2),EtargetAngle(1,2), ~]=Energy(u0,extrudedUnitCell,opt);
-            [V, exfl] = gradDescent(extrudedUnitCell, opt, u0, max_iter);
+            exfl(1,2) = 1;
+            [V, exfl(2,2)] = gradDescent(extrudedUnitCell, opt, u0, max_iter);
             u0=V(:,end);
             [E(2,2),~,Eedge(2,2),Eface(2,2),Ehinge(2,2),EtargetAngle(2,2), ~]=Energy(u0,extrudedUnitCell,opt);
 
             t2 = toc;
-            fprintf(', time: %1.2f, exitflag: %d\n',t2,exfl)
+            fprintf(', time: %1.2f, exitflag: %d\n',t2,exflexfl(2,2))
         case {'interior-point', 'sqp'}
             [E(1,2),~,Eedge(1,2),Eface(1,2),Ehinge(1,2),EtargetAngle(1,2), ~]=Energy(u0,extrudedUnitCell,opt);
+            exfl(1,2) = 1;
             prevKtargetAngle = opt.KtargetAngle;
             opt.options.Algorithm = opt.relAlgor;
             for inter = 1:opt.relInterval
                 fprintf('load: %d, step: %1.2f',2*iter,inter/opt.relInterval)
                 tic;
-                
                 opt.KtargetAngle = prevKtargetAngle - (prevKtargetAngle/opt.relInterval)*inter;
-
-                [V(:,inter+1),~,exfl]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
+                [V(:,inter+1),~,exfl(inter+1,2)]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
                 u0 = V(:,inter+1);
-
                 [E(inter+1,2),~,Eedge(inter+1,2),Eface(inter+1,2),Ehinge(inter+1,2),EtargetAngle(inter+1,2), ~]=Energy(u0,extrudedUnitCell,opt);
-
                 t2 = toc;
-                fprintf(', time: %1.2f, exitflag: %d\n',t2,exfl)
+                fprintf(', time: %1.2f, exitflag: %d\n',t2,exfl(inter+1,2))
             end
-            opt.options.Algorithm = opt.closeAlgor;
+            opt.options.Algorithm = opt.folAlgor;
             opt.KtargetAngle = prevKtargetAngle;
             extrudedUnitCell.angleConstr=[];
     end
-    u0=zeros(3*size(extrudedUnitCell.node,1),1);
-%         fprintf('%d\t%d\t%d\t%d\t%d\n',extrudedUnitCell.angleConstr(1,2),theta(extrudedUnitCell.angleConstr(1,1)),Eedge(inter+1,iter),Eface(inter+1,iter),Ehinge(inter+1,iter) );   
-        
+    
     result.deform(2).V=[V(1:3:end,end) V(2:3:end,end) V(3:3:end,end)];
     result.deform(2).Ve=V(:,end);
     for j=1:size(V,2)
@@ -111,17 +102,21 @@ for iter=1:length(opt.angleConstrFinal)
     result.Eface=Eface;
     result.Ehinge=Ehinge;
     result.EtargetAngle=EtargetAngle;    
-    
+    result.exfl = exfl;
     result.numMode=length(result.deform);
     
     fileName = strcat(folderName,'/',opt.template,'_',...
         mat2str(opt.angleConstrFinal(iter).val(:,1)'),'_','.mat');
     save(fileName, 'result');
-    clearvars result E Eedge Eface Ehinge EtargetAngle;
+    
+    clearvars result E Eedge Eface Ehinge EtargetAngle exfl;
+    fclose('all');
     
     %update angle starting point
 %     [~,~,~,~,~,~,theta0]=Energy(u0,extrudedUnitCell,opt);
 end
+
+
 
 
 

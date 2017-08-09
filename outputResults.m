@@ -79,7 +79,7 @@ hl2=plotOpt(opt);
 opt.xlim=xlim;
 opt.ylim=ylim;
 opt.zlim=zlim;
-if strcmp(opt.plot,'result')
+if strcmp(opt.plot,'result') || strcmp(opt.plot,'savedata')
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %PREPARE PLOTTING OF DEFORMED CONFIGURATION
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -223,7 +223,7 @@ if strcmp(opt.plot,'info')
     set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);
 end
 
-if strcmp(opt.plot,'result')
+if strcmp(opt.plot,'result') || strcmp(opt.plot,'savedata')
         %First make solid face with 100% transparency
         for nc=1:size(extrudedUnitCell.latVec,1)
             for i=3:10

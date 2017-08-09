@@ -9,18 +9,18 @@ clear, close all , clc, format long
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-SimCase=1
+SimCase=1;
 
 switch SimCase
     case 1
         opt=initOpt('inputType','individual',...
                     'template','truncated tetrahedron',...
-                    'plot','result',...
+                    'plot','savedata','createFig', 'on', 'showFig', 'off',...
                     'interval', 1,'saveFig','on','periodic','on','figDPI',300,...
                     'saveMovie', 'on', 'safeMovieAntiAlias', 0,...
-                    'closeAlgor', 'interior-point','relAlgor', 'sqp',...
+                    'folAlgor', 'sqp','relAlgor', 'sqp',...
                     'gradDescStep', 1e-1, 'gradDescTol', 1e-9,...
-                    'constrFace','off','constrEdge','off',...
+                    'constrFace','on','constrEdge','off',...
                     'Khinge',0.0005,'Kedge',1,'Kface',1,'KtargetAngle',0.5,...
                     'relInterval', 1, 'constAnglePerc',0.99);
         opt.angleConstrFinal(1).val=[1  -pi*0.985
@@ -35,28 +35,28 @@ switch SimCase
                                      2  -pi*0.985
                                      8  -pi*0.985
                                      ];
-        opt.angleConstrFinal(4).val=[2  -pi*0.985
-                                     13  -pi*0.985
-                                     41  -pi*0.985
-                                     ];
-        opt.angleConstrFinal(5).val=[3  -pi*0.985
-                                     8  -pi*0.985
-                                     ];
-        opt.angleConstrFinal(6).val=[3  -pi*0.985
-                                     19  -pi*0.985
-                                     37  -pi*0.985
-                                     ];
-        opt.angleConstrFinal(7).val=[3  -pi*0.985
-                                     41  -pi*0.985
-                                     ];
-        opt.angleConstrFinal(8).val=[3  -pi*0.985
-                                     ];
-        opt.angleConstrFinal(9).val=[24  -pi*0.985
-                                     48  -pi*0.985
-                                     ];
-        opt.angleConstrFinal(10).val=[36  -pi*0.985
-                                     48  -pi*0.985
-                                     ];
+%         opt.angleConstrFinal(4).val=[2  -pi*0.985
+%                                      13  -pi*0.985
+%                                      41  -pi*0.985
+%                                      ];
+%         opt.angleConstrFinal(5).val=[3  -pi*0.985
+%                                      8  -pi*0.985
+%                                      ];
+%         opt.angleConstrFinal(6).val=[3  -pi*0.985
+%                                      19  -pi*0.985
+%                                      37  -pi*0.985
+%                                      ];
+%         opt.angleConstrFinal(7).val=[3  -pi*0.985
+%                                      41  -pi*0.985
+%                                      ];
+%         opt.angleConstrFinal(8).val=[3  -pi*0.985
+%                                      ];
+%         opt.angleConstrFinal(9).val=[24  -pi*0.985
+%                                      48  -pi*0.985
+%                                      ];
+%         opt.angleConstrFinal(10).val=[36  -pi*0.985
+%                                      48  -pi*0.985
+%                                      ];
 
     case 2
         opt=initOpt('inputType','individual',...
@@ -131,9 +131,9 @@ end
 
 %SOLVER OPTIONS
 opt.options=optimoptions('fmincon','GradConstr','on','GradObj','on',...
-                         'tolfun',1e-5','tolx',1e-9,'tolcon',1e-5,...
+                         'tolfun',1e-7','tolx',1e-10,'tolcon',1e-7,...
                          'Display','off','DerivativeCheck','off',...
-                         'maxfunevals',100000,'Algorithm', opt.closeAlgor);
+                         'maxfunevals',100000,'Algorithm', opt.folAlgor);
 %                          'FiniteDifferenceType', 'central', 'FiniteDifferenceStepSize', eps^(1));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -150,23 +150,7 @@ opt.options=optimoptions('fmincon','GradConstr','on','GradObj','on',...
 %OUTPUT AND PLOT GEOMETRY
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-fileFolder = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat');
-allFiles = dir(fileFolder);
-for ct = 1:length(allFiles)
-    if allFiles(ct).isdir
-%         disp('skip all directories...')
-        continue;
-    end
-    
-    % parse the file name to get back hinge set and exit flag
-    fileName = allFiles(ct).name;
-    parsedName = strsplit(fileName(1:end-4), '_');
-    hingeSetStr = parsedName{2};
-    hingeSetStr = strsplit(hingeSetStr(2:end-1), ' ');
-    hingeSet = str2double(hingeSetStr)';
-    extrudedUnitCell.angleConstr = [hingeSet(:), -pi*0.985 * ones(length(hingeSet), 1)];
-    load(strcat(fileFolder,'/', fileName));
-    outputResults(unitCell,extrudedUnitCell,result,opt);
-    close all;
-end
+%% 
+ReadAndPlot(unitCell, extrudedUnitCell, opt);
+
 
