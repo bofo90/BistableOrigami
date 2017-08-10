@@ -1,17 +1,29 @@
-function [extrudedUnitCell]=findDeformation(unitCell,extrudedUnitCell,opt)
+function findDeformation(unitCell,extrudedUnitCell,opt)
 
 %Show details geometries (if requested)
 if strcmp(opt.plot,'result')
-    [~,extrudedUnitCell]=nonlinearFolding(unitCell,extrudedUnitCell,opt);
+    if strcmp(opt.readAngFile,'off')
+        nonlinearFolding(unitCell,extrudedUnitCell,opt);
+    else
+        opt.angleConstrFinal = [];
+        fileHinges = strcat(pwd, '\Results\hingeList_reduced\', opt.template, '.csv');
+        hingeList = dlmread(fileHinges);
+        for i = 1:size(hingeList, 1)
+            row = hingeList(i, :);
+            hinges = row(0~=row);
+            opt.angleConstrFinal(1).val = [hinges(:), -pi*0.985 * ones(length(hinges), 1)];
+            fprintf('Hinge selection number %d/%d. ', i, size(hingeList, 1))
+            nonlinearFolding(unitCell,extrudedUnitCell,opt);
+        end
+    end
 end
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %NON-LINEAR ANALYSIS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [V,extrudedUnitCell]=nonlinearFolding(unitCell,extrudedUnitCell,opt)
+function nonlinearFolding(unitCell,extrudedUnitCell,opt)
 
 %INITIALIZE LINEAR CONSTRAINTS
 [Aeq, Beq]=linearConstr(unitCell,extrudedUnitCell,opt);
@@ -32,7 +44,7 @@ for iter=1:length(opt.angleConstrFinal)
     V(:,1)=u0;
     [E(1,1),~,Eedge(1,1),Eface(1,1),Ehinge(1,1),EtargetAngle(1,1), ~]=Energy(u0,extrudedUnitCell,opt);
     exfl(1,1) = 1;
-    fprintf(['angle contrain:', mat2str(opt.angleConstrFinal(iter).val(:,1)') ,'\n']);
+    fprintf(['Angle contrain:', mat2str(opt.angleConstrFinal(iter).val(:,1)') ,'\n']);
     tic
     extrudedUnitCell.angleConstr=opt.angleConstrFinal(iter).val;
     for inter=1:opt.interval
