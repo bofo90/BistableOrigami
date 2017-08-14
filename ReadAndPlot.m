@@ -46,13 +46,15 @@ switch opt.plot
                 extrudedUnitCell.angleConstr = [hingeSet(:), -pi*0.985 * ones(length(hingeSet), 1)];
                 load(strcat(folderResults,'/', fileName));
                 succesfullFiles = succesfullFiles + 1;
+                fprintf('Plot of Hinges number %d/%d\n', succesfullFiles, length(allFiles)-directories);
                 if strcmp(opt.plot, 'savedata')
                     [CM, Radios, Stdev, EhingeInt] = getRadiosStdev(extrudedUnitCell, opt, result);
                     Energies = [ones(length(result.E),1)*(ct-directories), result.Eedge,...
-                        result.Eface, result.Ehinge, result.EtargetAngle, EhingeInt];
+                        result.Eface, result.Ehinge, result.EtargetAngle, EhingeInt, result.exfl];
                     PosStad = cat(3,ones(length(result.E),2,1)*(ct-directories),CM, Radios, Stdev);
+                    Hinges = [num2str(ct-directories),',',parsedName{2}];
                     dlmwrite(fileMassDist, PosStad, 'delimiter', ',', '-append');
-                    dlmwrite(fileHinge,[num2str(ct-directories),',',parsedName{2}], 'delimiter', '', '-append');
+                    dlmwrite(fileHinge, Hinges, 'delimiter', '', '-append');
                     dlmwrite(fileEnergy, Energies, 'delimiter', ',', '-append');
                 end
                 if strcmp(opt.createFig, 'on')
@@ -62,7 +64,6 @@ switch opt.plot
                     close all;
                 end
             end
-            fprintf('Succesfull result Files read: %d\n', succesfullFiles);
         end
         fclose('all');
         
@@ -97,7 +98,9 @@ end
 
 function [EhingeIntSum] = getIntEnergy(u, opt, extrudedUnitCell)
 theta=zeros(size(extrudedUnitCell.nodeHingeEx,1),1);
-innerHinges = [1 2 3 7 8 9 13 14 18 19 23 24 28 32 36 37 41 48]';
+% innerHinges = [1 2 3 7 8 9 13 14 18 19 23 24 28 32 36 37 41 48]';%%%truncated tetrahedron
+% innerHinges = [1 2 3 7 8 12]'; %%%tetrahedron
+innerHinges = [1 2 7 12 3 8 17 13 21 22 26]; %%%Cube
 EhingeInt = zeros(size(innerHinges,1),1);
 extrudedUnitCell.node=extrudedUnitCell.node+[u(1:3:end) u(2:3:end) u(3:3:end)];
 

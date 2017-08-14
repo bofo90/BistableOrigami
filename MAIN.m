@@ -13,28 +13,30 @@ SimCase=1;
 
 switch SimCase
     case 1
-        opt=initOpt('inputType','individual',...
-                    'template','truncated tetrahedron',...
-                    'plot','result','createFig', 'off', 'showFig', 'off',...
+        opt=initOpt('inputType','individual',... 
+                    'template','cuboctahedron',...
+                    'plot','selectHinges','createFig', 'off', 'showFig', 'off',...
                     'interval', 1,'saveFig','off','periodic','on','figDPI',300,...
                     'saveMovie', 'off', 'safeMovieAntiAlias', 0,...
-                    'folAlgor', 'sqp','relAlgor', 'sqp','readAngFile', 'on',...
+                    'folAlgor', 'sqp','relAlgor', 'sqp','readAngFile', 'off',...
                     'gradDescStep', 1e-1, 'gradDescTol', 1e-9,...
                     'constrFace','on','constrEdge','off',...
                     'Khinge',0.0005,'Kedge',1,'Kface',1,'KtargetAngle',0.5,...
                     'relInterval', 1, 'constAnglePerc',0.99);
-        opt.angleConstrFinal(1).val=[1  -pi*0.985
-                                     2  -pi*0.985
-                                     14  -pi*0.985
-                                     ];
-        opt.angleConstrFinal(2).val=[1  -pi*0.985
-                                     2  -pi*0.985
-                                     19  -pi*0.985
-                                     ];
-        opt.angleConstrFinal(3).val=[1  -pi*0.985
-                                     2  -pi*0.985
-                                     8  -pi*0.985
-                                     ];
+        opt.angleConstrFinal(1).val=[];
+%                                      1  -pi*0.985
+%                                      2  -pi*0.985
+%                                      7  -pi*0.985
+%                                      13  -pi*0.985
+%                                      ];
+%         opt.angleConstrFinal(2).val=[1  -pi*0.985
+%                                      2  -pi*0.985
+%                                      19  -pi*0.985
+%                                      ];
+%         opt.angleConstrFinal(3).val=[1  -pi*0.985
+%                                      2  -pi*0.985
+%                                      8  -pi*0.985
+%                                      ];
 %         opt.angleConstrFinal(4).val=[2  -pi*0.985
 %                                      13  -pi*0.985
 %                                      41  -pi*0.985
@@ -131,11 +133,11 @@ end
 
 %SOLVER OPTIONS
 opt.options=optimoptions('fmincon','GradConstr','on','GradObj','on',...
-                         'tolfun',1e-7','tolx',1e-10,'tolcon',1e-7,...
+                         'tolfun',1e-6','tolx',1e-9, 'tolcon',1e-9,...
                          'Display','off','DerivativeCheck','off',...
-                         'maxfunevals',100000,'Algorithm', opt.folAlgor);
+                         'maxfunevals',1000000,'Algorithm', opt.folAlgor);
 %                          'FiniteDifferenceType', 'central', 'FiniteDifferenceStepSize', eps^(1));
-
+tic;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %BUILD
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -149,7 +151,7 @@ selectHinges(unitCell, extrudedUnitCell, opt)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %ANALYSIS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-findDeformation(unitCell,extrudedUnitCell,opt);
+% findDeformation(unitCell,extrudedUnitCell,opt);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %OUTPUT AND PLOT GEOMETRY
@@ -160,6 +162,9 @@ if (strcmp(opt.plot, 'result') && strcmp(opt.createFig, 'off'))
 else
     ReadAndPlot(unitCell, extrudedUnitCell, opt);
 end
+
+t = toc;
+fprintf('The whole program lasted %.2f seconds\n', t);
 
 
 
