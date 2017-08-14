@@ -714,6 +714,7 @@ for ne=1:length(unitCell.Polyhedron)
                 extrudedUnitCell.edge([end+1],:)=[nodeNumNew(index(i+1)) nodeNumNew(index(i))];
                 extrudedUnitCell.edge([end+1],:)=[nodeNumNew(index(i)) nodeNum(index(i))];
                 extrudedUnitCell.edge([end+1],:)=[nodeNumNew(index(i)) nodeNum(index(i+1))];
+                extrudedUnitCell.edge([end+1],:)=[nodeNumNew(index(i+1)) nodeNum(index(i))];
                 extrudedUnitCell.edgeHinge([end+1],:)=[nodeNum(index(i)) nodeNum(index(i+1)) nodeNumNew(index(i+1))];
                 extrudedUnitCell.edgeHinge([end+1],:)=[nodeNum(index(i+1)) nodeNumNew(index(i+1)) nodeNumNew(index(i))];
                 extrudedUnitCell.edgeHinge([end+1],:)=[nodeNumNew(index(i)) nodeNum(index(i)) nodeNum(index(i+1))]; 
