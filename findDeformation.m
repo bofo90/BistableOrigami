@@ -191,6 +191,8 @@ C1=[];
 DC1=[]; 
 Ceq1=[]; Ceq2=[];
 DCeq1=[]; DCeq2=[];
+C1=[]; C2=[];
+DC1=[]; DC2=[];
 
 %APPLY DEFORMATION NODES
 extrudedUnitCell.node=extrudedUnitCell.node+[u(1:3:end) u(2:3:end) u(3:3:end)];
@@ -199,12 +201,20 @@ extrudedUnitCell.node=extrudedUnitCell.node+[u(1:3:end) u(2:3:end) u(3:3:end)];
 %INEQUALITY CONSTRAINS
 %%%%%%%%%%%%%%%%%%%%%%
 %MAXIMUM AND MINIMUM ANGLES
-[C, DC]=getHinge(extrudedUnitCell);
-C=[-C-pi*opt.constAnglePerc; C-pi*opt.constAnglePerc];
-DC=[-DC; DC]';
+[angles, Dangles]=getHinge(extrudedUnitCell);
+C1 = [-angles-pi*opt.constAnglePerc; angles-pi*opt.constAnglePerc];
+DC1 = [-Dangles; Dangles];
+%MAXIMUM AND MINIMUM EDGE STRECHING
+if strcmp(opt.constrEdge,'off') && ~isnan(opt.maxStretch)
+    [normStrech, DnormStrech]=getEdgeNorm(extrudedUnitCell);
+    C2 = [-normStrech-opt.maxStretch; normStrech-opt.maxStretch];
+    DC2 = [-DnormStrech; DnormStrech];
+end
+C = [C1; C2];
+DC = [DC1; DC2]';
 
 %%%%%%%%%%%%%%%%%%%%%%
-%INEQUALITY CONSTRAINS
+%EQUALITY CONSTRAINS
 %%%%%%%%%%%%%%%%%%%%%%
 %CONSTRAINT ASSOCIATED TO EDGE STRETCHING
 if strcmp(opt.constrEdge,'on')
@@ -303,6 +313,19 @@ for i=1:size(extrudedUnitCell.edge,1)
     dEdge(i)=L-extrudedUnitCell.edgeL(i);            
     Jedge(i,3*extrudedUnitCell.edge(i,1)-2:3*extrudedUnitCell.edge(i,1))=-dx/L;
     Jedge(i,3*extrudedUnitCell.edge(i,2)-2:3*extrudedUnitCell.edge(i,2))=dx/L;
+end
+
+function [dEdge, Jedge]=getEdgeNorm(extrudedUnitCell)
+dEdge=zeros(size(extrudedUnitCell.edge,1),1);
+Jedge=zeros(length(extrudedUnitCell.edge),size(extrudedUnitCell.node,1)*3);   
+for i=1:size(extrudedUnitCell.edge,1)
+    coor1=extrudedUnitCell.node(extrudedUnitCell.edge(i,1),:);
+    coor2=extrudedUnitCell.node(extrudedUnitCell.edge(i,2),:);
+    dx=coor2-coor1;
+    L=sqrt(dx*dx');
+    dEdge(i)=(L-extrudedUnitCell.edgeL(i))/extrudedUnitCell.edgeL(i);            
+    Jedge(i,3*extrudedUnitCell.edge(i,1)-2:3*extrudedUnitCell.edge(i,1))=-dx/L/extrudedUnitCell.edgeL(i);
+    Jedge(i,3*extrudedUnitCell.edge(i,2)-2:3*extrudedUnitCell.edge(i,2))=dx/L/extrudedUnitCell.edgeL(i);
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
