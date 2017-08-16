@@ -45,7 +45,6 @@ for iter=1:length(opt.angleConstrFinal)
     [E(1,1),~,Eedge(1,1),Eface(1,1),Ehinge(1,1),EtargetAngle(1,1), ~]=Energy(u0,extrudedUnitCell,opt);
     exfl(1,1) = 1;
     fprintf(['Angle contrain:', mat2str(opt.angleConstrFinal(iter).val(:,1)') ,'\n']);
-    tic
     extrudedUnitCell.angleConstr=opt.angleConstrFinal(iter).val;
     for inter=1:opt.interval
         fprintf('load: %d, step: %1.2f',2*iter-1,inter/opt.interval);
@@ -73,6 +72,7 @@ for iter=1:length(opt.angleConstrFinal)
     switch opt.relAlgor
         case 'gradDesc'
             fprintf('load: %d, step: 1.00',2*iter)
+            t1 = toc;
             extrudedUnitCell.angleConstr=[];
             [E(1,2),~,Eedge(1,2),Eface(1,2),Ehinge(1,2),EtargetAngle(1,2), ~]=Energy(u0,extrudedUnitCell,opt);
             exfl(1,2) = 1;
@@ -81,7 +81,7 @@ for iter=1:length(opt.angleConstrFinal)
             [E(2,2),~,Eedge(2,2),Eface(2,2),Ehinge(2,2),EtargetAngle(2,2), ~]=Energy(u0,extrudedUnitCell,opt);
 
             t2 = toc;
-            fprintf(', time: %1.2f, exitflag: %d\n',t2,exflexfl(2,2))
+            fprintf(', time: %1.2f, exitflag: %d\n',t2-t1,exflexfl(2,2))
         case {'interior-point', 'sqp'}
             [E(1,2),~,Eedge(1,2),Eface(1,2),Ehinge(1,2),EtargetAngle(1,2), ~]=Energy(u0,extrudedUnitCell,opt);
             exfl(1,2) = 1;
@@ -89,13 +89,13 @@ for iter=1:length(opt.angleConstrFinal)
             opt.options.Algorithm = opt.relAlgor;
             for inter = 1:opt.relInterval
                 fprintf('load: %d, step: %1.2f',2*iter,inter/opt.relInterval)
-                tic;
+                t1 = toc;
                 opt.KtargetAngle = prevKtargetAngle - (prevKtargetAngle/opt.relInterval)*inter;
                 [V(:,inter+1),~,exfl(inter+1,2)]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
                 u0 = V(:,inter+1);
                 [E(inter+1,2),~,Eedge(inter+1,2),Eface(inter+1,2),Ehinge(inter+1,2),EtargetAngle(inter+1,2), ~]=Energy(u0,extrudedUnitCell,opt);
                 t2 = toc;
-                fprintf(', time: %1.2f, exitflag: %d\n',t2,exfl(inter+1,2))
+                fprintf(', time: %1.2f, exitflag: %d\n',t2-t1,exfl(inter+1,2))
             end
             opt.options.Algorithm = opt.folAlgor;
             opt.KtargetAngle = prevKtargetAngle;
