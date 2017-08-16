@@ -14,20 +14,25 @@ SimCase=1;
 switch SimCase
     case 1
         opt=initOpt('inputType','individual',... 
-                    'template','cuboctahedron',...
-                    'plot','selectHinges','createFig', 'off', 'showFig', 'off',...
-                    'interval', 1,'saveFig','off','periodic','on','figDPI',300,...
+                    'template','cube',...
+                    'plot','result','createFig', 'on', 'showFig', 'on',...
+                    'interval', 1,'saveFig','on','periodic','on','figDPI',300,...
                     'saveMovie', 'off', 'safeMovieAntiAlias', 0,...
                     'folAlgor', 'sqp','relAlgor', 'sqp','readAngFile', 'off',...
                     'gradDescStep', 1e-1, 'gradDescTol', 1e-9,...
                     'constrFace','on','constrEdge','off',...
                     'Khinge',0.0005,'Kedge',1,'Kface',1,'KtargetAngle',0.5,...
-                    'relInterval', 1, 'constAnglePerc',0.99);
-        opt.angleConstrFinal(1).val=[];
+                    'relInterval', 1, 'constAnglePerc',0.99, 'maxStretch', 0.3);
+        hingeSet = [7 8 12 13 21 22 26 30]';
+        opt.angleConstrFinal(1).val=[ hingeSet(:) , -pi*0.985 * ones(length(hingeSet), 1)];
 %                                      1  -pi*0.985
 %                                      2  -pi*0.985
-%                                      7  -pi*0.985
-%                                      13  -pi*0.985
+%                                      12  -pi*0.985
+%                                      8  -pi*0.985
+% %                                      17  -pi*0.985
+%                                      21  -pi*0.985
+% %                                      26  -pi*0.985
+% %                                      30  -pi*0.985
 %                                      ];
 %         opt.angleConstrFinal(2).val=[1  -pi*0.985
 %                                      2  -pi*0.985
@@ -135,9 +140,10 @@ end
 opt.options=optimoptions('fmincon','GradConstr','on','GradObj','on',...
                          'tolfun',1e-6','tolx',1e-9, 'tolcon',1e-9,...
                          'Display','off','DerivativeCheck','off',...
-                         'maxfunevals',1000000,'Algorithm', opt.folAlgor);
+                         'maxfunevals',10000000,'Algorithm', opt.folAlgor);
 %                          'FiniteDifferenceType', 'central', 'FiniteDifferenceStepSize', eps^(1));
 tic;
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %BUILD
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -151,7 +157,7 @@ selectHinges(unitCell, extrudedUnitCell, opt)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %ANALYSIS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% findDeformation(unitCell,extrudedUnitCell,opt);
+findDeformation(unitCell,extrudedUnitCell,opt);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %OUTPUT AND PLOT GEOMETRY
