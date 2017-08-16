@@ -187,12 +187,10 @@ E=Eedge+Eface+Ehinge+EtargetAngle;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [C,Ceq,DC,DCeq]=nonlinearConstr(u,extrudedUnitCell,opt)
 
-C1=[]; 
-DC1=[]; 
-Ceq1=[]; Ceq2=[];
-DCeq1=[]; DCeq2=[];
 C1=[]; C2=[];
 DC1=[]; DC2=[];
+Ceq1=[]; Ceq2=[]; Ceq3=[];
+DCeq1=[]; DCeq2=[]; DCeq3=[];
 
 %APPLY DEFORMATION NODES
 extrudedUnitCell.node=extrudedUnitCell.node+[u(1:3:end) u(2:3:end) u(3:3:end)];
@@ -223,10 +221,11 @@ end
 %ENERGY ASSOCIATED TO FACE BENDING
 if strcmp(opt.constrFace,'on')
     [Ceq2, DCeq2]=getFace(extrudedUnitCell);
+%     [Ceq3, DCeq3]=getConvFace(extrudedUnitCell);
 end
 %FINAL CONSTRAINTS
-Ceq=[Ceq1; Ceq2];
-DCeq=[DCeq1; DCeq2]';
+Ceq=[Ceq1; Ceq2; Ceq3];
+DCeq=[DCeq1; DCeq2; DCeq3]';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -354,6 +353,42 @@ for i=1:length(extrudedUnitCell.face)
         Jface(rep,3*extrudedUnitCell.face{i}(3)-2:3*extrudedUnitCell.face{i}(3))=cross((coor4-coor1),(coor2-coor1));
         Jface(rep,3*extrudedUnitCell.face{i}(3+j)-2:3*extrudedUnitCell.face{i}(3+j))=cross((coor2-coor1),(coor3-coor1));
         dFace(rep)=(coor4-coor1)*a';
+    end
+end
+
+function [dFace, Jface]=getConvFace(extrudedUnitCell)
+rep=0;
+tnf=0;
+for i=1:length(extrudedUnitCell.face)
+    tnf=tnf+length(extrudedUnitCell.face{i})-1;
+end
+dFace=zeros(tnf,1);
+Jface=zeros(tnf,size(extrudedUnitCell.node,1)*3);
+for i=1:length(extrudedUnitCell.face)
+    endpoint = length(extrudedUnitCell.face{i});
+    coor1=extrudedUnitCell.node(extrudedUnitCell.face{i}(1),:);
+    coor2=extrudedUnitCell.node(extrudedUnitCell.face{i}(2),:);
+    coor3=extrudedUnitCell.node(extrudedUnitCell.face{i}(3),:);
+    a=cross(coor2-coor1,coor3-coor2);
+    a = a/norm(a);
+    for j=1:endpoint-1
+        rep=rep+1;
+        coor1=extrudedUnitCell.node(extrudedUnitCell.face{i}(mod(j,endpoint)+1),:);
+        coor2=extrudedUnitCell.node(extrudedUnitCell.face{i}(mod(j+1,endpoint)+1),:);
+        coor3=extrudedUnitCell.node(extrudedUnitCell.face{i}(mod(j+2,endpoint)+1),:);
+        b = cross(coor2-coor1,coor3-coor2);
+        b = b/norm(b);
+        dFace(rep) = a*b'-1;
+        Jface(rep,3*extrudedUnitCell.face{i}(1)-2:3*extrudedUnitCell.face{i}(1))=b;
+        Jface(rep,3*extrudedUnitCell.face{i}(j+1)-2:3*extrudedUnitCell.face{i}(j+1))=a;
+        
+        
+%         coor4=extrudedUnitCell.node(extrudedUnitCell.face{i}(3+j),:);
+%         Jface(rep,3*extrudedUnitCell.face{i}(1)-2:3*extrudedUnitCell.face{i}(1))=cross((coor3-coor2),(coor3-coor4));
+%         Jface(rep,3*extrudedUnitCell.face{i}(2)-2:3*extrudedUnitCell.face{i}(2))=cross((coor3-coor1),(coor4-coor1));
+%         Jface(rep,3*extrudedUnitCell.face{i}(3)-2:3*extrudedUnitCell.face{i}(3))=cross((coor4-coor1),(coor2-coor1));
+%         Jface(rep,3*extrudedUnitCell.face{i}(3+j)-2:3*extrudedUnitCell.face{i}(3+j))=cross((coor2-coor1),(coor3-coor1));
+%         dFace(rep)=(coor4-coor1)*a';
     end
 end
 
