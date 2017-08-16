@@ -772,3 +772,16 @@ if strcmp(opt.periodic,'on')
         extrudedUnitCell.ref(i)=size(extrudedUnitCell.node,1);
     end
 end
+
+%Internal Hinges
+%added by Agustin Iniguez
+
+i = 1;
+internalHinges = length(unitCell.Polyhedron.node);
+for hinge = 1: length(extrudedUnitCell.nodeHingeEx)
+    if (extrudedUnitCell.nodeHingeEx(hinge,1) <= internalHinges && ...
+            extrudedUnitCell.nodeHingeEx(hinge,2) <= internalHinges)
+        extrudedUnitCell.innerHinges(i) = hinge;
+        i = i+1;
+    end
+end

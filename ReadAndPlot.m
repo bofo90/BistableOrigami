@@ -48,10 +48,11 @@ switch opt.plot
                 succesfullFiles = succesfullFiles + 1;
                 fprintf('Plot of Hinges number %d/%d\n', succesfullFiles, length(allFiles)-directories);
                 if strcmp(opt.plot, 'savedata')
-                    [CM, Radios, Stdev, EhingeInt] = getRadiosStdev(extrudedUnitCell, opt, result);
+                    [CM, Radios, Stdev, EhingeInt, maxStrech, minStrech] = getRadiosStdev(extrudedUnitCell, opt, result);
                     Energies = [ones(length(result.E),1)*(ct-directories), result.Eedge,...
                         result.Eface, result.Ehinge, result.EtargetAngle, EhingeInt, result.exfl];
-                    PosStad = cat(3,ones(length(result.E),2,1)*(ct-directories),CM, Radios, Stdev);
+                    PosStad = cat(3,ones(length(result.E),2,1)*(ct-directories),CM,...
+                        Radios, Stdev, maxStrech, minStrech);
                     Hinges = [num2str(ct-directories),',',parsedName{2}];
                     dlmwrite(fileMassDist, PosStad, 'delimiter', ',', '-append');
                     dlmwrite(fileHinge, Hinges, 'delimiter', '', '-append');
@@ -79,11 +80,13 @@ hingeSetStr = strsplit(hingeSetStr(1:end), ' ');
 hingeSet = str2double(hingeSetStr)';
 
 
-function [CM, Radios, Stdev, EhingeInt] = getRadiosStdev(extrudedUnitCell, opt, result)
+function [CM, Radios, Stdev, EhingeInt, maxStrech, minStrech] = getRadiosStdev(extrudedUnitCell, opt, result)
 CM = zeros(length(result.deform(1).interV),length(result.deform),3);
 Radios = zeros(length(result.deform(1).interV),length(result.deform));
 Stdev = zeros(length(result.deform(1).interV),length(result.deform));
 EhingeInt = zeros(length(result.deform(1).interV),length(result.deform));
+maxStrech = zeros(length(result.deform(1).interV),length(result.deform));
+minStrech = zeros(length(result.deform(1).interV),length(result.deform));
 
 for iter = 1:length(result.deform)
     for inter = 1:length(result.deform(iter).interV)
@@ -93,22 +96,36 @@ for iter = 1:length(result.deform)
         Radios(inter, iter) = mean(allRad);
         Stdev(inter, iter) = std(allRad);
         EhingeInt(inter, iter) = getIntEnergy(result.deform(iter).interV(inter).Ve, opt, extrudedUnitCell);
+        [maxStrech(inter, iter), minStrech(inter, iter)] = ...
+            getExtremeStreching(result.deform(iter).interV(inter).Ve, opt, extrudedUnitCell);
     end
 end
 
 function [EhingeIntSum] = getIntEnergy(u, opt, extrudedUnitCell)
 theta=zeros(size(extrudedUnitCell.nodeHingeEx,1),1);
-% innerHinges = [1 2 3 7 8 9 13 14 18 19 23 24 28 32 36 37 41 48]';%%%truncated tetrahedron
-% innerHinges = [1 2 3 7 8 12]'; %%%tetrahedron
-innerHinges = [1 2 7 12 3 8 17 13 21 22 26]; %%%Cube
-EhingeInt = zeros(size(innerHinges,1),1);
+EhingeInt = zeros(size(extrudedUnitCell.innerHinges,1),1);
 extrudedUnitCell.node=extrudedUnitCell.node+[u(1:3:end) u(2:3:end) u(3:3:end)];
 
 for i=1:size(extrudedUnitCell.nodeHingeEx,1)
     [~,theta(i)]=JacobianHinge(extrudedUnitCell.node(extrudedUnitCell.nodeHingeEx(i,:),:));
 end
-for i= 1:length(innerHinges)
-    EhingeInt(i)=1/2*opt.Khinge*(theta(innerHinges(i))-extrudedUnitCell.theta(innerHinges(i)))^2;
+for i= 1:length(extrudedUnitCell.innerHinges)
+    EhingeInt(i)=1/2*opt.Khinge*(theta(extrudedUnitCell.innerHinges(i))-...
+        extrudedUnitCell.theta(extrudedUnitCell.innerHinges(i)))^2;
 end
 EhingeIntSum = sum(EhingeInt);
 
+function [maxStrech, minStrech] = getExtremeStreching(u, opt, extrudedUnitCell)
+dEdge=zeros(size(extrudedUnitCell.edge,1),1);
+extrudedUnitCell.node=extrudedUnitCell.node+[u(1:3:end) u(2:3:end) u(3:3:end)];
+
+for i=1:size(extrudedUnitCell.edge,1)
+    coor1=extrudedUnitCell.node(extrudedUnitCell.edge(i,1),:);
+    coor2=extrudedUnitCell.node(extrudedUnitCell.edge(i,2),:);
+    dx=coor2-coor1;
+    L=sqrt(dx*dx');
+    dEdge(i)=L-extrudedUnitCell.edgeL(i);            
+end
+
+maxStrech = max(dEdge);
+minStrech = min(dEdge);
