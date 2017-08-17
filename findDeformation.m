@@ -18,6 +18,7 @@ if strcmp(opt.plot,'result')
     end
 end
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %NON-LINEAR ANALYSIS
@@ -41,6 +42,7 @@ end
 for iter=1:length(opt.angleConstrFinal)
     clearvars V;
     u0=zeros(3*size(extrudedUnitCell.node,1),1);
+    initialiseGlobalx(u0);
     V(:,1)=u0;
     [E(1,1),~,Eedge(1,1),Eface(1,1),Ehinge(1,1),EtargetAngle(1,1), ~]=Energy(u0,extrudedUnitCell,opt);
     exfl(1,1) = 1;
@@ -82,7 +84,7 @@ for iter=1:length(opt.angleConstrFinal)
 
             t2 = toc;
             fprintf(', time: %1.2f, exitflag: %d\n',t2-t1,exflexfl(2,2))
-        case {'interior-point', 'sqp'}
+        case {'interior-point', 'sqp','Active-Set'}
             [E(1,2),~,Eedge(1,2),Eface(1,2),Ehinge(1,2),EtargetAngle(1,2), ~]=Energy(u0,extrudedUnitCell,opt);
             exfl(1,2) = 1;
             prevKtargetAngle = opt.KtargetAngle;
@@ -120,13 +122,14 @@ for iter=1:length(opt.angleConstrFinal)
     fileName = strcat(folderName,'/',opt.template,'_',...
         mat2str(opt.angleConstrFinal(iter).val(:,1)'),'_','.mat');
     save(fileName, 'result');
-    
+ 
     clearvars result E Eedge Eface Ehinge EtargetAngle exfl;
     fclose('all');
-    
+
     %update angle starting point
 %     [~,~,~,~,~,~,theta0]=Energy(u0,extrudedUnitCell,opt);
 end
+
 
 
 
@@ -147,6 +150,7 @@ Ehinge=0;
 EtargetAngle=0;
 
 %APPLY DEFORMATION NODES
+extrudedUnitCellPrev = extrudedUnitCell;
 extrudedUnitCell.node=extrudedUnitCell.node+[u(1:3:end) u(2:3:end) u(3:3:end)];
 
 %ENERGY ASSOCIATED TO EDGE STRETCHING
@@ -164,7 +168,7 @@ if strcmp(opt.constrFace,'off')
 end
 
 %ENERGY ASSOCIATED TO HINGE BENDING
-[theta, Jhinge]=getHinge(extrudedUnitCell);
+[theta, Jhinge]=getHinge(extrudedUnitCell, extrudedUnitCellPrev);
 Ehinge=1/2*opt.Khinge*sum((theta-extrudedUnitCell.theta).^2);
 dE=dE+opt.Khinge*(Jhinge'*(theta-extrudedUnitCell.theta));
 
@@ -180,6 +184,7 @@ EtargetAngle=1/2*opt.KtargetAngle*sum(dtheta.^2);
 %TOTAL ENERGY
 E=Eedge+Eface+Ehinge+EtargetAngle;
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %NONLINEAR CONSTRAINTS
@@ -193,13 +198,14 @@ Ceq1=[]; Ceq2=[]; Ceq3=[];
 DCeq1=[]; DCeq2=[]; DCeq3=[];
 
 %APPLY DEFORMATION NODES
+extrudedUnitCellPrev = extrudedUnitCell;
 extrudedUnitCell.node=extrudedUnitCell.node+[u(1:3:end) u(2:3:end) u(3:3:end)];
 
 %%%%%%%%%%%%%%%%%%%%%%
 %INEQUALITY CONSTRAINS
 %%%%%%%%%%%%%%%%%%%%%%
 %MAXIMUM AND MINIMUM ANGLES
-[angles, Dangles]=getHinge(extrudedUnitCell);
+[angles, Dangles]=getHinge(extrudedUnitCell, extrudedUnitCellPrev);
 C1 = [-angles-pi*opt.constAnglePerc; angles-pi*opt.constAnglePerc];
 DC1 = [-Dangles; Dangles];
 %MAXIMUM AND MINIMUM EDGE STRECHING
@@ -210,6 +216,7 @@ if strcmp(opt.constrEdge,'off') && ~isnan(opt.maxStretch)
 end
 C = [C1; C2];
 DC = [DC1; DC2]';
+
 
 %%%%%%%%%%%%%%%%%%%%%%
 %EQUALITY CONSTRAINS
@@ -226,6 +233,7 @@ end
 %FINAL CONSTRAINTS
 Ceq=[Ceq1; Ceq2; Ceq3];
 DCeq=[DCeq1; DCeq2; DCeq3]';
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -296,6 +304,7 @@ if strcmp(opt.periodic,'on')
     end
 end
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %EDGE LENGTH AND JACOBIAN
@@ -314,6 +323,7 @@ for i=1:size(extrudedUnitCell.edge,1)
     Jedge(i,3*extrudedUnitCell.edge(i,2)-2:3*extrudedUnitCell.edge(i,2))=dx/L;
 end
 
+
 function [dEdge, Jedge]=getEdgeNorm(extrudedUnitCell)
 dEdge=zeros(size(extrudedUnitCell.edge,1),1);
 Jedge=zeros(length(extrudedUnitCell.edge),size(extrudedUnitCell.node,1)*3);   
@@ -326,6 +336,7 @@ for i=1:size(extrudedUnitCell.edge,1)
     Jedge(i,3*extrudedUnitCell.edge(i,1)-2:3*extrudedUnitCell.edge(i,1))=-dx/L/extrudedUnitCell.edgeL(i);
     Jedge(i,3*extrudedUnitCell.edge(i,2)-2:3*extrudedUnitCell.edge(i,2))=dx/L/extrudedUnitCell.edgeL(i);
 end
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -355,6 +366,7 @@ for i=1:length(extrudedUnitCell.face)
         dFace(rep)=(coor4-coor1)*a';
     end
 end
+
 
 function [dFace, Jface]=getConvFace(extrudedUnitCell)
 rep=0;
@@ -392,13 +404,15 @@ for i=1:length(extrudedUnitCell.face)
     end
 end
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %HINGE ANGLE AND JACOBIAN
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [theta, Jhinge]=getHinge(extrudedUnitCell)
+function [theta, Jhinge]=getHinge(extrudedUnitCell, extrudedUnitCellPrev)
 theta=zeros(size(extrudedUnitCell.nodeHingeEx,1),1);
+thetaPrev = getGlobalx(extrudedUnitCellPrev);
 Jhinge=zeros(size(extrudedUnitCell.nodeHingeEx,1),size(extrudedUnitCell.node,1)*3);
 for i=1:size(extrudedUnitCell.nodeHingeEx,1)
     extrudedUnitCell.node(extrudedUnitCell.nodeHingeEx(i,:),:);
@@ -406,7 +420,12 @@ for i=1:size(extrudedUnitCell.nodeHingeEx,1)
     index(2:3:12)=3*extrudedUnitCell.nodeHingeEx(i,:)-1;
     index(3:3:12)=3*extrudedUnitCell.nodeHingeEx(i,:);
     [Jhinge(i,index),theta(i)]=JacobianHinge(extrudedUnitCell.node(extrudedUnitCell.nodeHingeEx(i,:),:));
+    if abs(thetaPrev(i)-theta(i)) > pi
+        theta(i) = theta(i)+sign(thetaPrev(i))*2*pi;
+    end
 end
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%         YUN's addition                                        %%%%%%
@@ -477,6 +496,7 @@ if difference <= opt.gradDescTol
     deformationV(:,size(deformationV,2)+1) = u(:);
 end
 
+
 function ePen = penalty(theta)
 % A penalty function which punished theta value outside the range of
 % [-0.95*pi, 0.95*pi].
@@ -486,3 +506,17 @@ function ePen = penalty(theta)
 % yun
 
 ePen = sum(max(0, 0.5 .* (theta - 0.95*pi) .* (theta + 0.95*pi)));
+
+function initialiseGlobalx(u0)
+global poop
+poop.x = [];
+poop.x = [poop.x u0];
+
+function theta = getGlobalx(extrudedUnitCell)
+global poop
+theta=zeros(size(extrudedUnitCell.nodeHingeEx,1),1);
+extrudedUnitCell.node=extrudedUnitCell.node+[poop.x(1:3:end,end) poop.x(2:3:end,end) poop.x(3:3:end,end)];
+for i=1:size(extrudedUnitCell.nodeHingeEx,1)
+    [~,theta(i)]=JacobianHinge(extrudedUnitCell.node(extrudedUnitCell.nodeHingeEx(i,:),:));
+end
+

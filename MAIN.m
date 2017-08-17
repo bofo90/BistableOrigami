@@ -4,7 +4,7 @@
 %FOR ANY QUESTION RELATED TO THE MATLAB FILES, PLEASE CONTACT JOHANNES
 %OVERVELDE AT J.T.B.OVERVELDE@GMAIL.COM (WWW.OVERVELDE.COM)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-clear, close all , clc, format long
+clear, close all , clc, format long, clearvars -global
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
@@ -22,8 +22,8 @@ switch SimCase
                     'gradDescStep', 1e-1, 'gradDescTol', 1e-9,...
                     'constrFace','on','constrEdge','off',...
                     'Khinge',0.0005,'Kedge',1,'Kface',1,'KtargetAngle',0.5,...
-                    'relInterval', 1, 'constAnglePerc',0.99, 'maxStretch', 0.3);
-        hingeSet = [7 8 12 13 21 22 26 30]';
+                    'relInterval', 1, 'constAnglePerc',0.99, 'maxStretch', 0.1);
+        hingeSet = [3 7 13 21 22 30]';
         opt.angleConstrFinal(1).val=[ hingeSet(:) , -pi*0.985 * ones(length(hingeSet), 1)];
 %                                      1  -pi*0.985
 %                                      2  -pi*0.985
@@ -136,18 +136,25 @@ switch SimCase
         opt.angleConstrFinal(2).val=[];
 end
 
-%SOLVER OPTIONS
-opt.options=optimoptions('fmincon','GradConstr','on','GradObj','on',...
-                         'tolfun',1e-6','tolx',1e-9, 'tolcon',1e-9,...
-                         'Display','off','DerivativeCheck','off',...
-                         'maxfunevals',10000000,'Algorithm', opt.folAlgor);
-%                          'FiniteDifferenceType', 'central', 'FiniteDifferenceStepSize', eps^(1));
+
 tic;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %BUILD
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 [unitCell,extrudedUnitCell,opt]=buildGeometry(opt);
+
+%SOLVER OPTIONS
+opt.options=optimoptions('fmincon','GradConstr','on','GradObj','on',...
+                         'tolfun',1e-6','tolx',1e-9, 'tolcon',1e-9,...
+                         'Display','off','DerivativeCheck','off',...
+                         'maxfunevals',10000000, 'MaxIterations', 1500,...
+                         'Algorithm', opt.folAlgor, 'OutputFcn',@outfun);
+%                          'RelLineSrchBnd', 0.1, 'RelLineSrchBndDuration', 10e10,...
+%                          'TypicalX', 0.1*ones(length(extrudedUnitCell.node(:,1))*3,1),...
+                         
+%                          'FiniteDifferenceType', 'central', 'FiniteDifferenceStepSize', eps^(1));
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %SELECT HINGES
