@@ -132,9 +132,9 @@ MinStrRel = np.empty(0)
 
 folder_name = "Results/cube/sqp/energy/"
 
-file_name1 = "EnergyData.csv"
-file_name2 = "Hinges.csv"
-file_name3 = "PosStad.csv"
+file_name1 = "EnergyData_0.3stretch.csv"
+file_name2 = "Hinges_0.3stretch.csv"
+file_name3 = "PosStad_0.3stretch.csv"
 
 #######################################################################################################################
 ##################### Reading Files
@@ -286,8 +286,8 @@ fig5 = plt.figure(4,figsize=(cm2inch(35), cm2inch(20)))
 ax6 = plt.subplot(121)  
 ax7 = plt.subplot(122)   
 maxPerc = np.amax([np.nanmax(flagCountFol),np.nanmax(flagCountRel)])
-NiceGraph2D(ax6, '# of actuated Hinges', 'percentage # of flags', [0.5, 0], [internalHinges-0.5, maxPerc+0.01], [np.arange(len(hingeCount))+1, np.nan])       
-NiceGraph2D(ax7, '# of actuated Hinges', 'percentage # of flags', [0.5, 0], [internalHinges-0.5, maxPerc+0.01], [np.arange(len(hingeCount))+1, np.nan])  
+NiceGraph2D(ax6, '# of actuated Hinges', 'percentage # of flags', [0.5, 0], [internalHinges-0.5, 1+0.01], [np.arange(len(hingeCount))+1, np.nan])       
+NiceGraph2D(ax7, '# of actuated Hinges', 'percentage # of flags', [0.5, 0], [internalHinges-0.5, 1+0.01], [np.arange(len(hingeCount))+1, np.nan])  
 
 fig6 = plt.figure(5,figsize=(cm2inch(35), cm2inch(20)))
 ax8 = plt.subplot(121)  
@@ -325,9 +325,9 @@ for hinge, c in zip(np.arange(hingeNum[-1]),colors):
 #        ax3.plot(eEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = c)
 #        ax2.plot(RadRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  StdRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = c)
 #    if len(np.where(differentEnergies[:,0] == hinge)[0]) != 0:
-        ax1.annotate(hingeName[hinge], xy=(eEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1]), 
-                      xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
-                      arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
+#        ax1.annotate(hingeName[hinge], xy=(eEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1]), 
+#                      xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
+#                      arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
         
         
 
@@ -348,4 +348,5 @@ fig6.show()
 fig1.savefig(folder_name + file_name1[:-4]+'.png', transparent = True)
 #fig2.savefig(folder_name + file_name3[:-4]+'.png', transparent = True)
 #fig3.savefig(folder_name + 'CenterOfMass.png', transparent = True)
+fig5.savefig(folder_name + 'Flags.png', transparent = True)
 #fig6.savefig(folder_name + 'MaxMinStretch.png', transparent = True)
