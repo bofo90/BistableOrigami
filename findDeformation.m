@@ -61,6 +61,11 @@ for iter=1:length(opt.angleConstrFinal)
         fprintf(', time: %1.2f, exitflag: %d\n',t2-t1,exfl(inter+1,1));
     end
     
+    if strcmp(opt.gethistory, 'on')
+        V = getGlobalAllx;
+    end
+   
+    
     result.deform(1).V=[V(1:3:end,end) V(2:3:end,end) V(3:3:end,end)];
     result.deform(1).Ve=V(:,end);
     for j=1:size(V,2)
@@ -70,6 +75,7 @@ for iter=1:length(opt.angleConstrFinal)
     
     clearvars V;
     V(:,1)=u0;
+    initialiseGlobalx(u0);
 
     switch opt.relAlgor
         case 'gradDesc'
@@ -102,6 +108,10 @@ for iter=1:length(opt.angleConstrFinal)
             opt.options.Algorithm = opt.folAlgor;
             opt.KtargetAngle = prevKtargetAngle;
             extrudedUnitCell.angleConstr=[];
+    end
+    
+    if strcmp(opt.gethistory, 'on')
+        V = getGlobalAllx;
     end
     
     result.deform(2).V=[V(1:3:end,end) V(2:3:end,end) V(3:3:end,end)];
@@ -420,7 +430,7 @@ for i=1:size(extrudedUnitCell.nodeHingeEx,1)
     index(2:3:12)=3*extrudedUnitCell.nodeHingeEx(i,:)-1;
     index(3:3:12)=3*extrudedUnitCell.nodeHingeEx(i,:);
     [Jhinge(i,index),theta(i)]=JacobianHinge(extrudedUnitCell.node(extrudedUnitCell.nodeHingeEx(i,:),:));
-    if abs(thetaPrev(i)-theta(i)) > pi
+    if abs(thetaPrev(i)-theta(i)) > 0.50*2*pi
         theta(i) = theta(i)+sign(thetaPrev(i))*2*pi;
     end
 end
@@ -512,6 +522,7 @@ global poop
 poop.x = [];
 poop.x = [poop.x u0];
 
+
 function theta = getGlobalx(extrudedUnitCell)
 global poop
 theta=zeros(size(extrudedUnitCell.nodeHingeEx,1),1);
@@ -519,4 +530,8 @@ extrudedUnitCell.node=extrudedUnitCell.node+[poop.x(1:3:end,end) poop.x(2:3:end,
 for i=1:size(extrudedUnitCell.nodeHingeEx,1)
     [~,theta(i)]=JacobianHinge(extrudedUnitCell.node(extrudedUnitCell.nodeHingeEx(i,:),:));
 end
+
+function r = getGlobalAllx
+global poop
+r = poop.x;
 
