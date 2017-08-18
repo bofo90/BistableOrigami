@@ -132,9 +132,9 @@ MinStrRel = np.empty(0)
 
 folder_name = "Results/cube/sqp/energy/"
 
-file_name1 = "EnergyData_0.3stretch.csv"
-file_name2 = "Hinges_0.3stretch.csv"
-file_name3 = "PosStad_0.3stretch.csv"
+file_name1 = "EnergyData.csv"
+file_name2 = "Hinges.csv"
+file_name3 = "PosStad.csv"
 
 #######################################################################################################################
 ##################### Reading Files
@@ -211,14 +211,13 @@ orderedHinges = np.argsort(actuatedHinges)
 flagCountFol = np.zeros((len(hingeCount), totalflags))
 flagCountRel = np.zeros((len(hingeCount), totalflags))
 hingesMask = np.arange(hingeNum[-1], dtype = float)
-notConvHinges = []
+notConvHinges = np.empty((0,3), dtype = int)
 for i in np.arange(len(hingeNum)):
     if exflFol[i] != 1 or exflRel[i] != 1:
         flagCountFol[actuatedHinges[hingeNum[i]-1]-1,exflFol[i]+3]  += 1
         flagCountRel[actuatedHinges[hingeNum[i]-1]-1,exflRel[i]+3]  += 1
-        notConvHinges.append([hingeNum[i]-1, exflFol[i], exflRel[i]])
+        notConvHinges = np.append(notConvHinges,np.array([[hingeNum[i]-1, exflFol[i], exflRel[i]]]), axis = 0)
         hingesMask[hingeNum[i]-1] = np.NaN
-notConvHinges = np.array(notConvHinges)
 notConverged = sum(np.isnan(hingesMask))
 converged = hingeNum[-1] - notConverged
 ############################################ normalize the flag counts
@@ -245,11 +244,12 @@ for hinge in np.arange(hingeNum[-1]):
                                                             energies[hingeNum[-1]:]<=hingeeEdge+tolEdge)))[0]
         ############################################ see if at least one of the neighbours converge
         i = 0
-        while len(np.where(notConvHinges[:,0] == orderedHinges[sameEnergy[i]])[0]) != 0:
-            i = i + 1
-            if i >= len(sameEnergy):
-                i = -1
-                break
+        if len(notConvHinges) > 0:
+            while len(np.where(notConvHinges[:,0] == orderedHinges[sameEnergy[i]])[0]) != 0:
+                i = i + 1
+                if i >= len(sameEnergy):
+                    i = -1
+                    break
         ############################################ save the new state or not according to the convergance
         if i != -1:
             findit = np.where(differentEnergies[:,0] == orderedHinges[sameEnergy[i]])[0]
@@ -324,10 +324,10 @@ for hinge, c in zip(np.arange(hingeNum[-1]),colors):
 #        ax1.plot(eEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = c)
 #        ax3.plot(eEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = c)
 #        ax2.plot(RadRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  StdRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = c)
-#    if len(np.where(differentEnergies[:,0] == hinge)[0]) != 0:
-#        ax1.annotate(hingeName[hinge], xy=(eEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1]), 
-#                      xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
-#                      arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
+    if len(np.where(differentEnergies[:,0] == hinge)[0]) != 0:
+        ax1.annotate(hingeName[hinge], xy=(eEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1]), 
+                      xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
+                      arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
         
         
 
