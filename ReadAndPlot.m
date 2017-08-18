@@ -124,7 +124,7 @@ for i=1:size(extrudedUnitCell.edge,1)
     coor2=extrudedUnitCell.node(extrudedUnitCell.edge(i,2),:);
     dx=coor2-coor1;
     L=sqrt(dx*dx');
-    dEdge(i)=L-extrudedUnitCell.edgeL(i);            
+    dEdge(i)=(L-extrudedUnitCell.edgeL(i))/extrudedUnitCell.edgeL(i);            
 end
 
 maxStrech = max(dEdge);
