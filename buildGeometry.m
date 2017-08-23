@@ -731,9 +731,11 @@ sharedEdge=A(A(:,3)==2,1:2);
 nodeHingeEx=zeros(size(sharedEdge,1),4);
 
 for i=1:size(sharedEdge,1)
-    refNode=extrudedUnitCell.edgeHingeSorted(((extrudedUnitCell.edgeHingeSorted(:,1)==sharedEdge(i,1)).*(extrudedUnitCell.edgeHingeSorted(:,2)==sharedEdge(i,2)))==1,3)';
+    refNode=extrudedUnitCell.edgeHingeSorted(((extrudedUnitCell.edgeHingeSorted(:,1)==sharedEdge(i,1)).*...
+        (extrudedUnitCell.edgeHingeSorted(:,2)==sharedEdge(i,2)))==1,3)';
     %Determine order
-    refNode2=extrudedUnitCell.edgeHinge(((extrudedUnitCell.edgeHinge(:,1)==sharedEdge(i,1)).*(extrudedUnitCell.edgeHinge(:,2)==sharedEdge(i,2)))==1,3)';
+    refNode2=extrudedUnitCell.edgeHinge(((extrudedUnitCell.edgeHinge(:,1)==sharedEdge(i,1)).*...
+        (extrudedUnitCell.edgeHinge(:,2)==sharedEdge(i,2)))==1,3)';
 
     if length(refNode2)>1
         'error'

@@ -29,3 +29,4 @@ end
 function setGlobalx(val)
 global poop
 poop.x = [poop.x val];
+poop.flag = 1;

@@ -42,7 +42,7 @@ end
 for iter=1:length(opt.angleConstrFinal)
     clearvars V;
     u0=zeros(3*size(extrudedUnitCell.node,1),1);
-    initialiseGlobalx(u0);
+    initialiseGlobalx(u0, theta0);
     V(:,1)=u0;
     [E(1,1),~,Eedge(1,1),Eface(1,1),Ehinge(1,1),EtargetAngle(1,1), ~]=Energy(u0,extrudedUnitCell,opt);
     exfl(1,1) = 1;
@@ -56,7 +56,7 @@ for iter=1:length(opt.angleConstrFinal)
         [V(:,inter+1),~,exfl(inter+1,1)]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
         u0 = V(:,inter+1);
         %Determine energy of that equilibrium
-        [E(inter+1,1),~,Eedge(inter+1,1),Eface(inter+1,1),Ehinge(inter+1,1),EtargetAngle(inter+1,1), ~]=Energy(u0,extrudedUnitCell,opt);
+        [E(inter+1,1),~,Eedge(inter+1,1),Eface(inter+1,1),Ehinge(inter+1,1),EtargetAngle(inter+1,1), theta]=Energy(u0,extrudedUnitCell,opt);
         t2 = toc;
         fprintf(', time: %1.2f, exitflag: %d\n',t2-t1,exfl(inter+1,1));
     end
@@ -75,7 +75,7 @@ for iter=1:length(opt.angleConstrFinal)
     
     clearvars V;
     V(:,1)=u0;
-    initialiseGlobalx(u0);
+    initialiseGlobalx(u0, theta);
 
     switch opt.relAlgor
         case 'gradDesc'
@@ -517,18 +517,31 @@ function ePen = penalty(theta)
 
 ePen = sum(max(0, 0.5 .* (theta - 0.95*pi) .* (theta + 0.95*pi)));
 
-function initialiseGlobalx(u0)
+function initialiseGlobalx(u0, theta)
 global poop
 poop.x = [];
+poop.theta = [];
 poop.x = [poop.x u0];
+poop.theta = [poop.theta theta];
+poop.flag = 0;
+
 
 
 function theta = getGlobalx(extrudedUnitCell)
 global poop
-theta=zeros(size(extrudedUnitCell.nodeHingeEx,1),1);
-extrudedUnitCell.node=extrudedUnitCell.node+[poop.x(1:3:end,end) poop.x(2:3:end,end) poop.x(3:3:end,end)];
-for i=1:size(extrudedUnitCell.nodeHingeEx,1)
-    [~,theta(i)]=JacobianHinge(extrudedUnitCell.node(extrudedUnitCell.nodeHingeEx(i,:),:));
+if poop.flag
+    theta=zeros(size(extrudedUnitCell.nodeHingeEx,1),1);
+    extrudedUnitCell.node=extrudedUnitCell.node+[poop.x(1:3:end,end) poop.x(2:3:end,end) poop.x(3:3:end,end)];
+    for i=1:size(extrudedUnitCell.nodeHingeEx,1)
+        [~,theta(i)]=JacobianHinge(extrudedUnitCell.node(extrudedUnitCell.nodeHingeEx(i,:),:));
+        if abs(poop.theta(i,end)-theta(i)) > 0.50*2*pi
+            theta(i) = theta(i)+sign(poop.theta(i,end))*2*pi;
+        end
+    end
+    poop.theta = [poop.theta theta];
+    poop.flag = 0;
+else
+    theta = poop.theta(:,end);
 end
 
 function r = getGlobalAllx

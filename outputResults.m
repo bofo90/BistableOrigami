@@ -316,7 +316,9 @@ if strcmp(opt.plot,'result') || strcmp(opt.plot,'savedata')
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         for nMode=1:result.numMode
             pause(1)
+%             fprintf('end part');
             for framMode=1:length(plotextrudedUnitCell.mode(nMode).frame)
+%                 pause();
                 for nc=1:size(extrudedUnitCell.latVec,1)
                     for i=3:10     
                         c=(plotextrudedUnitCell.mode(nMode).frame(framMode).polFace(i).normal*viewCoor'>0);
