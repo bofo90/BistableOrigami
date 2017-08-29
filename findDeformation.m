@@ -10,6 +10,7 @@ if strcmp(opt.plot,'result')
         hingeList = dlmread(fileHinges);
         for i = 1:size(hingeList, 1)
             row = hingeList(i, :);
+%             hinges = [row(0~=row)*2-1 row(0~=row)*2]';
             hinges = row(0~=row);
             opt.angleConstrFinal(1).val = [hinges(:), -pi*0.985 * ones(length(hinges), 1)];
             fprintf('Hinge selection number %d/%d. ', i, size(hingeList, 1))

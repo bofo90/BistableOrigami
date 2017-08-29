@@ -715,9 +715,9 @@ for ne=1:length(unitCell.Polyhedron)
                 extrudedUnitCell.edge([end+1],:)=[nodeNumNew(index(i)) nodeNum(index(i))];
                 extrudedUnitCell.edge([end+1],:)=[nodeNumNew(index(i)) nodeNum(index(i+1))];
                 extrudedUnitCell.edge([end+1],:)=[nodeNumNew(index(i+1)) nodeNum(index(i))];
-                extrudedUnitCell.edgeHinge([end+1],:)=[nodeNum(index(i)) nodeNum(index(i+1)) nodeNumNew(index(i+1))];
-                extrudedUnitCell.edgeHinge([end+1],:)=[nodeNum(index(i+1)) nodeNumNew(index(i+1)) nodeNumNew(index(i))];
-                extrudedUnitCell.edgeHinge([end+1],:)=[nodeNumNew(index(i)) nodeNum(index(i)) nodeNum(index(i+1))]; 
+                extrudedUnitCell.edgeHinge([end+1],:)=[nodeNum(index(i)) nodeNum(index(i+1)) nodeNumNew(index(i+1)) nodeNumNew(index(i))];
+                extrudedUnitCell.edgeHinge([end+1],:)=[nodeNum(index(i+1)) nodeNumNew(index(i+1)) nodeNumNew(index(i)) nodeNum(index(i))];
+                extrudedUnitCell.edgeHinge([end+1],:)=[nodeNumNew(index(i)) nodeNum(index(i)) nodeNum(index(i+1)) nodeNumNew(index(i+1))]; 
             end
         end
     end
@@ -728,11 +728,12 @@ extrudedUnitCell.edgeHingeSorted(:,1:2)=sort(extrudedUnitCell.edgeHinge(:,1:2),2
 [a,b,c] = unique(extrudedUnitCell.edgeHingeSorted(:,1:2),'rows');
 A=[a accumarray(c,1)];
 sharedEdge=A(A(:,3)==2,1:2);
+% nodeHingeEx=zeros(size(sharedEdge,1)*2,4);
 nodeHingeEx=zeros(size(sharedEdge,1),4);
 
 for i=1:size(sharedEdge,1)
     refNode=extrudedUnitCell.edgeHingeSorted(((extrudedUnitCell.edgeHingeSorted(:,1)==sharedEdge(i,1)).*...
-        (extrudedUnitCell.edgeHingeSorted(:,2)==sharedEdge(i,2)))==1,3)';
+        (extrudedUnitCell.edgeHingeSorted(:,2)==sharedEdge(i,2)))==1,3:4)';
     %Determine order
     refNode2=extrudedUnitCell.edgeHinge(((extrudedUnitCell.edgeHinge(:,1)==sharedEdge(i,1)).*...
         (extrudedUnitCell.edgeHinge(:,2)==sharedEdge(i,2)))==1,3)';
@@ -741,9 +742,11 @@ for i=1:size(sharedEdge,1)
         'error'
     end
     index=1:2;
-    index1=index(refNode==refNode2(1));
+    index1=index(refNode(1,:)==refNode2(1));
     index2=setdiff(index,index1);
-    nodeHingeEx(i,:)=[sharedEdge(i,:) refNode([index1,index2])];
+    nodeHingeEx(i,:)=[sharedEdge(i,:) refNode(1,[index1,index2])];
+%     nodeHingeEx(2*i-1,:)=[sharedEdge(i,:) refNode(1,[index1,index2])];
+%     nodeHingeEx(2*i,:)=[sharedEdge(i,:) refNode(2,[index1,index2])];
 end
 extrudedUnitCell.nodeHingeEx=nodeHingeEx;
 

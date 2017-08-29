@@ -270,17 +270,17 @@ NiceGraph2D(ax1, 'Edge Energy',  'Hinge Energy')#, [min(eEdgeRel[stepsHinge-1::s
 #ax3 = plt.subplot(122)
 #NiceGraph2D(ax3, 'Edge Energy',  'Hinge Energy', [0.00025, 0.012],[0.01375,  0.029] )
 
-fig2 = plt.figure(1,figsize=(cm2inch(35), cm2inch(20)))
-ax2 = plt.subplot(111)
-NiceGraph2D(ax2, 'Average Radius', 'StDev of Radius')#, [min(eEdgeRel[stepsHinge-1::stepsHinge]), np.NaN],[max(eEdgeRel[stepsHinge-1::stepsHinge]), np.NaN], buffer = [0.00001, 0.0])
-
-fig3 = plt.figure(2,figsize=(cm2inch(35), cm2inch(20)))
-ax4 = plt.subplot(111, projection='3d')
-NiceGraph3D(ax4, 'CenterMass X', 'CenterMass Y', 'CenterMass Z')
-
-fig4 = plt.figure(3,figsize=(cm2inch(35), cm2inch(20)))
-ax5 = plt.subplot(111)
-NiceGraph2D(ax5, 'Hinge-Set Number', 'Internal Hinge Energy', [np.nan, min(eHinIntRel)], [np.nan, max(eHinIntRel)], buffer = [0, 0.0004])
+#fig2 = plt.figure(1,figsize=(cm2inch(35), cm2inch(20)))
+#ax2 = plt.subplot(111)
+#NiceGraph2D(ax2, 'Average Radius', 'StDev of Radius')#, [min(eEdgeRel[stepsHinge-1::stepsHinge]), np.NaN],[max(eEdgeRel[stepsHinge-1::stepsHinge]), np.NaN], buffer = [0.00001, 0.0])
+#
+#fig3 = plt.figure(2,figsize=(cm2inch(35), cm2inch(20)))
+#ax4 = plt.subplot(111, projection='3d')
+#NiceGraph3D(ax4, 'CenterMass X', 'CenterMass Y', 'CenterMass Z')
+#
+#fig4 = plt.figure(3,figsize=(cm2inch(35), cm2inch(20)))
+#ax5 = plt.subplot(111)
+#NiceGraph2D(ax5, 'Hinge-Set Number', 'Internal Hinge Energy', [np.nan, min(eHinIntRel)], [np.nan, max(eHinIntRel)], buffer = [0, 0.0004])
 
 fig5 = plt.figure(4,figsize=(cm2inch(35), cm2inch(20)))
 ax6 = plt.subplot(121)  
@@ -316,36 +316,36 @@ for hinge, c in zip(np.arange(hingeNum[-1]),colors):
     if len(np.where(differentEnergies[:,0] == hinge)[0]) != 0:
         ax1.scatter(eEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1], c = c, label = hingeName[hinge])
 #        ax3.scatter(eEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1], c = c)
-        ax2.scatter(RadRel[stepsHinge*hinge+stepsHinge-1], StdRel[stepsHinge*hinge+stepsHinge-1], c = c, label = hingeName[hinge])
-        ax4.scatter(CMxRel[stepsHinge*hinge+stepsHinge-1], CMyRel[stepsHinge*hinge+stepsHinge-1], CMzRel[stepsHinge*hinge+stepsHinge-1], c = c)
-        ax5.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], eHinIntRel[stepsHinge*hinge+stepsHinge-1], c = c)
+#        ax2.scatter(RadRel[stepsHinge*hinge+stepsHinge-1], StdRel[stepsHinge*hinge+stepsHinge-1], c = c, label = hingeName[hinge])
+#        ax4.scatter(CMxRel[stepsHinge*hinge+stepsHinge-1], CMyRel[stepsHinge*hinge+stepsHinge-1], CMzRel[stepsHinge*hinge+stepsHinge-1], c = c)
+#        ax5.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], eHinIntRel[stepsHinge*hinge+stepsHinge-1], c = c)
         ax8.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], MaxStrRel[stepsHinge*hinge+stepsHinge-1], c = c)
         ax9.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], abs(MinStrRel[stepsHinge*hinge+stepsHinge-1]), c = c)
 #        ax1.plot(eEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = c)
 #        ax3.plot(eEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = c)
 #        ax2.plot(RadRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  StdRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = c)
-    if len(np.where(differentEnergies[:,0] == hinge)[0]) != 0:
-        ax1.annotate(hingeName[hinge], xy=(eEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1]), 
-                      xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
-                      arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
+#    if len(np.where(differentEnergies[:,0] == hinge)[0]) != 0:
+#        ax1.annotate(hingeName[hinge], xy=(eEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1]), 
+#                      xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
+#                      arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
         
         
 
 
 
 fig1.tight_layout()
-fig2.tight_layout()
-fig3.tight_layout()
-fig4.tight_layout()
+#fig2.tight_layout()
+#fig3.tight_layout()
+#fig4.tight_layout()
 fig5.tight_layout()
 fig6.tight_layout()
 fig1.show()
-fig2.show()
-fig3.show()
-fig4.show()
+#fig2.show()
+#fig3.show()
+#fig4.show()
 fig5.show()
 fig6.show()
-#fig1.savefig(folder_name + file_name1[:-4]+'.png', transparent = True)
+fig1.savefig(folder_name + file_name1[:-4]+'.png', transparent = True)
 #fig2.savefig(folder_name + file_name3[:-4]+'.png', transparent = True)
 #fig3.savefig(folder_name + 'CenterOfMass.png', transparent = True)
 #fig5.savefig(folder_name + 'Flags.png', transparent = True)
