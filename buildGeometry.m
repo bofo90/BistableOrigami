@@ -678,7 +678,7 @@ for ne=1:length(unitCell.Polyhedron)
          fprintf('Polyhedron %d has been removed because no faces have been extruded\n',ne)
     else
         nNodeSolid=size(extrudedUnitCell.node,1);
-        extrudedUnitCell.edge=[extrudedUnitCell.edge; nNodeSolid+unitCell.Polyhedron(ne).edge];
+%         extrudedUnitCell.edge=[extrudedUnitCell.edge; nNodeSolid+unitCell.Polyhedron(ne).edge];
         extrudedUnitCell.node=[extrudedUnitCell.node; unitCell.Polyhedron(ne).nodeNew];
         if isempty(unitCell.Polyhedron(ne).solidify)
         else
