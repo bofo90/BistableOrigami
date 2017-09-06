@@ -130,11 +130,21 @@ MaxStrRel = np.empty(0)
 MinStrFol = np.empty(0)
 MinStrRel = np.empty(0)
 
-folder_name = "Results/cube/sqp/energy/"
+maxStretch = np.NaN
+
+folder_name = "Results/cube/sqp/energy/"#maxStrech%1.2f/" %maxStretch
+folder_name2 = "Results/cube/sqp/energy/allmaxStrech/"
 
 file_name1 = "EnergyData.csv"
 file_name2 = "Hinges.csv"
 file_name3 = "PosStad.csv"
+
+print(maxStretch)
+#maxStretch = np.array([maxStretch])
+#
+#with open(folder_name2+'test.csv', 'a') as f:
+#    writer = csv.writer(f)
+#    writer.writerow(maxStretch)
 
 #######################################################################################################################
 ##################### Reading Files
@@ -158,12 +168,16 @@ with open(folder_name + file_name1,'r',newline='') as ffit:
                 exflFol = np.append(exflFol, np.int(row[11]))
                 exflRel = np.append(exflRel, np.int(row[12]))
                 
+ffit.close()
+                
 with open(folder_name + file_name2,'r',newline='') as ffit: 
     readers = csv.reader(ffit,delimiter=',');
     for row in readers:
         if row:
             if isfloat(row[0].encode('ascii','ignore')):
                 hingeName = np.append(hingeName, row[1]);
+                
+ffit.close()
 
 with open(folder_name + file_name3,'r',newline='') as ffit: 
     readers = csv.reader(ffit,delimiter=',');
@@ -195,7 +209,7 @@ stepsHinge = int(len(hingeNum)/hingeNum[-1])
 totalflags = 6
 internalHinges = 12 ###### Number of internal hinges
 
-tolHinge = 0.0001
+tolHinge = 0.003
 tolEdge = 0.01
 
 ############################################ get the number of actuated hinges for each hinge-set
@@ -213,7 +227,8 @@ flagCountRel = np.zeros((len(hingeCount), totalflags))
 hingesMask = np.arange(hingeNum[-1], dtype = float)
 notConvHinges = np.empty((0,3), dtype = int)
 for i in np.arange(len(hingeNum)):
-    if exflFol[i] != 1 or exflRel[i] != 1:
+    if (exflFol[i] != 1) or (exflRel[i] != 1):
+#    if (exflFol[i] != 1 and exflFol[i] != 2) or (exflRel[i] != 1 and exflRel[i] != 2):
         flagCountFol[actuatedHinges[hingeNum[i]-1]-1,exflFol[i]+3]  += 1
         flagCountRel[actuatedHinges[hingeNum[i]-1]-1,exflRel[i]+3]  += 1
         notConvHinges = np.append(notConvHinges,np.array([[hingeNum[i]-1, exflFol[i], exflRel[i]]]), axis = 0)
@@ -324,10 +339,10 @@ for hinge, c in zip(np.arange(hingeNum[-1]),colors):
 #        ax1.plot(eEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = c)
 #        ax3.plot(eEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = c)
 #        ax2.plot(RadRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  StdRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = c)
-#    if len(np.where(differentEnergies[:,0] == hinge)[0]) != 0:
-#        ax1.annotate(hingeName[hinge], xy=(eEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1]), 
-#                      xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
-#                      arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
+    if len(np.where(differentEnergies[:,0] == hinge)[0]) != 0:
+        ax1.annotate(hingeName[hinge], xy=(eEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1]), 
+                      xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
+                      arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
         
         
 
@@ -345,8 +360,8 @@ fig1.show()
 #fig4.show()
 fig5.show()
 fig6.show()
-fig1.savefig(folder_name + file_name1[:-4]+'.png', transparent = True)
+fig1.savefig(folder_name + file_name1[:-4]+'.png', transparent = False)
 #fig2.savefig(folder_name + file_name3[:-4]+'.png', transparent = True)
 #fig3.savefig(folder_name + 'CenterOfMass.png', transparent = True)
-#fig5.savefig(folder_name + 'Flags.png', transparent = True)
+fig5.savefig(folder_name + 'Flags.png', transparent = True)
 #fig6.savefig(folder_name + 'MaxMinStretch.png', transparent = True)

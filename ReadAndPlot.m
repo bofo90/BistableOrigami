@@ -6,7 +6,7 @@ switch opt.plot
         outputResults(unitCell,extrudedUnitCell,result,opt);
     case {'result', 'savedata'}
         if strcmp(opt.plot,'savedata')
-            folderEnergy = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/energy');
+            folderEnergy = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/energy');%,sprintf('/maxStrech%.2f', opt.maxStretch));
             if ~exist(folderEnergy, 'dir')
                 mkdir(folderEnergy);
             end
@@ -25,7 +25,7 @@ switch opt.plot
             end
         end
         
-        folderResults = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat');
+        folderResults = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat');%, sprintf('/maxStrech%.2f', opt.maxStretch));
         if ~exist(folderResults, 'dir')
             fprintf('No folder with results\n');
         else
@@ -43,6 +43,10 @@ switch opt.plot
                 fileName = allFiles(ct).name;
                 parsedName = strsplit(fileName(1:end-4), '_');
                 hingeSet = getHingeSet(parsedName{2});
+                if ~isequal(hingeSet, opt.angleConstrFinal(1).val(:,1)) && strcmp(opt.readAngFile,'off')
+                    continue;
+                end
+               
                 extrudedUnitCell.angleConstr = [hingeSet(:), -pi*0.985 * ones(length(hingeSet), 1)];
                 load(strcat(folderResults,'/', fileName));
                 succesfullFiles = succesfullFiles + 1;
@@ -50,9 +54,10 @@ switch opt.plot
                 if strcmp(opt.plot, 'savedata')
                     [CM, Radios, Stdev, EhingeInt, maxStrech, minStrech] = getRadiosStdev(extrudedUnitCell, opt, result);
                     Energies = [ones(length(result.E),1)*(ct-directories), result.Eedge,...
-                        result.Eface, result.Ehinge, result.EtargetAngle, EhingeInt, result.exfl];
-                    PosStad = cat(3,ones(length(result.E),2,1)*(ct-directories),CM,...
-                        Radios, Stdev, maxStrech, minStrech);
+                        result.Eface, result.Ehinge, result.EtargetAngle, EhingeInt(1:end-1:end,:), result.exfl];
+                    PosStad = cat(3,ones(length(result.E),2,1)*(ct-directories),CM(1:end-1:end,:,:),...
+                        Radios(1:end-1:end,:), Stdev(1:end-1:end,:),...
+                        maxStrech(1:end-1:end,:), minStrech(1:end-1:end,:));
                     Hinges = [num2str(ct-directories),',',parsedName{2}];
                     dlmwrite(fileMassDist, PosStad, 'delimiter', ',', '-append');
                     dlmwrite(fileHinge, Hinges, 'delimiter', '', '-append');

@@ -3,18 +3,32 @@ function findDeformation(unitCell,extrudedUnitCell,opt)
 %Show details geometries (if requested)
 if strcmp(opt.plot,'result')
     if strcmp(opt.readAngFile,'off')
-        nonlinearFolding(unitCell,extrudedUnitCell,opt);
+        oriMaxStrech = opt.maxStretch;
+        for inter = 1:opt.stepMaxStrech
+            opt.maxStretch = (oriMaxStrech/opt.stepMaxStrech)*inter;
+            fprintf('Maximum stretching %1.2f.\n', opt.maxStretch);
+            nonlinearFolding(unitCell,extrudedUnitCell,opt);
+        end
     else
         opt.angleConstrFinal = [];
         fileHinges = strcat(pwd, '\Results\hingeList_reduced\', opt.template, '.csv');
-        hingeList = dlmread(fileHinges);
-        for i = 1:size(hingeList, 1)
-            row = hingeList(i, :);
-%             hinges = [row(0~=row)*2-1 row(0~=row)*2]';
-            hinges = row(0~=row);
-            opt.angleConstrFinal(1).val = [hinges(:), -pi*0.985 * ones(length(hinges), 1)];
-            fprintf('Hinge selection number %d/%d. ', i, size(hingeList, 1))
-            nonlinearFolding(unitCell,extrudedUnitCell,opt);
+        if ~exist(fileHinges, 'file')
+            fprintf('Hinge-selection file does not exist.\n');
+        else
+            hingeList = dlmread(fileHinges);
+            oriMaxStrech = opt.maxStretch;
+            for inter = 1:opt.stepMaxStrech
+                opt.maxStretch = (oriMaxStrech/opt.stepMaxStrech)*inter;
+                fprintf('Maximum stretching %1.2f.\n', opt.maxStretch);
+                for i = 1:size(hingeList, 1)
+                    row = hingeList(i, :);
+        %             hinges = [row(0~=row)*2-1 row(0~=row)*2]';
+                    hinges = row(0~=row);
+                    opt.angleConstrFinal(1).val = [hinges(:), -pi*0.985 * ones(length(hinges), 1)];
+                    fprintf('Hinge selection number %d/%d. ', i, size(hingeList, 1));
+                    nonlinearFolding(unitCell,extrudedUnitCell,opt);
+                end
+            end
         end
     end
 end
@@ -35,7 +49,7 @@ theta0=extrudedUnitCell.theta;
 max_iter = 100000;
 extrudedUnitCell.angleConstr=[];
 
-folderName = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat');
+folderName = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat');%/maxStrech', num2str(opt.maxStretch));
 if ~exist(folderName, 'dir')
     mkdir(folderName);
 end
@@ -343,9 +357,9 @@ for i=1:size(extrudedUnitCell.edge,1)
     coor2=extrudedUnitCell.node(extrudedUnitCell.edge(i,2),:);
     dx=coor2-coor1;
     L=sqrt(dx*dx');
-    dEdge(i)=(L-extrudedUnitCell.edgeL(i))/extrudedUnitCell.edgeL(i);            
-    Jedge(i,3*extrudedUnitCell.edge(i,1)-2:3*extrudedUnitCell.edge(i,1))=-dx/L/extrudedUnitCell.edgeL(i);
-    Jedge(i,3*extrudedUnitCell.edge(i,2)-2:3*extrudedUnitCell.edge(i,2))=dx/L/extrudedUnitCell.edgeL(i);
+    dEdge(i)=(L-extrudedUnitCell.edgeL(i));%/extrudedUnitCell.edgeL(i);            
+    Jedge(i,3*extrudedUnitCell.edge(i,1)-2:3*extrudedUnitCell.edge(i,1))=-dx/L;%/extrudedUnitCell.edgeL(i);
+    Jedge(i,3*extrudedUnitCell.edge(i,2)-2:3*extrudedUnitCell.edge(i,2))=dx/L;%/extrudedUnitCell.edgeL(i);
 end
 
 
