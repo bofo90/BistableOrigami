@@ -5,30 +5,31 @@ switch opt.plot
         result = [];
         outputResults(unitCell,extrudedUnitCell,result,opt);
     case {'result', 'savedata'}
-        if strcmp(opt.plot,'savedata')
-            folderEnergy = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/energy');%,sprintf('/maxStrech%.2f', opt.maxStretch));
-            if ~exist(folderEnergy, 'dir')
-                mkdir(folderEnergy);
-            end
-
-            fileEnergy = strcat(folderEnergy, '/','EnergyData.csv');
-            if exist(fileEnergy, 'file')
-                delete(fileEnergy) % always start with new file
-            end
-            fileHinge = strcat(folderEnergy, '/','Hinges.csv');
-            if exist(fileHinge, 'file')
-                delete(fileHinge) % always start with new file
-            end
-            fileMassDist = strcat(folderEnergy, '/','PosStad.csv');
-            if exist(fileMassDist, 'file')
-                delete(fileMassDist) % always start with new file
-            end
-        end
         
-        folderResults = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat');%, sprintf('/maxStrech%.2f', opt.maxStretch));
+        folderResults = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat/', sprintf('kangle%2.4f_khinge%2.4f', opt.KtargetAngle, opt.Khinge));
         if ~exist(folderResults, 'dir')
             fprintf('No folder with results\n');
         else
+            if strcmp(opt.plot,'savedata')
+                folderEnergy = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/energy/', sprintf('kangle%2.4f_khinge%2.4f', opt.KtargetAngle, opt.Khinge));
+                if ~exist(folderEnergy, 'dir')
+                    mkdir(folderEnergy);
+                end
+
+                fileEnergy = strcat(folderEnergy, '/','EnergyData.csv');
+                if exist(fileEnergy, 'file')
+                    delete(fileEnergy) % always start with new file
+                end
+                fileHinge = strcat(folderEnergy, '/','Hinges.csv');
+                if exist(fileHinge, 'file')
+                    delete(fileHinge) % always start with new file
+                end
+                fileMassDist = strcat(folderEnergy, '/','PosStad.csv');
+                if exist(fileMassDist, 'file')
+                    delete(fileMassDist) % always start with new file
+                end
+            end
+        
             allFiles = dir(folderResults);
             directories = 0;
             succesfullFiles = 0;

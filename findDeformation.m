@@ -16,17 +16,24 @@ if strcmp(opt.plot,'result')
             fprintf('Hinge-selection file does not exist.\n');
         else
             hingeList = dlmread(fileHinges);
-            oriMaxStrech = opt.maxStretch;
-            for inter = 1:opt.stepMaxStrech
-                opt.maxStretch = (oriMaxStrech/opt.stepMaxStrech)*inter;
-                fprintf('Maximum stretching %1.2f.\n', opt.maxStretch);
-                for i = 1:size(hingeList, 1)
-                    row = hingeList(i, :);
-        %             hinges = [row(0~=row)*2-1 row(0~=row)*2]';
-                    hinges = row(0~=row);
-                    opt.angleConstrFinal(1).val = [hinges(:), -pi*0.985 * ones(length(hinges), 1)];
-                    fprintf('Hinge selection number %d/%d. ', i, size(hingeList, 1));
-                    nonlinearFolding(unitCell,extrudedUnitCell,opt);
+            orikHinge = opt.Khinge;
+            orikTargetAngle = opt.KtargetAngle;
+            for stephinge = 1:opt.stepkHinge
+                for stepangle = 1:opt.stepkTargetAngle
+                    opt.Khinge = orikHinge*10^(stephinge-1);
+                    opt.KtargetAngle = orikTargetAngle*10^(stepangle/2-0.5);
+                    fprintf('ktargetangle %f, khinge %f.\n', opt.KtargetAngle, opt.Khinge );
+                    for i = 1:size(hingeList, 1)
+                        row = hingeList(i, :);
+            %             hinges = [row(0~=row)*2-1 row(0~=row)*2]';
+                        hinges = row(0~=row);
+%                         if length(hinges) > 3
+%                             break
+%                         end
+                        opt.angleConstrFinal(1).val = [hinges(:), -pi*0.985 * ones(length(hinges), 1)];
+                        fprintf('Hinge selection number %d/%d. ', i, size(hingeList, 1));
+                        nonlinearFolding(unitCell,extrudedUnitCell,opt);
+                    end
                 end
             end
         end
@@ -49,7 +56,7 @@ theta0=extrudedUnitCell.theta;
 max_iter = 100000;
 extrudedUnitCell.angleConstr=[];
 
-folderName = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat');%/maxStrech', num2str(opt.maxStretch));
+folderName = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat/', sprintf('kangle%2.4f_khinge%2.4f', opt.KtargetAngle, opt.Khinge));
 if ~exist(folderName, 'dir')
     mkdir(folderName);
 end
