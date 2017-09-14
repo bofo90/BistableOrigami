@@ -13,7 +13,7 @@ import matplotlib
 from matplotlib.colors import from_levels_and_colors
 
 totSimulations = 0
-internalHinges = 12
+internalHinges = 9
 flags = np.empty((7, 7, 6)) # 12 internal hinges, 7 possible flags
 flags[:] = np.NaN
 ststs = np.empty((7,7))
@@ -44,24 +44,24 @@ fig1.subplots_adjust(wspace = 0.23)
 for ax in axes1.flat:
     ax.set_xscale('log')
     ax.set_yscale('log')
-    pc2.NiceGraph2D(ax, 'khinge', 'kangle', mincoord = [0.0005, 0.5], maxcoord = [500, 500], divisions = [x,y])
+    pc2.NiceGraph2D(ax, 'khinge', 'kangle', mincoord = [0.0005*10**(-0.5), 0.5*10**(-0.25)], maxcoord = [500*10**(0.5), 500*10**(0.25)], divisions = [x,y])
     ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
     ax.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
 
-cmap2, norm = from_levels_and_colors(np.linspace(0,1,11), cm.summer_r(np.linspace(0, 1, 10)))
+cmap, norm = from_levels_and_colors(np.linspace(0,1,11), cm.summer_r(np.linspace(0, 1, 10)))
 allflags = np.ma.masked_where(np.isnan(allflags), allflags)
 flags = np.ma.masked_where(np.isnan(flags), flags)
 
-cs1 = axes1[0,0].pcolormesh(x2, y2, allflags, cmap=cmap2, norm = norm)
-axes1[0,1].pcolormesh(x2, y2, flags[:,:,1], cmap=cmap2, norm = norm)
-axes1[1,0].pcolormesh(x2, y2, flags[:,:,3], cmap=cmap2, norm = norm)
-axes1[1,1].pcolormesh(x2, y2, flags[:,:,5], cmap=cmap2, norm = norm)
+cs1 = axes1[0,0].pcolormesh(x2, y2, allflags, cmap=cmap, norm = norm)
+axes1[0,1].pcolormesh(x2, y2, flags[:,:,1], cmap=cmap, norm = norm)
+axes1[1,0].pcolormesh(x2, y2, flags[:,:,3], cmap=cmap, norm = norm)
+axes1[1,1].pcolormesh(x2, y2, flags[:,:,5], cmap=cmap, norm = norm)
 
 for ax in axes1.flat:
     ax.grid(which='major', alpha=0.2, color = '0.2') 
     
 cbar = plt.colorbar(cs1, format="%.2f", ax =axes1.ravel().tolist(), fraction=0.046, pad=0.03)
-cbar.set_label('Convergence rate', fontsize = 15, color = '0.2')
+cbar.set_label('Non-Convergence rate', fontsize = 15, color = '0.2')
 cbar.ax.tick_params(axis='y',colors='0.2')
 cbar.ax.tick_params(axis='x',colors='0.2')
 cbar.outline.set_edgecolor('0.2')
@@ -72,12 +72,13 @@ fig2, axes2 = plt.subplots(nrows=1, ncols=1, figsize=(pc2.cm2inch(35), pc2.cm2in
 
 axes2.set_xscale('log')
 axes2.set_yscale('log')
-pc2.NiceGraph2D(axes2, 'khinge', 'kangle', mincoord = [0.0005, 0.5], maxcoord = [500, 500], divisions = [x,y])
+pc2.NiceGraph2D(axes2, 'khinge', 'kangle', mincoord = [0.0005*10**(-0.5), 0.5*10**(-0.25)], maxcoord = [500*10**(0.5), 500*10**(0.25)], divisions = [x,y])
 axes2.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
 axes2.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
 
+cmap2, norm2 = from_levels_and_colors(np.arange(np.nanmax(ststs)+1)+1, cm.Set2(np.linspace(0, 1, np.nanmax(ststs))))
 ststs = np.ma.masked_where(np.isnan(ststs), ststs)
-cs2 = axes2.pcolormesh(x2, y2, ststs, cmap=cm.Set2)
+cs2 = axes2.pcolormesh(x2, y2, ststs, cmap=cmap2, norm = norm2)
 
 axes2.grid(which='major', alpha=0.2, color = '0.2') 
 
