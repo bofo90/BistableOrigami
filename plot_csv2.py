@@ -369,14 +369,16 @@ def ReadandAnalizeFile(folder_name):
     #fig4.show()
     fig5.show()
     fig6.show()
-    fig1.savefig(folder_name + file_name1[:-4]+'.png', transparent = False)
+#    fig1.savefig(folder_name + file_name1[:-4]+'.png', transparent = False)
     #fig2.savefig(folder_name + file_name3[:-4]+'.png', transparent = True)
     #fig3.savefig(folder_name + 'CenterOfMass.png', transparent = True)
-    fig5.savefig(folder_name + 'Flags.png', transparent = True)
+#    fig5.savefig(folder_name + 'Flags.png', transparent = True)
     #fig6.savefig(folder_name + 'MaxMinStretch.png', transparent = True)
+    
+    print(hingeName[differentEnergies[:,0]])
     
     return allFlags, len(differentEnergies[:,0])
 
 if __name__ == "__main__":
-    folder_name = "Results/cube/sqp/energy/kangle%2.4f_khinge%2.4f/" %(kangle, khinge)
+    folder_name = "Results/cube/sqp/energy/"
     ReadandAnalizeFile(folder_name)
