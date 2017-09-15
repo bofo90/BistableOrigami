@@ -19,24 +19,26 @@ if strcmp(opt.plot,'result')
             orikHinge = opt.Khinge;
             orikTargetAngle = opt.KtargetAngle;
             orikEdge = opt.Kedge;
-            for stepedge = 1:opt.stepkEdge
-%                 for stepangle = 1:opt.stepkTargetAngle
-%                     opt.Khinge = orikHinge*10^(stephinge-1);
-%                     opt.KtargetAngle = orikTargetAngle*10^(stepangle/2-0.5);
-                opt.Kedge = orikEdge*10^(stepedge/2-0.5);
-                fprintf('kedge %f.\n', opt.Kedge );
-                for i = 1:size(hingeList, 1)
-                    row = hingeList(i, :);
-    %                 hinges = [row(0~=row)*2-1 row(0~=row)*2]';
-                    hinges = row(0~=row);
-    %                             if length(hinges) > 3
-    %                                 break
-    %                             end
-                    opt.angleConstrFinal(1).val = [hinges(:), -pi*0.985 * ones(length(hinges), 1)];
-                    fprintf('Hinge selection number %d/%d. ', i, size(hingeList, 1));
-                    nonlinearFolding(unitCell,extrudedUnitCell,opt);
+            for stephinge = 1:opt.stepkHinge
+                opt.Khinge = orikHinge*10^((stephinge-1)/2);
+                for stepangle = 1:(opt.stepkTargetAngle-stephinge)
+                    opt.KtargetAngle = orikTargetAngle*10^(-(stepangle-1)/2);
+                    for stepedge = 1:(opt.stepkEdge-stephinge)
+                        opt.Kedge = orikEdge*10^(-(stepedge-1)/2);
+                        fprintf('kHinge %f\tkTargetAngle %f\tkEdge %f\n', opt.Khinge,opt.KtargetAngle, opt.Kedge );
+                        for i = 1:size(hingeList, 1)
+                            row = hingeList(i, :);
+            %                 hinges = [row(0~=row)*2-1 row(0~=row)*2]';
+                            hinges = row(0~=row);
+            %                             if length(hinges) > 3
+            %                                 break
+            %                             end
+                            opt.angleConstrFinal(1).val = [hinges(:), -pi*0.985 * ones(length(hinges), 1)];
+                            fprintf('Hinge selection number %d/%d. ', i, size(hingeList, 1));
+                            nonlinearFolding(unitCell,extrudedUnitCell,opt);
+                        end
+                    end
                 end
-%                 end
             end
         end
     end
@@ -58,7 +60,7 @@ theta0=extrudedUnitCell.theta;
 max_iter = 100000;
 extrudedUnitCell.angleConstr=[];
 
-folderName = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat/', sprintf('kedge%2.4f', opt.Kedge));
+folderName = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat/', sprintf('kh%2.3f_kta%2.3f_ke%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge));
 if ~exist(folderName, 'dir')
     mkdir(folderName);
 end
