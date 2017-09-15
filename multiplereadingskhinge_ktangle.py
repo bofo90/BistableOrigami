@@ -18,7 +18,7 @@ flags = np.empty((7, 7, 6)) # 12 internal hinges, 7 possible flags
 flags[:] = np.NaN
 ststs = np.empty((7,7))
 ststs[:] = np.NaN
-folder_name = "Results/cube/sqp/energy/"
+folder_name = "Results/triangular prism/sqp/energy/"
 
 for stephinge in np.arange(7):
     for stepangle in np.arange(7):

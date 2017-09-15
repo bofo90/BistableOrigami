@@ -222,18 +222,18 @@ def ReadandAnalizeFile(folder_name):
     ############################################ order the hinge-set according to the number of actuated hinges
     orderedHinges = np.argsort(actuatedHinges)
     
-    ############################################ count the different flags and Mask the hinge-sets that didnt converged
+    ############################################ count the different flags and Mask the hinge-sets that didnt converge
     flagCountFol = np.zeros((len(hingeCount), totalflags))
     flagCountRel = np.zeros((len(hingeCount), totalflags))
     hingesMask = np.arange(hingeNum[-1], dtype = float)
     notConvHinges = np.empty((0,3), dtype = int)
     for i in np.arange(len(hingeNum)):
         error = False
-        if (exflFol[i] != 1):
+        if exflFol[i] != 1 and exflFol[i] != 2:
     #    if (exflFol[i] != 1 and exflFol[i] != 2) or (exflRel[i] != 1 and exflRel[i] != 2):
             flagCountFol[actuatedHinges[hingeNum[i]-1]-1,exflFol[i]+3]  += 1
             error = True
-        if (exflRel[i] != 1) and not error:
+        if exflRel[i] != 1 and exflRel[i] != 2 and not error:
             flagCountRel[actuatedHinges[hingeNum[i]-1]-1,exflRel[i]+3]  += 1
             error = True
         if error:
@@ -380,5 +380,5 @@ def ReadandAnalizeFile(folder_name):
     return allFlags, len(differentEnergies[:,0])
 
 if __name__ == "__main__":
-    folder_name = "Results/cube/sqp/energy/"
+    folder_name = "Results/triangular prism/sqp/energy/"
     ReadandAnalizeFile(folder_name)
