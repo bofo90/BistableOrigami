@@ -246,11 +246,11 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     notConvHinges = np.empty((0,3), dtype = int)
     for i in np.arange(len(hingeNum)):
         error = False
-        if exflFol[i] != 1:# and exflFol[i] != 2:
+        if exflFol[i] != 1 and exflFol[i] != 2:
     #    if (exflFol[i] != 1 and exflFol[i] != 2) or (exflRel[i] != 1 and exflRel[i] != 2):
             flagCountFol[actuatedHinges[hingeNum[i]-1]-1,exflFol[i]+3]  += 1
             error = True
-        if exflRel[i] != 1 and not error:# and exflRel[i] != 2:
+        if exflRel[i] != 1 and not error and exflRel[i] != 2:
             flagCountRel[actuatedHinges[hingeNum[i]-1]-1,exflRel[i]+3]  += 1
             error = True
         if error:
