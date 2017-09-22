@@ -14,7 +14,7 @@ from matplotlib.colors import from_levels_and_colors
 
 totSimulations = 0
 internalHinges = 12
-flags = np.empty((6, 6)) # 12 internal hinges, 7 possible flags
+flags = np.empty((6, 6)) # 12 internal hinges, 6 possible flags
 flags[:] = np.NaN
 ststs = np.empty((6))
 ststs[:] = np.NaN
@@ -25,7 +25,7 @@ for stepedge in np.arange(6):
     subfolder_name = "kedge%2.4f/" %(kedge)
     if os.path.exists(folder_name+subfolder_name):
         totSimulations += 1
-        flags[stepedge,:], ststs[stepedge] = pc2.ReadandAnalizeFile(folder_name+subfolder_name)
+        flags[stepedge,:], ststs[stepedge] = pc2.ReadandAnalizeFile(folder_name+subfolder_name, plot = False)
         print(folder_name)
             
 allflags = np.sum(flags, axis = 1)

@@ -60,7 +60,7 @@ theta0=extrudedUnitCell.theta;
 max_iter = 100000;
 extrudedUnitCell.angleConstr=[];
 
-folderName = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat/', sprintf('kh%2.3f_kta%2.3f_ke%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge));
+folderName = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat/stablestates');%, sprintf('kh%2.3f_kta%2.3f_ke%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge));
 if ~exist(folderName, 'dir')
     mkdir(folderName);
 end
@@ -156,7 +156,7 @@ for iter=1:length(opt.angleConstrFinal)
     result.numMode=length(result.deform);
     
     fileName = strcat(folderName,'/',opt.template,'_',...
-        mat2str(opt.angleConstrFinal(iter).val(:,1)'),'_','.mat');
+        mat2str(opt.angleConstrFinal(iter).val(:,1)'),'_',sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge),'.mat');
     save(fileName, 'result');
  
     clearvars result E Eedge Eface Ehinge EtargetAngle exfl;

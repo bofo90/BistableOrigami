@@ -6,12 +6,12 @@ switch opt.plot
         outputResults(unitCell,extrudedUnitCell,result,opt);
     case {'result', 'savedata'}
         
-        folderResults = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat/', sprintf('kh%2.3f_kta%2.3f_ke%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge));
+        folderResults = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat/stablestates');%', sprintf('kh%2.3f_kta%2.3f_ke%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge));
         if ~exist(folderResults, 'dir')
             fprintf('No folder with results\n');
         else
             if strcmp(opt.plot,'savedata')
-                folderEnergy = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/energy/', sprintf('kh%2.3f_kta%2.3f_ke%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge));
+                folderEnergy = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/energy/stablestates');%', sprintf('kh%2.3f_kta%2.3f_ke%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge));
                 if ~exist(folderEnergy, 'dir')
                     mkdir(folderEnergy);
                 end
@@ -47,7 +47,11 @@ switch opt.plot
                 if ~isequal(hingeSet, opt.angleConstrFinal(1).val(:,1)) && strcmp(opt.readAngFile,'off')
                     continue;
                 end
-               
+                ks = sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge);
+                fileks = strcat(parsedName{3},'_',parsedName{4},'_',parsedName{5});
+                if ~isequal(ks, fileks)&& strcmp(opt.readAngFile,'off')
+                    continue;
+                end
                 extrudedUnitCell.angleConstr = [hingeSet(:), -pi*0.985 * ones(length(hingeSet), 1)];
                 load(strcat(folderResults,'/', fileName));
                 succesfullFiles = succesfullFiles + 1;
