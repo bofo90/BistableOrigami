@@ -95,7 +95,7 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.spines['right'].set_color(gray)
     return
 
-def ReadandAnalizeFile(folder_name):
+def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan):
     
     plt.close('all')
 
@@ -208,10 +208,27 @@ def ReadandAnalizeFile(folder_name):
     
     stepsHinge = int(len(hingeNum)/hingeNum[-1])
     totalflags = 6
-    internalHinges = 12 ###### Number of internal hinges
+    internalHinges = 9 ###### Number of internal hinges
+    totalnumberHinges = 27
+    totalnumberEdges = 108
     
     tolHinge = 0.003
     tolEdge = 0.01
+    normalized = ''
+    
+    ############################################ Modify data to have a normalized energy (or just difference in angle/length)
+    if ~np.isnan(khinge):
+        eHingeFol = np.sqrt(eHingeFol*2/khinge/totalnumberHinges)
+        eHingeRel = np.sqrt(eHingeRel*2/khinge/totalnumberHinges)
+        eHinIntFol = np.sqrt(eHinIntFol*2/khinge/internalHinges)
+        eHinIntRel = np.sqrt(eHinIntRel*2/khinge/internalHinges)
+        tolHinge = 0.02
+        normalized = normalized + 'hn'
+    if ~np.isnan(kedge):
+        eEdgeFol = np.sqrt(eEdgeFol*2/kedge/totalnumberEdges)
+        eEdgeRel = np.sqrt(eEdgeRel*2/kedge/totalnumberEdges)
+        tolEdge = 0.001
+        normalized = normalized + 'en'
     
     ############################################ get the number of actuated hinges for each hinge-set
     actuatedHinges = np.zeros(hingeNum[-1], dtype = int)
@@ -229,11 +246,11 @@ def ReadandAnalizeFile(folder_name):
     notConvHinges = np.empty((0,3), dtype = int)
     for i in np.arange(len(hingeNum)):
         error = False
-        if exflFol[i] != 1 and exflFol[i] != 2:
+        if exflFol[i] != 1:# and exflFol[i] != 2:
     #    if (exflFol[i] != 1 and exflFol[i] != 2) or (exflRel[i] != 1 and exflRel[i] != 2):
             flagCountFol[actuatedHinges[hingeNum[i]-1]-1,exflFol[i]+3]  += 1
             error = True
-        if exflRel[i] != 1 and exflRel[i] != 2 and not error:
+        if exflRel[i] != 1 and not error:# and exflRel[i] != 2:
             flagCountRel[actuatedHinges[hingeNum[i]-1]-1,exflRel[i]+3]  += 1
             error = True
         if error:
@@ -258,6 +275,8 @@ def ReadandAnalizeFile(folder_name):
     ############################################ going through all hinges in order and see all the neighbours in energy
     #nonConvStates = 0
     differentEnergies = np.empty((0,2), dtype = int)
+    differentEnergiesName = np.empty(0)
+    differentEnergiesEnergy = np.empty((0,2))
     for hinge in np.arange(hingeNum[-1]):
         if ~np.isnan(hingesMask[orderedHinges[hinge]]):
             hingeeHinge = lasteHingeRel[hinge]
@@ -266,7 +285,7 @@ def ReadandAnalizeFile(folder_name):
                                                                 energies[:hingeNum[-1]]<=hingeeHinge+tolHinge),
                                                  np.logical_and(energies[hingeNum[-1]:]>=hingeeEdge-tolEdge, 
                                                                 energies[hingeNum[-1]:]<=hingeeEdge+tolEdge)))[0]
-            ############################################ see if at least one of the neighbours converge
+            ############################################ see if at least one of the neighbours converge (including the selected one)
             i = 0
             if len(notConvHinges) > 0:
                 while len(np.where(notConvHinges[:,0] == orderedHinges[sameEnergy[i]])[0]) != 0:
@@ -279,6 +298,8 @@ def ReadandAnalizeFile(folder_name):
                 findit = np.where(differentEnergies[:,0] == orderedHinges[sameEnergy[i]])[0]
                 if len(findit) == 0:
                     differentEnergies = np.append(differentEnergies,np.array([[orderedHinges[sameEnergy[i]], len(sameEnergy)]]), axis = 0)
+                    differentEnergiesName = np.append(differentEnergiesName, np.array(hingeName[orderedHinges[sameEnergy[i]]]))
+                    differentEnergiesEnergy = np.append(differentEnergiesEnergy, np.array([[hingeeHinge,hingeeEdge]]), axis = 0)
             else:
     #            nonConvStates += len(sameEnergy)
                 print('State from non convergent hinges')
@@ -288,96 +309,98 @@ def ReadandAnalizeFile(folder_name):
     #######################################################################################################################
     ##################### Ploting the result
     #######################################################################################################################
-    fig1 = plt.figure(0,figsize=(cm2inch(35), cm2inch(20)))
-    ax1 = plt.subplot(111)#
-    NiceGraph2D(ax1, 'Edge Energy',  'Hinge Energy')#, [min(eEdgeRel[stepsHinge-1::stepsHinge]), np.NaN],[0.0014,  np.NaN] )
-    #ax3 = plt.subplot(122)
-    #NiceGraph2D(ax3, 'Edge Energy',  'Hinge Energy', [0.00025, 0.012],[0.01375,  0.029] )
-    
-    #fig2 = plt.figure(1,figsize=(cm2inch(35), cm2inch(20)))
-    #ax2 = plt.subplot(111)
-    #NiceGraph2D(ax2, 'Average Radius', 'StDev of Radius')#, [min(eEdgeRel[stepsHinge-1::stepsHinge]), np.NaN],[max(eEdgeRel[stepsHinge-1::stepsHinge]), np.NaN], buffer = [0.00001, 0.0])
-    #
-    #fig3 = plt.figure(2,figsize=(cm2inch(35), cm2inch(20)))
-    #ax4 = plt.subplot(111, projection='3d')
-    #NiceGraph3D(ax4, 'CenterMass X', 'CenterMass Y', 'CenterMass Z')
-    #
-    #fig4 = plt.figure(3,figsize=(cm2inch(35), cm2inch(20)))
-    #ax5 = plt.subplot(111)
-    #NiceGraph2D(ax5, 'Hinge-Set Number', 'Internal Hinge Energy', [np.nan, min(eHinIntRel)], [np.nan, max(eHinIntRel)], buffer = [0, 0.0004])
-    
-    fig5 = plt.figure(4,figsize=(cm2inch(35), cm2inch(20)))
-    ax6 = plt.subplot(121)  
-    ax7 = plt.subplot(122)   
-    maxPerc = np.amax([np.nanmax(flagCountFol),np.nanmax(flagCountRel)])
-    NiceGraph2D(ax6, '# of actuated Hinges', 'percentage # of flags', [0.5, 0], [internalHinges-0.5, 1+0.01], [np.arange(len(hingeCount))+1, np.nan])       
-    NiceGraph2D(ax7, '# of actuated Hinges', 'percentage # of flags', [0.5, 0], [internalHinges-0.5, 1+0.01], [np.arange(len(hingeCount))+1, np.nan])  
-    
-    fig6 = plt.figure(5,figsize=(cm2inch(35), cm2inch(20)))
-    ax8 = plt.subplot(121)  
-    ax9 = plt.subplot(122) 
-    NiceGraph2D(ax8, 'Hinge-Set Number', 'Max final streching')
-    NiceGraph2D(ax9, 'Hinge-Set Number', 'Min final streching')            
+    if plot:
+        fig1 = plt.figure(0,figsize=(cm2inch(35), cm2inch(20)))
+        ax1 = plt.subplot(111)#
+        NiceGraph2D(ax1, 'Edge Energy',  'Hinge Energy')#, [min(eEdgeRel[stepsHinge-1::stepsHinge]), np.NaN],[0.0014,  np.NaN] )
+        #ax3 = plt.subplot(122)
+        #NiceGraph2D(ax3, 'Edge Energy',  'Hinge Energy', [0.00025, 0.012],[0.01375,  0.029] )
+        
+        #fig2 = plt.figure(1,figsize=(cm2inch(35), cm2inch(20)))
+        #ax2 = plt.subplot(111)
+        #NiceGraph2D(ax2, 'Average Radius', 'StDev of Radius')#, [min(eEdgeRel[stepsHinge-1::stepsHinge]), np.NaN],[max(eEdgeRel[stepsHinge-1::stepsHinge]), np.NaN], buffer = [0.00001, 0.0])
+        #
+        #fig3 = plt.figure(2,figsize=(cm2inch(35), cm2inch(20)))
+        #ax4 = plt.subplot(111, projection='3d')
+        #NiceGraph3D(ax4, 'CenterMass X', 'CenterMass Y', 'CenterMass Z')
+        #
+        #fig4 = plt.figure(3,figsize=(cm2inch(35), cm2inch(20)))
+        #ax5 = plt.subplot(111)
+        #NiceGraph2D(ax5, 'Hinge-Set Number', 'Internal Hinge Energy', [np.nan, min(eHinIntRel)], [np.nan, max(eHinIntRel)], buffer = [0, 0.0004])
+        
+        fig5 = plt.figure(4,figsize=(cm2inch(35), cm2inch(20)))
+        ax6 = plt.subplot(121)  
+        ax7 = plt.subplot(122)   
+        maxPerc = np.amax([np.nanmax(flagCountFol),np.nanmax(flagCountRel)])
+        NiceGraph2D(ax6, '# of actuated Hinges', 'percentage # of flags', [0.5, 0], [internalHinges-0.5, 1+0.01], [np.arange(len(hingeCount))+1, np.nan])       
+        NiceGraph2D(ax7, '# of actuated Hinges', 'percentage # of flags', [0.5, 0], [internalHinges-0.5, 1+0.01], [np.arange(len(hingeCount))+1, np.nan])  
+        
+        fig6 = plt.figure(5,figsize=(cm2inch(35), cm2inch(20)))
+        ax8 = plt.subplot(121)  
+        ax9 = plt.subplot(122) 
+        NiceGraph2D(ax8, 'Hinge-Set Number', 'Max final streching')
+        NiceGraph2D(ax9, 'Hinge-Set Number', 'Min final streching')            
+                    
+        width = 0.3
+        separation = 0
+        colors = cm.Set2(np.linspace(0, 1, totalflags))
+        for i, c in zip(reversed(np.arange(totalflags)), reversed(colors)):
+            if i == 4 or i == 0 or i == 2:  ###### block to appear flags 1, -3 and -1 respectively
+                continue
+            ax6.bar(np.arange(len(hingeCount))+separation, flagCountFol[:,i], width, color=c, label = i-3)
+            ax7.bar(np.arange(len(hingeCount))+separation, flagCountRel[:,i], width, color=c)
+            separation += width
+        
+        ax6.legend(loc = 2, fontsize =15, framealpha = 0.5, edgecolor = 'inherit', fancybox = False)
+                  
+        colors = cm.rainbow(np.linspace(0, 1, hingeNum[-1]))
+        for hinge, c in zip(np.arange(hingeNum[-1]),colors):
+            if ~np.isnan(hingesMask[hinge]):
+                c = '#36648B'
+            else:
+                c = '#FE9128'
+            if len(np.where(differentEnergies[:,0] == hinge)[0]) != 0:
+                ax1.scatter(eEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1], c = c, label = hingeName[hinge])
+        #        ax3.scatter(eEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1], c = c)
+        #        ax2.scatter(RadRel[stepsHinge*hinge+stepsHinge-1], StdRel[stepsHinge*hinge+stepsHinge-1], c = c, label = hingeName[hinge])
+        #        ax4.scatter(CMxRel[stepsHinge*hinge+stepsHinge-1], CMyRel[stepsHinge*hinge+stepsHinge-1], CMzRel[stepsHinge*hinge+stepsHinge-1], c = c)
+        #        ax5.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], eHinIntRel[stepsHinge*hinge+stepsHinge-1], c = c)
+                ax8.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], MaxStrRel[stepsHinge*hinge+stepsHinge-1], c = c)
+                ax9.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], abs(MinStrRel[stepsHinge*hinge+stepsHinge-1]), c = c)
+        #        ax1.plot(eEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = c)
+        #        ax3.plot(eEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = c)
+        #        ax2.plot(RadRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  StdRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = c)
+            if len(np.where(differentEnergies[:,0] == hinge)[0]) != 0:
+                ax1.annotate(hingeName[hinge], xy=(eEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1]), 
+                              xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
+                              arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
                 
-    width = 0.3
-    separation = 0
-    colors = cm.Set2(np.linspace(0, 1, totalflags))
-    for i, c in zip(reversed(np.arange(totalflags)), reversed(colors)):
-        if i == 4 or i == 0 or i == 2:  ###### block to appear flags 1, -3 and -1 respectively
-            continue
-        ax6.bar(np.arange(len(hingeCount))+separation, flagCountFol[:,i], width, color=c, label = i-3)
-        ax7.bar(np.arange(len(hingeCount))+separation, flagCountRel[:,i], width, color=c)
-        separation += width
+                
+        
+        
     
-    ax6.legend(loc = 2, fontsize =15, framealpha = 0.5, edgecolor = 'inherit', fancybox = False)
-              
-    colors = cm.rainbow(np.linspace(0, 1, hingeNum[-1]))
-    for hinge, c in zip(np.arange(hingeNum[-1]),colors):
-        if ~np.isnan(hingesMask[hinge]):
-            c = '#36648B'
-        else:
-            c = '#FE9128'
-        if len(np.where(differentEnergies[:,0] == hinge)[0]) != 0:
-            ax1.scatter(eEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1], c = c, label = hingeName[hinge])
-    #        ax3.scatter(eEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1], c = c)
-    #        ax2.scatter(RadRel[stepsHinge*hinge+stepsHinge-1], StdRel[stepsHinge*hinge+stepsHinge-1], c = c, label = hingeName[hinge])
-    #        ax4.scatter(CMxRel[stepsHinge*hinge+stepsHinge-1], CMyRel[stepsHinge*hinge+stepsHinge-1], CMzRel[stepsHinge*hinge+stepsHinge-1], c = c)
-    #        ax5.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], eHinIntRel[stepsHinge*hinge+stepsHinge-1], c = c)
-            ax8.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], MaxStrRel[stepsHinge*hinge+stepsHinge-1], c = c)
-            ax9.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], abs(MinStrRel[stepsHinge*hinge+stepsHinge-1]), c = c)
-    #        ax1.plot(eEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = c)
-    #        ax3.plot(eEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = c)
-    #        ax2.plot(RadRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  StdRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = c)
-        if len(np.where(differentEnergies[:,0] == hinge)[0]) != 0:
-            ax1.annotate(hingeName[hinge], xy=(eEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1]), 
-                          xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
-                          arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
-            
-            
+        fig1.tight_layout()
+        #fig2.tight_layout()
+        #fig3.tight_layout()
+        #fig4.tight_layout()
+        fig5.tight_layout()
+        fig6.tight_layout()
     
-    
-    
-    fig1.tight_layout()
-    #fig2.tight_layout()
-    #fig3.tight_layout()
-    #fig4.tight_layout()
-    fig5.tight_layout()
-    fig6.tight_layout()
-    fig1.show()
-    #fig2.show()
-    #fig3.show()
-    #fig4.show()
-    fig5.show()
-    fig6.show()
-#    fig1.savefig(folder_name + file_name1[:-4]+'.png', transparent = False)
-    #fig2.savefig(folder_name + file_name3[:-4]+'.png', transparent = True)
-    #fig3.savefig(folder_name + 'CenterOfMass.png', transparent = True)
-#    fig5.savefig(folder_name + 'Flags.png', transparent = True)
-    #fig6.savefig(folder_name + 'MaxMinStretch.png', transparent = True)
+        fig1.show()
+        #fig2.show()
+        #fig3.show()
+        #fig4.show()
+        fig5.show()
+        fig6.show()
+        fig1.savefig(folder_name + file_name1[:-4]+normalized+'.png', transparent = False)
+        #fig2.savefig(folder_name + file_name3[:-4]+normalized+'.png', transparent = True)
+        #fig3.savefig(folder_name + 'CenterOfMass'+normalized+'.png', transparent = True)
+#        fig5.savefig(folder_name + 'Flags.png', transparent = True)
+        #fig6.savefig(folder_name + 'MaxMinStretch'+normalized+'.png', transparent = True)
     
     print(hingeName[differentEnergies[:,0]])
     
-    return allFlags, len(differentEnergies[:,0])
+    return allFlags, len(differentEnergies[:,0]), differentEnergiesName, differentEnergiesEnergy
 
 if __name__ == "__main__":
     folder_name = "Results/triangular prism/sqp/energy/"
