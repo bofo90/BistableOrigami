@@ -15,17 +15,18 @@ if strcmp(opt.plot,'result')
         if ~exist(fileHinges, 'file')
             fprintf('Hinge-selection file does not exist.\n');
         else
+            simul = 1;
             hingeList = dlmread(fileHinges);
             orikHinge = opt.Khinge;
             orikTargetAngle = opt.KtargetAngle;
             orikEdge = opt.Kedge;
             for stephinge = 1:opt.stepkHinge
-                opt.Khinge = orikHinge*10^((stephinge-1)/2);
-                for stepangle = 1:(opt.stepkTargetAngle-stephinge)
-                    opt.KtargetAngle = orikTargetAngle*10^(-(stepangle-1)/2);
-                    for stepedge = 1:(opt.stepkEdge-stephinge)
-                        opt.Kedge = orikEdge*10^(-(stepedge-1)/2);
-                        fprintf('kHinge %f\tkTargetAngle %f\tkEdge %f\n', opt.Khinge,opt.KtargetAngle, opt.Kedge );
+                opt.Khinge = orikHinge*10^((stephinge-1)/4);
+                for stepangle = 1:(opt.stepkTargetAngle-stephinge-1)
+                    opt.KtargetAngle = orikTargetAngle*10^(-(stepangle-1)/4);
+                    for stepedge = 1:opt.stepkEdge
+                        opt.Kedge = orikEdge*10^((stepedge-1)/2);
+                        fprintf('kHinge %f\tkTargetAngle %f\tkEdge %f\tSimulation %d\n', opt.Khinge,opt.KtargetAngle, opt.Kedge, simul );
                         for i = 1:size(hingeList, 1)
                             row = hingeList(i, :);
             %                 hinges = [row(0~=row)*2-1 row(0~=row)*2]';
@@ -37,6 +38,7 @@ if strcmp(opt.plot,'result')
                             fprintf('Hinge selection number %d/%d. ', i, size(hingeList, 1));
                             nonlinearFolding(unitCell,extrudedUnitCell,opt);
                         end
+                        simul = simul+1;
                     end
                 end
             end
@@ -60,7 +62,7 @@ theta0=extrudedUnitCell.theta;
 max_iter = 100000;
 extrudedUnitCell.angleConstr=[];
 
-folderName = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat/stablestates');%, sprintf('kh%2.3f_kta%2.3f_ke%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge));
+folderName = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat/', sprintf('kh%2.3f_kta%2.3f_ke%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge));
 if ~exist(folderName, 'dir')
     mkdir(folderName);
 end
@@ -156,7 +158,7 @@ for iter=1:length(opt.angleConstrFinal)
     result.numMode=length(result.deform);
     
     fileName = strcat(folderName,'/',opt.template,'_',...
-        mat2str(opt.angleConstrFinal(iter).val(:,1)'),'_',sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge),'.mat');
+        mat2str(opt.angleConstrFinal(iter).val(:,1)'),'.mat');%'_',sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge),
     save(fileName, 'result');
  
     clearvars result E Eedge Eface Ehinge EtargetAngle exfl;

@@ -327,9 +327,9 @@ if strcmp(opt.plot,'result') || strcmp(opt.plot,'savedata')
                         set(hs{nc,i},'Vertices',plotextrudedUnitCell.mode(nMode).frame(framMode).lat(nc).coor,'facecolor','flat','facevertexCData',c*colt(4,:)+abs(1-c)*colt(5,:),'facealpha',1.0);
                     end
                 end
-                printGif(opt,framMode,f,nameFolder,['_',mat2str(extrudedUnitCell.angleConstr(:,1)'),'_',sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge),'_',num2str(nMode),'_deformed']);
+                printGif(opt,framMode,f,nameFolder,['_',mat2str(extrudedUnitCell.angleConstr(:,1)'),'_',num2str(nMode),'_deformed']);%'_',sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge),
                 if framMode==length(plotextrudedUnitCell.mode(nMode).frame)
-                    printHigRes(f,opt,['_',mat2str(extrudedUnitCell.angleConstr(:,1)'),'_',sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge),'_',num2str(nMode),'_deformed'],nameFolder);
+                    printHigRes(f,opt,['_',mat2str(extrudedUnitCell.angleConstr(:,1)'),'_',num2str(nMode),'_deformed'],nameFolder);%'_',sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge),
                 end
             end
             
