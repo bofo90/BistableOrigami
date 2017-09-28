@@ -208,9 +208,9 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     
     stepsHinge = int(len(hingeNum)/hingeNum[-1])
     totalflags = 6
-    internalHinges = 9 ###### Number of internal hinges
-    totalnumberHinges = 27
-    totalnumberEdges = 108
+    internalHinges = 6 ###### Number of internal hinges
+    totalnumberHinges = 18
+    totalnumberEdges = 72
     
     tolHinge = 0.003
     tolEdge = 0.01
@@ -222,12 +222,12 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         eHingeRel = np.sqrt(eHingeRel*2/khinge/totalnumberHinges)
         eHinIntFol = np.sqrt(eHinIntFol*2/khinge/internalHinges)
         eHinIntRel = np.sqrt(eHinIntRel*2/khinge/internalHinges)
-        tolHinge = 0.02
+        tolHinge = 0.019
         normalized = normalized + 'hn'
     if ~np.isnan(kedge):
         eEdgeFol = np.sqrt(eEdgeFol*2/kedge/totalnumberEdges)
         eEdgeRel = np.sqrt(eEdgeRel*2/kedge/totalnumberEdges)
-        tolEdge = 0.001
+        tolEdge = 0.0017
         normalized = normalized + 'en'
     
     ############################################ get the number of actuated hinges for each hinge-set
@@ -246,11 +246,11 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     notConvHinges = np.empty((0,3), dtype = int)
     for i in np.arange(len(hingeNum)):
         error = False
-        if exflFol[i] != 1 and exflFol[i] != 2:
+        if exflFol[i] != 1:# and exflFol[i] != 2:
     #    if (exflFol[i] != 1 and exflFol[i] != 2) or (exflRel[i] != 1 and exflRel[i] != 2):
             flagCountFol[actuatedHinges[hingeNum[i]-1]-1,exflFol[i]+3]  += 1
             error = True
-        if exflRel[i] != 1 and not error and exflRel[i] != 2:
+        if exflRel[i] != 1 and not error:# and exflRel[i] != 2:
             flagCountRel[actuatedHinges[hingeNum[i]-1]-1,exflRel[i]+3]  += 1
             error = True
         if error:
@@ -403,5 +403,5 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     return allFlags, len(differentEnergies[:,0]), differentEnergiesName, differentEnergiesEnergy
 
 if __name__ == "__main__":
-    folder_name = "Results/triangular prism/sqp/energy/"
-    ReadandAnalizeFile(folder_name)
+    folder_name = "Results/cube/sqp/energy/optpara/"
+    ReadandAnalizeFile(folder_name, khinge = 0.00316, kedge = 0.632)
