@@ -4,7 +4,7 @@ switch opt.plot
     case 'info'
         result = [];
         outputResults(unitCell,extrudedUnitCell,result,opt);
-    case {'result', 'savedata'}
+    case {'result', 'savedata', 'plot'}
         
         folderResults = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat/', sprintf('kh%2.3f_kta%2.3f_ke%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge));
         if ~exist(folderResults, 'dir')
@@ -29,10 +29,11 @@ switch opt.plot
                     delete(fileMassDist) % always start with new file
                 end
             end
-        
+            
             allFiles = dir(folderResults);
             directories = 0;
             succesfullFiles = 0;
+            
             for ct = 1:length(allFiles)
                 if allFiles(ct).isdir
             %         disp('skip all directories...')
@@ -44,9 +45,9 @@ switch opt.plot
                 fileName = allFiles(ct).name;
                 parsedName = strsplit(fileName(1:end-4), '_');
                 hingeSet = getHingeSet(parsedName{2});
-%                 if ~isequal(hingeSet, opt.angleConstrFinal(1).val(:,1)) && strcmp(opt.readAngFile,'off')
-%                     continue;
-%                 end
+                if ~isequal(hingeSet, opt.angleConstrFinal(1).val(:,1)) && strcmp(opt.readAngFile,'off')
+                    continue;
+                end
 %                 ks = sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge);
 %                 fileks = strcat(parsedName{3},'_',parsedName{4},'_',parsedName{5});
 %                 if ~isequal(ks, fileks)&& strcmp(opt.readAngFile,'off')

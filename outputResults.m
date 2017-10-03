@@ -79,7 +79,7 @@ hl2=plotOpt(opt);
 opt.xlim=xlim;
 opt.ylim=ylim;
 opt.zlim=zlim;
-if strcmp(opt.plot,'result') || strcmp(opt.plot,'savedata')
+if strcmp(opt.plot,'result') || strcmp(opt.plot,'savedata') || strcmp(opt.plot,'plot')
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %PREPARE PLOTTING OF DEFORMED CONFIGURATION
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -223,7 +223,7 @@ if strcmp(opt.plot,'info')
     set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);
 end
 
-if strcmp(opt.plot,'result') || strcmp(opt.plot,'savedata')
+if strcmp(opt.plot,'result') || strcmp(opt.plot,'savedata') || strcmp(opt.plot,'plot')
         %First make solid face with 100% transparency
         for nc=1:size(extrudedUnitCell.latVec,1)
             for i=3:10
@@ -251,24 +251,49 @@ if strcmp(opt.plot,'result') || strcmp(opt.plot,'savedata')
         %PLOT MOVING OF POLYHEDRA
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %New coordinates
+
         for ne=1:length(unitCell.Polyhedron)
-            for nc=1:size(unitCell.Polyhedron(1).latVec,1)
+            for nc=1:size(unitCell.Polyhedron(ne).latVec,1)
                 plotunitCell.Init(ne).lat(nc).coorNew(:,1)=plotunitCell.InitNew(ne).lat(nc).coor(:,1)+extrudedUnitCell.latVec(nc,1)-unitCell.PolyhedronNew(ne).latVec(nc,1);
                 plotunitCell.Init(ne).lat(nc).coorNew(:,2)=plotunitCell.InitNew(ne).lat(nc).coor(:,2)+extrudedUnitCell.latVec(nc,2)-unitCell.PolyhedronNew(ne).latVec(nc,2);
                 plotunitCell.Init(ne).lat(nc).coorNew(:,3)=plotunitCell.InitNew(ne).lat(nc).coor(:,3)+extrudedUnitCell.latVec(nc,3)-unitCell.PolyhedronNew(ne).latVec(nc,3);
-            end
-        end
-        %Update position
-        for ne=1:length(unitCell.Polyhedron)
-            for nc=1:size(unitCell.Polyhedron(1).latVec,1)
+                        %Update position
                 for i=3:10
+%                             set(hie{ne,nc,i},'vertices',plotunitCell.Init(ne).lat(nc).coorNew);
+%                             set(his{ne,nc,i},'vertices',plotunitCell.Init(ne).lat(nc).coorNew);
                     set(hie{ne,nc,i},'vertices',plotunitCell.Init(ne).lat(nc).coorNew);
                     set(his{ne,nc,i},'vertices',plotunitCell.Init(ne).lat(nc).coorNew);
                 end 
             end
         end
         set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);
-        %printHigRes(f,opt,'Polyhedra_Packing_Expanded',nameFolder)
+%         printHigRes(f,opt,'Polyhedra_Packing_Expanded',nameFolder)
+        
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %PLOT RESULT OF INTERNAL POLYHEDRA
+        %Made by Agustin Iniguez
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        
+        for nMode=1:result.numMode
+            pause(1)
+            for framMode=1:length(plotextrudedUnitCell.mode(nMode).frame)
+                for ne=1:length(unitCell.Polyhedron)
+                    for nc=1:size(unitCell.Polyhedron(ne).latVec,1)
+                        plotunitCell.Init(ne).lat(nc).coorNew(:,1) = plotunitCell.InitNew(ne).lat(nc).coor(:,1) + result.deform(nMode).interV(framMode).V(1:size(unitCell.Polyhedron(1).node,1),1);
+                        plotunitCell.Init(ne).lat(nc).coorNew(:,2) = plotunitCell.InitNew(ne).lat(nc).coor(:,2) + result.deform(nMode).interV(framMode).V(1:size(unitCell.Polyhedron(1).node,1),2);
+                        plotunitCell.Init(ne).lat(nc).coorNew(:,3) = plotunitCell.InitNew(ne).lat(nc).coor(:,3) + result.deform(nMode).interV(framMode).V(1:size(unitCell.Polyhedron(1).node,1),3);
+                        for i=3:10
+                            set(hie{ne,nc,i},'vertices',plotunitCell.Init(ne).lat(nc).coorNew);
+                            set(his{ne,nc,i},'vertices',plotunitCell.Init(ne).lat(nc).coorNew);  
+                        end 
+                    end
+                end
+                printGif(opt,framMode,f,nameFolder,['_',mat2str(extrudedUnitCell.angleConstr(:,1)'),'_',num2str(nMode),'_deformedUC']);%'_',sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge),
+                if framMode==length(plotextrudedUnitCell.mode(nMode).frame)
+                    printHigRes(f,opt,['_',mat2str(extrudedUnitCell.angleConstr(:,1)'),'_',num2str(nMode),'_deformedUC'],nameFolder);%'_',sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge),
+                end
+            end
+        end
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %PLOT SELECTED FACES TO EXTRUDE, SOLIDIFY AND REMOVE
