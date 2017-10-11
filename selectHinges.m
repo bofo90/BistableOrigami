@@ -160,24 +160,15 @@ dis = zeros(H);
 % loop through everything, because we need to
 for ii = 1:H
     for jj = 1:H
+        fprintf('%d\t%d\n', ii, jj);
         % get all possible paths between two nodes *ii* and *jj*
         pathsiijj = pathbetweennodes(G.adjacency, ii, jj);
-        % get the lengths of each of these paths
-        pathsLeniijj = zeros(length(pathsiijj), 1);
-        for pCt = 1:length(pathsiijj)
-            pathsLeniijj(pCt) = length(pathsiijj{pCt});
-        end
-        
-        % get all paths with the same minimum lengths, and only consider
-        % these shortest ones for our new definition of ``distance''
-        minPathLen = min(pathsLeniijj);
-        minPathsIdx = find(minPathLen==pathsLeniijj);
-        
+      
         % get the ``distance'' from node *ii* to node *jj*
         % by looping through all minimum length paths
         pathDis = inf; % initialise with infinity
-        for mCt = 1:length(minPathsIdx)
-            currentPath = pathsiijj{minPathsIdx(mCt)};
+        for mCt = 1:length(pathsiijj)
+            currentPath = pathsiijj{mCt};
             currentPathDisStr = '';
             
             % get the string of ``distance''
@@ -209,7 +200,7 @@ for ii = 1:H
     end
 end
 
-function pth = pathbetweennodes(adj, src, snk, verbose)
+function pth = pathbetweennodes(adj, src, snk)
 %PATHBETWEENNODES Return all paths between two nodes of a graph
 %
 % pth = pathbetweennodes(adj, src, snk)
@@ -238,12 +229,6 @@ function pth = pathbetweennodes(adj, src, snk, verbose)
 %   pth:    cell array, with each cell holding the indices of a unique path
 %           of nodes from src to snk.
 
-% Copyright 2014 Kelly Kearney
-
-if nargin < 4
-    verbose = false;
-end
-
 % input validation added by yun, May 02, 2017
 if src==snk
     pth = {[src]};
@@ -251,57 +236,34 @@ if src==snk
 end
 n = size(adj,1);
 stack = src;
-stop = false;
 pth = cell(0);
-cycles = cell(0);
 next = cell(n,1);
 for in = 1:n
     next{in} = find(adj(in,:));
 end
-visited = cell(0);
-pred = src;
-while 1
-    visited = [visited; sprintf('%d,', stack)];
-    [stack, pred] = addnode(stack, next, visited, pred);
-    if verbose
-        fprintf('%2d ', stack);
-        fprintf('\n');
-    end
-    if isempty(stack)
-        break;
-    end
-    if stack(end) == snk
-        pth = [pth; {stack}];
-        visited = [visited; sprintf('%d,', stack)];
-        stack = popnode(stack);
-    elseif length(unique(stack)) < length(stack)
-        cycles = [cycles; {stack}];
-        visited = [visited; sprintf('%d,', stack)];
-        stack = popnode(stack);  
+
+[pth,~,~,~] = nextNode(pth, stack, snk, next);
+
+
+function [paths, stack, snk, next] = nextNode(paths, stack, snk, next)
+
+originalstack = stack;
+if stack(end)==snk
+    if isempty(paths)
+        paths = [paths; {stack}];
+    elseif length(stack) < length(paths{end}) 
+        paths = cell(0);
+        paths = [paths; {stack}];
+    elseif length(stack) == length(paths{end})
+        paths = [paths; {stack}];
+    end       
+elseif length(unique(stack)) == length(stack)
+    for i = 1:length(next{originalstack(end)})
+        stack = [originalstack next{originalstack(end)}(i)];
+        [paths, stack, snk, next] = nextNode(paths, stack, snk, next);
     end
 end
 
-
-function [stack, pred] = addnode(stack, next, visited, pred)
-newnode = setdiff(next{stack(end)}, pred);
-possible = arrayfun(@(x) sprintf('%d,', [stack x]), newnode, 'uni', 0);
-isnew = ~ismember(possible, visited);
-if any(isnew)
-    idx = find(isnew, 1);
-    stack = str2num(possible{idx});
-    pred = stack(end-1);
-else
-    [stack, pred] = popnode(stack);
-end
-
-
-function [stack, pred] = popnode(stack)
-stack = stack(1:end-1);
-if length(stack) > 1
-    pred = stack(end-1);
-else
-    pred = [];
-end
 
 function getAllHinges(G, dis, flavourTypes, flavourNum, unitCell, extrudedUnitCell, opt)
 % get the complete list of hinge sets, and dump them in a csv file
