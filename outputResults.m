@@ -171,6 +171,7 @@ if strcmp(opt.plot,'info')
     end 
     hl2=plotOpt(opt); 
     axis tight
+    printHigRes(f,opt,'_internalPolyhedraVertFaces',nameFolder); 
     %EXTRUDED STATE
     [f4,hs,hie,his] = copyFigure(unitCell,extrudedUnitCell,opt,hs,hie,his);   
     for nc=1:size(extrudedUnitCell.latVec,1)
@@ -187,6 +188,7 @@ if strcmp(opt.plot,'info')
         end
     end
     set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);
+    printHigRes(f4,opt,'_extrudedPolyhedra',nameFolder); 
     %EXTRUDED STATE 'INFO
     [f5,hs,hie,his] = copyFigure(unitCell,extrudedUnitCell,opt,hs,hie,his); hold on 
     for nc=1:size(extrudedUnitCell.latVec,1)
@@ -203,6 +205,7 @@ if strcmp(opt.plot,'info')
             text(coorText(1),coorText(2),coorText(3),num2str(i),'fontsize',20)
         end
     set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);
+    printHigRes(f5,opt,'_extrudedPolyhedraVert',nameFolder); 
     %EXTRUDED STATE 'INFO' ANGLE NUMBERS
     [f6,hs,hie,his] = copyFigure(unitCell,extrudedUnitCell,opt,hs,hie,his); hold on 
     for nc=1:size(extrudedUnitCell.latVec,1)
@@ -221,6 +224,7 @@ if strcmp(opt.plot,'info')
             text(coorText(1),coorText(2),coorText(3),num2str(i),'fontsize',20)
         end
     set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);
+    printHigRes(f6,opt,'_extrudedPolyhedraEdges',nameFolder);
 end
 
 if strcmp(opt.plot,'result') || strcmp(opt.plot,'savedata') || strcmp(opt.plot,'plot')
