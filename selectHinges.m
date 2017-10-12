@@ -159,9 +159,8 @@ dis = zeros(H);
 
 % loop through everything, because we need to
 for ii = 1:H
-    for jj = 1:H
-        fprintf('%d\t%d\n', ii, jj);
-        % get all possible paths between two nodes *ii* and *jj*
+    for jj = ii:H
+        % get all possible paths between two nodes *ii* and *jj* both ways
         pathsiijj = pathbetweennodes(G.adjacency, ii, jj);
       
         % get the ``distance'' from node *ii* to node *jj*
@@ -188,17 +187,10 @@ for ii = 1:H
 
         % update distance matrix
         dis(ii,jj) = pathDis;
+        dis(jj,ii) = pathDis;
     end
 end
 
-
-% update distance matrix to make it symmetrical
-for ii = 1:H
-    for jj = ii:H
-        dis(ii,jj) = min(dis(ii,jj), dis(jj,ii));
-        dis(jj,ii) = dis(ii,jj);
-    end
-end
 
 function pth = pathbetweennodes(adj, src, snk)
 %PATHBETWEENNODES Return all paths between two nodes of a graph
@@ -234,35 +226,46 @@ if src==snk
     pth = {[src]};
     return;
 end
-n = size(adj,1);
-stack = src;
 pth = cell(0);
-next = cell(n,1);
-for in = 1:n
+next = cell(size(adj,1),1);
+pth{1} = 0;
+for in = 1:size(adj,1)
     next{in} = find(adj(in,:));
-end
-
-[pth,~,~,~] = nextNode(pth, stack, snk, next);
+    pth{1} = [pth{1} in];
+end 
+%Recursive search of shortest distance between src and snk
+[pth,~,~,~] = nextNode(pth, src, snk, next);
+%Recursive search of shortest distance between snk and src
+[pth,~,~,~] = nextNode(pth, snk, src, next);
 
 
 function [paths, stack, snk, next] = nextNode(paths, stack, snk, next)
 
-originalstack = stack;
-if stack(end)==snk
-    if isempty(paths)
-        paths = [paths; {stack}];
-    elseif length(stack) < length(paths{end}) 
-        paths = cell(0);
-        paths = [paths; {stack}];
-    elseif length(stack) == length(paths{end})
-        paths = [paths; {stack}];
-    end       
-elseif length(unique(stack)) == length(stack)
-    for i = 1:length(next{originalstack(end)})
-        stack = [originalstack next{originalstack(end)}(i)];
-        [paths, stack, snk, next] = nextNode(paths, stack, snk, next);
-    end
+%Check if the distance is longer than the previous found one
+if length(stack) > length(paths{end})
+    return;
 end
+%Check if we dont have loops in the stack
+if length(unique(stack)) ~= length(stack)
+    return;
+end
+%Check if you already end in the finnal edge
+if stack(end) == snk
+    %if the distance is shorter, erease the rest, if not just stack them
+    if length(stack) < length(paths{end}) 
+        paths = {stack};
+    else
+        paths = [paths; {stack}];
+    end
+    return;
+end
+%go through the next edges and call the function again
+originalstack = stack;
+for j = 1:length(next{originalstack(end)})
+    newstack = [originalstack next{originalstack(end)}(j)];
+    [paths, stack, snk, next] = nextNode(paths, newstack, snk, next);
+end
+
 
 
 function getAllHinges(G, dis, flavourTypes, flavourNum, unitCell, extrudedUnitCell, opt)
