@@ -47,7 +47,7 @@ for ii = 1:numEdges
         end
     end
 	hingeTypes{ii} = [num2str(min(faceTypes)),'-',num2str(max(faceTypes))];
-    isClosed{ii} = false;
+    isClosed{ii} = '0';
     
     % here starts stuff for adjacency matrix
     for jj = 1:numEdges
@@ -81,7 +81,7 @@ G = digraph(G_adjacency);
 
 % assign names and other properties to the nodes of the graph (edges on the polyherdon)
 G.Nodes.Name = hingeNames;
-G.Nodes.Properties.RowNames = hingeNames;
+% G.Nodes.Properties.RowNames = hingeNames;
 G.Nodes.IsClosed = isClosed;
 G.Nodes.Type = hingeTypes;
 G.Nodes.HingeNodes = hingeNodes;
@@ -157,39 +157,63 @@ function dis = getDistance(G, flavourDict)
 H = height(G.Nodes);
 dis = zeros(H);
 
-% loop through everything, because we need to
+%Loop through all the nodes
 for ii = 1:H
-    for jj = ii:H
-        % get all possible paths between two nodes *ii* and *jj* both ways
-        pathsiijj = pathbetweennodes(G.adjacency, ii, jj);
-      
-        % get the ``distance'' from node *ii* to node *jj*
-        % by looping through all minimum length paths
-        pathDis = inf; % initialise with infinity
-        for mCt = 1:length(pathsiijj)
-            currentPath = pathsiijj{mCt};
-            currentPathDisStr = '';
-            
-            % get the string of ``distance''
-            for lCt = 1:length(currentPath)
-            	currentPathDisStr = strcat(currentPathDisStr, ...
-                    flavourDict(G.Nodes{currentPath(lCt),'Type'}{1}));
-            end
-            
-            % convert to number and take the smallest value of the
-            % ``distance'' and the flipped ``distance''
-            currentPathDis = min(str2num(currentPathDisStr),...
-                str2num(flip(currentPathDisStr)));
-            if currentPathDis < pathDis
-                pathDis = currentPathDis;
-            end
+    [TR,~] = shortestpathtree(G, 'all', ii, 'OutputForm','cell');
+    %Loop through all the nodes to get the distance in string
+    for jj = 1:H
+        currentPath = TR{jj};
+        currentPathDisStr = '';
+        %loop in each distance to create the string
+        for lCt = 1:length(currentPath)
+            currentPathDisStr = strcat(currentPathDisStr, ...
+                flavourDict(G.Nodes{currentPath(lCt),'Type'}{1}));
         end
-
-        % update distance matrix
-        dis(ii,jj) = pathDis;
-        dis(jj,ii) = pathDis;
+        dis(ii,jj) = str2double(currentPathDisStr);
     end
 end
+
+%Make it symetric
+for ii = 1:H
+    for jj = ii:H
+        dis(ii,jj) = min(dis(ii,jj), dis(jj,ii));
+        dis(jj,ii) = dis(ii,jj);
+    end
+end
+
+% % loop through everything, because we need to
+% for ii = 1:H
+%     for jj = ii:H
+%         % get all possible paths between two nodes *ii* and *jj* both ways
+%         pathsiijj = pathbetweennodes(G.adjacency, ii, jj);
+%       
+%         % get the ``distance'' from node *ii* to node *jj*
+%         % by looping through all minimum length paths
+%         pathDis = inf; % initialise with infinity
+%         for mCt = 1:length(pathsiijj)
+%             currentPath = pathsiijj{mCt};
+%             currentPathDisStr = '';
+%             
+%             % get the string of ``distance''
+%             for lCt = 1:length(currentPath)
+%             	currentPathDisStr = strcat(currentPathDisStr, ...
+%                     flavourDict(G.Nodes{currentPath(lCt),'Type'}{1}));
+%             end
+%             
+%             % convert to number and take the smallest value of the
+%             % ``distance'' and the flipped ``distance''
+%             currentPathDis = min(str2num(currentPathDisStr),...
+%                 str2num(flip(currentPathDisStr)));
+%             if currentPathDis < pathDis
+%                 pathDis = currentPathDis;
+%             end
+%         end
+% 
+%         % update distance matrix
+%         dis(ii,jj) = pathDis;
+%         dis(jj,ii) = pathDis;
+%     end
+% end
 
 
 function pth = pathbetweennodes(adj, src, snk)
@@ -297,12 +321,13 @@ end
 % name of all hinges converted to an array of numbers
 allHinges = zeros(1, height(G.Nodes));
 for ct = 1:height(G.Nodes)
-    allHinges(ct) = str2num(G.Nodes.Properties.RowNames{ct});
+    allHinges(ct) = str2num(G.Nodes.Name{ct});
 end
 
 % starts generating all hignes
 hingeSetsPrev(1).all = [];
 for N = 1:height(G.Nodes)-1    %(0.5 * height(G.Nodes))
+    fprintf('Calculating distance for %d nodes\n', N);
     if N <= 0.5 * height(G.Nodes)
         hingeSets = chooseHinges(G, dis, flavourTypes, flavourNum, N, hingeSetsPrev(N).all);
 
@@ -331,11 +356,10 @@ for N = 1:height(G.Nodes)-1    %(0.5 * height(G.Nodes))
     
     if N >= 0.5 * height(G.Nodes)
         Nconj = height(G.Nodes)-N;
-        hingeSets = chooseHinges(G, dis, flavourTypes, flavourNum, Nconj, hingeSetsPrev(Nconj).all);
-        cHingeSets = zeros(size(hingeSets, 1), height(G.Nodes)-Nconj);
+        cHingeSets = zeros(size(hingeSetsPrev(Nconj+1).all, 1), N);
         for ct = 1:size(cHingeSets, 1)
             % write complement selections to file
-            cHingeSets(ct,:) = setdiff(allHinges, hingeSets(ct,:));
+            cHingeSets(ct,:) = setdiff(allHinges, hingeSetsPrev(Nconj+1).all(ct,:));
             dlmwrite(fileName, cHingeSets(ct,:), 'delimiter', ',', '-append')
 
             % plot and save figures when specified
@@ -392,13 +416,13 @@ else% N >= 2
     % initialising...
     hinges = [];
     currentIdx = 1;
-    cache.distance = []; % the matrices representing each selection
+%     cache.distance = []; % the matrices representing each selection
     cache.distanceEig = []; % their corresponding eigenvalues    
     % loop through each hinge set
     for ct = 1:size(hingeSetsPrev, 1)
+        fprintf('possible hinge slection %d/%d\n', ct, size(hingeSetsPrev, 1));
         hingeSet = hingeSetsPrev(ct, :);
         hingeSetIdx = getHingeIdx(hingeSet, G);
-        cols = dis(:, hingeSetIdx);
         % first, split the possible candidates into cases of different
         % flavours
         for flavourCt = 1:flavourNum
@@ -410,17 +434,17 @@ else% N >= 2
                     % avoid double counting
                     continue;
                 end
-                newNode = str2num(G.Nodes{newNodeIdx, 'Name'}{1});
+                newNode = str2double(G.Nodes{newNodeIdx, 'Name'}{1});
                 newSet = [hingeSet, newNode];
                 newSetIdx = [hingeSetIdx, newNodeIdx];
                 newDisMat = dis(newSetIdx, newSetIdx);
-                newDisEig = round(1000*sort(eig(newDisMat)')) / 1000; % round off 
+                newDisEig = round(1000*sort(eig(newDisMat))') / 1000; % round off 
                 
                 % if newDisEig is not in cache, add current solution
                 if isempty(cache.distanceEig) || ...
                         ~ismember(newDisEig, cache.distanceEig, 'rows')
                     hinges(currentIdx, :) = newSet;
-                    cache.distance(:,:,currentIdx) = newDisMat;
+%                     cache.distance(:,:,currentIdx) = newDisMat;
                     cache.distanceEig(currentIdx, :) = newDisEig;
                     currentIdx = currentIdx + 1;
                 end        
@@ -446,8 +470,7 @@ function hingeSetIdx = getHingeIdx(hingeSet, G)
 % yun
 hingeSetIdx = zeros(size(hingeSet));
 for ct = 1:length(hingeSetIdx)
-    hingeSetIdx(ct) = find(strcmp(G.Nodes.Properties.RowNames,...
-                      num2str(hingeSet(ct))));
+    hingeSetIdx(ct) = find(strcmp(G.Nodes.Name, num2str(hingeSet(ct))));
 end
 
 function f = plotSelectedHinges(hingeList, unitCell, extrudedUnitCell, ...
