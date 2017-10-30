@@ -33,7 +33,9 @@ if strcmp(opt.plot,'result')
 %                             if length(hinges) > 3
 %                                 break
 %                             end
-                            opt.angleConstrFinal(1).val = [hinges(:), -pi*0.985 * ones(length(hinges), 1)];
+                            %-pi if its the extruded version, pi if its
+                            %only the internal polyheron
+                            opt.angleConstrFinal(1).val = [hinges(:), pi*0.985 * ones(length(hinges), 1)];
                             fprintf('Hinge selection number %d/%d. ', i, size(hingeList, 1));
                             nonlinearFolding(unitCell,extrudedUnitCell,opt);
                         end
@@ -243,7 +245,11 @@ extrudedUnitCell.node=extrudedUnitCell.node+[u(1:3:end) u(2:3:end) u(3:3:end)];
 %%%%%%%%%%%%%%%%%%%%%%
 %MAXIMUM AND MINIMUM ANGLES
 [angles, Dangles]=getHinge(extrudedUnitCell, extrudedUnitCellPrev);
-C1 = [-angles-pi*opt.constAnglePerc; angles-pi*opt.constAnglePerc];
+if strcmp(opt.onlyUnitCell, 'on')
+    C1 = [-angles-(pi*opt.constAnglePerc-pi); angles-pi*opt.constAnglePerc];
+else
+    C1 = [-angles-pi*opt.constAnglePerc; angles-pi*opt.constAnglePerc];
+end
 DC1 = [-Dangles; Dangles];
 %MAXIMUM AND MINIMUM EDGE STRECHING
 if strcmp(opt.constrEdge,'off') && ~isnan(opt.maxStretch)
