@@ -29,11 +29,10 @@ if strcmp(opt.plot,'result')
                         fprintf('kHinge %f\tkTargetAngle %f\tkEdge %f\tSimulation %d\n', opt.Khinge,opt.KtargetAngle, opt.Kedge, simul );
                         for i = 1:size(hingeList, 1)
                             row = hingeList(i, :);
-            %                 hinges = [row(0~=row)*2-1 row(0~=row)*2]';
                             hinges = row(0~=row);
-            %                             if length(hinges) > 3
-            %                                 break
-            %                             end
+%                             if length(hinges) > 3
+%                                 break
+%                             end
                             opt.angleConstrFinal(1).val = [hinges(:), -pi*0.985 * ones(length(hinges), 1)];
                             fprintf('Hinge selection number %d/%d. ', i, size(hingeList, 1));
                             nonlinearFolding(unitCell,extrudedUnitCell,opt);
@@ -282,15 +281,15 @@ function [Aeq, Beq]=linearConstr(unitCell,extrudedUnitCell,opt)
 
 %FIX NODE CONSTRAINTS
 %IMPROVE FOLLOWING - AUTOMATIC DEPENDING ON NODES OF FACE 1
-nodeFix=extrudedUnitCell.face{1};
-e1=extrudedUnitCell.node(nodeFix(2),:)-extrudedUnitCell.node(nodeFix(1),:);
-e2=extrudedUnitCell.node(nodeFix(3),:)-extrudedUnitCell.node(nodeFix(2),:);
+nodeFix=unitCell.Polyhedron.face{1};
+e1=unitCell.Polyhedron.node(nodeFix(2),:)-unitCell.Polyhedron.node(nodeFix(1),:);
+e2=unitCell.Polyhedron.node(nodeFix(3),:)-unitCell.Polyhedron.node(nodeFix(2),:);
 e1=e1/norm(e1);
 e2=e2/norm(e2);
 e3=cross(e2,e1);
 e3=e3/norm(e3);
 
-Aeq=zeros(6,3*size(extrudedUnitCell.node,1));
+Aeq=zeros(6,3*size(unitCell.Polyhedron.node,1));
 Beq=zeros(6,1);
 Aeq(1,3*nodeFix(2)-2)=1;
 Aeq(2,3*nodeFix(2)-1)=1;
