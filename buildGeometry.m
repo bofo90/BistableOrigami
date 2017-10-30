@@ -42,6 +42,9 @@ switch opt.inputType
         unitCell.expCon=[];
         %Load polyhedron
         unitCell.Polyhedron(1)=polyhedra(opt.template);
+        if strcmp(opt.onlyUnitCell, 'on')
+            unitCell.Polyhedron(1).solidify=[1:length(unitCell.Polyhedron(1).face)];
+        end
     otherwise
         %LOAD ONE OF THE PREDEFINED UNIFORM SPACE-FILLING TESSELATIONS, OR 
         switch opt.template 
@@ -673,52 +676,52 @@ extrudedUnitCell.solidify=[];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %BUILD EXTRUDED UNIT CELL
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Modified by Agustin on30-10-2017
+
 for ne=1:length(unitCell.Polyhedron)
-    if length(unitCell.Polyhedron(ne).solidify)==length(unitCell.Polyhedron(ne).face)
-         fprintf('Polyhedron %d has been removed because no faces have been extruded\n',ne)
-    else
-        nNodeSolid=size(extrudedUnitCell.node,1);
+    nNodeSolid=size(extrudedUnitCell.node,1);
 %         extrudedUnitCell.edge=[extrudedUnitCell.edge; nNodeSolid+unitCell.Polyhedron(ne).edge];
-        extrudedUnitCell.node=[extrudedUnitCell.node; unitCell.Polyhedron(ne).nodeNew];
-        if isempty(unitCell.Polyhedron(ne).solidify)
-        else
-            for i=1:length(unitCell.Polyhedron(ne).solidify)
-                extrudedUnitCell.solidify=[extrudedUnitCell.solidify length(extrudedUnitCell.face)+1];
-                extrudedUnitCell.face{end+1}=nNodeSolid+unitCell.Polyhedron(ne).face{unitCell.Polyhedron(ne).solidify(i)};
-                nodeNum=nNodeSolid+unitCell.Polyhedron(ne).face{unitCell.Polyhedron(ne).solidify(i)};
-                extrudedUnitCell.edgeHinge=[extrudedUnitCell.edgeHinge; nodeNum(1) nodeNum(2) nodeNum(end)];
-                for j=2:length(nodeNum)-1
-                    extrudedUnitCell.edgeHinge=[extrudedUnitCell.edgeHinge; nodeNum(j) nodeNum(j+1) nodeNum(j-1)];
-                end
-                extrudedUnitCell.edgeHinge=[extrudedUnitCell.edgeHinge; nodeNum(end) nodeNum(1) nodeNum(end-1)];
+    extrudedUnitCell.node=[extrudedUnitCell.node; unitCell.Polyhedron(ne).nodeNew];
+    if ~isempty(unitCell.Polyhedron(ne).solidify)
+        for i=1:length(unitCell.Polyhedron(ne).solidify)
+            extrudedUnitCell.solidify=[extrudedUnitCell.solidify length(extrudedUnitCell.face)+1];
+            nodeNum=nNodeSolid+unitCell.Polyhedron(ne).face{unitCell.Polyhedron(ne).solidify(i)};
+            extrudedUnitCell.face{end+1}=nodeNum;
+            extrudedUnitCell.edgeHinge=[extrudedUnitCell.edgeHinge; nodeNum(1) nodeNum(2) nodeNum(end)];
+            for j=2:length(nodeNum)-1
+                extrudedUnitCell.edgeHinge=[extrudedUnitCell.edgeHinge; nodeNum(j) nodeNum(j+1) nodeNum(j-1)];
             end
+            extrudedUnitCell.edgeHinge=[extrudedUnitCell.edgeHinge; nodeNum(end) nodeNum(1) nodeNum(end-1)];
+            edges = nchoosek(nodeNum,2);
+            extrudedUnitCell.edge= [extrudedUnitCell.edge; edges];
         end
-        rep=length(extrudedUnitCell.face);   
-        for i=1:length(unitCell.Polyhedron(ne).extrude)        
-            nNo=size(extrudedUnitCell.node,1);
-            nodeNum=nNodeSolid+unitCell.Polyhedron(ne).face{unitCell.Polyhedron(ne).extrude(i)};
-            nodeNumNew=nNo+1:nNo+length(nodeNum);
-            unitCell.Polyhedron(ne).faceNodeExtrude{unitCell.Polyhedron(ne).extrude(i)}=nodeNumNew;
-            a=extrudedUnitCell.node(nodeNum(2),:)-extrudedUnitCell.node(nodeNum(1),:);
-            b=extrudedUnitCell.node(nodeNum(3),:)-extrudedUnitCell.node(nodeNum(1),:);
-            alpha=acos(sum(a.*b)/(norm(a)*norm(b)));
-            normal=cross(a,b)/(norm(a)*norm(b)*sin(alpha));
-            extrudedUnitCell.node(nodeNumNew,:)=extrudedUnitCell.node(nodeNum,:)+unitCell.Polyhedron(ne).faceExL(i)*ones(length(nodeNum),1)*normal;
-            
-            index=[1:length(nodeNum) 1];
-            for i=1:length(nodeNum)   
-                rep=rep+1;
-                extrudedUnitCell.face{rep}=[nodeNum(index(i)) nodeNum(index(i+1)) nodeNumNew(index(i+1)) nodeNumNew(index(i))];
-                extrudedUnitCell.edge([end+1],:)=[nodeNum(index(i)) nodeNum(index(i+1))];
-                extrudedUnitCell.edge([end+1],:)=[nodeNum(index(i+1)) nodeNumNew(index(i+1))];
-                extrudedUnitCell.edge([end+1],:)=[nodeNumNew(index(i+1)) nodeNumNew(index(i))];
-                extrudedUnitCell.edge([end+1],:)=[nodeNumNew(index(i)) nodeNum(index(i))];
-                extrudedUnitCell.edge([end+1],:)=[nodeNumNew(index(i)) nodeNum(index(i+1))];
-                extrudedUnitCell.edge([end+1],:)=[nodeNumNew(index(i+1)) nodeNum(index(i))];
-                extrudedUnitCell.edgeHinge([end+1],:)=[nodeNum(index(i)) nodeNum(index(i+1)) nodeNumNew(index(i+1)) nodeNumNew(index(i))];
-                extrudedUnitCell.edgeHinge([end+1],:)=[nodeNum(index(i+1)) nodeNumNew(index(i+1)) nodeNumNew(index(i)) nodeNum(index(i))];
-                extrudedUnitCell.edgeHinge([end+1],:)=[nodeNumNew(index(i)) nodeNum(index(i)) nodeNum(index(i+1)) nodeNumNew(index(i+1))]; 
-            end
+    end
+    rep=length(extrudedUnitCell.face);   
+    for i=1:length(unitCell.Polyhedron(ne).extrude)        
+        nNo=size(extrudedUnitCell.node,1);
+        nodeNum=nNodeSolid+unitCell.Polyhedron(ne).face{unitCell.Polyhedron(ne).extrude(i)};
+        nodeNumNew=nNo+1:nNo+length(nodeNum);
+        unitCell.Polyhedron(ne).faceNodeExtrude{unitCell.Polyhedron(ne).extrude(i)}=nodeNumNew;
+        a=extrudedUnitCell.node(nodeNum(2),:)-extrudedUnitCell.node(nodeNum(1),:);
+        b=extrudedUnitCell.node(nodeNum(3),:)-extrudedUnitCell.node(nodeNum(1),:);
+        alpha=acos(sum(a.*b)/(norm(a)*norm(b)));
+        normal=cross(a,b)/(norm(a)*norm(b)*sin(alpha));
+        extrudedUnitCell.node(nodeNumNew,:)=extrudedUnitCell.node(nodeNum,:)+...
+            unitCell.Polyhedron(ne).faceExL(i)*ones(length(nodeNum),1)*normal;
+
+        index=[1:length(nodeNum) 1];
+        for i=1:length(nodeNum)   
+            rep=rep+1;
+            extrudedUnitCell.face{rep}=[nodeNum(index(i)) nodeNum(index(i+1)) nodeNumNew(index(i+1)) nodeNumNew(index(i))];
+            extrudedUnitCell.edge([end+1],:)=[nodeNum(index(i)) nodeNum(index(i+1))];
+            extrudedUnitCell.edge([end+1],:)=[nodeNum(index(i+1)) nodeNumNew(index(i+1))];
+            extrudedUnitCell.edge([end+1],:)=[nodeNumNew(index(i+1)) nodeNumNew(index(i))];
+            extrudedUnitCell.edge([end+1],:)=[nodeNumNew(index(i)) nodeNum(index(i))];
+            extrudedUnitCell.edge([end+1],:)=[nodeNumNew(index(i)) nodeNum(index(i+1))];
+            extrudedUnitCell.edge([end+1],:)=[nodeNumNew(index(i+1)) nodeNum(index(i))];
+            extrudedUnitCell.edgeHinge([end+1],:)=[nodeNum(index(i)) nodeNum(index(i+1)) nodeNumNew(index(i+1)) nodeNumNew(index(i))];
+            extrudedUnitCell.edgeHinge([end+1],:)=[nodeNum(index(i+1)) nodeNumNew(index(i+1)) nodeNumNew(index(i)) nodeNum(index(i))];
+            extrudedUnitCell.edgeHinge([end+1],:)=[nodeNumNew(index(i)) nodeNum(index(i)) nodeNum(index(i+1)) nodeNumNew(index(i+1))]; 
         end
     end
 end
@@ -733,7 +736,7 @@ nodeHingeEx=zeros(size(sharedEdge,1),4);
 
 for i=1:size(sharedEdge,1)
     refNode=extrudedUnitCell.edgeHingeSorted(((extrudedUnitCell.edgeHingeSorted(:,1)==sharedEdge(i,1)).*...
-        (extrudedUnitCell.edgeHingeSorted(:,2)==sharedEdge(i,2)))==1,3:4)';
+        (extrudedUnitCell.edgeHingeSorted(:,2)==sharedEdge(i,2)))==1,3)';
     %Determine order
     refNode2=extrudedUnitCell.edgeHinge(((extrudedUnitCell.edgeHinge(:,1)==sharedEdge(i,1)).*...
         (extrudedUnitCell.edgeHinge(:,2)==sharedEdge(i,2)))==1,3)';
@@ -767,6 +770,8 @@ for i=1:size(extrudedUnitCell.nodeHingeEx,1)
     index(3:3:12)=3*extrudedUnitCell.nodeHingeEx(i,:);
     [~,extrudedUnitCell.theta(i)]=JacobianHinge(extrudedUnitCell.node(extrudedUnitCell.nodeHingeEx(i,:),:));
 end
+
+
 
 %Reference Nodes
 if strcmp(opt.periodic,'on')
