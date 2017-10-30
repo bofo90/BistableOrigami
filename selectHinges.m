@@ -329,7 +329,7 @@ end
 
 % starts generating all hignes
 hingeSetsPrev(1).all = [];
-for N = 1:6  %height(G.Nodes)-1
+for N = 1:height(G.Nodes)-1  %height(G.Nodes)-1
     fprintf('Calculating distance for %d nodes\n', N);
     if N <= 0.5 * height(G.Nodes)
         hingeSets = chooseHinges(G, dis, flavourTypes, flavourNum, N, hingeSetsPrev(N).all);
