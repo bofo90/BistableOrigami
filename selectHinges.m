@@ -8,10 +8,13 @@ if strcmp(opt.plot, 'selectHinges')
     [flavourDict, flavourTypes, flavourNum] = getFlavours(G);
     fprintf('Calculating distances...\n');
     dis = getDistance(G, flavourDict);
-
     % first generate the list of all hinge sets
     fprintf('Writting hinges...\n');
-    getAllHinges(G, dis, flavourTypes, flavourNum, unitCell, extrudedUnitCell, opt);
+    getAllHinges(G, dis, flavourTypes, flavourNum, opt);
+    fprintf('Ploting hinges...\n');
+    if strcmp(opt.createFig, 'on')
+        plotHinges(unitCell, extrudedUnitCell, opt);
+    end
     fprintf('Done with selecting hinges...\n');
 end
 
@@ -292,7 +295,7 @@ end
 
 
 
-function getAllHinges(G, dis, flavourTypes, flavourNum, unitCell, extrudedUnitCell, opt)
+function getAllHinges(G, dis, flavourTypes, flavourNum, opt)
 % get the complete list of hinge sets, and dump them in a csv file
 % ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 % INPUT
@@ -321,34 +324,18 @@ end
 % name of all hinges converted to an array of numbers
 allHinges = zeros(1, height(G.Nodes));
 for ct = 1:height(G.Nodes)
-    allHinges(ct) = str2num(G.Nodes.Name{ct});
+    allHinges(ct) = str2double(G.Nodes.Name{ct});
 end
 
 % starts generating all hignes
 hingeSetsPrev(1).all = [];
-for N = 1:height(G.Nodes)-1    %(0.5 * height(G.Nodes))
+for N = 1:6  %height(G.Nodes)-1
     fprintf('Calculating distance for %d nodes\n', N);
     if N <= 0.5 * height(G.Nodes)
         hingeSets = chooseHinges(G, dis, flavourTypes, flavourNum, N, hingeSetsPrev(N).all);
-
         for ct = 1:size(hingeSets, 1)
             % write selections to file
             dlmwrite(fileName, hingeSets(ct,:), 'delimiter', ',', '-append')
-
-            % plot and save figures when specified
-            if strcmp(opt.createFig, 'on')
-                f = plotSelectedHinges(hingeSets(ct,:), unitCell, extrudedUnitCell, true);
-                % set(f, 'visible', 'off');
-                if strcmp(opt.saveFig, 'on')
-                    folderName = strcat(pwd, '/hingeList_reduced/', opt.template, '/', ...
-                                 num2str(N), '/');
-                    if ~exist(folderName, 'dir')
-                     mkdir(folderName)
-                    end
-                    saveas(f, strcat(folderName, mat2str(hingeSets(ct,:)), '.png'))
-                    close(f)
-                end
-            end
         end
         % getting ready for the next loop
         hingeSetsPrev(N+1).all = hingeSets;
@@ -361,21 +348,6 @@ for N = 1:height(G.Nodes)-1    %(0.5 * height(G.Nodes))
             % write complement selections to file
             cHingeSets(ct,:) = setdiff(allHinges, hingeSetsPrev(Nconj+1).all(ct,:));
             dlmwrite(fileName, cHingeSets(ct,:), 'delimiter', ',', '-append')
-
-            % plot and save figures when specified
-            if strcmp(opt.createFig, 'on')
-                f = plotSelectedHinges(cHingeSets(ct,:), unitCell, extrudedUnitCell, true);
-                % set(f, 'visible', 'off');
-                if strcmp(opt.saveFig, 'on')
-                    folderName = strcat(pwd, '/hingeList_reduced/', opt.template, '/', ...
-                                num2str(height(G.Nodes)-N), '/');
-                    if ~exist(folderName, 'dir')
-                        mkdir(folderName)
-                    end
-                    saveas(f, strcat(folderName,mat2str(cHingeSets(ct,:)), '.png'))
-                    close(f)
-                end
-            end
         end
     end
 end
@@ -453,8 +425,6 @@ else% N >= 2
     end    
 end
 
-
-
 function hingeSetIdx = getHingeIdx(hingeSet, G)
 % gets the index of hinges in graph, as numbered in *outputResults()*
 % ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -473,8 +443,42 @@ for ct = 1:length(hingeSetIdx)
     hingeSetIdx(ct) = find(strcmp(G.Nodes.Name, num2str(hingeSet(ct))));
 end
 
-function f = plotSelectedHinges(hingeList, unitCell, extrudedUnitCell, ...
-             orderedNames)
+function plotHinges(unitCell, extrudedUnitCell, opt)
+
+folderName = strcat(pwd, '\Results\hingeList_reduced\');
+if ~exist(folderName, 'dir')
+    fprintf('There is no folder with hinge list');
+    return;
+end
+
+fileName = strcat(folderName, opt.template, '.csv');
+if ~exist(fileName, 'file')
+    fprintf('There is no file for the current polyhedra with hinge list');
+    return;
+end
+
+hingeList = csvread(fileName);
+
+for ii = 1:size(hingeList,1)
+    hinges = hingeList(ii, :);
+    hinges = hinges(0~=hinges);
+    
+    f = plotSelectedHinges(hinges, unitCell, extrudedUnitCell, false);
+    if strcmp(opt.saveFig, 'on')
+        folderName = strcat(pwd, '/Results/hingeList_reduced/', opt.template, '/', ...
+                     num2str(length(hinges)), '/');
+        if ~exist(folderName, 'dir')
+            mkdir(folderName);
+        end
+        saveas(f, strcat(folderName, mat2str(hinges), '.png'));
+        
+    end
+    if strcmp(opt.showFig, 'off')
+        close(f)
+    end
+end
+
+function f = plotSelectedHinges(hingeList, unitCell, extrudedUnitCell, orderedNames)
 % function plotSelectedHinges(geometry, hingeList)
 % highlights the set of selected hinges in a given polyhedron, for better
 % visualisation
@@ -491,8 +495,8 @@ function f = plotSelectedHinges(hingeList, unitCell, extrudedUnitCell, ...
 % OUTPUT
 % f - a graph object
 % ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-% last modified on Jun 07, 2017
-% yun
+% last modified on 30 Oct, 2017
+% agustin
 
 
 if ~exist('orderedNames', 'var')
@@ -509,6 +513,7 @@ axis('off')
 xlabel('x'); ylabel('y'); zlabel('z')
 if 1==length(hingeList)
     hingeStr = num2str(hingeList);
+    hingeStr = strcat('[',hingeStr,']');
 else
     hingeStr = mat2str(hingeList);
 end
