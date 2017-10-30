@@ -359,31 +359,31 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %ADD ADDITIONAL EDGES TO ENSURE SOLID FACES DO NOT DEFORM IN PLANE
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-for ne=1:length(unitCell.Polyhedron)
-    for i=1:length(unitCell.Polyhedron(ne).solidify)
-        node=unitCell.Polyhedron(ne).face{unitCell.Polyhedron(ne).solidify(i)};
-        switch length(unitCell.Polyhedron(ne).face{unitCell.Polyhedron(ne).solidify(i)});
-            case 4
-                unitCell.Polyhedron(ne).edge=[unitCell.Polyhedron(ne).edge; node([1,3])];
-            case 5
-                unitCell.Polyhedron(ne).edge=[unitCell.Polyhedron(ne).edge; node([1,3]); node([3,5])];
-            case 6
-                unitCell.Polyhedron(ne).edge=[unitCell.Polyhedron(ne).edge; node([1,3]); node([3,5]); node([5,1])];
-            case 7
-                unitCell.Polyhedron(ne).edge=[unitCell.Polyhedron(ne).edge; node([1,3]); node([3,5]); node([5,7]); node([7,3])];
-            case 8
-                unitCell.Polyhedron(ne).edge=[unitCell.Polyhedron(ne).edge; node([1,3]); node([3,5]); node([5,7]); node([7,1]); node([5,1])];
-            case 9
-                unitCell.Polyhedron(ne).edge=[unitCell.Polyhedron(ne).edge; node([1,3]); node([3,5]); node([5,7]); node([7,9]); node([9,3]); node([5,9])];
-            case 10
-                unitCell.Polyhedron(ne).edge=[unitCell.Polyhedron(ne).edge; node([1,3]); node([3,5]); node([5,7]); node([7,9]); node([9,1]); node([5,1]); node([5,9])];
-            case 11
-                unitCell.Polyhedron(ne).edge=[unitCell.Polyhedron(ne).edge; node([1,3]); node([3,5]); node([5,7]); node([7,9]); node([9,11]); node([5,1]); node([7,11]); node([7,1])];
-            case 12
-                unitCell.Polyhedron(ne).edge=[unitCell.Polyhedron(ne).edge; node([1,3]); node([3,5]); node([5,7]); node([7,9]); node([9,11]); node([11,1]); node([1,5]); node([1,7]); node([1,9])];
-        end
-    end
-end
+% for ne=1:length(unitCell.Polyhedron)
+%     for i=1:length(unitCell.Polyhedron(ne).solidify)
+%         node=unitCell.Polyhedron(ne).face{unitCell.Polyhedron(ne).solidify(i)};
+%         switch length(unitCell.Polyhedron(ne).face{unitCell.Polyhedron(ne).solidify(i)});
+%             case 4
+%                 unitCell.Polyhedron(ne).edge=[unitCell.Polyhedron(ne).edge; node([1,3])];
+%             case 5
+%                 unitCell.Polyhedron(ne).edge=[unitCell.Polyhedron(ne).edge; node([1,3]); node([3,5])];
+%             case 6
+%                 unitCell.Polyhedron(ne).edge=[unitCell.Polyhedron(ne).edge; node([1,3]); node([3,5]); node([5,1])];
+%             case 7
+%                 unitCell.Polyhedron(ne).edge=[unitCell.Polyhedron(ne).edge; node([1,3]); node([3,5]); node([5,7]); node([7,3])];
+%             case 8
+%                 unitCell.Polyhedron(ne).edge=[unitCell.Polyhedron(ne).edge; node([1,3]); node([3,5]); node([5,7]); node([7,1]); node([5,1])];
+%             case 9
+%                 unitCell.Polyhedron(ne).edge=[unitCell.Polyhedron(ne).edge; node([1,3]); node([3,5]); node([5,7]); node([7,9]); node([9,3]); node([5,9])];
+%             case 10
+%                 unitCell.Polyhedron(ne).edge=[unitCell.Polyhedron(ne).edge; node([1,3]); node([3,5]); node([5,7]); node([7,9]); node([9,1]); node([5,1]); node([5,9])];
+%             case 11
+%                 unitCell.Polyhedron(ne).edge=[unitCell.Polyhedron(ne).edge; node([1,3]); node([3,5]); node([5,7]); node([7,9]); node([9,11]); node([5,1]); node([7,11]); node([7,1])];
+%             case 12
+%                 unitCell.Polyhedron(ne).edge=[unitCell.Polyhedron(ne).edge; node([1,3]); node([3,5]); node([5,7]); node([7,9]); node([9,11]); node([11,1]); node([1,5]); node([1,7]); node([1,9])];
+%         end
+%     end
+% end
     
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %SET OPTIONS REGARDING PERIODIC BC
