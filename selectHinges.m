@@ -333,35 +333,39 @@ elseif N == 0
 elseif N == 1
     % actuate different types of hinges
     [~,hinges,~] = unique(G.Nodes.Type);
-    
 else% N >= 2
     % initialising...
-    hinges = double.empty(0,N);
-    cachedistanceEig = double.empty(0,N); % their corresponding eigenvalues
     numberHinges = size(G.Nodes,1);
+    hinges = zeros(size(hingeSetsPrev, 1)*(numberHinges-N),N);
+    distanceEig = zeros(size(hingeSetsPrev, 1)*(numberHinges-N),N);
+    index = 1;
     % loop through each hinge set
     for ct = 1:size(hingeSetsPrev, 1)
         hingeSet = hingeSetsPrev(ct, :);
         candidateHinges = (hingeSet(end)+1):numberHinges;
         % then start comparing matrices
         for nodeCt = candidateHinges
-            newSet = [hingeSet, nodeCt];
+            newSet = [hingeSet nodeCt];
             newDisMat = dis(newSet, newSet);
             newDisEig = round(1000*sort(eig(newDisMat))') / 1000; % round off 
 
             % if newDisEig is not in cache, add current solution
-            if isempty(cachedistanceEig)
-                hinges(end+1, :) = newSet;
-                cachedistanceEig(end+1, :) = newDisEig;
-            else
-                sameEig = sum(cachedistanceEig == newDisEig, 2);
-                if ~sum(sameEig == N)
-                    hinges(end+1, :) = newSet;
-                    cachedistanceEig(end+1, :) = newDisEig;
-                end
-            end        
+%             sameEig = sum(distanceEig(1:index,:) == newDisEig, 2);
+            cachedistanceEig = distanceEig(1:index,:);
+            for eigenvalue = 1:N
+                sameEig = cachedistanceEig(:,eigenvalue) == newDisEig(eigenvalue);
+                cachedistanceEig = cachedistanceEig(any(sameEig,2),:);
+            end
+            if size(cachedistanceEig,1) < 1
+
+%             if ~sum(sameEig == N)
+                hinges(index, :) = newSet;
+                distanceEig(index, :) = newDisEig;
+                index = index+1;
+            end
         end
-    end    
+    end 
+    hinges( ~any(hinges,2),:) = [];
 end
 
 function plotHinges(unitCell, extrudedUnitCell, opt)
