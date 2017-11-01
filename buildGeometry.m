@@ -680,7 +680,9 @@ extrudedUnitCell.solidify=[];
 
 for ne=1:length(unitCell.Polyhedron)
     nNodeSolid=size(extrudedUnitCell.node,1);
-%         extrudedUnitCell.edge=[extrudedUnitCell.edge; nNodeSolid+unitCell.Polyhedron(ne).edge];
+    if strcmp(opt.onlyUnitCell, 'on')
+        extrudedUnitCell.edge=[extrudedUnitCell.edge; nNodeSolid+unitCell.Polyhedron(ne).edge];
+    end
     extrudedUnitCell.node=[extrudedUnitCell.node; unitCell.Polyhedron(ne).nodeNew];
     if ~isempty(unitCell.Polyhedron(ne).solidify)
         for i=1:length(unitCell.Polyhedron(ne).solidify)
@@ -692,8 +694,10 @@ for ne=1:length(unitCell.Polyhedron)
                 extrudedUnitCell.edgeHinge=[extrudedUnitCell.edgeHinge; nodeNum(j) nodeNum(j+1) nodeNum(j-1)];
             end
             extrudedUnitCell.edgeHinge=[extrudedUnitCell.edgeHinge; nodeNum(end) nodeNum(1) nodeNum(end-1)];
-            edges = nchoosek(nodeNum,2);
-            extrudedUnitCell.edge= [extrudedUnitCell.edge; edges];
+            if strcmp(opt.onlyUnitCell, 'off')
+                edges = nchoosek(nodeNum,2);
+                extrudedUnitCell.edge= [extrudedUnitCell.edge; edges];
+            end
         end
     end
     rep=length(extrudedUnitCell.face);   
