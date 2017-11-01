@@ -133,25 +133,105 @@ function dis = getDistance(G)
 H = height(G.Nodes);
 dis = zeros(H);
 
-%Loop through all the nodes
-for ii = 1:H
-    [TR,~] = shortestpathtree(G, 'all', ii, 'OutputForm','cell');
-    %Loop through all the nodes to get the distance in string
-    for jj = 1:H
-        currentPathTypes = G.Nodes.Type(TR{jj});
-        currentPathDisStr = strjoin(string(currentPathTypes),'');
-        dis(ii,jj) = min(str2double(currentPathDisStr), str2double(flip(currentPathDisStr)));
-    end
-end
-
-%Make it symetric
+% loop through everything, because we need to
 for ii = 1:H
     for jj = ii:H
-        dis(ii,jj) = min(dis(ii,jj), dis(jj,ii));
-        dis(jj,ii) = dis(ii,jj);
+        % get all possible paths between two nodes *ii* and *jj* both ways
+        pathsiijj = pathbetweennodes(G, ii, jj);
+      
+        % get the ``distance'' from node *ii* to node *jj*
+        % by looping through all minimum length paths
+        pathDis = inf; % initialise with infinity
+        for mCt = 1:size(pathsiijj,1)
+            currentPath = pathsiijj(mCt,:);
+            currentPathTypes = G.Nodes.Type(currentPath);
+            currentPathDisStr = strjoin(string(currentPathTypes),'');
+            
+            % convert to number and take the smallest value of the
+            % ``distance'' and the flipped ``distance''
+            currentPathDis = min(str2double(currentPathDisStr), str2double(reverse(currentPathDisStr)));
+            if currentPathDis < pathDis
+                pathDis = currentPathDis;
+            end
+        end
+
+        % update distance matrix
+        dis(ii,jj) = pathDis;
+        dis(jj,ii) = pathDis;
     end
 end
 
+
+function pth = pathbetweennodes(G, src, snk)
+%PATHBETWEENNODES Return all paths between two nodes of a graph
+%
+% pth = pathbetweennodes(adj, src, snk)
+% pth = pathbetweennodes(adj, src, snk, vflag)
+%
+%
+% This function returns all simple paths (i.e. no cycles) between two nodes
+% in a graph.  Not sure this is the most efficient algorithm, but it seems
+% to work quickly for small graphs, and isn't too terrible for graphs with
+% ~50 nodes.
+%
+% Input variables:
+%
+%   adj:    adjacency matrix
+%
+%   src:    index of starting node
+%
+%   snk:    index of target node
+%
+%   vflag:  logical scalar for verbose mode.  If true, prints paths to
+%           screen as it traverses them (can be useful for larger,
+%           time-consuming graphs). [false]
+%
+% Output variables:
+%
+%   pth:    cell array, with each cell holding the indices of a unique path
+%           of nodes from src to snk.
+
+% input validation added by yun, May 02, 2017
+if src==snk
+    pth = [src];
+    return;
+end
+pth = 1:size(G.Nodes,1);
+for node = pth
+    next(node,:) = successors(G,node)';
+end 
+%Recursive search of shortest distance between src and snk
+[pth,~,~,~] = nextNode(pth, src, snk, next);
+%Recursive search of shortest distance between snk and src
+[pth,~,~,~] = nextNode(pth, snk, src, next);
+
+
+function [paths, stack, snk, next] = nextNode(paths, stack, snk, next)
+
+%Check if the distance is longer than the previous found one
+if length(stack) > length(paths(end,:))
+    return;
+end
+%Check if we dont have loops in the stack
+if any(diff(sort(stack))==0)
+    return;
+end
+%Check if you already end in the finnal edge
+if stack(end) == snk
+    %if the distance is shorter, erease the rest, if not just stack them
+    if length(stack) < length(paths(end,:)) 
+        paths = stack;
+    else
+        paths = [paths; stack];
+    end
+    return;
+end
+%go through the next edges and call the function again
+originalstack = stack;
+for j = next(originalstack(end),:)
+    newstack = [originalstack j];
+    [paths, stack, snk, next] = nextNode(paths, newstack, snk, next);
+end
 
 function getAllHinges(G, dis, opt)
 % get the complete list of hinge sets, and dump them in a csv file
