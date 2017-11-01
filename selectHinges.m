@@ -298,7 +298,11 @@ if exist(fileName, 'file')
 end
 
 for i = 2:height(G.Nodes)+1
-    dlmwrite(fileName, G.Nodes.Names(hingeSetsPrev(i).all')', 'delimiter', ',', '-append');
+    if size(hingeSetsPrev(i).all,1) > 1
+        dlmwrite(fileName, G.Nodes.Names(hingeSetsPrev(i).all), 'delimiter', ',', '-append');
+    else
+        dlmwrite(fileName, G.Nodes.Names(hingeSetsPrev(i).all)', 'delimiter', ',', '-append');
+    end
 end
 
 
