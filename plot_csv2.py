@@ -215,9 +215,9 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     
     stepsHinge = int(len(hingeNum)/hingeNum[-1])
     totalflags = 6
-    internalHinges = 9 ###### Number of internal hinges
-    totalnumberHinges = 9
-    totalnumberEdges = 24
+    internalHinges = 18 ###### Number of internal hinges
+    totalnumberHinges = 18
+    totalnumberEdges = 18
     
     tolHinge = 0.003
     tolEdge = 0.01
@@ -239,7 +239,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     
     ############################################ get the number of actuated hinges for each hinge-set
     actuatedHinges = np.zeros(hingeNum[-1], dtype = int)
-    hingeCount = np.zeros(internalHinges-1)   
+    hingeCount = np.zeros(internalHinges)   
     for hinge in np.arange(hingeNum[-1]):
         actuatedHinges[hinge] = len(hingeName[hinge].split())
         hingeCount[actuatedHinges[hinge]-1] += 1
@@ -253,11 +253,11 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     notConvHinges = np.empty((0,3), dtype = int)
     for i in np.arange(len(hingeNum)):
         error = False
-        if exflFol[i] != 1:# and exflFol[i] != 2:
+        if exflFol[i] != 1 and exflFol[i] != 2:
     #    if (exflFol[i] != 1 and exflFol[i] != 2) or (exflRel[i] != 1 and exflRel[i] != 2):
             flagCountFol[actuatedHinges[hingeNum[i]-1]-1,exflFol[i]+3]  += 1
             error = True
-        if exflRel[i] != 1 and not error:# and exflRel[i] != 2:
+        if exflRel[i] != 1 and not error and exflRel[i] != 2:
             flagCountRel[actuatedHinges[hingeNum[i]-1]-1,exflRel[i]+3]  += 1
             error = True
         if error:
@@ -384,9 +384,9 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     #            ax3.plot(eEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
     #            ax2.plot(RadRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  StdRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
             if len(findit) != 0:# and differentEnergies[findit[0],1] > maxststs:
-                ax1.annotate(hingeName[hinge], xy=(eEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1]), 
-                              xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
-                              arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
+#                ax1.annotate(hingeName[hinge], xy=(eEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1]), 
+#                              xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
+#                              arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
                 print(hingeName[differentEnergies[findit[0],0]], differentEnergies[findit[0],1])    
                 
         cs1 = ax1.scatter(differentEnergiesEnergy[:,1], differentEnergiesEnergy[:,0], c = differentEnergies[:,1],
@@ -426,5 +426,5 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     return allFlags, len(differentEnergies[:,0]), differentEnergiesName, differentEnergiesEnergy
 #%%
 if __name__ == "__main__":
-    folder_name = "Results/triangular prism/sqp/energy/internal/kh0.010_kta1.000_ke1.000/"
-    ReadandAnalizeFile(folder_name, khinge = 0.01, kedge = 1)
+    folder_name = "Results/cube/sqp/energy/internal/kh0.001_kta1.000_ke10.000/"
+    ReadandAnalizeFile(folder_name, khinge = 0.01, kedge = 10)

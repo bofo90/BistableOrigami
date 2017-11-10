@@ -70,6 +70,9 @@ switch opt.plot
                     dlmwrite(fileEnergy, Energies, 'delimiter', ',', '-append');
                 end
                 if strcmp(opt.createFig, 'on')
+                    if strcmp(opt.onlyUnitCell, 'on')
+                       [extrudedUnitCell, result] = extrudeInnerPolyhedra(extrudedUnitCell,result,1); 
+                    end
                     outputResults(unitCell,extrudedUnitCell,result,opt);
                 end
                 if strcmp(opt.showFig, 'off')
@@ -140,3 +143,46 @@ end
 
 maxStrech = max(dEdge);
 minStrech = min(dEdge);
+
+function [extrudedUnitCell, result] = extrudeInnerPolyhedra(extrudedUnitCell,result, extrutionLength)
+%%% Assuming only one unit cell
+Faces = extrudedUnitCell.face;
+Nodes = size(extrudedUnitCell.node,1);
+rep = 0;
+for i=1:length(Faces)      
+    nNo=size(extrudedUnitCell.node,1);
+    nodeNum=Faces{i};
+    nodeNumNew=nNo+1:nNo+length(nodeNum);
+    
+    normal = getNormal(extrudedUnitCell.node, nodeNum(1), nodeNum(2), nodeNum(3));
+    extrudedUnitCell.node(nodeNumNew,:)=extrudedUnitCell.node(nodeNum,:)+extrutionLength*ones(length(nodeNum),1)*normal;
+    
+    for j = 1:result.numMode
+        for k = 1:length(result.deform(j).interV)
+            movedNodes = extrudedUnitCell.node(1:Nodes,:)+result.deform(j).interV(k).V(1:Nodes,:);
+            normal = getNormal(movedNodes, nodeNum(1), nodeNum(2), nodeNum(3));
+            newNodes = movedNodes(nodeNum,:)+extrutionLength*ones(length(nodeNum),1)*normal;
+            result.deform(j).interV(k).V(nodeNumNew,:) = newNodes - extrudedUnitCell.node(nodeNumNew,:);
+            result.deform(j).interV(k).Ve=result.deform(j).interV(k).V(:,end);
+        end
+        movedNodes = extrudedUnitCell.node(1:Nodes,:)+result.deform(j).V(1:Nodes,:);
+        normal = getNormal(movedNodes, nodeNum(1), nodeNum(2), nodeNum(3));
+        newNodes = movedNodes(nodeNum,:)+extrutionLength*ones(length(nodeNum),1)*normal;
+        result.deform(j).V(nodeNumNew,:)= newNodes - extrudedUnitCell.node(nodeNumNew,:);
+        result.deform(j).Ve=result.deform(j).V(:,end);
+    end
+    index=[1:length(nodeNum) 1];
+    for j=1:length(nodeNum)   
+        rep=rep+1;
+        extrudedUnitCell.face{rep}=[nodeNum(index(j)) nodeNum(index(j+1)) nodeNumNew(index(j+1)) nodeNumNew(index(j))];
+    end
+end
+
+function normal = getNormal(nodes, node1, node2, node3)
+
+a=nodes(node2,:)-nodes(node1,:);
+b=nodes(node3,:)-nodes(node1,:);
+alpha=acos(sum(a.*b)/(norm(a)*norm(b)));
+normal=cross(a,b)/(norm(a)*norm(b)*sin(alpha));
+
+
