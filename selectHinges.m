@@ -1,5 +1,14 @@
 function selectHinges(unitCell, extrudedUnitCell, opt)
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%
+%%%%  Carefull with the selection of hinges! There is a problem when the
+%%%%  amount of hinges per vertex is the same as the amount of hinges per
+%%%%  face if all faces are equal in the same vertex (1 flavour in ). For
+%%%%  example the tetrahedron (3 hinges per vertix and each face has 3
+%%%%  hinges). There are specific hinge selections that from the distance
+%%%%  matriz have the same eigenvalu but there are different.
+%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %This is the function for selecting hinges
 if strcmp(opt.plot, 'selectHinges')
     fprintf('Creating graph...\n');
@@ -135,7 +144,7 @@ dis = zeros(H);
 
 % loop through everything, because we need to
 for ii = 1:H
-    for jj = ii:H
+    for jj = 1:H
         % get all possible paths between two nodes *ii* and *jj* both ways
         pathsiijj = pathbetweennodes(G, ii, jj);
       
@@ -157,7 +166,7 @@ for ii = 1:H
 
         % update distance matrix
         dis(ii,jj) = pathDis;
-        dis(jj,ii) = pathDis;
+%         dis(jj,ii) = pathDis;
     end
 end
 
@@ -203,7 +212,7 @@ end
 %Recursive search of shortest distance between src and snk
 [pth,~,~,~] = nextNode(pth, src, snk, next);
 %Recursive search of shortest distance between snk and src
-[pth,~,~,~] = nextNode(pth, snk, src, next);
+% [pth,~,~,~] = nextNode(pth, snk, src, next);
 
 
 function [paths, stack, snk, next] = nextNode(paths, stack, snk, next)
@@ -260,15 +269,15 @@ for N = 1:height(G.Nodes)-1  %height(G.Nodes)-1
         hingeSets = chooseHinges(G, dis, N, hingeSetsPrev(N).all);
         % getting ready for the next loop
     end
-    if N == 0.5 * height(G.Nodes)
-        hingeSets = chooseHinges(G, dis, N, hingeSetsPrev(N).all);
-        for ct = 1:size(hingeSets, 1)
-            % write complement selections to file
-            conjSet = allHinges;
-            conjSet(hingeSets(ct,:)) = [];
-            hingeSets(end+1,:) = conjSet;
-        end
-    end
+%     if N == 0.5 * height(G.Nodes)
+%         hingeSets = chooseHinges(G, dis, N, hingeSetsPrev(N).all);
+%         for ct = 1:size(hingeSets, 1)
+%             % write complement selections to file
+%             conjSet = allHinges;
+%             conjSet(hingeSets(ct,:)) = [];
+%             hingeSets(end+1,:) = conjSet;
+%         end
+%     end
     if N > 0.5 * height(G.Nodes)
         Nconj = height(G.Nodes)-N;
         hingeSets = zeros(size(hingeSetsPrev(Nconj+1).all, 1), N);
@@ -365,6 +374,34 @@ else% N >= 2
             end
         end
     end 
+
+%     if N == size(G.Nodes,1)/2
+%         allHinges = 1:height(G.Nodes);
+%         
+%         for i = 1:(index-1)
+%             newSet = allHinges;
+%             newSet(hinges(i,:)) = [];
+%             newDisMat = dis(newSet, newSet);
+%             newDisEig = round(1000*sort(eig(newDisMat))') / 1000; % round off 
+% 
+%             % if newDisEig is not in cache, add current solution
+% %             sameEig = sum(distanceEig(1:index,:) == newDisEig, 2);
+%             cachedistanceEig = distanceEig(1:index,:);
+%             for eigenvalue = 1:N
+%                 sameEig = cachedistanceEig(:,eigenvalue) == newDisEig(eigenvalue);
+%                 cachedistanceEig = cachedistanceEig(any(sameEig,2),:);
+%             end
+%             if size(cachedistanceEig,1) < 1
+% 
+% %             if ~sum(sameEig == N)
+%                 hinges(index, :) = newSet;
+%                 distanceEig(index, :) = newDisEig;
+%                 index = index+1;
+%             end
+%         end
+%         
+%     end
+    
     hinges( ~any(hinges,2),:) = [];
 end
 
