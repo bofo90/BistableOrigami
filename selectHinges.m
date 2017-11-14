@@ -35,24 +35,41 @@ hingeNames = double.empty(numEdges, 0); % corresponds to names in extrudedUnitCe
 
 flavourlist = double.empty(0,2);
 hingeTypes = double.empty(numEdges, 0);
-
-center = mean(unitCell.Polyhedron.node, 1);
+orderedEdges = sort(unitCell.Polyhedron.edge,2);
+orderedFaces = sortFace(unitCell.Polyhedron);
 
 for ii = 1:numEdges
     n1 = unitCell.Polyhedron.edge(ii,1);
     n2 = unitCell.Polyhedron.edge(ii,2); % endnodes of the edge
     % getting the edge numbering from nodeHingeEx (consistent with how
     % they're numbered in outputResults
-    [~,idx1]=ismember([n1 n2],extrudedUnitCell.nodeHingeEx(:,1:2),'rows');
-    [~,idx2]=ismember([n2 n1],extrudedUnitCell.nodeHingeEx(:,1:2),'rows');
-    hingeNames(ii) = idx1+idx2;
+    [~,idx1]=ismember(orderedEdges(ii,:),extrudedUnitCell.nodeHingeEx(:,1:2),'rows');
+%     [~,idx2]=ismember([n2 n1],extrudedUnitCell.nodeHingeEx(:,1:2),'rows');
+    hingeNames(ii) = idx1;%+idx2;
     
     % getting the types of faces associated with current edge
     faceTypes = [0 0];
+    nextEdge = [0 0;0 0];
     for ff = 1:length(unitCell.Polyhedron.face)
-        n_face = unitCell.Polyhedron.face{ff};
-        if sum(find(n1==n_face)) && sum(find(n2==n_face))
-            faceTypes(find(0==faceTypes, 1)) = length(unitCell.Polyhedron.face{ff});
+        n_face = orderedFaces{ff};
+        pos1 = find(n1==n_face);
+        pos2 = find(n2==n_face);
+        sides = length(n_face);
+        if sum(pos1) && sum(pos2)
+            index = find(0==faceTypes, 1);
+            faceTypes(index) = sides;
+            
+            maxPos = max(pos1,pos2);
+            if maxPos == sides
+                if min(pos1,pos2) == sides-1
+                    nextEdge(index,:) = [n_face(end) n_face(1)];
+                else
+                    nextEdge(index,:) = [n_face(1) n_face(2)];
+                end
+            else
+                nextEdge(index,:) = [n_face(maxPos) n_face(maxPos+1)];
+            end
+
         end
     end
     [added, flavour] = ismember([min(faceTypes) max(faceTypes)],flavourlist, 'rows');
@@ -62,29 +79,11 @@ for ii = 1:numEdges
     end
     hingeTypes(ii) = [flavour];
     
-    % here starts stuff for adjacency matrix
-    for jj = 1:numEdges
-        if ii == jj
-            G_adjacency(ii,jj) = 0;
-        else
-            n_edge2 = unitCell.Polyhedron.edge(jj, :);
-            
-            % see if these two hinges share a common node
-            comm_node = [n_edge2(n1==n_edge2), n_edge2(n2==n_edge2)];
-            if ~isempty(comm_node)
-                % determine the direction between these two hinges
-                edgeV1 = - getHingeVector([n1,n2], comm_node, unitCell);
-                edgeV2 = getHingeVector(n_edge2, comm_node, unitCell);
-                normV = unitCell.Polyhedron.node(comm_node,:) - center;
-                direction = dot(normV, cross(edgeV1,edgeV2));
-                if direction < 0
-                    G_adjacency(ii,jj) = 1;
-                elseif direction > 0
-                    G_adjacency(jj,ii) = 1;
-                end
-            end
-        end
-    end
+    nextEdge = sort(nextEdge,2);
+    [~,adedge1] = ismember(nextEdge(1,:),unitCell.Polyhedron.edge,'rows');
+    [~,adedge2] = ismember(nextEdge(2,:),unitCell.Polyhedron.edge,'rows');
+    G_adjacency(ii, adedge1) = 1;
+    G_adjacency(ii, adedge2) = 1;
 end
 
 G_adjacency = sparse(G_adjacency);
@@ -95,6 +94,22 @@ G = digraph(G_adjacency);
 % assign names and other properties to the nodes of the graph (edges on the polyherdon)
 G.Nodes.Names = hingeNames';
 G.Nodes.Type = hingeTypes';
+
+function orderedFaces = sortFace(Polyhedron)
+
+center = mean(Polyhedron.node, 1);
+orderedFaces = Polyhedron.face;
+
+for i = 1:size(Polyhedron.face,1)
+    a = Polyhedron.node(Polyhedron.face{i}(1),:)-Polyhedron.node(Polyhedron.face{i}(2),:);
+    b = Polyhedron.node(Polyhedron.face{i}(3),:)-Polyhedron.node(Polyhedron.face{i}(2),:);
+    node = Polyhedron.node(Polyhedron.face{i}(2),:)-center;
+    direction = dot(node, cross(a,b));
+    if direction < 0
+        orderedFaces{i} = flip(orderedFaces{i});
+    end
+end
+
 
 function [vec] = getHingeVector(nodes, comm_node, unitCell)
 % returns the hinge in the form of a 3D vector, and always use *comm_node*
@@ -374,6 +389,8 @@ else% N >= 2
             end
         end
     end 
+    
+    
 
 %     if N == size(G.Nodes,1)/2
 %         allHinges = 1:height(G.Nodes);
