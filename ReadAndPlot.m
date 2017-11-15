@@ -178,11 +178,17 @@ for i=1:length(Faces)
     end
 end
 
-function normal = getNormal(nodes, node1, node2, node3)
+function normal = getNormal(nodes, node1, node2, node3,prevnormal)
 
 a=nodes(node2,:)-nodes(node1,:);
 b=nodes(node3,:)-nodes(node1,:);
 alpha=acos(sum(a.*b)/(norm(a)*norm(b)));
+if imag(alpha) > 0
+    alpha = 0;
+end
 normal=cross(a,b)/(norm(a)*norm(b)*sin(alpha));
+if sum(isinf(normal))
+    normal = prevnormal;
+end
 
 
