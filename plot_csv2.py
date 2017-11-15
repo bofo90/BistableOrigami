@@ -215,9 +215,9 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     
     stepsHinge = int(len(hingeNum)/hingeNum[-1])
     totalflags = 6
-    internalHinges = 18 ###### Number of internal hinges
-    totalnumberHinges = 18
-    totalnumberEdges = 18
+    internalHinges = 12 ###### Number of internal hinges
+    totalnumberHinges = 12
+    totalnumberEdges = 12
     
     tolHinge = 0.003
     tolEdge = 0.01
@@ -253,11 +253,11 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     notConvHinges = np.empty((0,3), dtype = int)
     for i in np.arange(len(hingeNum)):
         error = False
-        if exflFol[i] != 1 and exflFol[i] != 2:
+        if exflFol[i] != 1:# and exflFol[i] != 2:
     #    if (exflFol[i] != 1 and exflFol[i] != 2) or (exflRel[i] != 1 and exflRel[i] != 2):
             flagCountFol[actuatedHinges[hingeNum[i]-1]-1,exflFol[i]+3]  += 1
             error = True
-        if exflRel[i] != 1 and not error and exflRel[i] != 2:
+        if exflRel[i] != 1 and not error:# and exflRel[i] != 2:
             flagCountRel[actuatedHinges[hingeNum[i]-1]-1,exflRel[i]+3]  += 1
             error = True
         if error:
@@ -418,7 +418,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         fig1.savefig(folder_name + file_name1[:-4]+normalized+'.png', transparent = False)
         #fig2.savefig(folder_name + file_name3[:-4]+normalized+'.png', transparent = True)
         #fig3.savefig(folder_name + 'CenterOfMass'+normalized+'.png', transparent = True)
-    #        fig5.savefig(folder_name + 'Flags.png', transparent = True)
+        fig5.savefig(folder_name + 'Flags.png', transparent = True)
         #fig6.savefig(folder_name + 'MaxMinStretch'+normalized+'.png', transparent = True)
 
 
@@ -426,5 +426,5 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     return allFlags, len(differentEnergies[:,0]), differentEnergiesName, differentEnergiesEnergy
 #%%
 if __name__ == "__main__":
-    folder_name = "Results/cube/sqp/energy/internal/kh0.001_kta1.000_ke10.000/"
-    ReadandAnalizeFile(folder_name, khinge = 0.01, kedge = 10)
+    folder_name = "Results/cube/sqp/energy/internal/kh0.001_kta1.000_ke10.000_kf10.000/"
+    ReadandAnalizeFile(folder_name, khinge = 0.001, kedge = 10)

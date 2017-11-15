@@ -5,13 +5,13 @@ switch opt.plot
         result = [];
         outputResults(unitCell,extrudedUnitCell,result,opt);
     case {'result', 'savedata', 'plot'}
-        
-        folderResults = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat/internal/', sprintf('kh%2.3f_kta%2.3f_ke%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge));
+        optionalName = sprintf('kh%2.3f_kta%2.3f_ke%2.3f_kf%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
+        folderResults = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat/internal/', optionalName);
         if ~exist(folderResults, 'dir')
             fprintf('No folder with results:' + folderResults + '\n');
         else
             if strcmp(opt.plot,'savedata')
-                folderEnergy = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/energy/internal/', sprintf('kh%2.3f_kta%2.3f_ke%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge));
+                folderEnergy = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/energy/internal/', optionalName);
                 if ~exist(folderEnergy, 'dir')
                     mkdir(folderEnergy);
                 end
