@@ -154,19 +154,22 @@ for i=1:length(Faces)
     nodeNum=Faces{i};
     nodeNumNew=nNo+1:nNo+length(nodeNum);
     
-    normal = getNormal(extrudedUnitCell.node, nodeNum(1), nodeNum(2), nodeNum(3));
+%     normal = getNormal(extrudedUnitCell.node, nodeNum(1), nodeNum(2), nodeNum(3),[0 0 0]);
+    normal = getavNormal(extrudedUnitCell.node(Faces{i},:), [0 0 0]);
     extrudedUnitCell.node(nodeNumNew,:)=extrudedUnitCell.node(nodeNum,:)+extrutionLength*ones(length(nodeNum),1)*normal;
     
     for j = 1:result.numMode
         for k = 1:length(result.deform(j).interV)
             movedNodes = extrudedUnitCell.node(1:Nodes,:)+result.deform(j).interV(k).V(1:Nodes,:);
-            normal = getNormal(movedNodes, nodeNum(1), nodeNum(2), nodeNum(3));
+%             normal = getNormal(movedNodes, nodeNum(1), nodeNum(2), nodeNum(3),normal);
+            normal = getavNormal(movedNodes(Faces{i},:), normal);
             newNodes = movedNodes(nodeNum,:)+extrutionLength*ones(length(nodeNum),1)*normal;
             result.deform(j).interV(k).V(nodeNumNew,:) = newNodes - extrudedUnitCell.node(nodeNumNew,:);
             result.deform(j).interV(k).Ve=result.deform(j).interV(k).V(:,end);
         end
         movedNodes = extrudedUnitCell.node(1:Nodes,:)+result.deform(j).V(1:Nodes,:);
-        normal = getNormal(movedNodes, nodeNum(1), nodeNum(2), nodeNum(3));
+%         normal = getNormal(movedNodes, nodeNum(1), nodeNum(2), nodeNum(3),normal);
+        normal = getavNormal(movedNodes(Faces{i},:), normal);
         newNodes = movedNodes(nodeNum,:)+extrutionLength*ones(length(nodeNum),1)*normal;
         result.deform(j).V(nodeNumNew,:)= newNodes - extrudedUnitCell.node(nodeNumNew,:);
         result.deform(j).Ve=result.deform(j).V(:,end);
@@ -191,4 +194,20 @@ if sum(isinf(normal))
     normal = prevnormal;
 end
 
+function normal = getavNormal(nodes,prevnormal)
+
+center = mean(nodes,1);
+node1 = 1;
+node2 = ceil(size(nodes,1)/2);
+
+a=nodes(node1,:)-center;
+b=nodes(node2,:)-center;
+alpha=acos(sum(a.*b)/(norm(a)*norm(b)));
+if imag(alpha) > 0
+    alpha = 0;
+end
+normal=cross(a,b)/(norm(a)*norm(b)*sin(alpha));
+if sum(isinf(normal))
+    normal = prevnormal;
+end
 
