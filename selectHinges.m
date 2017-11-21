@@ -80,8 +80,8 @@ for ii = 1:numEdges
     hingeTypes(ii) = [flavour];
     
     nextEdge = sort(nextEdge,2);
-    [~,adedge1] = ismember(nextEdge(1,:),unitCell.Polyhedron.edge,'rows');
-    [~,adedge2] = ismember(nextEdge(2,:),unitCell.Polyhedron.edge,'rows');
+    [~,adedge1] = ismember(nextEdge(1,:),orderedEdges,'rows');
+    [~,adedge2] = ismember(nextEdge(2,:),orderedEdges,'rows');
     G_adjacency(ii, adedge1) = 1;
     G_adjacency(ii, adedge2) = 1;
 end
