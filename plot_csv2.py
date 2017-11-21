@@ -251,27 +251,28 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     flagCountRel = np.zeros((len(hingeCount), totalflags))
     hingesMask = np.arange(hingeNum[-1], dtype = float)
     notConvHinges = np.empty((0,3), dtype = int)
-    for i in np.arange(len(hingeNum)):
+    for i in np.arange(hingeNum[-1]):
         error = False
-        if exflFol[i] != 1:# and exflFol[i] != 2:
-    #    if (exflFol[i] != 1 and exflFol[i] != 2) or (exflRel[i] != 1 and exflRel[i] != 2):
-            flagCountFol[actuatedHinges[hingeNum[i]-1]-1,exflFol[i]+3]  += 1
+#        flagCountFol[actuatedHinges[i]-1,exflFol[i*stepsHinge+1]+3]  += 1
+#        flagCountRel[actuatedHinges[i]-1,exflRel[i*stepsHinge+1]+3]  += 1
+        if exflFol[(i+1)*stepsHinge-1] != 1:# and exflFol[(i+1)*stepsHinge-1] != 2:
+            flagCountFol[actuatedHinges[i]-1,exflFol[(i+1)*stepsHinge-1]+3]  += 1
             error = True
-        if exflRel[i] != 1 and not error:# and exflRel[i] != 2:
-            flagCountRel[actuatedHinges[hingeNum[i]-1]-1,exflRel[i]+3]  += 1
+        if exflRel[(i+1)*stepsHinge-1] != 1 and not error:# and exflRel[(i+1)*stepsHinge-1] != 2:
+            flagCountRel[actuatedHinges[i]-1,exflRel[(i+1)*stepsHinge-1]+3]  += 1
             error = True
         if error:
-            notConvHinges = np.append(notConvHinges,np.array([[hingeNum[i]-1, exflFol[i], exflRel[i]]]), axis = 0)
-            hingesMask[hingeNum[i]-1] = np.NaN
+            notConvHinges = np.append(notConvHinges,np.array([[i, exflFol[(i+1)*stepsHinge-1], exflRel[(i+1)*stepsHinge-1]]]), axis = 0)
+            hingesMask[i] = np.NaN
             
     notConverged = sum(np.isnan(hingesMask))
     converged = hingeNum[-1] - notConverged
     ############################################ normalize the flag counts
     allFlags = np.sum(np.add(flagCountFol,flagCountRel), axis = 0)
-    allFlags = allFlags/hingeNum[-1]
+    allFlags = allFlags/hingeNum[-1]/2
     for i in np.arange(totalflags):
-        flagCountFol[:,i] = flagCountFol[:,i]/hingeCount/2
-        flagCountRel[:,i] = flagCountRel[:,i]/hingeCount/2
+        flagCountFol[:,i] = flagCountFol[:,i]/hingeCount
+        flagCountRel[:,i] = flagCountRel[:,i]/hingeCount
         
     ############################################ ordering the last energies on the release according to the number of actuated hinges
     lasteHingeRel = eHingeRel[stepsHinge-1::stepsHinge]
@@ -295,6 +296,8 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
             ############################################ see if at least one of the neighbours converge (including the selected one)
             i = 0
             if len(notConvHinges) > 0:
+                #goes through all hinges in the same neighbourhood and see if they dont converge. 
+                #If one converges, it stops. If non converges gives i =-1
                 while len(np.where(notConvHinges[:,0] == orderedHinges[sameEnergy[i]])[0]) != 0:
                     i = i + 1
                     if i >= len(sameEnergy):
@@ -340,9 +343,8 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         ax6 = plt.subplot(111)
 #        ax6 = plt.subplot(121)  
 #        ax7 = plt.subplot(122)   
-        maxPerc = np.amax([np.nanmax(flagCountFol),np.nanmax(flagCountRel)])
-        NiceGraph2D(ax6, '# of actuated Hinges', 'percentage # of flags', [0.5, 0], [internalHinges+0.5, 1+0.01], [np.arange(len(hingeCount))+1, np.arange(0,1.1,0.1)])       
-#        NiceGraph2D(ax7, '# of actuated Hinges', 'percentage # of flags', [0.5, 0], [internalHinges+0.5, 1+0.01], [np.arange(len(hingeCount))+1, np.nan])  
+        NiceGraph2D(ax6, '# of actuated Hinges', 'percentage # of flags', [0.5, 0], [len(hingeCount)+0.5, 1+0.01], [np.arange(len(hingeCount))+1, np.arange(0,1.1,0.1)])       
+#        NiceGraph2D(ax7, '# of actuated Hinges', 'percentage # of flags', [0.5, 0], [len(hingeCount)+0.5, 1+0.01], [np.arange(len(hingeCount))+1, np.nan])  
         
         fig6 = plt.figure(5,figsize=(cm2inch(35), cm2inch(20)))
         ax8 = plt.subplot(121)  
@@ -356,7 +358,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
             if np.sum(flagCountFol[:,i]+flagCountRel[:,i]) == 0:  ###### block to plot non-present flags
                 continue
             ax6.bar(np.arange(len(hingeCount))+1, flagCountFol[:,i]+flagCountRel[:,i], width, color=c, label = i-3, bottom = np.sum(flagCountFol[:,:i],1)+np.sum(flagCountRel[:,:i],1))
-#            ax7.bar(np.arange(len(hingeCount))+1.5, flagCountFol[:,i], width, color=c, bottom = np.sum(flagCountFol[:,:i],1))
+#            ax6.bar(np.arange(len(hingeCount))+1, flagCountFol[:,i], width, color=c, bottom = np.sum(flagCountFol[:,:i],1), label = i-3)
 #            ax7.bar(np.arange(len(hingeCount))+1, flagCountRel[:,i], width, color=c, bottom = np.sum(flagCountRel[:,:i],1))
         
         
@@ -425,7 +427,15 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
 
 
     return allFlags, len(differentEnergies[:,0]), differentEnergiesName, differentEnergiesEnergy
+
+#hinges = np.zeros(30)
+#
+#with open(folder_name + file_name1,'r',newline='') as ffit: 
+#    readers = csv.reader(ffit,delimiter=',');
+#    for row in readers:
+#        if row:
+#            hinges[np.size(row)] +=1
 #%%
 if __name__ == "__main__":
-    folder_name = "Results/cube/sqp/energy/internal/kh0.001_kta1.000_ke10.000_kf10.000/"
+    folder_name = "Results/cube/sqp/energy/internal/kh0.001_kta1.000_ke10.000_kf10.000woanglc/"
     ReadandAnalizeFile(folder_name, khinge = 0.001, kedge = 10)
