@@ -269,10 +269,10 @@ if strcmp(opt.constrEdge,'on')
     [Ceq1, DCeq1]=getEdge(extrudedUnitCell);
 end
 %ENERGY ASSOCIATED TO FACE BENDING
-if strcmp(opt.constrFace,'on')
-    [Ceq2, DCeq2]=getFace(extrudedUnitCell);
+% if strcmp(opt.constrFace,'on')
+%     [Ceq2, DCeq2]=getFace(extrudedUnitCell);
 %     [Ceq3, DCeq3]=getConvFace(extrudedUnitCell);
-end
+% end
 %FINAL CONSTRAINTS
 Ceq=[Ceq1; Ceq2; Ceq3];
 DCeq=[DCeq1; DCeq2; DCeq3]';
