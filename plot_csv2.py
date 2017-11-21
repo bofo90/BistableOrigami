@@ -270,8 +270,8 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     allFlags = np.sum(np.add(flagCountFol,flagCountRel), axis = 0)
     allFlags = allFlags/hingeNum[-1]
     for i in np.arange(totalflags):
-        flagCountFol[:,i] = flagCountFol[:,i]/hingeCount
-        flagCountRel[:,i] = flagCountRel[:,i]/hingeCount
+        flagCountFol[:,i] = flagCountFol[:,i]/hingeCount/2
+        flagCountRel[:,i] = flagCountRel[:,i]/hingeCount/2
         
     ############################################ ordering the last energies on the release according to the number of actuated hinges
     lasteHingeRel = eHingeRel[stepsHinge-1::stepsHinge]
@@ -337,11 +337,12 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         NiceGraph2D(ax5, 'Hinge-Set Number', 'Internal Hinge Energy', [np.nan, min(eHinIntRel)], [np.nan, max(eHinIntRel)], buffer = [0, 0.0004])
         
         fig5 = plt.figure(4,figsize=(cm2inch(35), cm2inch(20)))
-        ax6 = plt.subplot(121)  
-        ax7 = plt.subplot(122)   
+        ax6 = plt.subplot(111)
+#        ax6 = plt.subplot(121)  
+#        ax7 = plt.subplot(122)   
         maxPerc = np.amax([np.nanmax(flagCountFol),np.nanmax(flagCountRel)])
-        NiceGraph2D(ax6, '# of actuated Hinges', 'percentage # of flags', [0.5, 0], [internalHinges-0.5, 1+0.01], [np.arange(len(hingeCount))+1, np.nan])       
-        NiceGraph2D(ax7, '# of actuated Hinges', 'percentage # of flags', [0.5, 0], [internalHinges-0.5, 1+0.01], [np.arange(len(hingeCount))+1, np.nan])  
+        NiceGraph2D(ax6, '# of actuated Hinges', 'percentage # of flags', [0.5, 0], [internalHinges+0.5, 1+0.01], [np.arange(len(hingeCount))+1, np.arange(0,1.1,0.1)])       
+#        NiceGraph2D(ax7, '# of actuated Hinges', 'percentage # of flags', [0.5, 0], [internalHinges+0.5, 1+0.01], [np.arange(len(hingeCount))+1, np.nan])  
         
         fig6 = plt.figure(5,figsize=(cm2inch(35), cm2inch(20)))
         ax8 = plt.subplot(121)  
@@ -349,15 +350,15 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         NiceGraph2D(ax8, 'Hinge-Set Number', 'Max final streching')
         NiceGraph2D(ax9, 'Hinge-Set Number', 'Min final streching')            
                     
-        width = 0.3
-        separation = 0
+        width = 0.5
         colors = cm.Set2(np.linspace(0, 1, totalflags))
         for i, c in zip(reversed(np.arange(totalflags)), reversed(colors)):
-            if i == 4 or i == 0 or i == 2:  ###### block to appear flags 1, -3 and -1 respectively
+            if np.sum(flagCountFol[:,i]+flagCountRel[:,i]) == 0:  ###### block to plot non-present flags
                 continue
-            ax6.bar(np.arange(len(hingeCount))+separation, flagCountFol[:,i], width, color=c, label = i-3)
-            ax7.bar(np.arange(len(hingeCount))+separation, flagCountRel[:,i], width, color=c)
-            separation += width
+            ax6.bar(np.arange(len(hingeCount))+1, flagCountFol[:,i]+flagCountRel[:,i], width, color=c, label = i-3, bottom = np.sum(flagCountFol[:,:i],1)+np.sum(flagCountRel[:,:i],1))
+#            ax7.bar(np.arange(len(hingeCount))+1.5, flagCountFol[:,i], width, color=c, bottom = np.sum(flagCountFol[:,:i],1))
+#            ax7.bar(np.arange(len(hingeCount))+1, flagCountRel[:,i], width, color=c, bottom = np.sum(flagCountRel[:,:i],1))
+        
         
         ax6.legend(loc = 2, fontsize =15, framealpha = 0.5, edgecolor = 'inherit', fancybox = False)
         
