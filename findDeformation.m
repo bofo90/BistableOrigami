@@ -35,7 +35,7 @@ if strcmp(opt.plot,'result')
 %                             end
                             %-pi if its the extruded version, pi if its
                             %only the internal polyheron
-                            opt.angleConstrFinal(1).val = [hinges(:), (pi-pi*0.985) * ones(length(hinges), 1)];%
+                            opt.angleConstrFinal(1).val = [hinges(:), (pi*0.985) * ones(length(hinges), 1)];%
                             fprintf('Hinge selection number %d/%d. ', i, size(hingeList, 1));
                             nonlinearFolding(unitCell,extrudedUnitCell,opt);
                         end
@@ -244,13 +244,13 @@ extrudedUnitCell.node=extrudedUnitCell.node+[u(1:3:end) u(2:3:end) u(3:3:end)];
 %INEQUALITY CONSTRAINS
 %%%%%%%%%%%%%%%%%%%%%%
 %MAXIMUM AND MINIMUM ANGLES
-% [angles, Dangles]=getHinge(extrudedUnitCell, extrudedUnitCellPrev);
-% if strcmp(opt.onlyUnitCell, 'on')
-%     C1 = [-angles-(pi*opt.constAnglePerc-pi); angles-pi*opt.constAnglePerc];
-% else
-%     C1 = [-angles-pi*opt.constAnglePerc; angles-pi*opt.constAnglePerc];
-% end
-% DC1 = [-Dangles; Dangles];
+[angles, Dangles]=getHinge(extrudedUnitCell, extrudedUnitCellPrev);
+if strcmp(opt.onlyUnitCell, 'on')
+    C1 = [-angles-(pi*opt.constAnglePerc-pi); angles-pi*opt.constAnglePerc];
+else
+    C1 = [-angles-pi*opt.constAnglePerc; angles-pi*opt.constAnglePerc];
+end
+DC1 = [-Dangles; Dangles];
 %MAXIMUM AND MINIMUM EDGE STRECHING
 if strcmp(opt.constrEdge,'off') && ~isnan(opt.maxStretch)
     [normStrech, DnormStrech]=getEdgeNorm(extrudedUnitCell);
@@ -269,10 +269,10 @@ if strcmp(opt.constrEdge,'on')
     [Ceq1, DCeq1]=getEdge(extrudedUnitCell);
 end
 %ENERGY ASSOCIATED TO FACE BENDING
-% if strcmp(opt.constrFace,'on')
-%     [Ceq2, DCeq2]=getFace(extrudedUnitCell);
-%     [Ceq3, DCeq3]=getConvFace(extrudedUnitCell);
-% end
+if strcmp(opt.constrFace,'on')
+    [Ceq2, DCeq2]=getFace(extrudedUnitCell);
+    [Ceq3, DCeq3]=getConvFace(extrudedUnitCell);
+end
 %FINAL CONSTRAINTS
 Ceq=[Ceq1; Ceq2; Ceq3];
 DCeq=[DCeq1; DCeq2; DCeq3]';
