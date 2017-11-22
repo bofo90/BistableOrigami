@@ -271,7 +271,7 @@ end
 %ENERGY ASSOCIATED TO FACE BENDING
 if strcmp(opt.constrFace,'on')
     [Ceq2, DCeq2]=getFace(extrudedUnitCell);
-    [Ceq3, DCeq3]=getConvFace(extrudedUnitCell);
+%     [Ceq3, DCeq3]=getConvFace(extrudedUnitCell);
 end
 %FINAL CONSTRAINTS
 Ceq=[Ceq1; Ceq2; Ceq3];
