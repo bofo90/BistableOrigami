@@ -111,36 +111,6 @@ for i = 1:size(Polyhedron.face,1)
 end
 
 
-function [vec] = getHingeVector(nodes, comm_node, unitCell)
-% returns the hinge in the form of a 3D vector, and always use *comm_node*
-% as the starting point of the vector
-% ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-% INPUT
-% nodes     - a 2*1 array, containing the two nodes of a hinge
-% comm_node - the node in common between this hinge and the other one 
-%             under consideration
-% unitCell  - a unit cell
-% ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-% OUTPUT
-% vec - a vector of this hinge, pointing from *comm_node* to the other node
-%       in *nodes*
-% ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-% last modified on Mar 20, 2017
-
-
-comm_idx = find(comm_node==nodes);
-if comm_idx == 1
-    % do nothing
-elseif comm_idx == 2
-    nodes = flip(nodes);
-else
-    error('Oops, you''ve got the wrong nodes!')
-end
-
-coord1 = unitCell.Polyhedron.node(nodes(1), :);
-coord2 = unitCell.Polyhedron.node(nodes(2), :);
-vec = coord2 - coord1;
-
 function dis = getDistance(G)
 % Returns the ``distance'' matrix with flavours
 % ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
