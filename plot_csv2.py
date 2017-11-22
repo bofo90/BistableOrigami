@@ -216,8 +216,8 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     stepsHinge = int(len(hingeNum)/hingeNum[-1])
     totalflags = 6
     internalHinges = 12 ###### Number of internal hinges
-    totalnumberHinges = 12
-    totalnumberEdges = 12
+    totalnumberHinges = 36
+    totalnumberEdges = 144
     
     tolHinge = 0.003
     tolEdge = 0.01
@@ -437,5 +437,5 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
 #            hinges[np.size(row)] +=1
 #%%
 if __name__ == "__main__":
-    folder_name = "Results/cube/sqp/energy/internal/kh0.001_kta1.000_ke10.000_kf10.000woanglc/"
+    folder_name = "Results/cube/sqp/energy/internal/kh0.001_kta1.000_ke10.000_kf10.000/"
     ReadandAnalizeFile(folder_name, khinge = 0.001, kedge = 10)
