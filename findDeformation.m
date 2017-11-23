@@ -35,7 +35,7 @@ if strcmp(opt.plot,'result')
 %                             end
                             %-pi if its the extruded version, pi if its
                             %only the internal polyheron
-                            opt.angleConstrFinal(1).val = [hinges(:), (pi*0.985) * ones(length(hinges), 1)];%
+                            opt.angleConstrFinal(1).val = [hinges(:), (-pi*0.985) * ones(length(hinges), 1)];%
                             fprintf('Hinge selection number %d/%d. ', i, size(hingeList, 1));
                             nonlinearFolding(unitCell,extrudedUnitCell,opt);
                         end
@@ -63,7 +63,7 @@ theta0=extrudedUnitCell.theta;
 max_iter = 100000;
 extrudedUnitCell.angleConstr=[];
 
-folderName = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat/internal/', sprintf('kh%2.3f_kta%2.3f_ke%2.3f_kf%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface));
+folderName = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat', opt.saveFile);
 if ~exist(folderName, 'dir')
     mkdir(folderName);
 end
@@ -159,7 +159,7 @@ for iter=1:length(opt.angleConstrFinal)
     result.numMode=length(result.deform);
     
     fileName = strcat(folderName,'/',opt.template,'_',...
-        mat2str(opt.angleConstrFinal(iter).val(:,1)'),'.mat');%'_',sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge),
+        mat2str(opt.angleConstrFinal(iter).val(:,1)'),'.mat');
     save(fileName, 'result');
  
     clearvars result E Eedge Eface Ehinge EtargetAngle exfl;
