@@ -203,7 +203,7 @@ for ax, edge in zip(axes4.flat, edges):
         ax.set_ylabel('')
     i += 1
 
-reststst = ststs-np.sum(prov, axis = 0)
+reststst = ststs-goodstst
 reststst = np.ma.masked_where(np.isnan(reststst), reststst)
 
 cmap4, norm4 = from_levels_and_colors(np.arange(np.nanmax(reststst)+1)+1, cm.Greys_r(np.linspace(0, 1, np.nanmax(reststst))))
@@ -241,18 +241,18 @@ for ax, edge in zip(axes5.flat, edges):
     i += 1
 
 markersize = 5
-sizes = np.linspace(markersize, 56, prov.shape[0])[::-1]**2
-colors = cm.jet(np.linspace(0, 1, prov.shape[0]))
+sizes = np.linspace(markersize, 56, goodststperst.shape[0])[::-1]**2
+colors = cm.jet(np.linspace(0, 1, goodststperst.shape[0]))
 plots = []
 
-for state, c in zip(np.arange(prov.shape[0]), colors):
+for state, c in zip(np.arange(goodststperst.shape[0]), colors):
     for edge, ax in zip(np.arange(3), axes5.flat):
-        prov2 = ax.scatter(0.001*10**(np.nonzero(prov[state,:,:,edge])[0]/4), 0.1*10**(np.nonzero(prov[state,:,:,edge])[1]/4),
+        prov2 = ax.scatter(0.001*10**(np.nonzero(goodststperst[state,:,:,edge])[0]/4), 0.1*10**(np.nonzero(goodststperst[state,:,:,edge])[1]/4),
                          marker = 's', color = c,  s=sizes[state], label = state)
         if edge == 0:
             plots.append(prov2)
 
-lgnd = fig5.legend(plots, provname, loc=8, mode="expand", ncol= 5)
+lgnd = fig5.legend(plots, goodststperstnames, loc=8, mode="expand", ncol= 5)
 for handle in lgnd.legendHandles:
     handle.set_sizes([500])
 for label in lgnd.get_texts():

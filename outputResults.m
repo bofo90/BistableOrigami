@@ -23,7 +23,7 @@ opt.tranPol=0.5;
 %PREPARE PLOTTING UNDEFORMED CONFIGURATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Check if output folder is required, and create it if it doesn't exist
- nameFolder=[pwd,'/Results/',opt.template,'/',opt.relAlgor];
+ nameFolder=[pwd,'/Results/',opt.template,'/',opt.relAlgor,'/internal/'];
 if or(strcmp(opt.saveFig,'on'),strcmp(opt.saveMovie,'on'))
     if exist(nameFolder, 'dir')==0
         mkdir(nameFolder)
@@ -278,26 +278,26 @@ if strcmp(opt.plot,'result') || strcmp(opt.plot,'savedata') || strcmp(opt.plot,'
         %Made by Agustin Iniguez
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
-        for nMode=1:result.numMode
-            pause(1)
-            for framMode=1:length(plotextrudedUnitCell.mode(nMode).frame)
-                for ne=1:length(unitCell.Polyhedron)
-                    for nc=1:size(unitCell.Polyhedron(ne).latVec,1)
-                        plotunitCell.Init(ne).lat(nc).coorNew(:,1) = plotunitCell.InitNew(ne).lat(nc).coor(:,1) + result.deform(nMode).interV(framMode).V(1:size(unitCell.Polyhedron(1).node,1),1);
-                        plotunitCell.Init(ne).lat(nc).coorNew(:,2) = plotunitCell.InitNew(ne).lat(nc).coor(:,2) + result.deform(nMode).interV(framMode).V(1:size(unitCell.Polyhedron(1).node,1),2);
-                        plotunitCell.Init(ne).lat(nc).coorNew(:,3) = plotunitCell.InitNew(ne).lat(nc).coor(:,3) + result.deform(nMode).interV(framMode).V(1:size(unitCell.Polyhedron(1).node,1),3);
-                        for i=3:10
-                            set(hie{ne,nc,i},'vertices',plotunitCell.Init(ne).lat(nc).coorNew);
-                            set(his{ne,nc,i},'vertices',plotunitCell.Init(ne).lat(nc).coorNew);  
-                        end 
-                    end
-                end
-                printGif(opt,framMode,f,nameFolder,['_',mat2str(extrudedUnitCell.angleConstr(:,1)'),'_',num2str(nMode),'_deformedUC']);%'_',sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge),
-                if framMode==length(plotextrudedUnitCell.mode(nMode).frame)
-                    printHigRes(f,opt,['_',mat2str(extrudedUnitCell.angleConstr(:,1)'),'_',num2str(nMode),'_deformedUC'],nameFolder);%'_',sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge),
-                end
-            end
-        end
+%         for nMode=1:result.numMode
+%             pause(1)
+%             for framMode=1:length(plotextrudedUnitCell.mode(nMode).frame)
+%                 for ne=1:length(unitCell.Polyhedron)
+%                     for nc=1:size(unitCell.Polyhedron(ne).latVec,1)
+%                         plotunitCell.Init(ne).lat(nc).coorNew(:,1) = plotunitCell.InitNew(ne).lat(nc).coor(:,1) + result.deform(nMode).interV(framMode).V(1:size(unitCell.Polyhedron(1).node,1),1);
+%                         plotunitCell.Init(ne).lat(nc).coorNew(:,2) = plotunitCell.InitNew(ne).lat(nc).coor(:,2) + result.deform(nMode).interV(framMode).V(1:size(unitCell.Polyhedron(1).node,1),2);
+%                         plotunitCell.Init(ne).lat(nc).coorNew(:,3) = plotunitCell.InitNew(ne).lat(nc).coor(:,3) + result.deform(nMode).interV(framMode).V(1:size(unitCell.Polyhedron(1).node,1),3);
+%                         for i=3:10
+%                             set(hie{ne,nc,i},'vertices',plotunitCell.Init(ne).lat(nc).coorNew);
+%                             set(his{ne,nc,i},'vertices',plotunitCell.Init(ne).lat(nc).coorNew);  
+%                         end 
+%                     end
+%                 end
+%                 printGif(opt,framMode,f,nameFolder,['_',mat2str(extrudedUnitCell.angleConstr(:,1)'),'_',num2str(nMode),'_deformedUC']);%'_',sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge),
+%                 if framMode==length(plotextrudedUnitCell.mode(nMode).frame)
+%                     printHigRes(f,opt,['_',mat2str(extrudedUnitCell.angleConstr(:,1)'),'_',num2str(nMode),'_deformedUC'],nameFolder);%'_',sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge),
+%                 end
+%             end
+%         end
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %PLOT SELECTED FACES TO EXTRUDE, SOLIDIFY AND REMOVE
@@ -338,7 +338,7 @@ if strcmp(opt.plot,'result') || strcmp(opt.plot,'savedata') || strcmp(opt.plot,'
             end
         end
         set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);
-        printHigRes(f,opt,'_0_undeformed',nameFolder);     
+%         printHigRes(f,opt,'_0_undeformed',nameFolder);     
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %PLOT MODES INDIVIDUALLY

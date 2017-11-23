@@ -26,15 +26,16 @@ if strcmp(opt.plot,'result')
                     opt.KtargetAngle = orikTargetAngle*10^(-(stepangle-1)/4);
                     for stepedge = 1:opt.stepkEdge
                         opt.Kedge = orikEdge*10^((stepedge-1)/2);
-                        fprintf('kHinge %f\tkTargetAngle %f\tkEdge %f\tSimulation %d\n', opt.Khinge,opt.KtargetAngle, opt.Kedge, simul );
+                        fprintf('kH %f\tkTA %f\tkE %f\tkF %f\tSimulation %d\n', opt.Khinge,opt.KtargetAngle, opt.Kedge, opt.Kface,simul );
                         for i = 1:size(hingeList, 1)
                             row = hingeList(i, :);
-            %                 hinges = [row(0~=row)*2-1 row(0~=row)*2]';
                             hinges = row(0~=row);
-            %                             if length(hinges) > 3
-            %                                 break
-            %                             end
-                            opt.angleConstrFinal(1).val = [hinges(:), -pi*0.985 * ones(length(hinges), 1)];
+%                             if length(hinges) > 3
+%                                 break
+%                             end
+                            %-pi if its the extruded version, pi if its
+                            %only the internal polyheron
+                            opt.angleConstrFinal(1).val = [hinges(:), (pi*0.985) * ones(length(hinges), 1)];%
                             fprintf('Hinge selection number %d/%d. ', i, size(hingeList, 1));
                             nonlinearFolding(unitCell,extrudedUnitCell,opt);
                         end
@@ -62,7 +63,7 @@ theta0=extrudedUnitCell.theta;
 max_iter = 100000;
 extrudedUnitCell.angleConstr=[];
 
-folderName = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat/', sprintf('kh%2.3f_kta%2.3f_ke%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge));
+folderName = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat/internal/', sprintf('kh%2.3f_kta%2.3f_ke%2.3f_kf%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface));
 if ~exist(folderName, 'dir')
     mkdir(folderName);
 end
@@ -244,7 +245,11 @@ extrudedUnitCell.node=extrudedUnitCell.node+[u(1:3:end) u(2:3:end) u(3:3:end)];
 %%%%%%%%%%%%%%%%%%%%%%
 %MAXIMUM AND MINIMUM ANGLES
 [angles, Dangles]=getHinge(extrudedUnitCell, extrudedUnitCellPrev);
-C1 = [-angles-pi*opt.constAnglePerc; angles-pi*opt.constAnglePerc];
+if strcmp(opt.onlyUnitCell, 'on')
+    C1 = [-angles-(pi*opt.constAnglePerc-pi); angles-pi*opt.constAnglePerc];
+else
+    C1 = [-angles-pi*opt.constAnglePerc; angles-pi*opt.constAnglePerc];
+end
 DC1 = [-Dangles; Dangles];
 %MAXIMUM AND MINIMUM EDGE STRECHING
 if strcmp(opt.constrEdge,'off') && ~isnan(opt.maxStretch)

@@ -5,13 +5,13 @@ switch opt.plot
         result = [];
         outputResults(unitCell,extrudedUnitCell,result,opt);
     case {'result', 'savedata', 'plot'}
-        
-        folderResults = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat/', sprintf('kh%2.3f_kta%2.3f_ke%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge));
+        optionalName = sprintf('kh%2.3f_kta%2.3f_ke%2.3f_kf%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
+        folderResults = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat/internal/', optionalName);
         if ~exist(folderResults, 'dir')
             fprintf('No folder with results:' + folderResults + '\n');
         else
             if strcmp(opt.plot,'savedata')
-                folderEnergy = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/energy/', sprintf('kh%2.3f_kta%2.3f_ke%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge));
+                folderEnergy = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/energy/internal/', optionalName);
                 if ~exist(folderEnergy, 'dir')
                     mkdir(folderEnergy);
                 end
@@ -70,6 +70,9 @@ switch opt.plot
                     dlmwrite(fileEnergy, Energies, 'delimiter', ',', '-append');
                 end
                 if strcmp(opt.createFig, 'on')
+                    if strcmp(opt.onlyUnitCell, 'on')
+                       [extrudedUnitCell, result] = extrudeInnerPolyhedra(extrudedUnitCell,result,1); 
+                    end
                     outputResults(unitCell,extrudedUnitCell,result,opt);
                 end
                 if strcmp(opt.showFig, 'off')
@@ -140,3 +143,71 @@ end
 
 maxStrech = max(dEdge);
 minStrech = min(dEdge);
+
+function [extrudedUnitCell, result] = extrudeInnerPolyhedra(extrudedUnitCell,result, extrutionLength)
+%%% Assuming only one unit cell
+Faces = extrudedUnitCell.face;
+Nodes = size(extrudedUnitCell.node,1);
+rep = 0;
+for i=1:length(Faces)      
+    nNo=size(extrudedUnitCell.node,1);
+    nodeNum=Faces{i};
+    nodeNumNew=nNo+1:nNo+length(nodeNum);
+    
+%     normal = getNormal(extrudedUnitCell.node, nodeNum(1), nodeNum(2), nodeNum(3),[0 0 0]);
+    normal = getavNormal(extrudedUnitCell.node(Faces{i},:), [0 0 0]);
+    extrudedUnitCell.node(nodeNumNew,:)=extrudedUnitCell.node(nodeNum,:)+extrutionLength*ones(length(nodeNum),1)*normal;
+    
+    for j = 1:result.numMode
+        for k = 1:length(result.deform(j).interV)
+            movedNodes = extrudedUnitCell.node(1:Nodes,:)+result.deform(j).interV(k).V(1:Nodes,:);
+%             normal = getNormal(movedNodes, nodeNum(1), nodeNum(2), nodeNum(3),normal);
+            normal = getavNormal(movedNodes(Faces{i},:), normal);
+            newNodes = movedNodes(nodeNum,:)+extrutionLength*ones(length(nodeNum),1)*normal;
+            result.deform(j).interV(k).V(nodeNumNew,:) = newNodes - extrudedUnitCell.node(nodeNumNew,:);
+            result.deform(j).interV(k).Ve=result.deform(j).interV(k).V(:,end);
+        end
+        movedNodes = extrudedUnitCell.node(1:Nodes,:)+result.deform(j).V(1:Nodes,:);
+%         normal = getNormal(movedNodes, nodeNum(1), nodeNum(2), nodeNum(3),normal);
+        normal = getavNormal(movedNodes(Faces{i},:), normal);
+        newNodes = movedNodes(nodeNum,:)+extrutionLength*ones(length(nodeNum),1)*normal;
+        result.deform(j).V(nodeNumNew,:)= newNodes - extrudedUnitCell.node(nodeNumNew,:);
+        result.deform(j).Ve=result.deform(j).V(:,end);
+    end
+    index=[1:length(nodeNum) 1];
+    for j=1:length(nodeNum)   
+        rep=rep+1;
+        extrudedUnitCell.face{rep}=[nodeNum(index(j)) nodeNum(index(j+1)) nodeNumNew(index(j+1)) nodeNumNew(index(j))];
+    end
+end
+
+function normal = getNormal(nodes, node1, node2, node3,prevnormal)
+
+a=nodes(node2,:)-nodes(node1,:);
+b=nodes(node3,:)-nodes(node1,:);
+alpha=acos(sum(a.*b)/(norm(a)*norm(b)));
+if imag(alpha) > 0
+    alpha = 0;
+end
+normal=cross(a,b)/(norm(a)*norm(b)*sin(alpha));
+if sum(isinf(normal))
+    normal = prevnormal;
+end
+
+function normal = getavNormal(nodes,prevnormal)
+
+center = mean(nodes,1);
+node1 = 1;
+node2 = ceil(size(nodes,1)/2);
+
+a=nodes(node1,:)-center;
+b=nodes(node2,:)-center;
+alpha=acos(sum(a.*b)/(norm(a)*norm(b)));
+if imag(alpha) > 0
+    alpha = 0;
+end
+normal=cross(a,b)/(norm(a)*norm(b)*sin(alpha));
+if sum(isinf(normal))
+    normal = prevnormal;
+end
+
