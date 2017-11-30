@@ -6,7 +6,7 @@ Created on Mon Sep 11 15:30:52 2017
 """
 import numpy as np
 import os
-import plot_csv2 as pc2
+import DataAnalysisInterSteps as pc2
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib
