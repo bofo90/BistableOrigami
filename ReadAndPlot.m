@@ -39,11 +39,17 @@ switch opt.plot
                 
                 if strcmp(opt.plot, 'savedata')
                     [CM, Radios, Stdev, EhingeInt, maxStrech, minStrech] = getData(extrudedUnitCell, opt, result);
+                    EhingeInt = startEndValues(EhingeInt, result);
+                    CM = startEndValues(CM, result);
+                    Radios = startEndValues(Radios, result);
+                    Stdev = startEndValues(Stdev, result);
+                    maxStrech = startEndValues(maxStrech, result);
+                    minStrech = startEndValues(minStrech, result);
+                    
                     Energies = [ones(length(result.E),1)*(ct-directories), result.Eedge,...
-                        result.Eface, result.Ehinge, result.EtargetAngle, EhingeInt(1:end-1:end,:), result.exfl];
-                    PosStad = cat(3,ones(length(result.E),2,1)*(ct-directories),CM(1:end-1:end,:,:),...
-                        Radios(1:end-1:end,:), Stdev(1:end-1:end,:),...
-                        maxStrech(1:end-1:end,:), minStrech(1:end-1:end,:));
+                        result.Eface, result.Ehinge, result.EtargetAngle, EhingeInt, result.exfl];
+                    PosStad = cat(3,ones(length(result.E),2,1)*(ct-directories),...
+                        CM,Radios, Stdev,maxStrech, minStrech);
                     Hinges = [num2str(ct-directories),',',mat2str(hingeSet)];
                     dlmwrite(fMassDist, PosStad, 'delimiter', ',', '-append');
                     dlmwrite(fHinge, Hinges, 'delimiter', '', '-append');
@@ -148,6 +154,21 @@ end
 
 maxStrech = max(dEdge);
 minStrech = min(dEdge);
+
+function values = startEndValues(allValues, result);
+
+if size(allValues,3) == 1
+    values = [allValues(1,:);...
+        allValues(size(result.deform(1).interV,2),1) allValues(size(result.deform(2).interV,2),2)];
+else
+    firstvalues = allValues(1,:,:);
+    lastvalues1 = allValues(size(result.deform(1).interV,2),1,:);
+    lastvalues2 = allValues(size(result.deform(2).interV,2),2,:);
+    lastvalues = cat(2, lastvalues1, lastvalues2);
+    values = cat(1, firstvalues, lastvalues);
+    
+end
+
 
 function [extrudedUnitCell, result] = extrudeInnerPolyhedra(extrudedUnitCell,result, extrutionLength)
 %%% Assuming only one unit cell
