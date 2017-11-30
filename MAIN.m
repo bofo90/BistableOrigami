@@ -29,9 +29,10 @@ switch SimCase
                     'Khinge',0.01,'Kedge',10^0.5,'Kface',1,'KtargetAngle',1,...
                     'stepkHinge', 1, 'stepkTargetAngle', 3, 'stepkEdge', 1,...
                     'stepMaxStrech', 1, 'maxStretch', nan);
-        extraName = sprintf('_temp/kh%2.3f_kta%2.3f_ke%2.3f_kf%2.3f',...
+        optionalName = '_temp';
+        extraName = sprintf('/kh%2.3f_kta%2.3f_ke%2.3f_kf%2.3f',...
                                 opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
-        opt.saveFile = strcat('/',date,extraName);
+        opt.saveFile = strcat('/',date,optionalName,extraName);
         hingeSet = [1 2];
 
         %-pi if its the extruded version, pi if its
@@ -167,6 +168,7 @@ opt.options=optimoptions('fmincon','GradConstr','on','GradObj','on',...
                          
 %                          'FiniteDifferenceType', 'central', 'FiniteDifferenceStepSize', eps^(1));
 
+saveOptionsFile(opt, unitCell, extrudedUnitCell)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %SELECT HINGES
