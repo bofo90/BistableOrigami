@@ -11,27 +11,8 @@ switch opt.plot
         else
             if strcmp(opt.plot,'savedata')
                 folderEnergy = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/energy', opt.saveFile);
-                if ~exist(folderEnergy, 'dir')
-                    mkdir(folderEnergy);
-                end
-
-                fileEnergy = strcat(folderEnergy, '/','EnergyData.csv');
-                if exist(fileEnergy, 'file')
-                    delete(fileEnergy) % always start with new file
-                end
-                fileHinge = strcat(folderEnergy, '/','Hinges.csv');
-                if exist(fileHinge, 'file')
-                    delete(fileHinge) % always start with new file
-                end
-                fileMassDist = strcat(folderEnergy, '/','PosStad.csv');
-                if exist(fileMassDist, 'file')
-                    delete(fileMassDist) % always start with new file
-                end
-                fileMetadata = strcat(folderEnergy, '/','metadata.txt');
-                if exist(fileMetadata, 'file')
-                    delete(fileMetadata) % always start with new file
-                end
-                copyfile([folderResults '/metadata.txt'],fileMetadata);
+                [fMassDist, fHinge, fEnergy] = reviewDataFiles(folderEnergy, folderResults);
+                
             end
             
             allFiles = dir(folderResults);
@@ -46,29 +27,27 @@ switch opt.plot
                 end
 
                 % parse the file name to get back hinge set
-                fileName = allFiles(ct).name;
-                parsedName = strsplit(fileName(1:end-4), '_');
-                hingeSet = getHingeSet(parsedName{2});
+                hingeSet = getHingeSet(allFiles(ct).name);
                 if ~isequal(hingeSet, opt.angleConstrFinal(1).val(:,1)) && strcmp(opt.readAngFile,'off')
                     continue;
                 end
                 extrudedUnitCell.angleConstr = [hingeSet(:), -pi*0.985 * ones(length(hingeSet), 1)];
                 % load results from file
-                load(strcat(folderResults,'/', fileName));
+                load(strcat(folderResults,'/', allFiles(ct).name));
                 succesfullFiles = succesfullFiles + 1;
                 fprintf('Plot of Hinges number %d/%d\n', succesfullFiles, length(allFiles)-directories);
                 
                 if strcmp(opt.plot, 'savedata')
-                    [CM, Radios, Stdev, EhingeInt, maxStrech, minStrech] = getRadiosStdev(extrudedUnitCell, opt, result);
+                    [CM, Radios, Stdev, EhingeInt, maxStrech, minStrech] = getData(extrudedUnitCell, opt, result);
                     Energies = [ones(length(result.E),1)*(ct-directories), result.Eedge,...
                         result.Eface, result.Ehinge, result.EtargetAngle, EhingeInt(1:end-1:end,:), result.exfl];
                     PosStad = cat(3,ones(length(result.E),2,1)*(ct-directories),CM(1:end-1:end,:,:),...
                         Radios(1:end-1:end,:), Stdev(1:end-1:end,:),...
                         maxStrech(1:end-1:end,:), minStrech(1:end-1:end,:));
-                    Hinges = [num2str(ct-directories),',',parsedName{2}];
-                    dlmwrite(fileMassDist, PosStad, 'delimiter', ',', '-append');
-                    dlmwrite(fileHinge, Hinges, 'delimiter', '', '-append');
-                    dlmwrite(fileEnergy, Energies, 'delimiter', ',', '-append');
+                    Hinges = [num2str(ct-directories),',',mat2str(hingeSet)];
+                    dlmwrite(fMassDist, PosStad, 'delimiter', ',', '-append');
+                    dlmwrite(fHinge, Hinges, 'delimiter', '', '-append');
+                    dlmwrite(fEnergy, Energies, 'delimiter', ',', '-append');
                 end
                 if strcmp(opt.createFig, 'on')
                     if strcmp(opt.onlyUnitCell, 'on')
@@ -85,17 +64,42 @@ switch opt.plot
         
 end
 
+function [fileMassDist, fileHinge, fileEnergy] = reviewDataFiles(folderEnergy, folderResults)
 
-function [hingeSet] = getHingeSet(Name)
+if ~exist(folderEnergy, 'dir')
+    mkdir(folderEnergy);
+end
 
-hingeSetStr = Name;
+fileEnergy = strcat(folderEnergy, '/','EnergyData.csv');
+if exist(fileEnergy, 'file')
+    delete(fileEnergy) % always start with new file
+end
+fileHinge = strcat(folderEnergy, '/','Hinges.csv');
+if exist(fileHinge, 'file')
+    delete(fileHinge) % always start with new file
+end
+fileMassDist = strcat(folderEnergy, '/','PosStad.csv');
+if exist(fileMassDist, 'file')
+    delete(fileMassDist) % always start with new file
+end
+fileMetadata = strcat(folderEnergy, '/','metadata.txt');
+if exist(fileMetadata, 'file')
+    delete(fileMetadata) % always start with new file
+end
+copyfile([folderResults '/metadata.txt'],fileMetadata);
+
+
+function [hingeSet] = getHingeSet(fileName)
+
+parsedName = strsplit(fileName(1:end-4), '_');
+hingeSetStr = parsedName{2};
 hingeSetStr = strrep(hingeSetStr, '[', '');
 hingeSetStr = strrep(hingeSetStr, ']', '');
 hingeSetStr = strsplit(hingeSetStr(1:end), ' ');
 hingeSet = str2double(hingeSetStr)';
 
 
-function [CM, Radios, Stdev, EhingeInt, maxStrech, minStrech] = getRadiosStdev(extrudedUnitCell, opt, result)
+function [CM, Radios, Stdev, EhingeInt, maxStrech, minStrech] = getData(extrudedUnitCell, opt, result)
 CM = zeros(length(result.deform(1).interV),length(result.deform),3);
 Radios = zeros(length(result.deform(1).interV),length(result.deform));
 Stdev = zeros(length(result.deform(1).interV),length(result.deform));
