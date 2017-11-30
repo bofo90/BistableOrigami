@@ -1,5 +1,9 @@
-function saveOptionsFile(opt, unitCell, extrudedUnitCell)
+function metadataFile(opt, unitCell, extrudedUnitCell)
 
+filedir = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat', opt.saveFile, '/');
+filenametxt = strcat(filedir, 'metadata.txt');
+filenamemat = strcat(filedir, 'metadata.mat');
+    
 if strcmp(opt.plot,'result')
     metadata.minimizationOpt = opt.options;
     metadata.options = rmfield(opt,{'options','angleConstrFinal'});
@@ -12,15 +16,13 @@ if strcmp(opt.plot,'result')
     metadata.extUnitCell.hinges = size(extrudedUnitCell.nodeHingeEx,1);
     metadata.extUnitCell.intHinges = size(extrudedUnitCell.innerHinges,2);
 
-    filedir = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat', opt.saveFile, '/');
-    filename = strcat(filedir, 'metadata.txt');
     if ~exist(filedir, 'file')
         mkdir(filedir);
     end
 
-    struct2ini(filename, metadata)
+    struct2ini(filenametxt, metadata)
+    save(filenamemat, 'metadata');
 end
-
 
 function struct2ini(filename,Structure)
 %==========================================================================

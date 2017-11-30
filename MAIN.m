@@ -17,7 +17,7 @@ SimCase=1;
 
 switch SimCase
     case 1
-        opt=initOpt('inputType','individual', 'plot','result',... 
+        opt=initOpt('inputType','individual', 'plot','plot',... 
                     'template','cube','onlyUnitCell', 'off',...
                     'createFig', 'off', 'showFig', 'off','saveFig','off','saveMovie', 'off',...
                     'interval', 1,'relInterval', 1,'constAnglePerc',1,...
@@ -33,6 +33,7 @@ switch SimCase
         extraName = sprintf('/kh%2.3f_kta%2.3f_ke%2.3f_kf%2.3f',...
                                 opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
         opt.saveFile = strcat('/',date,optionalName,extraName);
+        
         hingeSet = [1 2];
 
         %-pi if its the extruded version, pi if its
@@ -168,12 +169,12 @@ opt.options=optimoptions('fmincon','GradConstr','on','GradObj','on',...
                          
 %                          'FiniteDifferenceType', 'central', 'FiniteDifferenceStepSize', eps^(1));
 
-saveOptionsFile(opt, unitCell, extrudedUnitCell)
+metadataFile(opt, unitCell, extrudedUnitCell);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %SELECT HINGES
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-selectHinges(unitCell, extrudedUnitCell, opt)
+selectHinges(unitCell, extrudedUnitCell, opt);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %ANALYSIS
