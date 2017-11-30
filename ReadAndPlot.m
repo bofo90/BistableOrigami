@@ -27,6 +27,11 @@ switch opt.plot
                 if exist(fileMassDist, 'file')
                     delete(fileMassDist) % always start with new file
                 end
+                fileMetadata = strcat(folderEnergy, '/','metadata.txt');
+                if exist(fileMetadata, 'file')
+                    delete(fileMetadata) % always start with new file
+                end
+                copyfile([folderResults '/metadata.txt'],fileMetadata);
             end
             
             allFiles = dir(folderResults);
@@ -34,8 +39,8 @@ switch opt.plot
             succesfullFiles = 0;
             
             for ct = 1:length(allFiles)
-                if allFiles(ct).isdir
-            %         disp('skip all directories...')
+                if allFiles(ct).isdir || strcmp(allFiles(ct).name(1:8), 'metadata')
+                    % skip all directories and metadata file
                     directories = directories+1;
                     continue;
                 end
@@ -47,15 +52,12 @@ switch opt.plot
                 if ~isequal(hingeSet, opt.angleConstrFinal(1).val(:,1)) && strcmp(opt.readAngFile,'off')
                     continue;
                 end
-%                 ks = sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge);
-%                 fileks = strcat(parsedName{3},'_',parsedName{4},'_',parsedName{5});
-%                 if ~isequal(ks, fileks)&& strcmp(opt.readAngFile,'off')
-%                     continue;
-%                 end
                 extrudedUnitCell.angleConstr = [hingeSet(:), -pi*0.985 * ones(length(hingeSet), 1)];
+                % load results from file
                 load(strcat(folderResults,'/', fileName));
                 succesfullFiles = succesfullFiles + 1;
                 fprintf('Plot of Hinges number %d/%d\n', succesfullFiles, length(allFiles)-directories);
+                
                 if strcmp(opt.plot, 'savedata')
                     [CM, Radios, Stdev, EhingeInt, maxStrech, minStrech] = getRadiosStdev(extrudedUnitCell, opt, result);
                     Energies = [ones(length(result.E),1)*(ct-directories), result.Eedge,...
