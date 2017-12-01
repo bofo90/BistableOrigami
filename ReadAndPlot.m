@@ -40,12 +40,12 @@ switch opt.plot
                 
                 if strcmp(opt.plot, 'savedata')
                     [CM, Radios, Stdev, EhingeInt, maxStrech, minStrech] = getData(extrudedUnitCell, opt, result);
-                    EhingeInt = startEndValues(EhingeInt, result);
-                    CM = startEndValues(CM, result);
-                    Radios = startEndValues(Radios, result);
-                    Stdev = startEndValues(Stdev, result);
-                    maxStrech = startEndValues(maxStrech, result);
-                    minStrech = startEndValues(minStrech, result);
+%                     EhingeInt = startEndValues(EhingeInt, result);
+%                     CM = startEndValues(CM, result);
+%                     Radios = startEndValues(Radios, result);
+%                     Stdev = startEndValues(Stdev, result);
+%                     maxStrech = startEndValues(maxStrech, result);
+%                     minStrech = startEndValues(minStrech, result);
                     
                     Energies = [ones(length(result.E),1)*(ct-directories), result.Eedge,...
                         result.Eface, result.Ehinge, result.EtargetAngle, EhingeInt, result.exfl];
@@ -133,24 +133,29 @@ hingeSet = str2double(hingeSetStr)';
 
 
 function [CM, Radios, Stdev, EhingeInt, maxStrech, minStrech] = getData(extrudedUnitCell, opt, result)
-CM = zeros(length(result.deform(1).interV),length(result.deform),3);
-Radios = zeros(length(result.deform(1).interV),length(result.deform));
-Stdev = zeros(length(result.deform(1).interV),length(result.deform));
-EhingeInt = zeros(length(result.deform(1).interV),length(result.deform));
-maxStrech = zeros(length(result.deform(1).interV),length(result.deform));
-minStrech = zeros(length(result.deform(1).interV),length(result.deform));
+CM = zeros(2,length(result.deform),3);
+Radios = zeros(2,length(result.deform));
+Stdev = zeros(2,length(result.deform));
+EhingeInt = zeros(2,length(result.deform));
+maxStrech = zeros(2,length(result.deform));
+minStrech = zeros(2,length(result.deform));
 
 for iter = 1:length(result.deform)
-    for inter = 1:length(result.deform(iter).interV)
-        newPos = extrudedUnitCell.node + result.deform(iter).interV(inter).V;
-        CM(inter, iter,:) = mean(newPos);
-        allRad = sqrt(sum(abs(newPos-CM(inter,iter)).^2,2));
-        Radios(inter, iter) = mean(allRad);
-        Stdev(inter, iter) = std(allRad);
-        EhingeInt(inter, iter) = getIntEnergy(result.deform(iter).interV(inter).Ve, opt, extrudedUnitCell);
-        [maxStrech(inter, iter), minStrech(inter, iter)] = ...
-            getExtremeStreching(result.deform(iter).interV(inter).Ve, opt, extrudedUnitCell);
-    end
+%     for inter = 1:length(result.deform(iter).interV)
+    startPos = extrudedUnitCell.node + result.deform(iter).interV(1).V;
+    endPos = extrudedUnitCell.node + result.deform(iter).interV(end).V;
+    CM(:,iter,:) = [mean(startPos); mean(endPos)]; %CM(inter, iter,:)
+    startAllRad = sqrt(sum(abs(startPos-CM(1,iter)).^2,2));
+    endAllRad = sqrt(sum(abs(endPos-CM(2,iter)).^2,2));
+    Radios(:,iter) = [mean(startAllRad);mean(endAllRad)];
+    Stdev(:,iter) = [std(startAllRad);std(endAllRad)];
+    EhingeInt(1,iter) = getIntEnergy(result.deform(iter).interV(1).Ve, opt, extrudedUnitCell);
+    EhingeInt(2,iter) = getIntEnergy(result.deform(iter).interV(end).Ve, opt, extrudedUnitCell);
+    [maxStrech(1,iter), minStrech(1,iter)] = ...
+        getExtremeStreching(result.deform(iter).interV(1).Ve, opt, extrudedUnitCell);
+    [maxStrech(2,iter), minStrech(2,iter)] = ...
+        getExtremeStreching(result.deform(iter).interV(end).Ve, opt, extrudedUnitCell);
+%     end
 end
 
 function [EhingeIntSum] = getIntEnergy(u, opt, extrudedUnitCell)
