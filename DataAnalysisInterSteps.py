@@ -106,40 +106,6 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     plt.close('all')
     #%%
     #######################################################################################################################
-    ##################### Initializing data from files 
-    #######################################################################################################################
-#    hingeNum = np.empty(0, dtype = int)
-#    hingeName = np.empty(0)
-#    eEdgeFol = np.empty(0)
-#    eEdgeRel = np.empty(0)
-#    eFaceFol = np.empty(0)
-#    eFaceRel = np.empty(0)
-#    eHingeFol = np.empty(0)
-#    eHingeRel = np.empty(0)
-#    eTAngleFol = np.empty(0)
-#    eTAngleRel = np.empty(0)
-#    eHinIntFol = np.empty(0)
-#    eHinIntRel = np.empty(0)
-#    
-#    exflFol = np.empty(0, dtype = int)
-#    exflRel = np.empty(0, dtype = int)
-    
-#    CMxFol = np.empty(0)
-#    CMxRel = np.empty(0)
-#    CMyFol = np.empty(0)
-#    CMyRel = np.empty(0)
-#    CMzFol = np.empty(0)
-#    CMzRel = np.empty(0)
-#    RadFol = np.empty(0)
-#    RadRel = np.empty(0)
-#    StdFol = np.empty(0)
-#    StdRel = np.empty(0)
-#    MaxStrFol = np.empty(0)
-#    MaxStrRel = np.empty(0)
-#    MinStrFol = np.empty(0)
-#    MinStrRel = np.empty(0)
-    
-    #######################################################################################################################
     ##################### Reading Files
     #######################################################################################################################
     
@@ -177,62 +143,6 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     MaxStrRel = dataPosStad[12,:]
     MinStrFol = dataPosStad[13,:]
     MinStrRel = dataPosStad[14,:]
-
-    hingeName = np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', unpack = True, usecols = [1], dtype=bytes).astype(str)
-#    dataHingeName = np.genfromtxt(folder_name+file_name2,skip_header=1, dtype=None, delimiter = ',', unpack = True)
-#    hingeName = dataHingeName[1,:]
-
-#    with open(folder_name + file_name1,'r',newline='') as ffit: 
-#        readers = csv.reader(ffit,delimiter=',');
-#        for row in readers:
-#            if row:
-#                if isfloat(row[0].encode('ascii','ignore')):
-#                    hingeNum = np.append(hingeNum, np.int(row[0]));
-#                    eEdgeFol = np.append(eEdgeFol, np.float(row[1]));
-#                    eEdgeRel = np.append(eEdgeRel, np.float(row[2]));
-#                    eFaceFol = np.append(eFaceFol, np.float(row[3]));
-#                    eFaceRel = np.append(eFaceRel, np.float(row[4]));
-#                    eHingeFol = np.append(eHingeFol, np.float(row[5]));
-#                    eHingeRel = np.append(eHingeRel, np.float(row[6]));
-#                    eTAngleFol = np.append(eTAngleFol, np.float(row[7]));
-#                    eTAngleRel = np.append(eTAngleRel, np.float(row[8]));
-#                    eHinIntFol = np.append(eHinIntFol, np.float(row[9]))
-#                    eHinIntRel = np.append(eHinIntRel, np.float(row[10]))
-#                    exflFol = np.append(exflFol, np.int(row[11]))
-#                    exflRel = np.append(exflRel, np.int(row[12]))
-#                    
-#    ffit.close()
-                    
-#    with open(folder_name + file_name2,'r',newline='') as ffit: 
-#        readers = csv.reader(ffit,delimiter=',');
-#        for row in readers:
-#            if row:
-#                if isfloat(row[0].encode('ascii','ignore')):
-#                    hingeName = np.append(hingeName, row[1]);
-#                    
-#    ffit.close()
-    
-#    with open(folder_name + file_name3,'r',newline='') as ffit: 
-#        readers = csv.reader(ffit,delimiter=',');
-#        for row in readers:
-#            if row:
-#                if isfloat(row[0].encode('ascii','ignore')):
-#                    CMxFol = np.append(CMxFol, np.float(row[1]));
-#                    CMxRel = np.append(CMxRel, np.float(row[2]));
-#                    CMyFol = np.append(CMyFol, np.float(row[3]));
-#                    CMyRel = np.append(CMyRel, np.float(row[4]));
-#                    CMzFol = np.append(CMzFol, np.float(row[5]));
-#                    CMzRel = np.append(CMzRel, np.float(row[6]));
-#                    RadFol = np.append(RadFol, np.float(row[7]));
-#                    RadRel = np.append(RadRel, np.float(row[8]));
-#                    StdFol = np.append(StdFol, np.float(row[9]));
-#                    StdRel = np.append(StdRel, np.float(row[10]));
-#                    MaxStrFol = np.append(MaxStrFol, np.float(row[11]));
-#                    MaxStrRel = np.append(MaxStrRel, np.float(row[12]));
-#                    MinStrFol = np.append(MinStrFol, np.float(row[13]));
-#                    MinStrRel = np.append(MinStrRel, np.float(row[14]));
-#                    
-#    ffit.close()
     
     #%%
     #######################################################################################################################
