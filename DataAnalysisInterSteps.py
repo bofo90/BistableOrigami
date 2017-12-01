@@ -196,20 +196,20 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         normalized = normalized + 'en'
     
     ############################################ get the number of actuated hinges for each hinge-set
-    actuatedHinges = np.zeros(hingeNum[-1], dtype = int)
+    actuatedHinges = np.zeros(totHingeNum, dtype = int)
     hingeCount = np.zeros(internalHinges)   
-    for hinge in np.arange(hingeNum[-1]):
+    for hinge in np.arange(totHingeNum):
         actuatedHinges[hinge] = len(hingeName[hinge].split())
         hingeCount[actuatedHinges[hinge]-1] += 1
     ############################################ order the hinge-set according to the number of actuated hinges
     orderedHinges = np.argsort(actuatedHinges)
     
     ############################################ count the different flags and Mask the hinge-sets that didnt converge
-    flagCountFol = np.zeros((len(hingeCount), totalflags))
-    flagCountRel = np.zeros((len(hingeCount), totalflags))
-    hingesMask = np.arange(hingeNum[-1], dtype = float)
+    flagCountFol = np.zeros((internalHinges, totalflags))
+    flagCountRel = np.zeros((internalHinges, totalflags))
+    hingesMask = np.arange(totHingeNum, dtype = float)
     notConvHinges = np.empty((0,3), dtype = int)
-    for i in np.arange(hingeNum[-1]):
+    for i in np.arange(totHingeNum):
         error = False
 #        flagCountFol[actuatedHinges[i]-1,exflFol[i*stepsHinge+1]+3]  += 1
 #        flagCountRel[actuatedHinges[i]-1,exflRel[i*stepsHinge+1]+3]  += 1
@@ -224,10 +224,10 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
             hingesMask[i] = np.NaN
             
     notConverged = sum(np.isnan(hingesMask))
-    converged = hingeNum[-1] - notConverged
+    converged = totHingeNum - notConverged
     ############################################ normalize the flag counts
     allFlags = np.sum(np.add(flagCountFol,flagCountRel), axis = 0)
-    allFlags = allFlags/hingeNum[-1]/2
+    allFlags = allFlags/totHingeNum/2
     for i in np.arange(totalflags):
         flagCountFol[:,i] = flagCountFol[:,i]/hingeCount
         flagCountRel[:,i] = flagCountRel[:,i]/hingeCount
@@ -243,14 +243,14 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     differentEnergies = np.empty((0,2), dtype = int)
     differentEnergiesName = np.empty(0)
     differentEnergiesEnergy = np.empty((0,2))
-    for hinge in np.arange(hingeNum[-1]):
+    for hinge in np.arange(totHingeNum):
         if ~np.isnan(hingesMask[orderedHinges[hinge]]):
             hingeeHinge = lasteHingeRel[hinge]
             hingeeEdge = lasteEdgeRel[hinge]
-            sameEnergy = np.where(np.logical_and(np.logical_and(energies[:hingeNum[-1]]>=hingeeHinge-tolHinge,
-                                                                energies[:hingeNum[-1]]<=hingeeHinge+tolHinge),
-                                                 np.logical_and(energies[hingeNum[-1]:]>=hingeeEdge-tolEdge, 
-                                                                energies[hingeNum[-1]:]<=hingeeEdge+tolEdge)))[0]
+            sameEnergy = np.where(np.logical_and(np.logical_and(energies[:totHingeNum]>=hingeeHinge-tolHinge,
+                                                                energies[:totHingeNum]<=hingeeHinge+tolHinge),
+                                                 np.logical_and(energies[totHingeNum:]>=hingeeEdge-tolEdge, 
+                                                                energies[totHingeNum:]<=hingeeEdge+tolEdge)))[0]
             ############################################ see if at least one of the neighbours converge (including the selected one)
             i = 0
             if len(notConvHinges) > 0:
@@ -328,7 +328,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         cmap1.set_over('r')
     
     
-        for hinge in np.arange(hingeNum[-1]):
+        for hinge in np.arange(totHingeNum):
             if ~np.isnan(hingesMask[hinge]):
                 col = '#36648B'
             else:
