@@ -35,9 +35,11 @@ if strcmp(opt.plot,'result')
 %                             if length(hinges) > 3
 %                                 break
 %                             end
-                            %-pi if its the extruded version, pi if its
-                            %only the internal polyheron
-                            opt.angleConstrFinal(1).val = [hinges(:), (-pi*0.985) * ones(length(hinges), 1)];%
+                            if strcmp(opt.onlyUnitCell, 'on')
+                                opt.angleConstrFinal(1).val = [hinges(:), (pi*0.985) * ones(length(hinges), 1)];
+                            else
+                                opt.angleConstrFinal(1).val = [hinges(:), (-pi*0.985) * ones(length(hinges), 1)];
+                            end
                             fprintf('Hinge selection number %d/%d. ', i, size(hingeList, 1));
                             nonlinearFolding(unitCell,extrudedUnitCell,opt);
                         end

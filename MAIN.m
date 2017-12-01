@@ -30,55 +30,20 @@ switch SimCase
                     'stepkHinge', 1, 'stepkTargetAngle', 3, 'stepkEdge', 1,...
                     'stepMaxStrech', 1, 'maxStretch', nan);
 
-        opt.saveFile = strcat('/',date,'_temp');
-        
-        opt.saveFile = '/30-Nov-2017_temp';
-        
-        hingeSet = [1 2 8];
+        opt.saveFile = strcat('/',date,'_firstCubeAfterModification');
+%         opt.saveFile = '/30-Nov-2017_temp';
 
         %-pi if its the extruded version, pi if its
         %only the internal polyheron
-        opt.angleConstrFinal(1).val=[ hingeSet(:) , (-pi*0.985) *ones(length(hingeSet), 1)];
-%                                      1  -pi*0.985
-%                                      2  -pi*0.985
-%                                      12  -pi*0.985
-%                                      8  -pi*0.985
-% %                                      17  -pi*0.985
-%                                      21  -pi*0.985
-% %                                      26  -pi*0.985
-% %                                      30  -pi*0.985
-%                                      ];
-%         opt.angleConstrFinal(2).val=[1  -pi*0.985
-%                                      2  -pi*0.985
-%                                      19  -pi*0.985
-%                                      ];
-%         opt.angleConstrFinal(3).val=[1  -pi*0.985
-%                                      2  -pi*0.985
-%                                      8  -pi*0.985
-%                                      ];
-%         opt.angleConstrFinal(4).val=[2  -pi*0.985
-%                                      13  -pi*0.985
-%                                      41  -pi*0.985
-%                                      ];
-%         opt.angleConstrFinal(5).val=[3  -pi*0.985
-%                                      8  -pi*0.985
-%                                      ];
-%         opt.angleConstrFinal(6).val=[3  -pi*0.985
-%                                      19  -pi*0.985
-%                                      37  -pi*0.985
-%                                      ];
-%         opt.angleConstrFinal(7).val=[3  -pi*0.985
-%                                      41  -pi*0.985
-%                                      ];
-%         opt.angleConstrFinal(8).val=[3  -pi*0.985
-%                                      ];
-%         opt.angleConstrFinal(9).val=[24  -pi*0.985
-%                                      48  -pi*0.985
-%                                      ];
-%         opt.angleConstrFinal(10).val=[36  -pi*0.985
-%                                      48  -pi*0.985
-%                                      ];
+        hingeSet = [1 2 8];
+        if strcmp(opt.onlyUnitCell, 'on')
+            opt.angleConstrFinal(1).val=[ hingeSet(:) , (pi*0.985) *ones(length(hingeSet), 1)];
+        else
+            opt.angleConstrFinal(1).val=[ hingeSet(:) , (-pi*0.985) *ones(length(hingeSet), 1)];
+        end
 
+        
+        
     case 2
         opt=initOpt('inputType','individual',...
                     'template','cuboctahedron',...
