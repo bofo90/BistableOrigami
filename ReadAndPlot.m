@@ -50,7 +50,7 @@ switch opt.plot
                         result.Eface, result.Ehinge, result.EtargetAngle, EhingeInt, result.exfl];
                     PosStad = [ones(length(result.E),1,1)*(ct-directories),...
                         CM(:,:),Radios, Stdev,maxStrech, minStrech];
-                    Hinges = [num2str(ct-directories),',',mat2str(hingeSet)];
+                    Hinges = [num2str(ct-directories),',',mat2str(hingeSet')];
                     dlmwrite(fMassDist, PosStad, 'delimiter', ',', '-append');
                     dlmwrite(fHinge, Hinges, 'delimiter', '', '-append');
                     dlmwrite(fEnergy, Energies, 'delimiter', ',', '-append');
