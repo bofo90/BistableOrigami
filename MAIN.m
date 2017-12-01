@@ -29,14 +29,12 @@ switch SimCase
                     'Khinge',0.01,'Kedge',10^0.5,'Kface',1,'KtargetAngle',1,...
                     'stepkHinge', 1, 'stepkTargetAngle', 3, 'stepkEdge', 1,...
                     'stepMaxStrech', 1, 'maxStretch', nan);
-        optionalName = '_temp';
-        extraName = sprintf('/kh%2.3f_kta%2.3f_ke%2.3f_kf%2.3f',...
-                                opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
-        opt.saveFile = strcat('/',date,optionalName,extraName);
+
+        opt.saveFile = strcat('/',date,'_temp');
         
-        opt.saveFile = '\30-Nov-2017_temp\kh0.010_kta1.000_ke3.162_kf1.000';
+        opt.saveFile = '/30-Nov-2017_temp';
         
-        hingeSet = [1];
+        hingeSet = [1 2 8];
 
         %-pi if its the extruded version, pi if its
         %only the internal polyheron
@@ -170,8 +168,6 @@ opt.options=optimoptions('fmincon','GradConstr','on','GradObj','on',...
 %                          'TypicalX', 0.1*ones(length(extrudedUnitCell.node(:,1))*3,1),...    
 
 %                          'FiniteDifferenceType', 'central', 'FiniteDifferenceStepSize', eps^(1));
-
-metadataFile(opt, unitCell, extrudedUnitCell);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %SELECT HINGES

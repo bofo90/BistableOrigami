@@ -1,6 +1,7 @@
 function metadataFile(opt, unitCell, extrudedUnitCell)
 
-filedir = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat', opt.saveFile, '/');
+extraName = sprintf('/kh%2.3f_kta%2.3f_ke%2.3f_kf%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
+filedir = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat', opt.saveFile,extraName, '/');
 filenametxt = strcat(filedir, 'metadata.txt');
 filenamemat = strcat(filedir, 'metadata.mat');
     
