@@ -108,105 +108,131 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     #######################################################################################################################
     ##################### Initializing data from files 
     #######################################################################################################################
-    hingeNum = np.empty(0, dtype = int)
-    hingeName = np.empty(0)
-    eEdgeFol = np.empty(0)
-    eEdgeRel = np.empty(0)
-    eFaceFol = np.empty(0)
-    eFaceRel = np.empty(0)
-    eHingeFol = np.empty(0)
-    eHingeRel = np.empty(0)
-    eTAngleFol = np.empty(0)
-    eTAngleRel = np.empty(0)
-    eHinIntFol = np.empty(0)
-    eHinIntRel = np.empty(0)
+#    hingeNum = np.empty(0, dtype = int)
+#    hingeName = np.empty(0)
+#    eEdgeFol = np.empty(0)
+#    eEdgeRel = np.empty(0)
+#    eFaceFol = np.empty(0)
+#    eFaceRel = np.empty(0)
+#    eHingeFol = np.empty(0)
+#    eHingeRel = np.empty(0)
+#    eTAngleFol = np.empty(0)
+#    eTAngleRel = np.empty(0)
+#    eHinIntFol = np.empty(0)
+#    eHinIntRel = np.empty(0)
+#    
+#    exflFol = np.empty(0, dtype = int)
+#    exflRel = np.empty(0, dtype = int)
     
-    exflFol = np.empty(0, dtype = int)
-    exflRel = np.empty(0, dtype = int)
-    
-    CMxFol = np.empty(0)
-    CMxRel = np.empty(0)
-    CMyFol = np.empty(0)
-    CMyRel = np.empty(0)
-    CMzFol = np.empty(0)
-    CMzRel = np.empty(0)
-    RadFol = np.empty(0)
-    RadRel = np.empty(0)
-    StdFol = np.empty(0)
-    StdRel = np.empty(0)
-    MaxStrFol = np.empty(0)
-    MaxStrRel = np.empty(0)
-    MinStrFol = np.empty(0)
-    MinStrRel = np.empty(0)
-    
-    
-    
-    #folder_name2 = "Results/cube/sqp/energy/allmaxStrech/"
-    
-    file_name1 = "EnergyData.csv"
-    file_name2 = "Hinges.csv"
-    file_name3 = "PosStad.csv"
-    
-    #maxStretch = np.array([maxStretch])
-    #
-    #with open(folder_name2+'test.csv', 'a') as f:
-    #    writer = csv.writer(f)
-    #    writer.writerow(maxStretch)
+#    CMxFol = np.empty(0)
+#    CMxRel = np.empty(0)
+#    CMyFol = np.empty(0)
+#    CMyRel = np.empty(0)
+#    CMzFol = np.empty(0)
+#    CMzRel = np.empty(0)
+#    RadFol = np.empty(0)
+#    RadRel = np.empty(0)
+#    StdFol = np.empty(0)
+#    StdRel = np.empty(0)
+#    MaxStrFol = np.empty(0)
+#    MaxStrRel = np.empty(0)
+#    MinStrFol = np.empty(0)
+#    MinStrRel = np.empty(0)
     
     #######################################################################################################################
     ##################### Reading Files
     #######################################################################################################################
-    with open(folder_name + file_name1,'r',newline='') as ffit: 
-        readers = csv.reader(ffit,delimiter=',');
-        for row in readers:
-            if row:
-                if isfloat(row[0].encode('ascii','ignore')):
-                    hingeNum = np.append(hingeNum, np.int(row[0]));
-                    eEdgeFol = np.append(eEdgeFol, np.float(row[1]));
-                    eEdgeRel = np.append(eEdgeRel, np.float(row[2]));
-                    eFaceFol = np.append(eFaceFol, np.float(row[3]));
-                    eFaceRel = np.append(eFaceRel, np.float(row[4]));
-                    eHingeFol = np.append(eHingeFol, np.float(row[5]));
-                    eHingeRel = np.append(eHingeRel, np.float(row[6]));
-                    eTAngleFol = np.append(eTAngleFol, np.float(row[7]));
-                    eTAngleRel = np.append(eTAngleRel, np.float(row[8]));
-                    eHinIntFol = np.append(eHinIntFol, np.float(row[9]))
-                    eHinIntRel = np.append(eHinIntRel, np.float(row[10]))
-                    exflFol = np.append(exflFol, np.int(row[11]))
-                    exflRel = np.append(exflRel, np.int(row[12]))
-                    
-    ffit.close()
-                    
-    with open(folder_name + file_name2,'r',newline='') as ffit: 
-        readers = csv.reader(ffit,delimiter=',');
-        for row in readers:
-            if row:
-                if isfloat(row[0].encode('ascii','ignore')):
-                    hingeName = np.append(hingeName, row[1]);
-                    
-    ffit.close()
     
-    with open(folder_name + file_name3,'r',newline='') as ffit: 
-        readers = csv.reader(ffit,delimiter=',');
-        for row in readers:
-            if row:
-                if isfloat(row[0].encode('ascii','ignore')):
-                    CMxFol = np.append(CMxFol, np.float(row[2]));
-                    CMxRel = np.append(CMxRel, np.float(row[3]));
-                    CMyFol = np.append(CMyFol, np.float(row[4]));
-                    CMyRel = np.append(CMyRel, np.float(row[5]));
-                    CMzFol = np.append(CMzFol, np.float(row[6]));
-                    CMzRel = np.append(CMzRel, np.float(row[7]));
-                    RadFol = np.append(RadFol, np.float(row[8]));
-                    RadRel = np.append(RadRel, np.float(row[9]));
-                    StdFol = np.append(StdFol, np.float(row[10]));
-                    StdRel = np.append(StdRel, np.float(row[11]));
-                    MaxStrFol = np.append(MaxStrFol, np.float(row[12]));
-                    MaxStrRel = np.append(MaxStrRel, np.float(row[13]));
-                    MinStrFol = np.append(MinStrFol, np.float(row[14]));
-                    MinStrRel = np.append(MinStrRel, np.float(row[15]));
+    file_name1 = "EnergyData.csv"
+    file_name2 = "Hinges.csv"
+    file_name3 = "PosStad.csv"
+
+    dataEnergy = np.loadtxt(folder_name+file_name1,skiprows=1, delimiter = ',', unpack = True)
+    hingeNum = dataEnergy[0,:].astype(int)
+    eEdgeFol = dataEnergy[1,:]
+    eEdgeRel = dataEnergy[2,:]
+    eFaceFol = dataEnergy[3,:]
+    eFaceRel = dataEnergy[4,:]
+    eHingeFol = dataEnergy[5,:]
+    eHingeRel = dataEnergy[6,:]
+    eTAngleFol = dataEnergy[7,:]
+    eTAngleRel = dataEnergy[8,:]
+    eHinIntFol = dataEnergy[9,:]
+    eHinIntRel = dataEnergy[10,:]
+    exflFol = dataEnergy[11,:].astype(int)
+    exflRel = dataEnergy[12,:].astype(int)
+    
+    dataPosStad = np.loadtxt(folder_name+file_name3,skiprows=1, delimiter = ',', unpack = True)
+    CMxFol = dataPosStad[1,:]
+    CMxRel = dataPosStad[2,:]
+    CMyFol = dataPosStad[3,:]
+    CMyRel = dataPosStad[4,:]
+    CMzFol = dataPosStad[5,:]
+    CMzRel = dataPosStad[6,:]
+    RadFol = dataPosStad[7,:]
+    RadRel = dataPosStad[8,:]
+    StdFol = dataPosStad[9,:]
+    StdRel = dataPosStad[10,:]
+    MaxStrFol = dataPosStad[11,:]
+    MaxStrRel = dataPosStad[12,:]
+    MinStrFol = dataPosStad[13,:]
+    MinStrRel = dataPosStad[14,:]
+
+    hingeName = np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', unpack = True, usecols = [1], dtype=bytes).astype(str)
+#    dataHingeName = np.genfromtxt(folder_name+file_name2,skip_header=1, dtype=None, delimiter = ',', unpack = True)
+#    hingeName = dataHingeName[1,:]
+
+#    with open(folder_name + file_name1,'r',newline='') as ffit: 
+#        readers = csv.reader(ffit,delimiter=',');
+#        for row in readers:
+#            if row:
+#                if isfloat(row[0].encode('ascii','ignore')):
+#                    hingeNum = np.append(hingeNum, np.int(row[0]));
+#                    eEdgeFol = np.append(eEdgeFol, np.float(row[1]));
+#                    eEdgeRel = np.append(eEdgeRel, np.float(row[2]));
+#                    eFaceFol = np.append(eFaceFol, np.float(row[3]));
+#                    eFaceRel = np.append(eFaceRel, np.float(row[4]));
+#                    eHingeFol = np.append(eHingeFol, np.float(row[5]));
+#                    eHingeRel = np.append(eHingeRel, np.float(row[6]));
+#                    eTAngleFol = np.append(eTAngleFol, np.float(row[7]));
+#                    eTAngleRel = np.append(eTAngleRel, np.float(row[8]));
+#                    eHinIntFol = np.append(eHinIntFol, np.float(row[9]))
+#                    eHinIntRel = np.append(eHinIntRel, np.float(row[10]))
+#                    exflFol = np.append(exflFol, np.int(row[11]))
+#                    exflRel = np.append(exflRel, np.int(row[12]))
+#                    
+#    ffit.close()
                     
-    ffit.close()
+#    with open(folder_name + file_name2,'r',newline='') as ffit: 
+#        readers = csv.reader(ffit,delimiter=',');
+#        for row in readers:
+#            if row:
+#                if isfloat(row[0].encode('ascii','ignore')):
+#                    hingeName = np.append(hingeName, row[1]);
+#                    
+#    ffit.close()
+    
+#    with open(folder_name + file_name3,'r',newline='') as ffit: 
+#        readers = csv.reader(ffit,delimiter=',');
+#        for row in readers:
+#            if row:
+#                if isfloat(row[0].encode('ascii','ignore')):
+#                    CMxFol = np.append(CMxFol, np.float(row[1]));
+#                    CMxRel = np.append(CMxRel, np.float(row[2]));
+#                    CMyFol = np.append(CMyFol, np.float(row[3]));
+#                    CMyRel = np.append(CMyRel, np.float(row[4]));
+#                    CMzFol = np.append(CMzFol, np.float(row[5]));
+#                    CMzRel = np.append(CMzRel, np.float(row[6]));
+#                    RadFol = np.append(RadFol, np.float(row[7]));
+#                    RadRel = np.append(RadRel, np.float(row[8]));
+#                    StdFol = np.append(StdFol, np.float(row[9]));
+#                    StdRel = np.append(StdRel, np.float(row[10]));
+#                    MaxStrFol = np.append(MaxStrFol, np.float(row[11]));
+#                    MaxStrRel = np.append(MaxStrRel, np.float(row[12]));
+#                    MinStrFol = np.append(MinStrFol, np.float(row[13]));
+#                    MinStrRel = np.append(MinStrRel, np.float(row[14]));
+#                    
+#    ffit.close()
     
     #%%
     #######################################################################################################################
@@ -387,9 +413,9 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     #            ax3.plot(eEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
     #            ax2.plot(RadRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  StdRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
             if len(findit) != 0:# and differentEnergies[findit[0],1] > maxststs:
-#                ax1.annotate(hingeName[hinge], xy=(eEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1]), 
-#                              xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
-#                              arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
+                ax1.annotate(hingeName[hinge], xy=(eEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1]), 
+                              xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
+                              arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
                 print(hingeName[differentEnergies[findit[0],0]], differentEnergies[findit[0],1])    
                 
         cs1 = ax1.scatter(differentEnergiesEnergy[:,1], differentEnergiesEnergy[:,0], c = differentEnergies[:,1],
@@ -437,5 +463,5 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
 #            hinges[np.size(row)] +=1
 #%%
 if __name__ == "__main__":
-    folder_name = "Results/cube/sqp/energy/internal/kh0.001_kta1.000_ke10.000_kf10.000/"
+    folder_name = "Results/cube/sqp/energy/30-Nov-2017_temp/kh0.010_kta1.000_ke3.162_kf1.000/"
     ReadandAnalizeFile(folder_name, khinge = 0.001, kedge = 10)
