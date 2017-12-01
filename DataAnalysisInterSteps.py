@@ -4,9 +4,10 @@ import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.colors import from_levels_and_colors
 import numpy as np
-#import os
+import configparser
+import os.path
 #import pylab as P
-import csv
+#import csv
 #import glob
 #import ntpath
 #import sys
@@ -128,6 +129,8 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     exflFol = dataEnergy[11,:].astype(int)
     exflRel = dataEnergy[12,:].astype(int)
     
+    hingeName = np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', unpack = True, usecols = [1], dtype=bytes).astype(str)    
+    
     dataPosStad = np.loadtxt(folder_name+file_name3,skiprows=1, delimiter = ',', unpack = True)
     CMxFol = dataPosStad[1,:]
     CMxRel = dataPosStad[2,:]
@@ -146,19 +149,38 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     
     #%%
     #######################################################################################################################
-    ##################### Analize the data
+    ##################### Read Metadata File and define variables
     #######################################################################################################################
     
-    stepsHinge = int(len(hingeNum)/hingeNum[-1])
-    totalflags = 6
-    internalHinges = 12 ###### Number of internal hinges
-    totalnumberHinges = 36
-    totalnumberEdges = 144
+    metadataFile = 'metadata.txt'
     
+    if os.path.isfile(folder_name+metadataFile):
+        metadata = configparser.RawConfigParser()
+        metadata.read(folder_name+metadataFile)
+
+        internalHinges = int(metadata.get('extUnitCell', 'intHinges'))
+        totalnumberHinges = int(metadata.get('extUnitCell', 'Hinges'))
+        totalnumberEdges = int(metadata.get('extUnitCell', 'Edges'))
+        khinge = float(metadata.get('options','kHinge'))
+        kedge = float(metadata.get('options','kEdge'))
+        kface = float(metadata.get('options','kFace'))
+    else:
+        raise FileNotFoundError('No metafile found at the given directory. Changes to the script to put manually the variables are needed\n')            
+        
+        
     tolHinge = 0.003
     tolEdge = 0.01
-    normalized = ''
-    
+    normalized = ''   
+        
+    stepsHinge = int(len(hingeNum)/len(hingeName))
+    totHingeNum = len(hingeName)
+    totalflags = 6
+    #%%
+    #######################################################################################################################
+    ##################### Analize the data
+    #######################################################################################################################
+
+
     ############################################ Modify data to have a normalized energy (or just difference in angle/length)
     if ~np.isnan(khinge):
         eHingeFol = np.sqrt(eHingeFol*2/khinge/totalnumberHinges)
