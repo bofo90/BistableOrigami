@@ -34,6 +34,8 @@ switch SimCase
                                 opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
         opt.saveFile = strcat('/',date,optionalName,extraName);
         
+        opt.saveFile = '\30-Nov-2017_temp\kh0.010_kta1.000_ke3.162_kf1.000';
+        
         hingeSet = [1 2];
 
         %-pi if its the extruded version, pi if its

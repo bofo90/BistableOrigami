@@ -11,7 +11,7 @@ switch opt.plot
         else
             if strcmp(opt.plot,'savedata')
                 folderEnergy = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/energy', opt.saveFile);
-                [fMassDist, fHinge, fEnergy] = reviewDataFiles(folderEnergy, folderResults);
+                [fMassDist, fHinge, fEnergy] = makeFileswHeaders(folderEnergy, folderResults);
                 
             end
             
@@ -48,8 +48,8 @@ switch opt.plot
                     
                     Energies = [ones(length(result.E),1)*(ct-directories), result.Eedge,...
                         result.Eface, result.Ehinge, result.EtargetAngle, EhingeInt, result.exfl];
-                    PosStad = cat(3,ones(length(result.E),2,1)*(ct-directories),...
-                        CM,Radios, Stdev,maxStrech, minStrech);
+                    PosStad = [ones(length(result.E),1,1)*(ct-directories),...
+                        CM(:,:),Radios, Stdev,maxStrech, minStrech];
                     Hinges = [num2str(ct-directories),',',mat2str(hingeSet)];
                     dlmwrite(fMassDist, PosStad, 'delimiter', ',', '-append');
                     dlmwrite(fHinge, Hinges, 'delimiter', '', '-append');
@@ -70,7 +70,7 @@ switch opt.plot
         
 end
 
-function [fileMassDist, fileHinge, fileEnergy] = reviewDataFiles(folderEnergy, folderResults)
+function [fileMassDist, fileHinge, fileEnergy] = makeFileswHeaders(folderEnergy, folderResults)
 
 if ~exist(folderEnergy, 'dir')
     mkdir(folderEnergy);
@@ -80,19 +80,45 @@ fileEnergy = strcat(folderEnergy, '/','EnergyData.csv');
 if exist(fileEnergy, 'file')
     delete(fileEnergy) % always start with new file
 end
+headersEnergy = {'Hinge Number'; 'EdgeEnergyFol'; 'EdgeEnergyRel'; 'FaceEnergyFol'; 'FaceEnergyRel'; ...
+    'HingeEnergyFol'; 'HingeEnergyRel'; 'TargetAngleEnergyFol'; 'TargetAngleEnergyRel'; ...
+    'IntHingeEnergyFol'; 'IntHingeEnergyRel'; 'FlagsFol'; 'FlagsRel'};
+writeHeader(fileEnergy, headersEnergy);
+
 fileHinge = strcat(folderEnergy, '/','Hinges.csv');
 if exist(fileHinge, 'file')
     delete(fileHinge) % always start with new file
 end
+headersHinge = {'HingeNumber'; 'ActuatedHinges'};
+writeHeader(fileHinge, headersHinge);
+
 fileMassDist = strcat(folderEnergy, '/','PosStad.csv');
 if exist(fileMassDist, 'file')
     delete(fileMassDist) % always start with new file
 end
+headersMassDist = {'Hinge Number';'CenterMassXFol';'CenterMassXRel';'CenterMassYFol';'CenterMassYRel';...
+    'CenterMassZFol';'CenterMassZRel'; 'MeanDistanceCMFol';'MeanDistanceCMRel'; 'StdDevDistanceCMFol';...
+    'StdDevDistanceCMRel';'MaxEdgeStrechFol';'MaxEdgeStrechRel';'MinEdgeStrechFol';'MinEdgeStrechRel'};
+writeHeader(fileMassDist, headersMassDist);
+
 fileMetadata = strcat(folderEnergy, '/','metadata.txt');
 if exist(fileMetadata, 'file')
     delete(fileMetadata) % always start with new file
 end
 copyfile([folderResults '/metadata.txt'],fileMetadata);
+
+function writeHeader(file, headers)
+
+fid = fopen(file, 'wt') ;                         % Opens file for writing.
+for j = 1:size(headers,1)
+    fprintf(fid, '%s', headers{j});
+    if j ~= size(headers,1)
+        fprintf(fid, ',');
+    else
+        fprintf(fid, '\n');
+    end
+end
+fclose(fid) ;                                          % Closes file.
 
 
 function [hingeSet] = getHingeSet(fileName)
