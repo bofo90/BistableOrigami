@@ -149,6 +149,8 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     MinStrRel = dataPosStad[14,:]
     SumIntAngFol = dataPosStad[15,:]
     SumIntAngRel = dataPosStad[16,:]
+    SumExtAngFol = dataPosStad[17,:]
+    SumExtAngRel = dataPosStad[18,:]
     
     #%%
     #######################################################################################################################
@@ -298,8 +300,10 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         NiceGraph3D(ax4, 'CenterMass X', 'CenterMass Y', 'CenterMass Z')
         
         fig4 = plt.figure(3,figsize=(cm2inch(35), cm2inch(20)))
-        ax5 = plt.subplot(111)
+        ax5 = plt.subplot(121)
+        ax10 = plt.subplot(122)
         NiceGraph2D(ax5, 'HingeEnergy', 'Sum of internal angles')
+        NiceGraph2D(ax10, 'HingeEnergy', 'Sum of external angles')
 #        NiceGraph2D(ax5, 'Hinge-Set Number', 'Internal Hinge Energy', [np.nan, min(eHinIntRel)], [np.nan, max(eHinIntRel)], buffer = [0, 0.0004])
         
         fig5 = plt.figure(4,figsize=(cm2inch(35), cm2inch(20)))
@@ -345,6 +349,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
                 ax2.scatter(RadRel[stepsHinge*hinge+stepsHinge-1], StdRel[stepsHinge*hinge+stepsHinge-1], c = col, label = hingeName[hinge])
                 ax4.scatter(CMxRel[stepsHinge*hinge+stepsHinge-1], CMyRel[stepsHinge*hinge+stepsHinge-1], CMzRel[stepsHinge*hinge+stepsHinge-1], c = col)
                 ax5.scatter(eHingeRel[stepsHinge*hinge+stepsHinge-1], SumIntAngRel[stepsHinge*hinge+stepsHinge-1], c = col)
+                ax10.scatter(eHingeRel[stepsHinge*hinge+stepsHinge-1], SumExtAngRel[stepsHinge*hinge+stepsHinge-1], c = col)
                 ax8.scatter(eEdgeRel[stepsHinge*hinge+stepsHinge-1], abs(max(MaxStrRel[stepsHinge*hinge+stepsHinge-1],MinStrRel[stepsHinge*hinge+stepsHinge-1], key=abs)), c = col)
 #                ax8.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], MaxStrRel[stepsHinge*hinge+stepsHinge-1], c = col)
 #                ax9.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], abs(MinStrRel[stepsHinge*hinge+stepsHinge-1]), c = col)
@@ -356,6 +361,9 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
                               xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
                               arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
                 ax5.annotate(hingeName[hinge], xy=(eHingeRel[stepsHinge*hinge+stepsHinge-1], SumIntAngRel[stepsHinge*hinge+stepsHinge-1]), 
+                              xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
+                              arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
+                ax10.annotate(hingeName[hinge], xy=(eHingeRel[stepsHinge*hinge+stepsHinge-1], SumExtAngRel[stepsHinge*hinge+stepsHinge-1]), 
                               xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
                               arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
                 ax8.annotate(hingeName[hinge], xy=(eEdgeRel[stepsHinge*hinge+stepsHinge-1], abs(max(MaxStrRel[stepsHinge*hinge+stepsHinge-1],MinStrRel[stepsHinge*hinge+stepsHinge-1], key=abs))), 
@@ -409,5 +417,5 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
 #            hinges[np.size(row)] +=1
 #%%
 if __name__ == "__main__":
-    folder_name = "Results/cube/sqp/energy/04-Dec-2017_withOutAnglCnst\kh0.010_kta1.000_ke3.162_kf1.000"
+    folder_name = "Results/cube/sqp/energy/01-Dec-2017_firstCubeAfterModification\kh0.010_kta1.000_ke3.162_kf1.000"
     ReadandAnalizeFile(folder_name, khinge = 0.001, kedge = 10)
