@@ -30,8 +30,8 @@ switch SimCase
                     'stepkHinge', 1, 'stepkTargetAngle', 3, 'stepkEdge', 1,...
                     'stepMaxStrech', 1, 'maxStretch', nan);
 
-        opt.saveFile = strcat('/',date,'_withOutAnglCnst');
-%         opt.saveFile = '/01-Dec-2017_withAnglCnst';
+%         opt.saveFile = strcat('/',date,'_withOutAnglCnst');
+        opt.saveFile = '/01-Dec-2017_firstCubeAfterModification';
 
         %-pi if its the extruded version, pi if its
         %only the internal polyheron

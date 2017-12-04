@@ -299,7 +299,8 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         
         fig4 = plt.figure(3,figsize=(cm2inch(35), cm2inch(20)))
         ax5 = plt.subplot(111)
-        NiceGraph2D(ax5, 'Hinge-Set Number', 'Internal Hinge Energy', [np.nan, min(eHinIntRel)], [np.nan, max(eHinIntRel)], buffer = [0, 0.0004])
+        NiceGraph2D(ax5, 'HingeEnergy', 'Sum of internal angles')
+#        NiceGraph2D(ax5, 'Hinge-Set Number', 'Internal Hinge Energy', [np.nan, min(eHinIntRel)], [np.nan, max(eHinIntRel)], buffer = [0, 0.0004])
         
         fig5 = plt.figure(4,figsize=(cm2inch(35), cm2inch(20)))
         ax6 = plt.subplot(111)
@@ -343,7 +344,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     #            ax3.scatter(eEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1], c = c)
                 ax2.scatter(RadRel[stepsHinge*hinge+stepsHinge-1], StdRel[stepsHinge*hinge+stepsHinge-1], c = col, label = hingeName[hinge])
                 ax4.scatter(CMxRel[stepsHinge*hinge+stepsHinge-1], CMyRel[stepsHinge*hinge+stepsHinge-1], CMzRel[stepsHinge*hinge+stepsHinge-1], c = col)
-                ax5.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], eHinIntRel[stepsHinge*hinge+stepsHinge-1], c = col)
+                ax5.scatter(eHingeRel[stepsHinge*hinge+stepsHinge-1], SumIntAngRel[stepsHinge*hinge+stepsHinge-1], c = col)
                 ax8.scatter(eEdgeRel[stepsHinge*hinge+stepsHinge-1], abs(max(MaxStrRel[stepsHinge*hinge+stepsHinge-1],MinStrRel[stepsHinge*hinge+stepsHinge-1], key=abs)), c = col)
 #                ax8.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], MaxStrRel[stepsHinge*hinge+stepsHinge-1], c = col)
 #                ax9.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], abs(MinStrRel[stepsHinge*hinge+stepsHinge-1]), c = col)
@@ -352,6 +353,9 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     #            ax2.plot(RadRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  StdRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
             if len(findit) != 0:# and differentEnergies[findit[0],1] > maxststs:
                 ax1.annotate(hingeName[hinge], xy=(eEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1]), 
+                              xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
+                              arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
+                ax5.annotate(hingeName[hinge], xy=(eHingeRel[stepsHinge*hinge+stepsHinge-1], SumIntAngRel[stepsHinge*hinge+stepsHinge-1]), 
                               xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
                               arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
                 ax8.annotate(hingeName[hinge], xy=(eEdgeRel[stepsHinge*hinge+stepsHinge-1], abs(max(MaxStrRel[stepsHinge*hinge+stepsHinge-1],MinStrRel[stepsHinge*hinge+stepsHinge-1], key=abs))), 
@@ -388,8 +392,9 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         fig1.savefig(folder_name + file_name1[:-4]+normalized+'.png', transparent = False)
         #fig2.savefig(folder_name + file_name3[:-4]+normalized+'.png', transparent = True)
         #fig3.savefig(folder_name + '/CenterOfMass'+normalized+'.png', transparent = True)
+        fig4.savefig(folder_name + '/InternalAnglesHingeEnergy'+normalized+'.png', transparent = True)
         fig5.savefig(folder_name + '/Flags.png', transparent = True)
-        #fig6.savefig(folder_name + '/MaxMinStretch'+normalized+'.png', transparent = True)
+        fig6.savefig(folder_name + '/MaxStretchEdgeEnergy'+normalized+'.png', transparent = True)
 
 
 
