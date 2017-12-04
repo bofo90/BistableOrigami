@@ -147,6 +147,8 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     MaxStrRel = dataPosStad[12,:]
     MinStrFol = dataPosStad[13,:]
     MinStrRel = dataPosStad[14,:]
+    SumIntAngFol = dataPosStad[15,:]
+    SumIntAngRel = dataPosStad[16,:]
     
     #%%
     #######################################################################################################################

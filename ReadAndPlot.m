@@ -39,7 +39,8 @@ switch opt.plot
                 fprintf('Plot of Hinges number %d/%d\n', succesfullFiles, length(allFiles)-directories);
                 
                 if strcmp(opt.plot, 'savedata')
-                    [CM, Radios, Stdev, EhingeInt, maxStrech, minStrech] = getData(extrudedUnitCell, opt, result);
+                    [CM, Radios, Stdev, EhingeInt, SumIntAngles, maxStrech, minStrech] =...
+                                                getData(extrudedUnitCell, opt, result);
 %                     EhingeInt = startEndValues(EhingeInt, result);
 %                     CM = startEndValues(CM, result);
 %                     Radios = startEndValues(Radios, result);
@@ -50,7 +51,7 @@ switch opt.plot
                     Energies = [ones(length(result.E),1)*(ct-directories), result.Eedge,...
                         result.Eface, result.Ehinge, result.EtargetAngle, EhingeInt, result.exfl];
                     PosStad = [ones(length(result.E),1,1)*(ct-directories),...
-                        CM(:,:),Radios, Stdev,maxStrech, minStrech];
+                        CM(:,:),Radios, Stdev,maxStrech, minStrech, SumIntAngles];
                     Hinges = [num2str(ct-directories),',',mat2str(hingeSet')];
                     dlmwrite(fMassDist, PosStad, 'delimiter', ',', '-append');
                     dlmwrite(fHinge, Hinges, 'delimiter', '', '-append');
@@ -99,7 +100,8 @@ if exist(fileMassDist, 'file')
 end
 headersMassDist = {'Hinge Number';'CenterMassXFol';'CenterMassXRel';'CenterMassYFol';'CenterMassYRel';...
     'CenterMassZFol';'CenterMassZRel'; 'MeanDistanceCMFol';'MeanDistanceCMRel'; 'StdDevDistanceCMFol';...
-    'StdDevDistanceCMRel';'MaxEdgeStrechFol';'MaxEdgeStrechRel';'MinEdgeStrechFol';'MinEdgeStrechRel'};
+    'StdDevDistanceCMRel';'MaxEdgeStrechFol';'MaxEdgeStrechRel';'MinEdgeStrechFol';'MinEdgeStrechRel';...
+    'SumIntAnglesFol';'SumIntAnglesRel' };
 writeHeader(fileMassDist, headersMassDist);
 
 fileMetadata = strcat(folderEnergy, '/','metadata.txt');
@@ -132,11 +134,12 @@ hingeSetStr = strsplit(hingeSetStr(1:end), ' ');
 hingeSet = str2double(hingeSetStr)';
 
 
-function [CM, Radios, Stdev, EhingeInt, maxStrech, minStrech] = getData(extrudedUnitCell, opt, result)
+function [CM, Radios, Stdev, EhingeInt, SumIntAngles, maxStrech, minStrech] = getData(extrudedUnitCell, opt, result)
 CM = zeros(2,length(result.deform),3);
 Radios = zeros(2,length(result.deform));
 Stdev = zeros(2,length(result.deform));
 EhingeInt = zeros(2,length(result.deform));
+SumIntAngles = zeros(2,length(result.deform));
 maxStrech = zeros(2,length(result.deform));
 minStrech = zeros(2,length(result.deform));
 
@@ -149,8 +152,8 @@ for iter = 1:length(result.deform)
     endAllRad = sqrt(sum(abs(endPos-CM(2,iter)).^2,2));
     Radios(:,iter) = [mean(startAllRad);mean(endAllRad)];
     Stdev(:,iter) = [std(startAllRad);std(endAllRad)];
-    EhingeInt(1,iter) = getIntEnergy(result.deform(iter).interV(1).Ve, opt, extrudedUnitCell);
-    EhingeInt(2,iter) = getIntEnergy(result.deform(iter).interV(end).Ve, opt, extrudedUnitCell);
+    [EhingeInt(1,iter),SumIntAngles(1,iter)] = getIntEnergy(result.deform(iter).interV(1).Ve, opt, extrudedUnitCell);
+    [EhingeInt(2,iter),SumIntAngles(2,iter)] = getIntEnergy(result.deform(iter).interV(end).Ve, opt, extrudedUnitCell);
     [maxStrech(1,iter), minStrech(1,iter)] = ...
         getExtremeStreching(result.deform(iter).interV(1).Ve, opt, extrudedUnitCell);
     [maxStrech(2,iter), minStrech(2,iter)] = ...
@@ -158,7 +161,7 @@ for iter = 1:length(result.deform)
 %     end
 end
 
-function [EhingeIntSum] = getIntEnergy(u, opt, extrudedUnitCell)
+function [EhingeIntSum, suminttheta] = getIntEnergy(u, opt, extrudedUnitCell)
 theta=zeros(size(extrudedUnitCell.nodeHingeEx,1),1);
 EhingeInt = zeros(size(extrudedUnitCell.innerHinges,1),1);
 extrudedUnitCell.node=extrudedUnitCell.node+[u(1:3:end) u(2:3:end) u(3:3:end)];
@@ -166,6 +169,7 @@ extrudedUnitCell.node=extrudedUnitCell.node+[u(1:3:end) u(2:3:end) u(3:3:end)];
 for i=1:size(extrudedUnitCell.nodeHingeEx,1)
     [~,theta(i)]=JacobianHinge(extrudedUnitCell.node(extrudedUnitCell.nodeHingeEx(i,:),:));
 end
+suminttheta = sum(theta(extrudedUnitCell.innerHinges));
 for i= 1:length(extrudedUnitCell.innerHinges)
     EhingeInt(i)=1/2*opt.Khinge*(theta(extrudedUnitCell.innerHinges(i))-...
         extrudedUnitCell.theta(extrudedUnitCell.innerHinges(i)))^2;
