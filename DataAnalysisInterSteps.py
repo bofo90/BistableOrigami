@@ -110,9 +110,9 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     ##################### Reading Files
     #######################################################################################################################
     
-    file_name1 = "EnergyData.csv"
-    file_name2 = "Hinges.csv"
-    file_name3 = "PosStad.csv"
+    file_name1 = "/EnergyData.csv"
+    file_name2 = "/Hinges.csv"
+    file_name3 = "/PosStad.csv"
 
     dataEnergy = np.loadtxt(folder_name+file_name1,skiprows=1, delimiter = ',', unpack = True)
     hingeNum = dataEnergy[0,:].astype(int)
@@ -132,6 +132,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     hingeName = np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', unpack = True, usecols = [1], dtype=bytes).astype(str)    
     
     dataPosStad = np.loadtxt(folder_name+file_name3,skiprows=1, delimiter = ',', unpack = True)
+    #### If there is no metadata file the order of this data is not the same as here shown
     CMxFol = dataPosStad[1,:]
     CMxRel = dataPosStad[2,:]
     CMyFol = dataPosStad[3,:]
@@ -152,7 +153,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     ##################### Read Metadata File and define variables
     #######################################################################################################################
     
-    metadataFile = 'metadata.txt'
+    metadataFile = '/metadata.txt'
     
     if os.path.isfile(folder_name+metadataFile):
         metadata = configparser.RawConfigParser()
@@ -165,7 +166,8 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         kedge = float(metadata.get('options','kEdge'))
         kface = float(metadata.get('options','kFace'))
     else:
-        raise FileNotFoundError('No metafile found at the given directory. Changes to the script to put manually the variables are needed\n')            
+        raise FileNotFoundError('No metafile found at the given directory. Changes to the script to put manually the variables are needed\n') 
+        #### If there is no metadata file the order of the dataPosStad is not the same as here shown           
         
         
     tolHinge = 0.003
@@ -305,10 +307,11 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
 #        NiceGraph2D(ax7, '# of actuated Hinges', 'percentage # of flags', [0.5, 0], [len(hingeCount)+0.5, 1+0.01], [np.arange(len(hingeCount))+1, np.nan])  
         
         fig6 = plt.figure(5,figsize=(cm2inch(35), cm2inch(20)))
-        ax8 = plt.subplot(121)  
-        ax9 = plt.subplot(122) 
-        NiceGraph2D(ax8, 'Hinge-Set Number', 'Max final streching')
-        NiceGraph2D(ax9, 'Hinge-Set Number', 'Min final streching')            
+        ax8 = plt.subplot(111)
+#        ax8 = plt.subplot(121)  
+#        ax9 = plt.subplot(122) 
+        NiceGraph2D(ax8, 'Edge Energy', 'Max strecht')
+#        NiceGraph2D(ax9, 'Hinge-Set Number', 'Min final streching')            
                     
         width = 0.5
         colors = cm.Set2(np.linspace(0, 1, totalflags))
@@ -339,13 +342,17 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
                 ax2.scatter(RadRel[stepsHinge*hinge+stepsHinge-1], StdRel[stepsHinge*hinge+stepsHinge-1], c = col, label = hingeName[hinge])
                 ax4.scatter(CMxRel[stepsHinge*hinge+stepsHinge-1], CMyRel[stepsHinge*hinge+stepsHinge-1], CMzRel[stepsHinge*hinge+stepsHinge-1], c = col)
                 ax5.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], eHinIntRel[stepsHinge*hinge+stepsHinge-1], c = col)
-                ax8.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], MaxStrRel[stepsHinge*hinge+stepsHinge-1], c = col)
-                ax9.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], abs(MinStrRel[stepsHinge*hinge+stepsHinge-1]), c = col)
+                ax8.scatter(eEdgeRel[stepsHinge*hinge+stepsHinge-1], abs(max(MaxStrRel[stepsHinge*hinge+stepsHinge-1],MinStrRel[stepsHinge*hinge+stepsHinge-1], key=abs)), c = col)
+#                ax8.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], MaxStrRel[stepsHinge*hinge+stepsHinge-1], c = col)
+#                ax9.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], abs(MinStrRel[stepsHinge*hinge+stepsHinge-1]), c = col)
     #            ax1.plot(eEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
     #            ax3.plot(eEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
     #            ax2.plot(RadRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  StdRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
             if len(findit) != 0:# and differentEnergies[findit[0],1] > maxststs:
                 ax1.annotate(hingeName[hinge], xy=(eEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1]), 
+                              xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
+                              arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
+                ax8.annotate(hingeName[hinge], xy=(eEdgeRel[stepsHinge*hinge+stepsHinge-1], abs(max(MaxStrRel[stepsHinge*hinge+stepsHinge-1],MinStrRel[stepsHinge*hinge+stepsHinge-1], key=abs))), 
                               xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
                               arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
                 print(hingeName[differentEnergies[findit[0],0]], differentEnergies[findit[0],1])    
@@ -378,9 +385,9 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         fig6.show()
         fig1.savefig(folder_name + file_name1[:-4]+normalized+'.png', transparent = False)
         #fig2.savefig(folder_name + file_name3[:-4]+normalized+'.png', transparent = True)
-        #fig3.savefig(folder_name + 'CenterOfMass'+normalized+'.png', transparent = True)
-        fig5.savefig(folder_name + 'Flags.png', transparent = True)
-        #fig6.savefig(folder_name + 'MaxMinStretch'+normalized+'.png', transparent = True)
+        #fig3.savefig(folder_name + '/CenterOfMass'+normalized+'.png', transparent = True)
+        fig5.savefig(folder_name + '/Flags.png', transparent = True)
+        #fig6.savefig(folder_name + '/MaxMinStretch'+normalized+'.png', transparent = True)
 
 
 
@@ -395,5 +402,5 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
 #            hinges[np.size(row)] +=1
 #%%
 if __name__ == "__main__":
-    folder_name = "Results/cube/sqp/energy/30-Nov-2017_temp/kh0.010_kta1.000_ke3.162_kf1.000/"
+    folder_name = "Results/cube/sqp/energy/04-Dec-2017_withOutAnglCnst\kh0.010_kta1.000_ke3.162_kf1.000"
     ReadandAnalizeFile(folder_name, khinge = 0.001, kedge = 10)
