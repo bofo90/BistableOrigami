@@ -179,8 +179,18 @@ for iter=1:length(opt.angleConstrFinal)
         mat2str(opt.angleConstrFinal(iter).val(:,1)'),'.mat');
     save(fileName, 'result');
     
-    allangles = [angles1 angles2];
-    plot(allangles')
+    
+%     nameFolderPlot=[pwd,'/Results/',opt.template,'/',opt.relAlgor,'/images',...
+%         opt.saveFile,extraName];
+%     nameFilePlot = ['/',opt.template,'_',...
+%         mat2str(opt.angleConstrFinal(iter).val(:,1)'),'.png'];
+%     if ~exist(nameFolderPlot, 'dir')
+%         mkdir(nameFolderPlot);
+%     end
+%     allangles = [angles1 angles2];
+%     plot(allangles')
+%     saveas(gcf, [nameFolderPlot, nameFilePlot]);
+%     close 'all';
  
     clearvars result E Eedge Eface Ehinge EtargetAngle exfl;
     fclose('all');
