@@ -249,13 +249,15 @@ extrudedUnitCell.node=extrudedUnitCell.node+[u(1:3:end) u(2:3:end) u(3:3:end)];
 %INEQUALITY CONSTRAINS
 %%%%%%%%%%%%%%%%%%%%%%
 %MAXIMUM AND MINIMUM ANGLES
-[angles, Dangles]=getHinge(extrudedUnitCell, extrudedUnitCellPrev);
-if strcmp(opt.onlyUnitCell, 'on')
-    C1 = [-angles-(pi*opt.constAnglePerc-pi); angles-pi*opt.constAnglePerc];
-else
-    C1 = [-angles-pi*opt.constAnglePerc; angles-pi*opt.constAnglePerc];
+if ~isnan(opt.constAnglePerc)
+    [angles, Dangles]=getHinge(extrudedUnitCell, extrudedUnitCellPrev);
+    if strcmp(opt.onlyUnitCell, 'on')
+        C1 = [-angles-(pi*opt.constAnglePerc-pi); angles-pi*opt.constAnglePerc];
+    else
+        C1 = [-angles-pi*opt.constAnglePerc; angles-pi*opt.constAnglePerc];
+    end
+    DC1 = [-Dangles; Dangles];
 end
-DC1 = [-Dangles; Dangles];
 %MAXIMUM AND MINIMUM EDGE STRECHING
 if strcmp(opt.constrEdge,'off') && ~isnan(opt.maxStretch)
     [normStrech, DnormStrech]=getEdgeNorm(extrudedUnitCell);
