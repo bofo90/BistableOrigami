@@ -90,26 +90,32 @@ for iter=1:length(opt.angleConstrFinal)
         [V(:,inter+1),~,exfl(inter+1,1)]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
         u0 = V(:,inter+1);
         %Determine energy of that equilibrium
-        [E(inter+1,1),~,Eedge(inter+1,1),Eface(inter+1,1),Ehinge(inter+1,1),EtargetAngle(inter+1,1), theta]=Energy(u0,extrudedUnitCell,opt);
+        [E(inter+1,1),~,Eedge(inter+1,1),Eface(inter+1,1),Ehinge(inter+1,1),EtargetAngle(inter+1,1), ~]=Energy(u0,extrudedUnitCell,opt);
         t2 = toc;
         fprintf(', time: %1.2f, exitflag: %d\n',t2-t1,exfl(inter+1,1));
     end
     
+    angles1 = getGlobalAngles;     
     if strcmp(opt.gethistory, 'on')
         V = getGlobalAllx;
     end
-   
+    if strcmp(opt.gethistory, 'off')
+        angles1 = [angles1(:,1) angles1(:,end)];
+    end
+
     
     result.deform(1).V=[V(1:3:end,end) V(2:3:end,end) V(3:3:end,end)];
     result.deform(1).Ve=V(:,end);
+    result.deform(1).theta = angles1(:,end);
     for j=1:size(V,2)
         result.deform(1).interV(j).V=[V(1:3:end,j) V(2:3:end,j) V(3:3:end,j)];
         result.deform(1).interV(j).Ve=V(:,j);
+        result.deform(1).interV(j).theta = angles1(:,j);
     end
     
     clearvars V;
     V(:,1)=u0;
-    initialiseGlobalx(u0, theta);
+    initialiseGlobalx(u0, angles1(:,end));
 
     switch opt.relAlgor
         case 'gradDesc'
@@ -144,15 +150,21 @@ for iter=1:length(opt.angleConstrFinal)
             extrudedUnitCell.angleConstr=[];
     end
     
+    angles2 = getGlobalAngles;
     if strcmp(opt.gethistory, 'on')
         V = getGlobalAllx;
+    end
+    if strcmp(opt.gethistory, 'off')
+        angles2 = [angles2(:,1) angles2(:,end)];
     end
     
     result.deform(2).V=[V(1:3:end,end) V(2:3:end,end) V(3:3:end,end)];
     result.deform(2).Ve=V(:,end);
+    result.deform(2).theta = angles2(:,end);
     for j=1:size(V,2)
         result.deform(2).interV(j).V=[V(1:3:end,j) V(2:3:end,j) V(3:3:end,j)];
         result.deform(2).interV(j).Ve=V(:,j);
+        result.deform(2).interV(j).theta = angles2(:,j);
     end
     
     result.E=E;
@@ -166,6 +178,9 @@ for iter=1:length(opt.angleConstrFinal)
     fileName = strcat(folderName,'/',opt.template,'_',...
         mat2str(opt.angleConstrFinal(iter).val(:,1)'),'.mat');
     save(fileName, 'result');
+    
+    allangles = [angles1 angles2];
+    plot(allangles')
  
     clearvars result E Eedge Eface Ehinge EtargetAngle exfl;
     fclose('all');
@@ -579,6 +594,8 @@ if poop.flag
         end
     end
     poop.theta = [poop.theta theta];
+    %turn the flag off after analising the angles just after an iteration,
+    %so it doesnt analyse it every time you get the energy
     poop.flag = 0;
 else
     theta = poop.theta(:,end);
@@ -587,4 +604,8 @@ end
 function r = getGlobalAllx
 global poop
 r = poop.x;
+
+function theta = getGlobalAngles
+global poop
+theta = poop.theta;
 
