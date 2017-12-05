@@ -155,9 +155,9 @@ for iter = 1:length(result.deform)
     Radios(:,iter) = [mean(startAllRad);mean(endAllRad)];
     Stdev(:,iter) = [std(startAllRad);std(endAllRad)];
     [EhingeInt(1,iter),SumIntAngles(1,iter), SumExtAngles(1,iter)] =...
-        getIntEnergy(result.deform(iter).interV(1).Ve, opt, extrudedUnitCell);
+        getIntEnergy(result.deform(iter).interV(1), opt, extrudedUnitCell);
     [EhingeInt(2,iter),SumIntAngles(2,iter), SumExtAngles(2,iter)] =...
-        getIntEnergy(result.deform(iter).interV(end).Ve, opt, extrudedUnitCell);
+        getIntEnergy(result.deform(iter).interV(end), opt, extrudedUnitCell);
     [maxStrech(1,iter), minStrech(1,iter)] = ...
         getExtremeStreching(result.deform(iter).interV(1).Ve, opt, extrudedUnitCell);
     [maxStrech(2,iter), minStrech(2,iter)] = ...
@@ -165,18 +165,16 @@ for iter = 1:length(result.deform)
 %     end
 end
 
-function [EhingeIntSum, suminttheta, sumexttheta] = getIntEnergy(u, opt, extrudedUnitCell)
-theta=zeros(size(extrudedUnitCell.nodeHingeEx,1),1);
+function [EhingeIntSum, suminttheta, sumexttheta] = getIntEnergy(result, opt, extrudedUnitCell)
+theta=result.theta;
 EhingeInt = zeros(size(extrudedUnitCell.innerHinges,1),1);
-extrudedUnitCell.node=extrudedUnitCell.node+[u(1:3:end) u(2:3:end) u(3:3:end)];
+extrudedUnitCell.node=extrudedUnitCell.node+[result.Ve(1:3:end) result.Ve(2:3:end) result.Ve(3:3:end)];
 
-for i=1:size(extrudedUnitCell.nodeHingeEx,1)
-    [~,theta(i)]=JacobianHinge(extrudedUnitCell.node(extrudedUnitCell.nodeHingeEx(i,:),:));
-end
 for i= 1:length(extrudedUnitCell.innerHinges)
     EhingeInt(i)=1/2*opt.Khinge*(theta(extrudedUnitCell.innerHinges(i))-...
         extrudedUnitCell.theta(extrudedUnitCell.innerHinges(i)))^2;
 end
+
 EhingeIntSum = sum(EhingeInt);
 suminttheta = sum(theta(extrudedUnitCell.innerHinges));
 theta(extrudedUnitCell.innerHinges) = [];
