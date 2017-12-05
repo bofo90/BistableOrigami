@@ -274,6 +274,9 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
                     differentEnergies = np.append(differentEnergies,np.array([[orderedHinges[sameEnergy[i]], len(sameEnergy)]]), axis = 0)
                     differentEnergiesName = np.append(differentEnergiesName, np.array(hingeName[orderedHinges[sameEnergy[i]]]))
                     differentEnergiesEnergy = np.append(differentEnergiesEnergy, np.array([[hingeeHinge,hingeeEdge]]), axis = 0)
+                    print(hingeName[orderedHinges[hinge]])
+                elif findit == 1:
+                    print(hingeName[orderedHinges[hinge]])
             else:
     #            nonConvStates += len(sameEnergy)
                 print('State from non convergent hinges')
@@ -353,7 +356,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
                 ax8.scatter(eEdgeRel[stepsHinge*hinge+stepsHinge-1], abs(max(MaxStrRel[stepsHinge*hinge+stepsHinge-1],MinStrRel[stepsHinge*hinge+stepsHinge-1], key=abs)), c = col)
 #                ax8.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], MaxStrRel[stepsHinge*hinge+stepsHinge-1], c = col)
 #                ax9.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], abs(MinStrRel[stepsHinge*hinge+stepsHinge-1]), c = col)
-    #            ax1.plot(eEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
+#                ax1.plot(eEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
     #            ax3.plot(eEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
     #            ax2.plot(RadRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  StdRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
             if len(findit) != 0:# and differentEnergies[findit[0],1] > maxststs:
@@ -417,5 +420,5 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
 #            hinges[np.size(row)] +=1
 #%%
 if __name__ == "__main__":
-    folder_name = "Results/cube/sqp/energy/04-Dec-2017_with_99AnglCnst\kh0.001_kta1.000_ke1.000_kf1.000"
+    folder_name = "Results/cube/sqp/energy/05-Dec-2017_with_99AnglCnst\kh0.010_kta1.000_ke3.162_kf1.000"
     ReadandAnalizeFile(folder_name, khinge = 0.001, kedge = 10)
