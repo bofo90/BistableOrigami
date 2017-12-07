@@ -45,14 +45,15 @@ dc=[-1 0  0
      0  0  1]';
  
 ka=norm(a);
-kab=sqrt((a'*a)*(b'*b)-(a'*b)^2);
-kca=sqrt((c'*c)*(a'*a)-(c'*a)^2);
 na=a/ka;
 
-kab=real(kab);
-kca=real(kca);
-nab=crossvector(a,b)/kab;
-nca=crossvector(c,a)/kca;
+nab = crossvector(a,b);
+nca = crossvector(c,a);
+kab = norm(nab);
+kca = norm(nca);
+
+nab = nab/kab;
+nca = nca/kca;
 
 detf=na'*(crossvector(nab,nca));
 dotf=nab'*nca;

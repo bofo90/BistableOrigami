@@ -484,6 +484,7 @@ for i=1:size(extrudedUnitCell.nodeHingeEx,1)
     [Jhinge(i,index),theta(i)]=JacobianHinge(extrudedUnitCell.node(extrudedUnitCell.nodeHingeEx(i,:),:));
     if abs(thetaPrev(i)-theta(i)) > 0.50*2*pi
         theta(i) = theta(i)+sign(thetaPrev(i))*2*pi;
+%         fprintf('angle %d energy\n', i);
     end
 end
 
@@ -588,6 +589,7 @@ if poop.flag
         [~,theta(i)]=JacobianHinge(extrudedUnitCell.node(extrudedUnitCell.nodeHingeEx(i,:),:));
         if abs(poop.theta(i,end)-theta(i)) > 0.50*2*pi
             theta(i) = theta(i)+sign(poop.theta(i,end))*2*pi;
+%             fprintf('angle %d global\n', i);
         end
     end
     poop.theta = [poop.theta theta];
