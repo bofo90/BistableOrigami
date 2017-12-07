@@ -57,7 +57,20 @@ switch opt.plot
                     dlmwrite(fHinge, Hinges, 'delimiter', '', '-append');
                     dlmwrite(fEnergy, Energies, 'delimiter', ',', '-append');
                 end
+                
                 if strcmp(opt.createFig, 'on')
+                    
+                    nameFolderPlot=[pwd,'/Results/',opt.template,'/',opt.relAlgor,'/images',...
+                        opt.saveFile,extraName];
+                    nameFilePlot = ['/',opt.template,'_',mat2str(hingeSet'),'.png'];
+                    if ~exist(nameFolderPlot, 'dir')
+                        mkdir(nameFolderPlot);
+                    end
+                    allangles = [result.deform(1).interV(:).theta result.deform(2).interV(:).theta];
+                    plot(allangles')
+                    saveas(gcf, [nameFolderPlot, nameFilePlot]);
+                    close 'all';                    
+                    
                     if strcmp(opt.onlyUnitCell, 'on')
                        [extrudedUnitCell, result] = extrudeInnerPolyhedra(extrudedUnitCell,result,1); 
                     end
