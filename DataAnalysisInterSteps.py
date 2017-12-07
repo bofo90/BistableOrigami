@@ -283,6 +283,14 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     #differentEnergies = np.array(differentEnergies)
     
     
+    ###################### Normalize the angles to be proportional to Pi and shift the angle sum to easier understanding
+
+    SumIntAngFol = SumIntAngFol/np.pi+internalHinges
+    SumIntAngRel = SumIntAngRel/np.pi+internalHinges
+    SumExtAngFol = (SumExtAngFol/np.pi-(totalnumberHinges-internalHinges))*(-1)
+    SumExtAngRel = (SumExtAngRel/np.pi-(totalnumberHinges-internalHinges))*(-1)
+    
+    
     #%%
     #######################################################################################################################
     ##################### Ploting the result
@@ -305,8 +313,11 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         fig4 = plt.figure(3,figsize=(cm2inch(35), cm2inch(20)))
         ax5 = plt.subplot(121)
         ax10 = plt.subplot(122)
-        NiceGraph2D(ax5, 'HingeEnergy', 'Sum of internal angles')
-        NiceGraph2D(ax10, 'HingeEnergy', 'Sum of external angles')
+        NiceGraph2D(ax5, r'Average $\Delta\theta$ [rad]', 'Sum of internal angles [rad]')
+        NiceGraph2D(ax10, r'Average $\Delta\theta$ [rad]', 'Sum of external angles [rad]')
+        ax5.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%g $\pi$'))
+        ax10.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%g $\pi$'))
+#        ax5.yaxis.set_major_locator(matl.ticker.MultipleLocator(base=1.0))
 #        NiceGraph2D(ax5, 'Hinge-Set Number', 'Internal Hinge Energy', [np.nan, min(eHinIntRel)], [np.nan, max(eHinIntRel)], buffer = [0, 0.0004])
         
         fig5 = plt.figure(4,figsize=(cm2inch(35), cm2inch(20)))
@@ -320,7 +331,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         ax8 = plt.subplot(111)
 #        ax8 = plt.subplot(121)  
 #        ax9 = plt.subplot(122) 
-        NiceGraph2D(ax8, 'Edge Energy', 'Max strecht')
+        NiceGraph2D(ax8, r'Average $\Delta$L', r'Max strecht $\Delta$L')
 #        NiceGraph2D(ax9, 'Hinge-Set Number', 'Min final streching')            
                     
         width = 0.5
@@ -422,5 +433,5 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
 #            hinges[np.size(row)] +=1
 #%%
 if __name__ == "__main__":
-    folder_name = "Results/triangular prism/sqp/energy/06-Dec-2017_99AngCnstr/kh0.010_kta1.000_ke1.000_kf1.000"
+    folder_name = "Results/cube/sqp/energy/05-Dec-2017_with_99AnglCnst\kh0.001_kta1.000_ke1.000_kf1.000"
     ReadandAnalizeFile(folder_name, khinge = 0.001, kedge = 10)
