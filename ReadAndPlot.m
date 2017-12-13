@@ -68,6 +68,8 @@ switch opt.plot
                     end
                     allangles = [result.deform(1).interV(:).theta result.deform(2).interV(:).theta];
                     plot(allangles')
+                    x = size(result.deform(1).interV,2)+0.5;
+                    line([x x],[-1.1*pi 1.1*pi], 'Color', [0 0 0])
                     saveas(gcf, [nameFolderPlot, nameFilePlot]);
                     close 'all';                    
                     
