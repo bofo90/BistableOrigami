@@ -87,7 +87,7 @@ for iter=1:length(opt.angleConstrFinal)
         t1 = toc;
         extrudedUnitCell.angleConstr(:,2)=theta0(extrudedUnitCell.angleConstr(:,1))+inter*(-theta0(extrudedUnitCell.angleConstr(:,1))+opt.angleConstrFinal(iter).val(:,2))/opt.interval;
         %Determine new equilibrium
-        [V(:,inter+1),~,exfl(inter+1,1)]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
+        [V(:,inter+1),~,exfl(inter+1,1),output]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
         u0 = V(:,inter+1);
         %Determine energy of that equilibrium
         [E(inter+1,1),~,Eedge(inter+1,1),Eface(inter+1,1),Ehinge(inter+1,1),EtargetAngle(inter+1,1), ~]=Energy(u0,extrudedUnitCell,opt);
@@ -107,6 +107,7 @@ for iter=1:length(opt.angleConstrFinal)
     result.deform(1).V=[V(1:3:end,end) V(2:3:end,end) V(3:3:end,end)];
     result.deform(1).Ve=V(:,end);
     result.deform(1).theta = angles1(:,end);
+    result.deform(1).output = output;
     for j=1:size(V,2)
         result.deform(1).interV(j).V=[V(1:3:end,j) V(2:3:end,j) V(3:3:end,j)];
         result.deform(1).interV(j).Ve=V(:,j);
@@ -139,7 +140,7 @@ for iter=1:length(opt.angleConstrFinal)
                 fprintf('load: %d, step: %1.2f',2*iter,inter/opt.relInterval)
                 t1 = toc;
                 opt.KtargetAngle = prevKtargetAngle - (prevKtargetAngle/opt.relInterval)*inter;
-                [V(:,inter+1),~,exfl(inter+1,2)]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
+                [V(:,inter+1),~,exfl(inter+1,2),output]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
                 u0 = V(:,inter+1);
                 [E(inter+1,2),~,Eedge(inter+1,2),Eface(inter+1,2),Ehinge(inter+1,2),EtargetAngle(inter+1,2), ~]=Energy(u0,extrudedUnitCell,opt);
                 t2 = toc;
@@ -161,6 +162,7 @@ for iter=1:length(opt.angleConstrFinal)
     result.deform(2).V=[V(1:3:end,end) V(2:3:end,end) V(3:3:end,end)];
     result.deform(2).Ve=V(:,end);
     result.deform(2).theta = angles2(:,end);
+    result.deform(2).output = output;
     for j=1:size(V,2)
         result.deform(2).interV(j).V=[V(1:3:end,j) V(2:3:end,j) V(3:3:end,j)];
         result.deform(2).interV(j).Ve=V(:,j);
