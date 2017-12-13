@@ -154,6 +154,9 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     SumExtAngRel = dataPosStad[18,:]
     
     dataAngles = np.loadtxt(folder_name+file_name4,skiprows=1, delimiter = ',')
+    dataAngles = np.delete(dataAngles, 0, 1)
+    MaxAngles = np.max(dataAngles, axis = 1)
+    MinAngles = np.min(dataAngles, axis = 1)
     
     #%%
     #######################################################################################################################
