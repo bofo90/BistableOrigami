@@ -12,7 +12,7 @@ switch opt.plot
         else
             if strcmp(opt.plot,'savedata')
                 folderEnergy = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/energy', opt.saveFile, extraName);
-                [fMassDist, fHinge, fEnergy] = makeFileswHeaders(folderEnergy, folderResults);
+                [fMassDist, fHinge, fEnergy, fAngles] = makeFileswHeaders(folderEnergy, folderResults);
                 
             end
             
@@ -47,15 +47,17 @@ switch opt.plot
 %                     Stdev = startEndValues(Stdev, result);
 %                     maxStrech = startEndValues(maxStrech, result);
 %                     minStrech = startEndValues(minStrech, result);
-                    
                     Energies = [ones(length(result.E),1)*(ct-directories), result.Eedge,...
                         result.Eface, result.Ehinge, result.EtargetAngle, EhingeInt, result.exfl];
                     PosStad = [ones(length(result.E),1,1)*(ct-directories),...
                         CM(:,:),Radios, Stdev,maxStrech, minStrech, SumIntAngles, SumExtAngles];
                     Hinges = [num2str(ct-directories),',',mat2str(hingeSet')];
-                    dlmwrite(fMassDist, PosStad, 'delimiter', ',', '-append');
+                    AllAngles = [extrudedUnitCell.theta result.deform(end).theta]';
+                    AllAngles = [ones(size(AllAngles,1),1)*(ct-directories) AllAngles];
+                    dlmwrite(fMassDist, PosStad, 'delimiter', ',', '-append','precision',7);
                     dlmwrite(fHinge, Hinges, 'delimiter', '', '-append');
-                    dlmwrite(fEnergy, Energies, 'delimiter', ',', '-append');
+                    dlmwrite(fEnergy, Energies, 'delimiter', ',', '-append','precision',7);
+                    dlmwrite(fAngles, AllAngles, 'delimiter', ',', '-append','precision',7);
                 end
                 
                 if strcmp(opt.createFig, 'on')
@@ -87,7 +89,7 @@ switch opt.plot
         
 end
 
-function [fileMassDist, fileHinge, fileEnergy] = makeFileswHeaders(folderEnergy, folderResults)
+function [fileMassDist, fileHinge, fileEnergy, fileAngles] = makeFileswHeaders(folderEnergy, folderResults)
 
 if ~exist(folderEnergy, 'dir')
     mkdir(folderEnergy);
@@ -118,6 +120,13 @@ headersMassDist = {'Hinge Number';'CenterMassXFol';'CenterMassXRel';'CenterMassY
     'StdDevDistanceCMRel';'MaxEdgeStrechFol';'MaxEdgeStrechRel';'MinEdgeStrechFol';'MinEdgeStrechRel';...
     'SumIntAnglesFol';'SumIntAnglesRel';'SumExtAnglesFol';'SumExtAnglesRel' };
 writeHeader(fileMassDist, headersMassDist);
+
+fileAngles = strcat(folderEnergy, '/','Angles.csv');
+if exist(fileAngles, 'file')
+    delete(fileAngles) % always start with new file
+end
+headersAngles = {'HingeNumber'; 'All Angles'};
+writeHeader(fileAngles, headersAngles);
 
 fileMetadata = strcat(folderEnergy, '/','metadata.txt');
 if exist(fileMetadata, 'file')
