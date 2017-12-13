@@ -113,6 +113,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     file_name1 = "/EnergyData.csv"
     file_name2 = "/Hinges.csv"
     file_name3 = "/PosStad.csv"
+    file_name4 = "/Angles.csv"
 
     dataEnergy = np.loadtxt(folder_name+file_name1,skiprows=1, delimiter = ',', unpack = True)
     hingeNum = dataEnergy[0,:].astype(int)
@@ -151,6 +152,8 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     SumIntAngRel = dataPosStad[16,:]
     SumExtAngFol = dataPosStad[17,:]
     SumExtAngRel = dataPosStad[18,:]
+    
+    dataAngles = np.loadtxt(folder_name+file_name4,skiprows=1, delimiter = ',')
     
     #%%
     #######################################################################################################################
@@ -438,5 +441,5 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
 #            hinges[np.size(row)] +=1
 #%%
 if __name__ == "__main__":
-    folder_name = "Results/cube/sqp/energy/13-Dec-2017_noAngleCnstr\kh0.010_kta1.000_ke3.162_kf1.000"
+    folder_name = "Results/cube/sqp/energy/13-Dec-2017_temp\kh0.010_kta1.000_ke3.162_kf1.000"
     ReadandAnalizeFile(folder_name, khinge = 0.001, kedge = 10)
