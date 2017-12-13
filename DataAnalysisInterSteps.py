@@ -228,6 +228,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         if error:
             notConvHinges = np.append(notConvHinges,np.array([[i, exflFol[(i+1)*stepsHinge-1], exflRel[(i+1)*stepsHinge-1]]]), axis = 0)
             hingesMask[i] = np.NaN
+            print(hingeName[i])
             
     notConverged = sum(np.isnan(hingesMask))
     converged = totHingeNum - notConverged
@@ -245,7 +246,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     lasteEdgeRel = lasteEdgeRel[orderedHinges]
     energies = np.append(lasteHingeRel, lasteEdgeRel)
     ############################################ going through all hinges in order and see all the neighbours in energy
-    #nonConvStates = 0
+    print('Stable State hinge selection:')
     differentEnergies = np.empty((0,2), dtype = int)
     differentEnergiesName = np.empty(0)
     differentEnergiesEnergy = np.empty((0,2))
@@ -282,6 +283,8 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
                 print('State from non convergent hinges')
     #differentEnergies = np.array(differentEnergies)
     
+    print('Total converged percentage:', converged/totHingeNum)
+    print('Not converged: ', notConverged, '/', totHingeNum)
     
     ###################### Normalize the angles to be proportional to Pi and shift the angle sum to easier understanding
 
@@ -345,6 +348,8 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         
         
         ax6.legend(loc = 2, fontsize =15, framealpha = 0.5, edgecolor = 'inherit', fancybox = False)
+        s = 'Convergence: %.2f\nNon Convergence states: %d/%d' %(converged/totHingeNum, notConverged,totHingeNum)
+        ax6.set_title(s)
         
         maxststs = np.max(differentEnergies[:,1])
         cmap1, norm1 = from_levels_and_colors(np.arange(np.nanmax(differentEnergies[:,1])+1)+1,
@@ -373,9 +378,9 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     #            ax3.plot(eEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
     #            ax2.plot(RadRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  StdRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
             if len(findit) != 0:# and differentEnergies[findit[0],1] > maxststs:
-#                ax1.annotate(hingeName[hinge], xy=(eEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1]), 
-#                              xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
-#                              arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
+                ax1.annotate(hingeName[hinge], xy=(eEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1]), 
+                              xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
+                              arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
                 ax5.annotate(hingeName[hinge], xy=(eHingeRel[stepsHinge*hinge+stepsHinge-1], SumIntAngRel[stepsHinge*hinge+stepsHinge-1]), 
                               xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
                               arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
@@ -433,5 +438,5 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
 #            hinges[np.size(row)] +=1
 #%%
 if __name__ == "__main__":
-    folder_name = "Results/triangular prism/sqp/energy/07-Dec-2017_99AngleCnstr\kh0.010_kta1.000_ke0.316_kf1.000"
+    folder_name = "Results/cube/sqp/energy/11-Dec-2017_100AngleCnstr\kh0.010_kta1.000_ke3.162_kf1.000"
     ReadandAnalizeFile(folder_name, khinge = 0.001, kedge = 10)
