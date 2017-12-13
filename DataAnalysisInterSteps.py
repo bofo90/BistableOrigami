@@ -193,12 +193,12 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         eHingeRel = np.sqrt(eHingeRel*2/khinge/totalnumberHinges)
         eHinIntFol = np.sqrt(eHinIntFol*2/khinge/internalHinges)
         eHinIntRel = np.sqrt(eHinIntRel*2/khinge/internalHinges)
-        tolHinge = 0.019
+        tolHinge = 0.001
         normalized = normalized + 'hn'
     if ~np.isnan(kedge):
         eEdgeFol = np.sqrt(eEdgeFol*2/kedge/totalnumberEdges)
         eEdgeRel = np.sqrt(eEdgeRel*2/kedge/totalnumberEdges)
-        tolEdge = 0.0017
+        tolEdge = 0.0001
         normalized = normalized + 'en'
     
     ############################################ get the number of actuated hinges for each hinge-set
