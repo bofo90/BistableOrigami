@@ -183,10 +183,11 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     tolHinge = 0.003
     tolEdge = 0.01
     normalized = ''   
+    tolStretch = 0.3 #max precentage of allowed stretch
         
     stepsHinge = int(len(hingeNum)/len(hingeName))
     totHingeNum = len(hingeName)
-    totalflags = 6
+    totalflags = 8
     #%%
     #######################################################################################################################
     ##################### Analize the data
@@ -231,6 +232,17 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         if exflRel[(i+1)*stepsHinge-1] != 1 and not error:# and exflRel[(i+1)*stepsHinge-1] != 2:
             flagCountRel[actuatedHinges[i]-1,exflRel[(i+1)*stepsHinge-1]+3]  += 1
             error = True
+        if not error:
+            #check if max/min angle not bigger than pi or -pi
+            if MaxAngles[i*2+1] > np.pi or MinAngles[i*2+1] < -np.pi:
+                flagCountRel[actuatedHinges[i]-1,6]  += 1
+                exflRel[(i+1)*stepsHinge-1] = 3
+                error = True
+            #check for max/min strech not bigger than a tolerance
+            if MaxStrFol[(i+1)*stepsHinge-1] > tolStretch or MinStrFol[(i+1)*stepsHinge-1] < -tolStretch:
+                flagCountRel[actuatedHinges[i]-1,7]  += 1
+                exflRel[(i+1)*stepsHinge-1] = 4
+                error = True
         if error:
             notConvHinges = np.append(notConvHinges,np.array([[i, exflFol[(i+1)*stepsHinge-1], exflRel[(i+1)*stepsHinge-1]]]), axis = 0)
             hingesMask[i] = np.NaN
@@ -340,7 +352,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         ax8 = plt.subplot(111)
 #        ax8 = plt.subplot(121)  
 #        ax9 = plt.subplot(122) 
-        NiceGraph2D(ax8, r'Average $\Delta$L', r'Max strecht $\Delta$L')
+        NiceGraph2D(ax8, r'Average $\Delta$L', r'Max strecht $\Delta$L/L')
 #        NiceGraph2D(ax9, 'Hinge-Set Number', 'Min final streching')            
                     
         width = 0.5
