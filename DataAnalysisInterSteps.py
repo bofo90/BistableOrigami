@@ -200,7 +200,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         eHingeRel = np.sqrt(eHingeRel*2/khinge/totalnumberHinges)
         eHinIntFol = np.sqrt(eHinIntFol*2/khinge/internalHinges)
         eHinIntRel = np.sqrt(eHinIntRel*2/khinge/internalHinges)
-        tolHinge = 0.001
+        tolHinge = 0.005
         normalized = normalized + 'hn'
     if ~np.isnan(kedge):
         eEdgeFol = np.sqrt(eEdgeFol*2/kedge/totalnumberEdges)
@@ -234,12 +234,12 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
             error = True
         if not error:
             #check if max/min angle not bigger than pi or -pi
-            if MaxAngles[i*2+1] > np.pi or MinAngles[i*2+1] < -np.pi:
+            if MaxAngles[i*2+1] > np.pi*1.01 or MinAngles[i*2+1] < -np.pi*1.01:
                 flagCountRel[actuatedHinges[i]-1,6]  += 1
                 exflRel[(i+1)*stepsHinge-1] = 3
                 error = True
             #check for max/min strech not bigger than a tolerance
-            if MaxStrFol[(i+1)*stepsHinge-1] > tolStretch or MinStrFol[(i+1)*stepsHinge-1] < -tolStretch:
+            if (MaxStrRel[(i+1)*stepsHinge-1] > tolStretch or MinStrRel[(i+1)*stepsHinge-1]  < -tolStretch) and not error:
                 flagCountRel[actuatedHinges[i]-1,7]  += 1
                 exflRel[(i+1)*stepsHinge-1] = 4
                 error = True
@@ -456,5 +456,5 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
 #            hinges[np.size(row)] +=1
 #%%
 if __name__ == "__main__":
-    folder_name = "Results/cube/sqp/energy/13-Dec-2017_temp\kh0.010_kta1.000_ke3.162_kf1.000"
+    folder_name = "Results/cube/sqp/energy/13-Dec-2017_99AngleCnstr\kh0.001_kta1.000_ke1.000_kf1.000"
     ReadandAnalizeFile(folder_name, khinge = 0.001, kedge = 10)
