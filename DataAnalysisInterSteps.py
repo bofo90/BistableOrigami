@@ -200,7 +200,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         eHingeRel = np.sqrt(eHingeRel*2/khinge/totalnumberHinges)
         eHinIntFol = np.sqrt(eHinIntFol*2/khinge/internalHinges)
         eHinIntRel = np.sqrt(eHinIntRel*2/khinge/internalHinges)
-        tolHinge = 0.003
+        tolHinge = 0.008
         normalized = normalized + 'hn'
     if ~np.isnan(kedge):
         eEdgeFol = np.sqrt(eEdgeFol*2/kedge/totalnumberEdges)
@@ -234,7 +234,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
             error = True
         if not error:
             #check if max/min angle not bigger than pi or -pi
-            if MaxAngles[i*2+1] > np.pi*1.01 or MinAngles[i*2+1] < -np.pi*1.01:
+            if MaxAngles[i*2+1] > np.around(np.pi,4) or MinAngles[i*2+1] < -np.around(np.pi,4):
                 flagCountRel[actuatedHinges[i]-1,6]  += 1
                 exflRel[(i+1)*stepsHinge-1] = 3
                 error = True
