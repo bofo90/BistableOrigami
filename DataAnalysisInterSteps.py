@@ -185,6 +185,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     normalized = ''   
     tolStretch = 0.3 #max precentage of allowed stretch
     digitPi = 4 # digits of pi for rounding to see if angles go beyond it and "not converge"
+    tolAngleSS = 0.087 # equivalent to 5 degrees
         
     stepsHinge = int(len(hingeNum)/len(hingeName))
     totHingeNum = len(hingeName)
@@ -259,58 +260,74 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         flagCountRel[:,i] = flagCountRel[:,i]/hingeCount
         
     ############################################ ordering the last energies on the release according to the number of actuated hinges
-    lasteHingeRel = eHingeRel[stepsHinge-1::stepsHinge]
-    lasteEdgeRel = eEdgeRel[stepsHinge-1::stepsHinge]
+#    lasteHingeRel = eHingeRel[stepsHinge-1::stepsHinge]
+#    lasteEdgeRel = eEdgeRel[stepsHinge-1::stepsHinge]
+##    for hinge in np.arange(totHingeNum):
+##        if np.isnan(hingesMask[hinge]):
+##            lasteHingeRel[hinge] = np.nan
+##            lasteEdgeRel[hinge] = np.nan
+#    lasteHingeRel = lasteHingeRel[orderedHinges]
+#    lasteEdgeRel = lasteEdgeRel[orderedHinges]
+#    energies = np.append(lasteHingeRel, lasteEdgeRel)
+#    ############################################ going through all hinges in order and see all the neighbours in energy
+#    print('Stable State hinge selection:')
+#    differentEnergies = np.empty((0,2), dtype = int)
+#    differentEnergiesName = np.empty(0)
+#    differentEnergiesEnergy = np.empty((0,2))
 #    for hinge in np.arange(totHingeNum):
-#        if np.isnan(hingesMask[hinge]):
-#            lasteHingeRel[hinge] = np.nan
-#            lasteEdgeRel[hinge] = np.nan
-    lasteHingeRel = lasteHingeRel[orderedHinges]
-    lasteEdgeRel = lasteEdgeRel[orderedHinges]
-    energies = np.append(lasteHingeRel, lasteEdgeRel)
-    ############################################ going through all hinges in order and see all the neighbours in energy
-    print('Stable State hinge selection:')
-    differentEnergies = np.empty((0,2), dtype = int)
-    differentEnergiesName = np.empty(0)
-    differentEnergiesEnergy = np.empty((0,2))
-    for hinge in np.arange(totHingeNum):
-        if ~np.isnan(hingesMask[orderedHinges[hinge]]):
-            hingeeHinge = lasteHingeRel[hinge]
-            hingeeEdge = lasteEdgeRel[hinge]
-            sameEnergy = np.where(np.logical_and(np.logical_and(energies[:totHingeNum]>=hingeeHinge-tolHinge,
-                                                                energies[:totHingeNum]<=hingeeHinge+tolHinge),
-                                                 np.logical_and(energies[totHingeNum:]>=hingeeEdge-tolEdge, 
-                                                                energies[totHingeNum:]<=hingeeEdge+tolEdge)))[0]
-            ############################################ see if at least one of the neighbours converge (including the selected one)
-            i = 0
-            if len(notConvHinges) > 0:
-                #goes through all hinges in the same neighbourhood and see if they dont converge. 
-                #If one converges, it stops. If non converges gives i =-1
-                while len(np.where(notConvHinges[:,0] == orderedHinges[sameEnergy[i]])[0]) != 0:
-                    i = i + 1
-                    if i >= len(sameEnergy):
-                        i = -1
-                        break
-            ############################################ save the new state or not according to the convergance
-            if i != -1:
-                findit = np.where(differentEnergies[:,0] == orderedHinges[sameEnergy[i]])[0]
-                if len(findit) == 0:
-                    stablehinge = orderedHinges[hinge]
-                    differentEnergies = np.append(differentEnergies,np.array([[stablehinge, len(sameEnergy)]]), axis = 0)
-                    differentEnergiesName = np.append(differentEnergiesName, np.array(hingeName[stablehinge]))
-                    differentEnergiesEnergy = np.append(differentEnergiesEnergy, np.array([[lasteHingeRel[hinge],lasteEdgeRel[hinge]]]), axis = 0)
-                    print(hingeName[orderedHinges[hinge]])
-                elif findit >= 1:
-                    print(hingeName[orderedHinges[hinge]], findit) 
-            else:
-    #            nonConvStates += len(sameEnergy)
-                print('State from non convergent hinges')
-    #differentEnergies = np.array(differentEnergies)
+#        if ~np.isnan(hingesMask[orderedHinges[hinge]]):
+#            hingeeHinge = lasteHingeRel[hinge]
+#            hingeeEdge = lasteEdgeRel[hinge]
+#            sameEnergy = np.where(np.logical_and(np.logical_and(energies[:totHingeNum]>=hingeeHinge-tolHinge,
+#                                                                energies[:totHingeNum]<=hingeeHinge+tolHinge),
+#                                                 np.logical_and(energies[totHingeNum:]>=hingeeEdge-tolEdge, 
+#                                                                energies[totHingeNum:]<=hingeeEdge+tolEdge)))[0]
+#            ############################################ see if at least one of the neighbours converge (including the selected one)
+#            i = 0
+#            if len(notConvHinges) > 0:
+#                #goes through all hinges in the same neighbourhood and see if they dont converge. 
+#                #If one converges, it stops. If non converges gives i =-1
+#                while len(np.where(notConvHinges[:,0] == orderedHinges[sameEnergy[i]])[0]) != 0:
+#                    i = i + 1
+#                    if i >= len(sameEnergy):
+#                        i = -1
+#                        break
+#            ############################################ save the new state or not according to the convergance
+#            if i != -1:
+#                findit = np.where(differentEnergies[:,0] == orderedHinges[sameEnergy[i]])[0]
+#                if len(findit) == 0:
+#                    stablehinge = orderedHinges[hinge]
+#                    differentEnergies = np.append(differentEnergies,np.array([[stablehinge, len(sameEnergy)]]), axis = 0)
+#                    differentEnergiesName = np.append(differentEnergiesName, np.array(hingeName[stablehinge]))
+#                    differentEnergiesEnergy = np.append(differentEnergiesEnergy, np.array([[lasteHingeRel[hinge],lasteEdgeRel[hinge]]]), axis = 0)
+#                    print(hingeName[stablehinge])
+#                elif findit >= 1:
+#                    print(hingeName[orderedHinges[hinge]], findit) 
+#            else:
+#    #            nonConvStates += len(sameEnergy)
+#                print('State from non convergent hinges')
+#    #differentEnergies = np.array(differentEnergies)
     ######################### Problems: double counting of stable states that are close to each other due to the ill definition of neighbourhoods.
     #########################           Additionally counting states that didn't converge.
     print('Total converged percentage:', converged/totHingeNum)
     print('Not converged: ', notConverged, '/', totHingeNum)
     
+    ###################### Analysis of angles to find stable states
+    convHinges = np.empty(0, dtype = int)
+    finalAngles = np.empty((0,np.size(dataAngles,1)))
+    dataAngles = np.around(dataAngles/tolAngleSS)*tolAngleSS ## Here you conisder the tolerance for angles to recognize stable states
+    for hinge in orderedHinges:
+        if ~np.isnan(hingesMask[hinge]):
+            sortAngleIndex = np.lexsort((dataAngles[2*hinge+1,:],dataAngles[2*hinge,:]))
+            finalAngles = np.append(finalAngles, [dataAngles[2*hinge+1,sortAngleIndex]], axis = 0)
+            convHinges = np.append(convHinges, hinge)
+    
+    angles, index, counts = np.unique(finalAngles, axis = 0, return_index = True, return_counts = True)
+    differentEnergies = np.column_stack((convHinges[index], counts))
+    differentEnergiesName = hingeName[convHinges[index]]
+    differentEnergiesEnergy = np.column_stack((eHingeRel[convHinges[index]*stepsHinge+stepsHinge-1], 
+                                                eEdgeRel[convHinges[index]*stepsHinge+stepsHinge-1]))
+   
     ###################### Normalize the angles to be proportional to Pi and shift the angle sum to easier understanding
 
     SumIntAngFol = SumIntAngFol/np.pi+internalHinges
@@ -399,7 +416,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
 #                ax8.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], MaxStrRel[stepsHinge*hinge+stepsHinge-1], c = col)
 #                ax9.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], abs(MinStrRel[stepsHinge*hinge+stepsHinge-1]), c = col)
 #            ax1.plot(eEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
-            ax1.scatter(eEdgeRel[stepsHinge*hinge+stepsHinge-1],  eHingeRel[stepsHinge*hinge+stepsHinge-1], c = col)                
+#            ax1.scatter(eEdgeRel[stepsHinge*hinge+stepsHinge-1],  eHingeRel[stepsHinge*hinge+stepsHinge-1], c = col)                
     #            ax3.plot(eEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
     #            ax2.plot(RadRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  StdRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
             if len(findit) != 0:# and differentEnergies[findit[0],1] > maxststs:
@@ -463,5 +480,5 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
 #            hinges[np.size(row)] +=1
 #%%
 if __name__ == "__main__":
-    folder_name = "Results/cube/sqp/energy/13-Dec-2017_100AngleCnstr\kh0.001_kta1.000_ke1.000_kf1.000"
+    folder_name = "Results/cube/sqp/energy/13-Dec-2017_noAngleCnstr\kh0.010_kta1.000_ke3.162_kf1.000"
     ReadandAnalizeFile(folder_name, khinge = 0.001, kedge = 10)
