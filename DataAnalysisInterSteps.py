@@ -184,6 +184,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     tolEdge = 0.01
     normalized = ''   
     tolStretch = 0.3 #max precentage of allowed stretch
+    digitPi = 4 # digits of pi for rounding to see if angles go beyond it and "not converge"
         
     stepsHinge = int(len(hingeNum)/len(hingeName))
     totHingeNum = len(hingeName)
@@ -234,7 +235,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
             error = True
         if not error:
             #check if max/min angle not bigger than pi or -pi
-            if MaxAngles[i*2+1] > np.around(np.pi,4) or MinAngles[i*2+1] < -np.around(np.pi,4):
+            if MaxAngles[i*2+1] > np.around(np.pi,digitPi) or MinAngles[i*2+1] < -np.around(np.pi,digitPi):
                 flagCountRel[actuatedHinges[i]-1,6]  += 1
                 exflRel[(i+1)*stepsHinge-1] = 3
                 error = True
