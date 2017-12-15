@@ -200,7 +200,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         eHingeRel = np.sqrt(eHingeRel*2/khinge/totalnumberHinges)
         eHinIntFol = np.sqrt(eHinIntFol*2/khinge/internalHinges)
         eHinIntRel = np.sqrt(eHinIntRel*2/khinge/internalHinges)
-        tolHinge = 0.005
+        tolHinge = 0.003
         normalized = normalized + 'hn'
     if ~np.isnan(kedge):
         eEdgeFol = np.sqrt(eEdgeFol*2/kedge/totalnumberEdges)
@@ -260,6 +260,10 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     ############################################ ordering the last energies on the release according to the number of actuated hinges
     lasteHingeRel = eHingeRel[stepsHinge-1::stepsHinge]
     lasteEdgeRel = eEdgeRel[stepsHinge-1::stepsHinge]
+#    for hinge in np.arange(totHingeNum):
+#        if np.isnan(hingesMask[hinge]):
+#            lasteHingeRel[hinge] = np.nan
+#            lasteEdgeRel[hinge] = np.nan
     lasteHingeRel = lasteHingeRel[orderedHinges]
     lasteEdgeRel = lasteEdgeRel[orderedHinges]
     energies = np.append(lasteHingeRel, lasteEdgeRel)
@@ -290,9 +294,10 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
             if i != -1:
                 findit = np.where(differentEnergies[:,0] == orderedHinges[sameEnergy[i]])[0]
                 if len(findit) == 0:
-                    differentEnergies = np.append(differentEnergies,np.array([[orderedHinges[sameEnergy[i]], len(sameEnergy)]]), axis = 0)
-                    differentEnergiesName = np.append(differentEnergiesName, np.array(hingeName[orderedHinges[sameEnergy[i]]]))
-                    differentEnergiesEnergy = np.append(differentEnergiesEnergy, np.array([[hingeeHinge,hingeeEdge]]), axis = 0)
+                    stablehinge = orderedHinges[hinge]
+                    differentEnergies = np.append(differentEnergies,np.array([[stablehinge, len(sameEnergy)]]), axis = 0)
+                    differentEnergiesName = np.append(differentEnergiesName, np.array(hingeName[stablehinge]))
+                    differentEnergiesEnergy = np.append(differentEnergiesEnergy, np.array([[lasteHingeRel[hinge],lasteEdgeRel[hinge]]]), axis = 0)
                     print(hingeName[orderedHinges[hinge]])
                 elif findit >= 1:
                     print(hingeName[orderedHinges[hinge]], findit) 
@@ -300,7 +305,8 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     #            nonConvStates += len(sameEnergy)
                 print('State from non convergent hinges')
     #differentEnergies = np.array(differentEnergies)
-    
+    ######################### Problems: double counting of stable states that are close to each other due to the ill definition of neighbourhoods.
+    #########################           Additionally counting states that didn't converge.
     print('Total converged percentage:', converged/totHingeNum)
     print('Not converged: ', notConverged, '/', totHingeNum)
     
@@ -456,5 +462,5 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
 #            hinges[np.size(row)] +=1
 #%%
 if __name__ == "__main__":
-    folder_name = "Results/cube/sqp/energy/13-Dec-2017_99AngleCnstr\kh0.001_kta1.000_ke1.000_kf1.000"
+    folder_name = "Results/cube/sqp/energy/13-Dec-2017_100AngleCnstr\kh0.001_kta1.000_ke1.000_kf1.000"
     ReadandAnalizeFile(folder_name, khinge = 0.001, kedge = 10)
