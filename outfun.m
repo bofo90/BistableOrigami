@@ -29,4 +29,5 @@ end
 function setGlobalx(val)
 global poop
 poop.x = [poop.x val];
+%Turn the flag on only after making an iteration on the fmincon
 poop.flag = 1;

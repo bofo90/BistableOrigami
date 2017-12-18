@@ -23,7 +23,8 @@ opt.tranPol=0.5;
 %PREPARE PLOTTING UNDEFORMED CONFIGURATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Check if output folder is required, and create it if it doesn't exist
- nameFolder=[pwd,'/Results/',opt.template,'/',opt.relAlgor];
+extraName = sprintf('/kh%2.3f_kta%2.3f_ke%2.3f_kf%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
+nameFolder=[pwd,'/Results/',opt.template,'/',opt.relAlgor,'/images',opt.saveFile,extraName];
 if or(strcmp(opt.saveFig,'on'),strcmp(opt.saveMovie,'on'))
     if exist(nameFolder, 'dir')==0
         mkdir(nameFolder)
@@ -79,7 +80,7 @@ hl2=plotOpt(opt);
 opt.xlim=xlim;
 opt.ylim=ylim;
 opt.zlim=zlim;
-if strcmp(opt.plot,'result') || strcmp(opt.plot,'savedata')
+if strcmp(opt.plot,'result') || strcmp(opt.plot,'savedata') || strcmp(opt.plot,'plot')
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %PREPARE PLOTTING OF DEFORMED CONFIGURATION
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -171,6 +172,7 @@ if strcmp(opt.plot,'info')
     end 
     hl2=plotOpt(opt); 
     axis tight
+    printHigRes(f,opt,'_internalPolyhedraVertFaces',nameFolder); 
     %EXTRUDED STATE
     [f4,hs,hie,his] = copyFigure(unitCell,extrudedUnitCell,opt,hs,hie,his);   
     for nc=1:size(extrudedUnitCell.latVec,1)
@@ -187,6 +189,7 @@ if strcmp(opt.plot,'info')
         end
     end
     set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);
+    printHigRes(f4,opt,'_extrudedPolyhedra',nameFolder); 
     %EXTRUDED STATE 'INFO
     [f5,hs,hie,his] = copyFigure(unitCell,extrudedUnitCell,opt,hs,hie,his); hold on 
     for nc=1:size(extrudedUnitCell.latVec,1)
@@ -203,6 +206,7 @@ if strcmp(opt.plot,'info')
             text(coorText(1),coorText(2),coorText(3),num2str(i),'fontsize',20)
         end
     set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);
+    printHigRes(f5,opt,'_extrudedPolyhedraVert',nameFolder); 
     %EXTRUDED STATE 'INFO' ANGLE NUMBERS
     [f6,hs,hie,his] = copyFigure(unitCell,extrudedUnitCell,opt,hs,hie,his); hold on 
     for nc=1:size(extrudedUnitCell.latVec,1)
@@ -221,9 +225,10 @@ if strcmp(opt.plot,'info')
             text(coorText(1),coorText(2),coorText(3),num2str(i),'fontsize',20)
         end
     set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);
+    printHigRes(f6,opt,'_extrudedPolyhedraEdges',nameFolder);
 end
 
-if strcmp(opt.plot,'result') || strcmp(opt.plot,'savedata')
+if strcmp(opt.plot,'result') || strcmp(opt.plot,'savedata') || strcmp(opt.plot,'plot')
         %First make solid face with 100% transparency
         for nc=1:size(extrudedUnitCell.latVec,1)
             for i=3:10
@@ -251,24 +256,49 @@ if strcmp(opt.plot,'result') || strcmp(opt.plot,'savedata')
         %PLOT MOVING OF POLYHEDRA
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %New coordinates
+
         for ne=1:length(unitCell.Polyhedron)
-            for nc=1:size(unitCell.Polyhedron(1).latVec,1)
+            for nc=1:size(unitCell.Polyhedron(ne).latVec,1)
                 plotunitCell.Init(ne).lat(nc).coorNew(:,1)=plotunitCell.InitNew(ne).lat(nc).coor(:,1)+extrudedUnitCell.latVec(nc,1)-unitCell.PolyhedronNew(ne).latVec(nc,1);
                 plotunitCell.Init(ne).lat(nc).coorNew(:,2)=plotunitCell.InitNew(ne).lat(nc).coor(:,2)+extrudedUnitCell.latVec(nc,2)-unitCell.PolyhedronNew(ne).latVec(nc,2);
                 plotunitCell.Init(ne).lat(nc).coorNew(:,3)=plotunitCell.InitNew(ne).lat(nc).coor(:,3)+extrudedUnitCell.latVec(nc,3)-unitCell.PolyhedronNew(ne).latVec(nc,3);
-            end
-        end
-        %Update position
-        for ne=1:length(unitCell.Polyhedron)
-            for nc=1:size(unitCell.Polyhedron(1).latVec,1)
+                        %Update position
                 for i=3:10
+%                             set(hie{ne,nc,i},'vertices',plotunitCell.Init(ne).lat(nc).coorNew);
+%                             set(his{ne,nc,i},'vertices',plotunitCell.Init(ne).lat(nc).coorNew);
                     set(hie{ne,nc,i},'vertices',plotunitCell.Init(ne).lat(nc).coorNew);
                     set(his{ne,nc,i},'vertices',plotunitCell.Init(ne).lat(nc).coorNew);
                 end 
             end
         end
         set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);
-        %printHigRes(f,opt,'Polyhedra_Packing_Expanded',nameFolder)
+%         printHigRes(f,opt,'Polyhedra_Packing_Expanded',nameFolder)
+        
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %PLOT RESULT OF INTERNAL POLYHEDRA
+        %Made by Agustin Iniguez
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        
+%         for nMode=1:result.numMode
+%             pause(1)
+%             for framMode=1:length(plotextrudedUnitCell.mode(nMode).frame)
+%                 for ne=1:length(unitCell.Polyhedron)
+%                     for nc=1:size(unitCell.Polyhedron(ne).latVec,1)
+%                         plotunitCell.Init(ne).lat(nc).coorNew(:,1) = plotunitCell.InitNew(ne).lat(nc).coor(:,1) + result.deform(nMode).interV(framMode).V(1:size(unitCell.Polyhedron(1).node,1),1);
+%                         plotunitCell.Init(ne).lat(nc).coorNew(:,2) = plotunitCell.InitNew(ne).lat(nc).coor(:,2) + result.deform(nMode).interV(framMode).V(1:size(unitCell.Polyhedron(1).node,1),2);
+%                         plotunitCell.Init(ne).lat(nc).coorNew(:,3) = plotunitCell.InitNew(ne).lat(nc).coor(:,3) + result.deform(nMode).interV(framMode).V(1:size(unitCell.Polyhedron(1).node,1),3);
+%                         for i=3:10
+%                             set(hie{ne,nc,i},'vertices',plotunitCell.Init(ne).lat(nc).coorNew);
+%                             set(his{ne,nc,i},'vertices',plotunitCell.Init(ne).lat(nc).coorNew);  
+%                         end 
+%                     end
+%                 end
+%                 printGif(opt,framMode,f,nameFolder,['_',mat2str(extrudedUnitCell.angleConstr(:,1)'),'_',num2str(nMode),'_deformedUC']);%'_',sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge),
+%                 if framMode==length(plotextrudedUnitCell.mode(nMode).frame)
+%                     printHigRes(f,opt,['_',mat2str(extrudedUnitCell.angleConstr(:,1)'),'_',num2str(nMode),'_deformedUC'],nameFolder);%'_',sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge),
+%                 end
+%             end
+%         end
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %PLOT SELECTED FACES TO EXTRUDE, SOLIDIFY AND REMOVE
@@ -309,7 +339,7 @@ if strcmp(opt.plot,'result') || strcmp(opt.plot,'savedata')
             end
         end
         set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);
-        printHigRes(f,opt,'_0_undeformed',nameFolder);     
+%         printHigRes(f,opt,'_0_undeformed',nameFolder);     
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %PLOT MODES INDIVIDUALLY
@@ -327,9 +357,9 @@ if strcmp(opt.plot,'result') || strcmp(opt.plot,'savedata')
                         set(hs{nc,i},'Vertices',plotextrudedUnitCell.mode(nMode).frame(framMode).lat(nc).coor,'facecolor','flat','facevertexCData',c*colt(4,:)+abs(1-c)*colt(5,:),'facealpha',1.0);
                     end
                 end
-                printGif(opt,framMode,f,nameFolder,['_',mat2str(extrudedUnitCell.angleConstr(:,1)'),'_',num2str(nMode),'_deformed']);
+                printGif(opt,framMode,f,nameFolder,['_',mat2str(extrudedUnitCell.angleConstr(:,1)'),'_',num2str(nMode),'_deformed']);%'_',sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge),
                 if framMode==length(plotextrudedUnitCell.mode(nMode).frame)
-                    printHigRes(f,opt,['_',mat2str(extrudedUnitCell.angleConstr(:,1)'),'_',num2str(nMode),'_deformed'],nameFolder);
+                    printHigRes(f,opt,['_',mat2str(extrudedUnitCell.angleConstr(:,1)'),'_',num2str(nMode),'_deformed'],nameFolder);%'_',sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge),
                 end
             end
             
@@ -473,7 +503,7 @@ function printHigRes(f,opt,nam,nameFolder)
     switch opt.saveFig
         case 'on'
 %             name=[nameFolder,'/',opt.template,'_',num2str(opt.plotPer),'_',nam];
-            name=[nameFolder,'/',opt.template,nam];
+            name=[nameFolder,'/',opt.template,nam,'.png'];
             figpos=getpixelposition(f); %dont need to change anything here
             resolution=get(0,'ScreenPixelsPerInch'); %dont need to change anything here
             set(f,'paperunits','inches','papersize',figpos(3:4)/resolution,...

@@ -3,17 +3,50 @@ function findDeformation(unitCell,extrudedUnitCell,opt)
 %Show details geometries (if requested)
 if strcmp(opt.plot,'result')
     if strcmp(opt.readAngFile,'off')
-        nonlinearFolding(unitCell,extrudedUnitCell,opt);
+        oriMaxStrech = opt.maxStretch;
+        for inter = 1:opt.stepMaxStrech
+            opt.maxStretch = (oriMaxStrech/opt.stepMaxStrech)*inter;
+            fprintf('Maximum stretching %1.2f.\n', opt.maxStretch);
+            metadataFile(opt, unitCell, extrudedUnitCell);
+            nonlinearFolding(unitCell,extrudedUnitCell,opt);
+        end
     else
         opt.angleConstrFinal = [];
         fileHinges = strcat(pwd, '\Results\hingeList_reduced\', opt.template, '.csv');
-        hingeList = dlmread(fileHinges);
-        for i = 1:size(hingeList, 1)
-            row = hingeList(i, :);
-            hinges = row(0~=row);
-            opt.angleConstrFinal(1).val = [hinges(:), -pi*0.985 * ones(length(hinges), 1)];
-            fprintf('Hinge selection number %d/%d. ', i, size(hingeList, 1))
-            nonlinearFolding(unitCell,extrudedUnitCell,opt);
+        if ~exist(fileHinges, 'file')
+            fprintf('Hinge-selection file does not exist.\n');
+        else
+            simul = 1;
+            hingeList = dlmread(fileHinges);
+            orikHinge = opt.Khinge;
+            orikTargetAngle = opt.KtargetAngle;
+            orikEdge = opt.Kedge;
+            for stephinge = 1:opt.stepkHinge
+                opt.Khinge = orikHinge*10^((stephinge-1)/4);
+                for stepangle = 1:(opt.stepkTargetAngle-stephinge-1)
+                    opt.KtargetAngle = orikTargetAngle*10^(-(stepangle-1)/4);
+                    for stepedge = 1:opt.stepkEdge
+                        opt.Kedge = orikEdge*10^((stepedge-1)/2);
+                        fprintf('kH %f\tkTA %f\tkE %f\tkF %f\tSimulation %d\n', opt.Khinge,opt.KtargetAngle, opt.Kedge, opt.Kface,simul );
+                        metadataFile(opt, unitCell, extrudedUnitCell);
+                        for i = 1:size(hingeList, 1)
+                            row = hingeList(i, :);
+                            hinges = row(0~=row);
+%                             if length(hinges) > 3
+%                                 break
+%                             end
+                            if strcmp(opt.onlyUnitCell, 'on')
+                                opt.angleConstrFinal(1).val = [hinges(:), (pi*0.985) * ones(length(hinges), 1)];
+                            else
+                                opt.angleConstrFinal(1).val = [hinges(:), (-pi*0.985) * ones(length(hinges), 1)];
+                            end
+                            fprintf('Hinge selection number %d/%d. ', i, size(hingeList, 1));
+                            nonlinearFolding(unitCell,extrudedUnitCell,opt);
+                        end
+                        simul = simul+1;
+                    end
+                end
+            end
         end
     end
 end
@@ -34,7 +67,8 @@ theta0=extrudedUnitCell.theta;
 max_iter = 100000;
 extrudedUnitCell.angleConstr=[];
 
-folderName = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat');
+extraName = sprintf('/kh%2.3f_kta%2.3f_ke%2.3f_kf%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
+folderName = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat', opt.saveFile, extraName);
 if ~exist(folderName, 'dir')
     mkdir(folderName);
 end
@@ -53,29 +87,36 @@ for iter=1:length(opt.angleConstrFinal)
         t1 = toc;
         extrudedUnitCell.angleConstr(:,2)=theta0(extrudedUnitCell.angleConstr(:,1))+inter*(-theta0(extrudedUnitCell.angleConstr(:,1))+opt.angleConstrFinal(iter).val(:,2))/opt.interval;
         %Determine new equilibrium
-        [V(:,inter+1),~,exfl(inter+1,1)]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
+        [V(:,inter+1),~,exfl(inter+1,1),output]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
         u0 = V(:,inter+1);
         %Determine energy of that equilibrium
-        [E(inter+1,1),~,Eedge(inter+1,1),Eface(inter+1,1),Ehinge(inter+1,1),EtargetAngle(inter+1,1), theta]=Energy(u0,extrudedUnitCell,opt);
+        [E(inter+1,1),~,Eedge(inter+1,1),Eface(inter+1,1),Ehinge(inter+1,1),EtargetAngle(inter+1,1), ~]=Energy(u0,extrudedUnitCell,opt);
         t2 = toc;
         fprintf(', time: %1.2f, exitflag: %d\n',t2-t1,exfl(inter+1,1));
     end
     
+    angles1 = getGlobalAngles;     
     if strcmp(opt.gethistory, 'on')
         V = getGlobalAllx;
     end
-   
+    if strcmp(opt.gethistory, 'off')
+        angles1 = [angles1(:,1) angles1(:,end)];
+    end
+
     
     result.deform(1).V=[V(1:3:end,end) V(2:3:end,end) V(3:3:end,end)];
     result.deform(1).Ve=V(:,end);
+    result.deform(1).theta = angles1(:,end);
+    result.deform(1).output = output;
     for j=1:size(V,2)
         result.deform(1).interV(j).V=[V(1:3:end,j) V(2:3:end,j) V(3:3:end,j)];
         result.deform(1).interV(j).Ve=V(:,j);
+        result.deform(1).interV(j).theta = angles1(:,j);
     end
     
     clearvars V;
     V(:,1)=u0;
-    initialiseGlobalx(u0, theta);
+    initialiseGlobalx(u0, angles1(:,end));
 
     switch opt.relAlgor
         case 'gradDesc'
@@ -99,7 +140,7 @@ for iter=1:length(opt.angleConstrFinal)
                 fprintf('load: %d, step: %1.2f',2*iter,inter/opt.relInterval)
                 t1 = toc;
                 opt.KtargetAngle = prevKtargetAngle - (prevKtargetAngle/opt.relInterval)*inter;
-                [V(:,inter+1),~,exfl(inter+1,2)]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
+                [V(:,inter+1),~,exfl(inter+1,2),output]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
                 u0 = V(:,inter+1);
                 [E(inter+1,2),~,Eedge(inter+1,2),Eface(inter+1,2),Ehinge(inter+1,2),EtargetAngle(inter+1,2), ~]=Energy(u0,extrudedUnitCell,opt);
                 t2 = toc;
@@ -110,15 +151,22 @@ for iter=1:length(opt.angleConstrFinal)
             extrudedUnitCell.angleConstr=[];
     end
     
+    angles2 = getGlobalAngles;
     if strcmp(opt.gethistory, 'on')
         V = getGlobalAllx;
+    end
+    if strcmp(opt.gethistory, 'off')
+        angles2 = [angles2(:,1) angles2(:,end)];
     end
     
     result.deform(2).V=[V(1:3:end,end) V(2:3:end,end) V(3:3:end,end)];
     result.deform(2).Ve=V(:,end);
+    result.deform(2).theta = angles2(:,end);
+    result.deform(2).output = output;
     for j=1:size(V,2)
         result.deform(2).interV(j).V=[V(1:3:end,j) V(2:3:end,j) V(3:3:end,j)];
         result.deform(2).interV(j).Ve=V(:,j);
+        result.deform(2).interV(j).theta = angles2(:,j);
     end
     
     result.E=E;
@@ -130,9 +178,9 @@ for iter=1:length(opt.angleConstrFinal)
     result.numMode=length(result.deform);
     
     fileName = strcat(folderName,'/',opt.template,'_',...
-        mat2str(opt.angleConstrFinal(iter).val(:,1)'),'_','.mat');
+        mat2str(opt.angleConstrFinal(iter).val(:,1)'),'.mat');
     save(fileName, 'result');
- 
+    
     clearvars result E Eedge Eface Ehinge EtargetAngle exfl;
     fclose('all');
 
@@ -215,9 +263,15 @@ extrudedUnitCell.node=extrudedUnitCell.node+[u(1:3:end) u(2:3:end) u(3:3:end)];
 %INEQUALITY CONSTRAINS
 %%%%%%%%%%%%%%%%%%%%%%
 %MAXIMUM AND MINIMUM ANGLES
-[angles, Dangles]=getHinge(extrudedUnitCell, extrudedUnitCellPrev);
-C1 = [-angles-pi*opt.constAnglePerc; angles-pi*opt.constAnglePerc];
-DC1 = [-Dangles; Dangles];
+if ~isnan(opt.constAnglePerc)
+    [angles, Dangles]=getHinge(extrudedUnitCell, extrudedUnitCellPrev);
+    if strcmp(opt.onlyUnitCell, 'on')
+        C1 = [-angles-(pi*opt.constAnglePerc-pi); angles-pi*opt.constAnglePerc];
+    else
+        C1 = [-angles-pi*opt.constAnglePerc; angles-pi*opt.constAnglePerc];
+    end
+    DC1 = [-Dangles; Dangles];
+end
 %MAXIMUM AND MINIMUM EDGE STRECHING
 if strcmp(opt.constrEdge,'off') && ~isnan(opt.maxStretch)
     [normStrech, DnormStrech]=getEdgeNorm(extrudedUnitCell);
@@ -342,9 +396,9 @@ for i=1:size(extrudedUnitCell.edge,1)
     coor2=extrudedUnitCell.node(extrudedUnitCell.edge(i,2),:);
     dx=coor2-coor1;
     L=sqrt(dx*dx');
-    dEdge(i)=(L-extrudedUnitCell.edgeL(i))/extrudedUnitCell.edgeL(i);            
-    Jedge(i,3*extrudedUnitCell.edge(i,1)-2:3*extrudedUnitCell.edge(i,1))=-dx/L/extrudedUnitCell.edgeL(i);
-    Jedge(i,3*extrudedUnitCell.edge(i,2)-2:3*extrudedUnitCell.edge(i,2))=dx/L/extrudedUnitCell.edgeL(i);
+    dEdge(i)=(L-extrudedUnitCell.edgeL(i));%/extrudedUnitCell.edgeL(i);            
+    Jedge(i,3*extrudedUnitCell.edge(i,1)-2:3*extrudedUnitCell.edge(i,1))=-dx/L;%/extrudedUnitCell.edgeL(i);
+    Jedge(i,3*extrudedUnitCell.edge(i,2)-2:3*extrudedUnitCell.edge(i,2))=dx/L;%/extrudedUnitCell.edgeL(i);
 end
 
 
@@ -432,6 +486,7 @@ for i=1:size(extrudedUnitCell.nodeHingeEx,1)
     [Jhinge(i,index),theta(i)]=JacobianHinge(extrudedUnitCell.node(extrudedUnitCell.nodeHingeEx(i,:),:));
     if abs(thetaPrev(i)-theta(i)) > 0.50*2*pi
         theta(i) = theta(i)+sign(thetaPrev(i))*2*pi;
+%         fprintf('angle %d energy\n', i);
     end
 end
 
@@ -536,9 +591,12 @@ if poop.flag
         [~,theta(i)]=JacobianHinge(extrudedUnitCell.node(extrudedUnitCell.nodeHingeEx(i,:),:));
         if abs(poop.theta(i,end)-theta(i)) > 0.50*2*pi
             theta(i) = theta(i)+sign(poop.theta(i,end))*2*pi;
+%             fprintf('angle %d global\n', i);
         end
     end
     poop.theta = [poop.theta theta];
+    %turn the flag off after analising the angles just after an iteration,
+    %so it doesnt analyse it every time you get the energy
     poop.flag = 0;
 else
     theta = poop.theta(:,end);
@@ -547,4 +605,8 @@ end
 function r = getGlobalAllx
 global poop
 r = poop.x;
+
+function theta = getGlobalAngles
+global poop
+theta = poop.theta;
 

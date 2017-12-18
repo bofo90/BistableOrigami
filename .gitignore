@@ -1,3 +1,5 @@
 *.asv
 DataEnergy/
 Results/
+__pycache__/
+*.txt

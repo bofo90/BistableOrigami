@@ -4,8 +4,11 @@
 %FOR ANY QUESTION RELATED TO THE MATLAB FILES, PLEASE CONTACT JOHANNES
 %OVERVELDE AT J.T.B.OVERVELDE@GMAIL.COM (WWW.OVERVELDE.COM)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-clear, close all , clc, format long, clearvars -global
-%CHANGES
+clear
+close all
+clc
+format long
+clearvars -global
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -13,58 +16,33 @@ SimCase=1;
 
 switch SimCase
     case 1
-        opt=initOpt('inputType','individual',... 
-                    'template','cube',...
-                    'plot','info','createFig', 'on', 'showFig', 'on',...
-                    'interval', 1,'saveFig','off','periodic','on','figDPI',300,...
-                    'saveMovie', 'off', 'safeMovieAntiAlias', 0,...
-                    'folAlgor', 'sqp','relAlgor', 'sqp','readAngFile', 'off',...
+        opt=initOpt('inputType','individual', 'plot','result',... 
+                    'template','cube','onlyUnitCell', 'off',...
+                    'createFig', 'on', 'showFig', 'on','saveFig','off','saveMovie', 'off',...
+                    'interval', 1,'relInterval', 1,'constAnglePerc',nan,...
+                    'periodic','off','figDPI',300,'safeMovieAntiAlias', 0,...
+                    'folAlgor', 'sqp','relAlgor', 'sqp',...
                     'gradDescStep', 1e-1, 'gradDescTol', 1e-9,...
-                    'constrFace','on','constrEdge','off','gethistory', 'off',...
-                    'Khinge',0.0005,'Kedge',1,'Kface',1,'KtargetAngle',0.5,...
-                    'relInterval', 1, 'constAnglePerc',1, 'maxStretch', nan);
-        hingeSet = [3 7 8 13 17 21 26 30]';
-        opt.angleConstrFinal(1).val=[ hingeSet(:) , -pi *0.985 *ones(length(hingeSet), 1)];
-%                                      1  -pi*0.985
-%                                      2  -pi*0.985
-%                                      12  -pi*0.985
-%                                      8  -pi*0.985
-% %                                      17  -pi*0.985
-%                                      21  -pi*0.985
-% %                                      26  -pi*0.985
-% %                                      30  -pi*0.985
-%                                      ];
-%         opt.angleConstrFinal(2).val=[1  -pi*0.985
-%                                      2  -pi*0.985
-%                                      19  -pi*0.985
-%                                      ];
-%         opt.angleConstrFinal(3).val=[1  -pi*0.985
-%                                      2  -pi*0.985
-%                                      8  -pi*0.985
-%                                      ];
-%         opt.angleConstrFinal(4).val=[2  -pi*0.985
-%                                      13  -pi*0.985
-%                                      41  -pi*0.985
-%                                      ];
-%         opt.angleConstrFinal(5).val=[3  -pi*0.985
-%                                      8  -pi*0.985
-%                                      ];
-%         opt.angleConstrFinal(6).val=[3  -pi*0.985
-%                                      19  -pi*0.985
-%                                      37  -pi*0.985
-%                                      ];
-%         opt.angleConstrFinal(7).val=[3  -pi*0.985
-%                                      41  -pi*0.985
-%                                      ];
-%         opt.angleConstrFinal(8).val=[3  -pi*0.985
-%                                      ];
-%         opt.angleConstrFinal(9).val=[24  -pi*0.985
-%                                      48  -pi*0.985
-%                                      ];
-%         opt.angleConstrFinal(10).val=[36  -pi*0.985
-%                                      48  -pi*0.985
-%                                      ];
+                    'readAngFile', 'off','gethistory', 'on',...
+                    'constrFace','on','constrEdge','off',...
+                    'Khinge',0.01,'Kedge',10^0.5,'Kface',1,'KtargetAngle',1,...
+                    'stepkHinge', 1, 'stepkTargetAngle', 3, 'stepkEdge', 1,...
+                    'stepMaxStrech', 1, 'maxStretch', nan);
 
+%         opt.saveFile = strcat('/',date,'_temp');
+        opt.saveFile = '/13-Dec-2017_noAngleCnstr';
+
+        %-pi if its the extruded version, pi if its
+        %only the internal polyheron
+        hingeSet = [3 8 13 17 21 26 22 30];%[7 3 8 13 17 26 22 30];
+        if strcmp(opt.onlyUnitCell, 'on')
+            opt.angleConstrFinal(1).val=[ hingeSet(:) , (pi*0.985) *ones(length(hingeSet), 1)];
+        else
+            opt.angleConstrFinal(1).val=[ hingeSet(:) , (-pi*0.985) *ones(length(hingeSet), 1)];
+        end
+
+        
+        
     case 2
         opt=initOpt('inputType','individual',...
                     'template','cuboctahedron',...
@@ -146,20 +124,19 @@ tic;
 
 %SOLVER OPTIONS
 opt.options=optimoptions('fmincon','GradConstr','on','GradObj','on',...
-                         'tolfun',1e-6','tolx',1e-9, 'tolcon',1e-9,...
+                         'tolfun',1e-5,'tolx',1e-9, 'tolcon',1e-9,...
                          'Display','off','DerivativeCheck','off',...
-                         'maxfunevals',100000, 'MaxIterations', 2000,...
+                         'maxfunevals',30000, 'MaxIterations', 1000,...
                          'Algorithm', opt.folAlgor, 'OutputFcn',@outfun);
 %                          'RelLineSrchBnd', 0.1, 'RelLineSrchBndDuration', 10e10,...
-%                          'TypicalX', 0.1*ones(length(extrudedUnitCell.node(:,1))*3,1),...
-                         
-%                          'FiniteDifferenceType', 'central', 'FiniteDifferenceStepSize', eps^(1));
+%                          'TypicalX', 0.1*ones(length(extrudedUnitCell.node(:,1))*3,1),...    
 
+%                          'FiniteDifferenceType', 'central', 'FiniteDifferenceStepSize', eps^(1));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %SELECT HINGES
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-selectHinges(unitCell, extrudedUnitCell, opt)
+selectHinges(unitCell, extrudedUnitCell, opt);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %ANALYSIS

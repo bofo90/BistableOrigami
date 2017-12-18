@@ -1,17 +1,27 @@
 function selectHinges(unitCell, extrudedUnitCell, opt)
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%
+%%%%  Carefull with the selection of hinges! There is a problem when the
+%%%%  amount of hinges per vertex is the same as the amount of hinges per
+%%%%  face if all faces are equal in the same vertex (1 flavour in ). For
+%%%%  example the tetrahedron (3 hinges per vertix and each face has 3
+%%%%  hinges). There are specific hinge selections that from the distance
+%%%%  matriz have the same eigenvalu but there are different.
+%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %This is the function for selecting hinges
 if strcmp(opt.plot, 'selectHinges')
     fprintf('Creating graph...\n');
     [G] = buildGraph(unitCell, extrudedUnitCell);
-    fprintf('Getting flavours...\n');
-    [flavourDict, flavourTypes, flavourNum] = getFlavours(G);
     fprintf('Calculating distances...\n');
-    dis = getDistance(G, flavourDict);
-
+    dis = getDistance(G);
     % first generate the list of all hinge sets
     fprintf('Writting hinges...\n');
-    getAllHinges(G, dis, flavourTypes, flavourNum, unitCell, extrudedUnitCell, opt);
+    getAllHinges(G, dis, opt);
+    fprintf('Ploting hinges...\n');
+    if strcmp(opt.createFig, 'on')
+        plotHinges(unitCell, extrudedUnitCell, opt);
+    end
     fprintf('Done with selecting hinges...\n');
 end
 
@@ -21,57 +31,59 @@ function [G] = buildGraph(unitCell, extrudedUnitCell)
 numEdges = size(unitCell.Polyhedron.edge, 1);
 G_adjacency = zeros(numEdges);
 
-hingeNames = cell(numEdges, 1); % corresponds to names in extrudedUnitCell
-hingeTypes = cell(numEdges, 1);
-isClosed = cell(numEdges, 1);
-hingeNodes = cell(numEdges, 1);
+hingeNames = double.empty(numEdges, 0); % corresponds to names in extrudedUnitCell
 
-center = mean(unitCell.Polyhedron.node, 1);
+flavourlist = double.empty(0,2);
+hingeTypes = double.empty(numEdges, 0);
+orderedEdges = sort(unitCell.Polyhedron.edge,2);
+orderedFaces = sortFace(unitCell.Polyhedron);
 
 for ii = 1:numEdges
     n1 = unitCell.Polyhedron.edge(ii,1);
     n2 = unitCell.Polyhedron.edge(ii,2); % endnodes of the edge
-    hingeNodes{ii} = sort([n1 n2]);
     % getting the edge numbering from nodeHingeEx (consistent with how
     % they're numbered in outputResults
-    [~,idx1]=ismember([n1 n2],extrudedUnitCell.nodeHingeEx(:,1:2),'rows');
-    [~,idx2]=ismember([n2 n1],extrudedUnitCell.nodeHingeEx(:,1:2),'rows');
-    hingeNames{ii} = num2str(idx1+idx2);
+    [~,idx1]=ismember(orderedEdges(ii,:),extrudedUnitCell.nodeHingeEx(:,1:2),'rows');
+%     [~,idx2]=ismember([n2 n1],extrudedUnitCell.nodeHingeEx(:,1:2),'rows');
+    hingeNames(ii) = idx1;%+idx2;
     
     % getting the types of faces associated with current edge
     faceTypes = [0 0];
+    nextEdge = [0 0;0 0];
     for ff = 1:length(unitCell.Polyhedron.face)
-        n_face = unitCell.Polyhedron.face{ff};
-        if sum(find(n1==n_face)) && sum(find(n2==n_face))
-            faceTypes(find(0==faceTypes, 1)) = length(unitCell.Polyhedron.face{ff});
-        end
-    end
-	hingeTypes{ii} = [num2str(min(faceTypes)),'-',num2str(max(faceTypes))];
-    isClosed{ii} = false;
-    
-    % here starts stuff for adjacency matrix
-    for jj = 1:numEdges
-        if ii == jj
-            G_adjacency(ii,jj) = 0;
-        else
-            n_edge2 = unitCell.Polyhedron.edge(jj, :);
+        n_face = orderedFaces{ff};
+        pos1 = find(n1==n_face);
+        pos2 = find(n2==n_face);
+        sides = length(n_face);
+        if sum(pos1) && sum(pos2)
+            index = find(0==faceTypes, 1);
+            faceTypes(index) = sides;
             
-            % see if these two hinges share a common node
-            comm_node = [n_edge2(n1==n_edge2), n_edge2(n2==n_edge2)];
-            if ~isempty(comm_node)
-                % determine the direction between these two hinges
-                edgeV1 = - getHingeVector([n1,n2], comm_node, unitCell);
-                edgeV2 = getHingeVector(n_edge2, comm_node, unitCell);
-                normV = unitCell.Polyhedron.node(comm_node,:) - center;
-                direction = dot(normV, cross(edgeV1,edgeV2));
-                if direction < 0
-                    G_adjacency(ii,jj) = 1;
-                elseif direction > 0
-                    G_adjacency(jj,ii) = 1;
+            maxPos = max(pos1,pos2);
+            if maxPos == sides
+                if min(pos1,pos2) == sides-1
+                    nextEdge(index,:) = [n_face(end) n_face(1)];
+                else
+                    nextEdge(index,:) = [n_face(1) n_face(2)];
                 end
+            else
+                nextEdge(index,:) = [n_face(maxPos) n_face(maxPos+1)];
             end
+
         end
     end
+    [added, flavour] = ismember([min(faceTypes) max(faceTypes)],flavourlist, 'rows');
+    if ~added
+       flavourlist(end+1,:) = [min(faceTypes) max(faceTypes)];
+       flavour =  size(flavourlist,1);
+    end
+    hingeTypes(ii) = [flavour];
+    
+    nextEdge = sort(nextEdge,2);
+    [~,adedge1] = ismember(nextEdge(1,:),orderedEdges,'rows');
+    [~,adedge2] = ismember(nextEdge(2,:),orderedEdges,'rows');
+    G_adjacency(ii, adedge1) = 1;
+    G_adjacency(ii, adedge2) = 1;
 end
 
 G_adjacency = sparse(G_adjacency);
@@ -80,68 +92,26 @@ G_adjacency = sparse(G_adjacency);
 G = digraph(G_adjacency);
 
 % assign names and other properties to the nodes of the graph (edges on the polyherdon)
-G.Nodes.Name = hingeNames;
-G.Nodes.Properties.RowNames = hingeNames;
-G.Nodes.IsClosed = isClosed;
-G.Nodes.Type = hingeTypes;
-G.Nodes.HingeNodes = hingeNodes;
+G.Nodes.Names = hingeNames';
+G.Nodes.Type = hingeTypes';
 
+function orderedFaces = sortFace(Polyhedron)
 
-function [vec] = getHingeVector(nodes, comm_node, unitCell)
-% returns the hinge in the form of a 3D vector, and always use *comm_node*
-% as the starting point of the vector
-% ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-% INPUT
-% nodes     - a 2*1 array, containing the two nodes of a hinge
-% comm_node - the node in common between this hinge and the other one 
-%             under consideration
-% unitCell  - a unit cell
-% ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-% OUTPUT
-% vec - a vector of this hinge, pointing from *comm_node* to the other node
-%       in *nodes*
-% ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-% last modified on Mar 20, 2017
+center = mean(Polyhedron.node, 1);
+orderedFaces = Polyhedron.face;
 
-
-comm_idx = find(comm_node==nodes);
-if comm_idx == 1
-    % do nothing
-elseif comm_idx == 2
-    nodes = flip(nodes);
-else
-    error('Oops, you''ve got the wrong nodes!')
+for i = 1:size(Polyhedron.face,1)
+    a = Polyhedron.node(Polyhedron.face{i}(1),:)-Polyhedron.node(Polyhedron.face{i}(2),:);
+    b = Polyhedron.node(Polyhedron.face{i}(3),:)-Polyhedron.node(Polyhedron.face{i}(2),:);
+    node = Polyhedron.node(Polyhedron.face{i}(2),:)-center;
+    direction = dot(node, cross(a,b));
+    if direction < 0
+        orderedFaces{i} = flip(orderedFaces{i});
+    end
 end
 
-coord1 = unitCell.Polyhedron.node(nodes(1), :);
-coord2 = unitCell.Polyhedron.node(nodes(2), :);
-vec = coord2 - coord1;
 
-function [flavourDict, flavourTypes, flavourNum] = getFlavours(G)
-% Returns the info about flavours of a graph G
-% ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-% INPUT
-% G -  a directed graph
-% ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-% OUTPUT
-% flavourTypes - a cell array containing the types of flavours
-% flavourNum   - number of different flavours
-% flavourDict  - a container map that maps different flavourTypes to
-%                different numeric values. E.g., in truncated tetrahedron,
-%                flavourDict('3-6') = '1', flavourDict('6-6') = '2'
-% ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-% last modified on Jun 07, 2017
-% yun
-
-flavourTypes = unique(G.Nodes.Type);
-flavourNum = length(flavourTypes);
-
-flavourDict = containers.Map;
-for ii = 1:flavourNum
-    flavourDict(flavourTypes{ii}) = num2str(ii);
-end
-
-function dis = getDistance(G, flavourDict)
+function dis = getDistance(G)
 % Returns the ``distance'' matrix with flavours
 % ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 % INPUT
@@ -160,36 +130,20 @@ dis = zeros(H);
 % loop through everything, because we need to
 for ii = 1:H
     for jj = 1:H
-        % get all possible paths between two nodes *ii* and *jj*
-        pathsiijj = pathbetweennodes(G.adjacency, ii, jj);
-        % get the lengths of each of these paths
-        pathsLeniijj = zeros(length(pathsiijj), 1);
-        for pCt = 1:length(pathsiijj)
-            pathsLeniijj(pCt) = length(pathsiijj{pCt});
-        end
-        
-        % get all paths with the same minimum lengths, and only consider
-        % these shortest ones for our new definition of ``distance''
-        minPathLen = min(pathsLeniijj);
-        minPathsIdx = find(minPathLen==pathsLeniijj);
-        
+        % get all possible paths between two nodes *ii* and *jj* both ways
+        pathsiijj = pathbetweennodes(G, ii, jj);
+      
         % get the ``distance'' from node *ii* to node *jj*
         % by looping through all minimum length paths
         pathDis = inf; % initialise with infinity
-        for mCt = 1:length(minPathsIdx)
-            currentPath = pathsiijj{minPathsIdx(mCt)};
-            currentPathDisStr = '';
-            
-            % get the string of ``distance''
-            for lCt = 1:length(currentPath)
-            	currentPathDisStr = strcat(currentPathDisStr, ...
-                    flavourDict(G.Nodes{currentPath(lCt),'Type'}{1}));
-            end
+        for mCt = 1:size(pathsiijj,1)
+            currentPath = pathsiijj(mCt,:);
+            currentPathTypes = G.Nodes.Type(currentPath);
+            currentPathDisStr = strjoin(string(currentPathTypes),'');
             
             % convert to number and take the smallest value of the
             % ``distance'' and the flipped ``distance''
-            currentPathDis = min(str2num(currentPathDisStr),...
-                str2num(flip(currentPathDisStr)));
+            currentPathDis = min(str2double(currentPathDisStr), str2double(reverse(currentPathDisStr)));
             if currentPathDis < pathDis
                 pathDis = currentPathDis;
             end
@@ -197,19 +151,12 @@ for ii = 1:H
 
         % update distance matrix
         dis(ii,jj) = pathDis;
+%         dis(jj,ii) = pathDis;
     end
 end
 
 
-% update distance matrix to make it symmetrical
-for ii = 1:H
-    for jj = ii:H
-        dis(ii,jj) = min(dis(ii,jj), dis(jj,ii));
-        dis(jj,ii) = dis(ii,jj);
-    end
-end
-
-function pth = pathbetweennodes(adj, src, snk, verbose)
+function pth = pathbetweennodes(G, src, snk)
 %PATHBETWEENNODES Return all paths between two nodes of a graph
 %
 % pth = pathbetweennodes(adj, src, snk)
@@ -238,72 +185,49 @@ function pth = pathbetweennodes(adj, src, snk, verbose)
 %   pth:    cell array, with each cell holding the indices of a unique path
 %           of nodes from src to snk.
 
-% Copyright 2014 Kelly Kearney
-
-if nargin < 4
-    verbose = false;
-end
-
 % input validation added by yun, May 02, 2017
 if src==snk
-    pth = {[src]};
+    pth = [src];
     return;
 end
-n = size(adj,1);
-stack = src;
-stop = false;
-pth = cell(0);
-cycles = cell(0);
-next = cell(n,1);
-for in = 1:n
-    next{in} = find(adj(in,:));
+pth = 1:size(G.Nodes,1);
+for node = pth
+    next(node,:) = successors(G,node)';
+end 
+%Recursive search of shortest distance between src and snk
+[pth,~,~,~] = nextNode(pth, src, snk, next);
+%Recursive search of shortest distance between snk and src
+% [pth,~,~,~] = nextNode(pth, snk, src, next);
+
+
+function [paths, stack, snk, next] = nextNode(paths, stack, snk, next)
+
+%Check if the distance is longer than the previous found one
+if length(stack) > length(paths(end,:))
+    return;
 end
-visited = cell(0);
-pred = src;
-while 1
-    visited = [visited; sprintf('%d,', stack)];
-    [stack, pred] = addnode(stack, next, visited, pred);
-    if verbose
-        fprintf('%2d ', stack);
-        fprintf('\n');
+%Check if we dont have loops in the stack
+if any(diff(sort(stack))==0)
+    return;
+end
+%Check if you already end in the finnal edge
+if stack(end) == snk
+    %if the distance is shorter, erease the rest, if not just stack them
+    if length(stack) < length(paths(end,:)) 
+        paths = stack;
+    else
+        paths = [paths; stack];
     end
-    if isempty(stack)
-        break;
-    end
-    if stack(end) == snk
-        pth = [pth; {stack}];
-        visited = [visited; sprintf('%d,', stack)];
-        stack = popnode(stack);
-    elseif length(unique(stack)) < length(stack)
-        cycles = [cycles; {stack}];
-        visited = [visited; sprintf('%d,', stack)];
-        stack = popnode(stack);  
-    end
+    return;
+end
+%go through the next edges and call the function again
+originalstack = stack;
+for j = next(originalstack(end),:)
+    newstack = [originalstack j];
+    [paths, stack, snk, next] = nextNode(paths, newstack, snk, next);
 end
 
-
-function [stack, pred] = addnode(stack, next, visited, pred)
-newnode = setdiff(next{stack(end)}, pred);
-possible = arrayfun(@(x) sprintf('%d,', [stack x]), newnode, 'uni', 0);
-isnew = ~ismember(possible, visited);
-if any(isnew)
-    idx = find(isnew, 1);
-    stack = str2num(possible{idx});
-    pred = stack(end-1);
-else
-    [stack, pred] = popnode(stack);
-end
-
-
-function [stack, pred] = popnode(stack)
-stack = stack(1:end-1);
-if length(stack) > 1
-    pred = stack(end-1);
-else
-    pred = [];
-end
-
-function getAllHinges(G, dis, flavourTypes, flavourNum, unitCell, extrudedUnitCell, opt)
+function getAllHinges(G, dis, opt)
 % get the complete list of hinge sets, and dump them in a csv file
 % ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 % INPUT
@@ -319,6 +243,44 @@ function getAllHinges(G, dis, flavourTypes, flavourNum, unitCell, extrudedUnitCe
 % last modified on Jun 05, 2017
 % yun
 
+% name of all hinges converted to an array of numbers
+allHinges = 1:height(G.Nodes);
+
+% starts generating all hignes
+hingeSetsPrev(height(G.Nodes)+1).all = allHinges;
+for N = 1:height(G.Nodes)-1  %height(G.Nodes)-1
+    fprintf('Calculating distance for %d nodes\n', N);
+    if N <= 0.5 * height(G.Nodes)
+        hingeSets = chooseHinges(G, dis, N, hingeSetsPrev(N).all);
+        % getting ready for the next loop
+    end
+%     if N == 0.5 * height(G.Nodes)
+%         hingeSets = chooseHinges(G, dis, N, hingeSetsPrev(N).all);
+%         for ct = 1:size(hingeSets, 1)
+%             % write complement selections to file
+%             conjSet = allHinges;
+%             conjSet(hingeSets(ct,:)) = [];
+%             hingeSets(end+1,:) = conjSet;
+%         end
+%     end
+    if N > 0.5 * height(G.Nodes)
+        Nconj = height(G.Nodes)-N;
+        hingeSets = zeros(size(hingeSetsPrev(Nconj+1).all, 1), N);
+        for ct = 1:size(hingeSets, 1)
+            % write complement selections to file
+            conjSet = allHinges;
+            conjSet(hingeSetsPrev(Nconj+1).all(ct,:)) = [];
+            hingeSets(ct,:) = conjSet;
+        end
+    end
+    
+    hingeSetsPrev(N+1).all = hingeSets;    
+end
+
+saveHinges(hingeSetsPrev, opt, G)
+
+function saveHinges(hingeSetsPrev, opt, G)
+
 % create folder if it doesn't exist
 folderName = strcat(pwd, '\Results\hingeList_reduced\');
 if ~exist(folderName, 'dir')
@@ -329,69 +291,16 @@ if exist(fileName, 'file')
     delete(fileName) % always start with new file
 end
 
-% name of all hinges converted to an array of numbers
-allHinges = zeros(1, height(G.Nodes));
-for ct = 1:height(G.Nodes)
-    allHinges(ct) = str2num(G.Nodes.Properties.RowNames{ct});
-end
-
-% starts generating all hignes
-hingeSetsPrev(1).all = [];
-for N = 1:height(G.Nodes)-1    %(0.5 * height(G.Nodes))
-    if N <= 0.5 * height(G.Nodes)
-        hingeSets = chooseHinges(G, dis, flavourTypes, flavourNum, N, hingeSetsPrev(N).all);
-
-        for ct = 1:size(hingeSets, 1)
-            % write selections to file
-            dlmwrite(fileName, hingeSets(ct,:), 'delimiter', ',', '-append')
-
-            % plot and save figures when specified
-            if strcmp(opt.createFig, 'on')
-                f = plotSelectedHinges(hingeSets(ct,:), unitCell, extrudedUnitCell, true);
-                % set(f, 'visible', 'off');
-                if strcmp(opt.saveFig, 'on')
-                    folderName = strcat(pwd, '/hingeList_reduced/', opt.template, '/', ...
-                                 num2str(N), '/');
-                    if ~exist(folderName, 'dir')
-                     mkdir(folderName)
-                    end
-                    saveas(f, strcat(folderName, mat2str(hingeSets(ct,:)), '.png'))
-                    close(f)
-                end
-            end
-        end
-        % getting ready for the next loop
-        hingeSetsPrev(N+1).all = hingeSets;
-    end
-    
-    if N >= 0.5 * height(G.Nodes)
-        Nconj = height(G.Nodes)-N;
-        hingeSets = chooseHinges(G, dis, flavourTypes, flavourNum, Nconj, hingeSetsPrev(Nconj).all);
-        cHingeSets = zeros(size(hingeSets, 1), height(G.Nodes)-Nconj);
-        for ct = 1:size(cHingeSets, 1)
-            % write complement selections to file
-            cHingeSets(ct,:) = setdiff(allHinges, hingeSets(ct,:));
-            dlmwrite(fileName, cHingeSets(ct,:), 'delimiter', ',', '-append')
-
-            % plot and save figures when specified
-            if strcmp(opt.createFig, 'on')
-                f = plotSelectedHinges(cHingeSets(ct,:), unitCell, extrudedUnitCell, true);
-                % set(f, 'visible', 'off');
-                if strcmp(opt.saveFig, 'on')
-                    folderName = strcat(pwd, '/hingeList_reduced/', opt.template, '/', ...
-                                num2str(height(G.Nodes)-N), '/');
-                    if ~exist(folderName, 'dir')
-                        mkdir(folderName)
-                    end
-                    saveas(f, strcat(folderName,mat2str(cHingeSets(ct,:)), '.png'))
-                    close(f)
-                end
-            end
-        end
+for i = 2:height(G.Nodes)+1
+    if size(hingeSetsPrev(i).all,1) > 1
+        dlmwrite(fileName, G.Nodes.Names(hingeSetsPrev(i).all), 'delimiter', ',', '-append');
+    else
+        dlmwrite(fileName, G.Nodes.Names(hingeSetsPrev(i).all)', 'delimiter', ',', '-append');
     end
 end
 
-function [hinges] = chooseHinges(G, dis, flavourTypes, flavourNum, N, hingeSetsPrev)
+
+function [hinges] = chooseHinges(G, dis, N, hingeSetsPrev)
 % select *N* number of hinges from graph *G* to actuate, the flavoured
 % version
 % ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -417,76 +326,107 @@ elseif N == 0
     hinges = [];
 elseif N == 1
     % actuate different types of hinges
-    hinges = zeros(flavourNum, 1);
-    for ct = 1:flavourNum
-        idx = find(1==strcmp(G.Nodes.Type, flavourTypes(ct)), 1);
-        hinges(ct) = str2num(G.Nodes{idx,'Name'}{1});
-    end
-    
+    [~,hinges,~] = unique(G.Nodes.Type);
 else% N >= 2
     % initialising...
-    hinges = [];
-    currentIdx = 1;
-    cache.distance = []; % the matrices representing each selection
-    cache.distanceEig = []; % their corresponding eigenvalues    
+    numberHinges = size(G.Nodes,1);
+    hinges = zeros(size(hingeSetsPrev, 1)*(numberHinges-N),N);
+    distanceEig = zeros(size(hingeSetsPrev, 1)*(numberHinges-N),N);
+    index = 1;
     % loop through each hinge set
     for ct = 1:size(hingeSetsPrev, 1)
         hingeSet = hingeSetsPrev(ct, :);
-        hingeSetIdx = getHingeIdx(hingeSet, G);
-        cols = dis(:, hingeSetIdx);
-        % first, split the possible candidates into cases of different
-        % flavours
-        for flavourCt = 1:flavourNum
-            candidateIdxs = find(1==strcmp(G.Nodes.Type,flavourTypes{flavourCt}));
-            % then start comparing matrices
-            for nodeCt = 1:length(candidateIdxs)
-                newNodeIdx = candidateIdxs(nodeCt);
-                if newNodeIdx <= hingeSetIdx(end)
-                    % avoid double counting
-                    continue;
-                end
-                newNode = str2num(G.Nodes{newNodeIdx, 'Name'}{1});
-                newSet = [hingeSet, newNode];
-                newSetIdx = [hingeSetIdx, newNodeIdx];
-                newDisMat = dis(newSetIdx, newSetIdx);
-                newDisEig = round(1000*sort(eig(newDisMat)')) / 1000; % round off 
-                
-                % if newDisEig is not in cache, add current solution
-                if isempty(cache.distanceEig) || ...
-                        ~ismember(newDisEig, cache.distanceEig, 'rows')
-                    hinges(currentIdx, :) = newSet;
-                    cache.distance(:,:,currentIdx) = newDisMat;
-                    cache.distanceEig(currentIdx, :) = newDisEig;
-                    currentIdx = currentIdx + 1;
-                end        
+        candidateHinges = (hingeSet(end)+1):numberHinges;
+        % then start comparing matrices
+        for nodeCt = candidateHinges
+            newSet = [hingeSet nodeCt];
+            newDisMat = dis(newSet, newSet);
+            newDisEig = round(1000*sort(eig(newDisMat))') / 1000; % round off 
+
+            % if newDisEig is not in cache, add current solution
+%             sameEig = sum(distanceEig(1:index,:) == newDisEig, 2);
+            cachedistanceEig = distanceEig(1:index,:);
+            for eigenvalue = 1:N
+                sameEig = cachedistanceEig(:,eigenvalue) == newDisEig(eigenvalue);
+                cachedistanceEig = cachedistanceEig(any(sameEig,2),:);
+            end
+            if size(cachedistanceEig,1) < 1
+
+%             if ~sum(sameEig == N)
+                hinges(index, :) = newSet;
+                distanceEig(index, :) = newDisEig;
+                index = index+1;
             end
         end
-    end    
+    end 
+    
+    
+
+%     if N == size(G.Nodes,1)/2
+%         allHinges = 1:height(G.Nodes);
+%         
+%         for i = 1:(index-1)
+%             newSet = allHinges;
+%             newSet(hinges(i,:)) = [];
+%             newDisMat = dis(newSet, newSet);
+%             newDisEig = round(1000*sort(eig(newDisMat))') / 1000; % round off 
+% 
+%             % if newDisEig is not in cache, add current solution
+% %             sameEig = sum(distanceEig(1:index,:) == newDisEig, 2);
+%             cachedistanceEig = distanceEig(1:index,:);
+%             for eigenvalue = 1:N
+%                 sameEig = cachedistanceEig(:,eigenvalue) == newDisEig(eigenvalue);
+%                 cachedistanceEig = cachedistanceEig(any(sameEig,2),:);
+%             end
+%             if size(cachedistanceEig,1) < 1
+% 
+% %             if ~sum(sameEig == N)
+%                 hinges(index, :) = newSet;
+%                 distanceEig(index, :) = newDisEig;
+%                 index = index+1;
+%             end
+%         end
+%         
+%     end
+    
+    hinges( ~any(hinges,2),:) = [];
 end
 
+function plotHinges(unitCell, extrudedUnitCell, opt)
 
-
-function hingeSetIdx = getHingeIdx(hingeSet, G)
-% gets the index of hinges in graph, as numbered in *outputResults()*
-% ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-% INPUT
-% hingeSet - an array of integers, which represent the names of hinges
-% G -  a directed graph object
-% ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-% OUTPUT
-% hingeSetIdx - an array of integers of the same size as hingeSet, which
-%               contains the indeces of the hinges in the graph G
-% ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-% last modified on Apr 10, 2017
-% yun
-hingeSetIdx = zeros(size(hingeSet));
-for ct = 1:length(hingeSetIdx)
-    hingeSetIdx(ct) = find(strcmp(G.Nodes.Properties.RowNames,...
-                      num2str(hingeSet(ct))));
+folderName = strcat(pwd, '\Results\hingeList_reduced\');
+if ~exist(folderName, 'dir')
+    fprintf('There is no folder with hinge list');
+    return;
 end
 
-function f = plotSelectedHinges(hingeList, unitCell, extrudedUnitCell, ...
-             orderedNames)
+fileName = strcat(folderName, opt.template, '.csv');
+if ~exist(fileName, 'file')
+    fprintf('There is no file for the current polyhedra with hinge list');
+    return;
+end
+
+hingeList = csvread(fileName);
+
+for ii = 1:size(hingeList,1)
+    hinges = hingeList(ii, :);
+    hinges = hinges(0~=hinges);
+    
+    f = plotSelectedHinges(hinges, unitCell, extrudedUnitCell, false);
+    if strcmp(opt.saveFig, 'on')
+        folderName = strcat(pwd, '/Results/hingeList_reduced/', opt.template, '/', ...
+                     num2str(length(hinges)), '/');
+        if ~exist(folderName, 'dir')
+            mkdir(folderName);
+        end
+        saveas(f, strcat(folderName, mat2str(hinges), '.png'));
+        
+    end
+    close(f)
+
+end
+
+function f = plotSelectedHinges(hingeList, unitCell, extrudedUnitCell, orderedNames)
 % function plotSelectedHinges(geometry, hingeList)
 % highlights the set of selected hinges in a given polyhedron, for better
 % visualisation
@@ -503,8 +443,8 @@ function f = plotSelectedHinges(hingeList, unitCell, extrudedUnitCell, ...
 % OUTPUT
 % f - a graph object
 % ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-% last modified on Jun 07, 2017
-% yun
+% last modified on 30 Oct, 2017
+% agustin
 
 
 if ~exist('orderedNames', 'var')
@@ -521,6 +461,7 @@ axis('off')
 xlabel('x'); ylabel('y'); zlabel('z')
 if 1==length(hingeList)
     hingeStr = num2str(hingeList);
+    hingeStr = strcat('[',hingeStr,']');
 else
     hingeStr = mat2str(hingeList);
 end
