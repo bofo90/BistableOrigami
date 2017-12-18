@@ -146,43 +146,43 @@ tolEdge = 0.003
 maxHinge = 2.1#np.max(uniqueEnergies[:,0])#2.1
 maxEdge = 0.15#np.max(uniqueEnergies[:,1])#0.15
 
+aangles, bindex, ccounts = np.unique(uniqueAngles, axis = 0, return_index = True, return_counts = True)
+
 
 fig3, axes3 = plt.subplots(nrows=1, ncols=1, figsize=(pc2.cm2inch(35), pc2.cm2inch(20)))
 
 pc2.NiceGraph2D(axes3, r'Average $\Delta$L [cm]',  r'Average $\Delta\theta$ [rad]')
 
-cmap = cm.Set2
-cmap.set_over('r')
-cmap.set_under('0.2')
+cmap1 = cm.Set2
+cmap1.set_over('r')
+cmap1.set_under('0.2')
 
-cs3 = axes3.hist2d(uniqueEnergies[:,1], uniqueEnergies[:,0], bins = [np.arange(0,maxEdge+tolEdge,tolEdge),np.arange(0,maxHinge+tolHinge,tolHinge)],
-                   cmap = cm.Set2, vmax = 70, vmin = 3)
-axes3.scatter(uniqueEnergies[:,1], uniqueEnergies[:,0], 0.5, '0.5')
+cs3 = axes3.scatter(uniqueEnergies[bindex,1], uniqueEnergies[bindex,0], c = ccounts, cmap = cmap1, vmax = 70, vmin = 3)
 
-cbar3 = plt.colorbar(cs3[3],format="%d", fraction=0.05, pad=0.01, extend='both')
+cbar3 = plt.colorbar(cs3,format="%d", fraction=0.05, pad=0.01, extend='both')
 cbar3.set_label('Counts of Simulations', fontsize = 15, color = '0.2')
 cbar3.ax.tick_params(axis='y',colors='0.2')
 cbar3.ax.tick_params(axis='x',colors='0.2')
 cbar3.outline.set_edgecolor('0.2')
 
-goodstst = np.zeros((7,7,3))
-goodststperst = np.empty((0,7,7,3), dtype = int)
-goodststperstnames = np.empty(0)
-for i in np.arange(cs3[0].shape[0]):
-    for j in np.arange(cs3[0].shape[1]):
-        if cs3[0][i][j]>=3:
-            same = np.where(np.logical_and(np.logical_and(uniqueEnergies[:,1]>=cs3[1][i],
-                                                          uniqueEnergies[:,1]<cs3[1][i+1]),
-                                           np.logical_and(uniqueEnergies[:,0]>=cs3[2][j], 
-                                                          uniqueEnergies[:,0]<cs3[2][j+1])))[0]
-            ids = 'Counts %d\tEnergies %.3f %.3f\t' %(len(same), cs3[1][i], cs3[2][j])
-            provcount = np.zeros((7,7,3))
-            for stablest in same:
-                goodstst[uniqueKs[stablest][0]][uniqueKs[stablest][1]][uniqueKs[stablest][2]] += 1
-                provcount[uniqueKs[stablest][0]][uniqueKs[stablest][1]][uniqueKs[stablest][2]] += 1
-            print(ids, stablest, uniqueNames[same[0]], uniqueKs[same[0]][0], uniqueKs[same[0]][1], uniqueKs[same[0]][2])
-            goodststperst = np.append(goodststperst, [provcount], axis = 0)
-            goodststperstnames = np.append(goodststperstnames, uniqueNames[stablest])
+#goodstst = np.zeros((7,7,3))
+#goodststperst = np.empty((0,7,7,3), dtype = int)
+#goodststperstnames = np.empty(0)
+#for i in np.arange(cs3[0].shape[0]):
+#    for j in np.arange(cs3[0].shape[1]):
+#        if cs3[0][i][j]>=3:
+#            same = np.where(np.logical_and(np.logical_and(uniqueEnergies[:,1]>=cs3[1][i],
+#                                                          uniqueEnergies[:,1]<cs3[1][i+1]),
+#                                           np.logical_and(uniqueEnergies[:,0]>=cs3[2][j], 
+#                                                          uniqueEnergies[:,0]<cs3[2][j+1])))[0]
+#            ids = 'Counts %d\tEnergies %.3f %.3f\t' %(len(same), cs3[1][i], cs3[2][j])
+#            provcount = np.zeros((7,7,3))
+#            for stablest in same:
+#                goodstst[uniqueKs[stablest][0]][uniqueKs[stablest][1]][uniqueKs[stablest][2]] += 1
+#                provcount[uniqueKs[stablest][0]][uniqueKs[stablest][1]][uniqueKs[stablest][2]] += 1
+#            print(ids, stablest, uniqueNames[same[0]], uniqueKs[same[0]][0], uniqueKs[same[0]][1], uniqueKs[same[0]][2])
+#            goodststperst = np.append(goodststperst, [provcount], axis = 0)
+#            goodststperstnames = np.append(goodststperstnames, uniqueNames[stablest])
 
 fig3.show()
 #fig3.savefig(folder_name + 'AllStateskallw2flags.png', transparent = True)
@@ -222,7 +222,7 @@ cbar4.ax.tick_params(axis='x',colors='0.2')
 cbar4.outline.set_edgecolor('0.2')
 
 fig4.show()
-fig4.savefig(folder_name + 'StableStatesRestkallwo2flags.png', transparent = True)
+#fig4.savefig(folder_name + 'StableStatesRestkallwo2flags.png', transparent = True)
 
 #%%
 
@@ -264,5 +264,5 @@ for label in lgnd.get_texts():
 lgnd.get_frame().set_alpha(0)
 
 fig5.show()
-fig5.savefig(folder_name + 'StableStatesgoodCountkallw2flags.png', transparent = True)
+#fig5.savefig(folder_name + 'StableStatesgoodCountkallw2flags.png', transparent = True)
 
