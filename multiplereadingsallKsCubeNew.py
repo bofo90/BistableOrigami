@@ -146,7 +146,7 @@ tolEdge = 0.003
 maxHinge = 2.1#np.max(uniqueEnergies[:,0])#2.1
 maxEdge = 0.15#np.max(uniqueEnergies[:,1])#0.15
 
-aangles, bindex, ccounts = np.unique(uniqueAngles, axis = 0, return_index = True, return_counts = True)
+aangles, bindex, cinverse, dcounts = np.unique(uniqueAngles, axis = 0, return_index = True, return_inverse = True, return_counts = True)
 
 
 fig3, axes3 = plt.subplots(nrows=1, ncols=1, figsize=(pc2.cm2inch(35), pc2.cm2inch(20)))
@@ -157,7 +157,7 @@ cmap1 = cm.Set2
 cmap1.set_over('r')
 cmap1.set_under('0.2')
 
-cs3 = axes3.scatter(uniqueEnergies[bindex,1], uniqueEnergies[bindex,0], c = ccounts, cmap = cmap1, vmax = 70, vmin = 3)
+cs3 = axes3.scatter(uniqueEnergies[bindex,1], uniqueEnergies[bindex,0], c = dcounts, cmap = cmap1, vmax = 70, vmin = 3)
 
 cbar3 = plt.colorbar(cs3,format="%d", fraction=0.05, pad=0.01, extend='both')
 cbar3.set_label('Counts of Simulations', fontsize = 15, color = '0.2')
@@ -165,9 +165,13 @@ cbar3.ax.tick_params(axis='y',colors='0.2')
 cbar3.ax.tick_params(axis='x',colors='0.2')
 cbar3.outline.set_edgecolor('0.2')
 
-#goodstst = np.zeros((7,7,3))
-#goodststperst = np.empty((0,7,7,3), dtype = int)
-#goodststperstnames = np.empty(0)
+goodstst = np.zeros((7,7,3))
+goodststperst = np.empty((0,7,7,3), dtype = int)
+goodststperstnames = np.empty(0)
+
+for parameter, stablestate in zip(uniqueKs, cinverse):
+    if dcounts[stablestate] >= 3:
+        goodstst[parameter[0]][parameter[1]][parameter[2]] += 1
 #for i in np.arange(cs3[0].shape[0]):
 #    for j in np.arange(cs3[0].shape[1]):
 #        if cs3[0][i][j]>=3:
@@ -207,11 +211,12 @@ for ax, edge in zip(axes4.flat, edges):
     i += 1
 
 reststst = ststs-goodstst
-reststst = np.ma.masked_where(np.isnan(reststst), reststst)
+reststst = np.ma.masked_where(np.isnan(reststst), reststst)  
 
 cmap4, norm4 = from_levels_and_colors(np.arange(np.nanmax(reststst)+1)+1, cm.Greys_r(np.linspace(0, 1, np.nanmax(reststst))))
-cmap4.set_under('#17566E')
+cmap4.set_under('#17566E')          
 
+              
 for edge, ax in zip(np.arange(3), axes4.flat):
     cs4 = ax.pcolormesh(x2, y2, reststst[:,:,edge].T, cmap=cmap4, norm = norm4)
 
