@@ -282,7 +282,7 @@ saveHinges(hingeSetsPrev, opt, G)
 function saveHinges(hingeSetsPrev, opt, G)
 
 % create folder if it doesn't exist
-folderName = strcat(pwd, '\Results\hingeList_reduced\');
+folderName = strcat(pwd, '/Results/hingeList_reduced/');
 if ~exist(folderName, 'dir')
     mkdir(folderName);
 end
@@ -394,7 +394,7 @@ end
 
 function plotHinges(unitCell, extrudedUnitCell, opt)
 
-folderName = strcat(pwd, '\Results\hingeList_reduced\');
+folderName = strcat(pwd, '/Results/hingeList_reduced/');
 if ~exist(folderName, 'dir')
     fprintf('There is no folder with hinge list');
     return;

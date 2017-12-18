@@ -80,9 +80,7 @@ switch opt.plot
                     end
                     outputResults(unitCell,extrudedUnitCell,result,opt);
                 end
-                if strcmp(opt.showFig, 'off')
-                    close all;
-                end
+                close all;
             end
         end
         fclose('all');

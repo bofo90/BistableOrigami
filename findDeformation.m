@@ -12,7 +12,7 @@ if strcmp(opt.plot,'result')
         end
     else
         opt.angleConstrFinal = [];
-        fileHinges = strcat(pwd, '\Results\hingeList_reduced\', opt.template, '.csv');
+        fileHinges = strcat(pwd, '/Results/hingeList_reduced/', opt.template, '.csv');
         if ~exist(fileHinges, 'file')
             fprintf('Hinge-selection file does not exist.\n');
         else
