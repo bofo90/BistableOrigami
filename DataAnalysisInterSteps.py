@@ -254,7 +254,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     converged = totHingeNum - notConverged
     ############################################ normalize the flag counts
     allFlags = np.sum(np.add(flagCountFol,flagCountRel), axis = 0)
-    allFlags = allFlags/totHingeNum/2
+    allFlags = allFlags/totHingeNum
     for i in np.arange(totalflags):
         flagCountFol[:,i] = flagCountFol[:,i]/hingeCount
         flagCountRel[:,i] = flagCountRel[:,i]/hingeCount
@@ -322,7 +322,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
             finalAngles = np.append(finalAngles, [dataAngles[2*hinge+1,sortAngleIndex]], axis = 0)
             convHinges = np.append(convHinges, hinge)
     
-    angles, index, counts = np.unique(finalAngles, axis = 0, return_index = True, return_counts = True)
+    differentAngles, index, counts = np.unique(finalAngles, axis = 0, return_index = True, return_counts = True)
     differentEnergies = np.column_stack((convHinges[index], counts))
     differentEnergiesName = hingeName[convHinges[index]]
     differentEnergiesEnergy = np.column_stack((eHingeRel[convHinges[index]*stepsHinge+stepsHinge-1], 
@@ -469,7 +469,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
 
 
 
-    return allFlags, len(differentEnergies[:,0]), differentEnergiesName, differentEnergiesEnergy
+    return allFlags, len(differentEnergies[:,0]), differentEnergiesName, differentEnergiesEnergy, differentAngles
 
 #hinges = np.zeros(30)
 #
