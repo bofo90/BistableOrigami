@@ -9,7 +9,7 @@ import os
 import DataAnalysisInterSteps as pc2
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-import matplotlib
+import matplotlib as matl
 from matplotlib.colors import from_levels_and_colors
 import matplotlib.ticker as ticker
 
@@ -76,8 +76,8 @@ for ax, edge in zip(axes1.flat, edges):
     ax.set_yscale('log')
     ax.set_title('kEdge %2.3f' %(edge), fontsize = 15, color = '0.2')
     pc2.NiceGraph2D(ax, 'kHinge', 'kTargetAngle', mincoord = [np.min(x2), np.min(y2)], maxcoord = [np.max(x2), np.max(y2)], divisions = [x,y])
-    ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
-    ax.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+    ax.get_xaxis().set_major_formatter(ticker.ScalarFormatter())
+    ax.get_yaxis().set_major_formatter(ticker.ScalarFormatter())
     ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%2.3f'))
     if i%3 != 0:
         ax.set_yticks([])
@@ -115,8 +115,8 @@ for ax, edge in zip(axes2.flat, edges):
     ax.set_yscale('log')
     ax.set_title('kEdge %2.3f' %(edge), fontsize = 15, color = '0.2')
     pc2.NiceGraph2D(ax, 'kHinge', 'kAngle', mincoord = [np.min(x2), np.min(y2)], maxcoord = [np.max(x2), np.max(y2)], divisions = [x,y])
-    ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
-    ax.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+    ax.get_xaxis().set_major_formatter(ticker.ScalarFormatter())
+    ax.get_yaxis().set_major_formatter(ticker.ScalarFormatter())
     ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%2.3f'))
     if i%3 != 0:
         ax.set_yticks([])
@@ -125,7 +125,7 @@ for ax, edge in zip(axes2.flat, edges):
 
 
 durations = np.ma.masked_where(np.isnan(durations), durations)
-cmap2, norm2 = from_levels_and_colors(np.linspace(0, 60, 6), cm.Blues_r(np.linspace(0, 1, 5)))
+cmap2, norm2 = from_levels_and_colors(np.linspace(0, 90, 7), cm.Blues_r(np.linspace(0, 1, 6)))
 cmap2.set_over('0.2')
 
 for edge, ax in zip(np.arange(8), axes2.flat):
@@ -138,7 +138,7 @@ cbar2.ax.tick_params(axis='x',colors='0.2')
 cbar2.outline.set_edgecolor('0.2')
 
 fig2.show()
-fig2.savefig(folder_name + 'SimultionDurationkallwo2flags.png', transparent = True)
+#fig2.savefig(folder_name + 'SimultionDurationkallwo2flags.png', transparent = True)
 
 #%%
 tolHinge = 0.1
@@ -157,7 +157,7 @@ cmap1 = cm.Set2
 cmap1.set_over('r')
 cmap1.set_under('0.2')
 
-cs3 = axes3.scatter(uniqueEnergies[bindex,1], uniqueEnergies[bindex,0], c = dcounts, cmap = cmap1, vmax = 70, vmin = 3)
+cs3 = axes3.scatter(uniqueEnergies[bindex,1], uniqueEnergies[bindex,0], c = dcounts, cmap = cmap1, vmax = 83, vmin = 3)
 
 cbar3 = plt.colorbar(cs3,format="%d", fraction=0.05, pad=0.01, extend='both')
 cbar3.set_label('Counts of Simulations', fontsize = 15, color = '0.2')
@@ -179,7 +179,7 @@ countgoodstst = np.sum(dcounts>=3)
 
 
 fig3.show()
-fig3.savefig(folder_name + 'AllStateskallwo2flags.png', transparent = True)
+#fig3.savefig(folder_name + 'AllStateskallwo2flags.png', transparent = True)
 
 #%%
 
@@ -192,8 +192,8 @@ for ax, edge in zip(axes4.flat, edges):
     ax.set_yscale('log')
     ax.set_title('kEdge %2.3f' %(edge), fontsize = 15, color = '0.2')
     pc2.NiceGraph2D(ax, 'kHinge', 'kAngle', mincoord = [np.min(x2), np.min(y2)], maxcoord = [np.max(x2), np.max(y2)], divisions = [x,y])
-    ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
-    ax.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+    ax.get_xaxis().set_major_formatter(ticker.ScalarFormatter())
+    ax.get_yaxis().set_major_formatter(ticker.ScalarFormatter())
     ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%2.3f'))
     if i%3 != 0:
         ax.set_yticks([])
@@ -217,7 +217,7 @@ cbar4.ax.tick_params(axis='x',colors='0.2')
 cbar4.outline.set_edgecolor('0.2')
 
 fig4.show()
-fig4.savefig(folder_name + 'StableStatesRestkallwo2flags.png', transparent = True)
+#fig4.savefig(folder_name + 'StableStatesRestkallwo2flags.png', transparent = True)
 
 #%%
 
@@ -230,8 +230,8 @@ for ax, edge in zip(axes5.flat, edges):
     ax.set_yscale('log')
     ax.set_title('kEdge %2.3f' %(edge), fontsize = 15, color = '0.2')
     pc2.NiceGraph2D(ax, 'kHinge', 'kAngle', mincoord = [np.min(x2), np.min(y2)], maxcoord = [np.max(x2), np.max(y2)], divisions = [x,y])
-    ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
-    ax.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+    ax.get_xaxis().set_major_formatter(ticker.ScalarFormatter())
+    ax.get_yaxis().set_major_formatter(ticker.ScalarFormatter())
     ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%2.3f'))
     if i%3 != 0:
         ax.set_yticks([])
@@ -266,4 +266,12 @@ lgnd.get_frame().set_alpha(0)
 
 fig5.show()
 fig5.savefig(folder_name + 'StableStatesgoodCountkallwo2flags.png', transparent = True)
+
+#%%
+
+fig6, axes6 = plt.subplots(nrows=1, ncols=2, figsize=(pc2.cm2inch(35), pc2.cm2inch(20)))
+pc2.NiceGraph2D(axes6[0], r'Average $\Delta\theta$ [rad]', 'Sum of internal angles [rad]')
+pc2.NiceGraph2D(axes6[1], r'Average $\Delta\theta$ [rad]', 'Sum of external angles [rad]')
+axes6[0].yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%g $\pi$'))
+axes6[1].yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%g $\pi$'))
 
