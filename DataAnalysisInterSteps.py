@@ -248,7 +248,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         if error:
             notConvHinges = np.append(notConvHinges,np.array([[i, exflFol[(i+1)*stepsHinge-1], exflRel[(i+1)*stepsHinge-1]]]), axis = 0)
             hingesMask[i] = np.NaN
-            print(hingeName[i])
+#            print(hingeName[i])
             
     notConverged = sum(np.isnan(hingesMask))
     converged = totHingeNum - notConverged
@@ -309,8 +309,8 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
 #    #differentEnergies = np.array(differentEnergies)
     ######################### Problems: double counting of stable states that are close to each other due to the ill definition of neighbourhoods.
     #########################           Additionally counting states that didn't converge.
-    print('Total converged percentage:', converged/totHingeNum)
-    print('Not converged: ', notConverged, '/', totHingeNum)
+#    print('Total converged percentage:', converged/totHingeNum)
+#    print('Not converged: ', notConverged, '/', totHingeNum)
     
     ###################### Analysis of angles to find stable states
     convHinges = np.empty(0, dtype = int)
@@ -432,7 +432,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
                 ax8.annotate(hingeName[hinge], xy=(eEdgeRel[stepsHinge*hinge+stepsHinge-1], abs(max(MaxStrRel[stepsHinge*hinge+stepsHinge-1],MinStrRel[stepsHinge*hinge+stepsHinge-1], key=abs))), 
                               xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
                               arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
-                print(hingeName[differentEnergies[findit[0],0]], differentEnergies[findit[0],1])    
+#                print(hingeName[differentEnergies[findit[0],0]], differentEnergies[findit[0],1])    
                 
         cs1 = ax1.scatter(differentEnergiesEnergy[:,1], differentEnergiesEnergy[:,0], c = differentEnergies[:,1],
                           label = differentEnergiesName, cmap = cmap1, vmax = maxststs)

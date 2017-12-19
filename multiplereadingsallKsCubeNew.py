@@ -42,7 +42,7 @@ for stephinge in np.arange(7):
             names = np.nan
             energies = np.nan
             if os.path.exists(folder_name+subfolder_name):
-                print(folder_name+subfolder_name, simulations)
+#                print(folder_name+subfolder_name, simulations)
                 flags[stephinge,stepangle,stepedge,:], ststs[stephinge,stepangle,stepedge], names, energies, angles, sumint, sumext= pc2.ReadandAnalizeFile(folder_name+subfolder_name, plot = False)
                 uniqueNames = np.append(uniqueNames, names)
                 uniqueSumInt = np.append(uniqueSumInt, sumint)
@@ -288,12 +288,13 @@ cs4 = axes6[1].scatter(uniqueEnergies[bindex,0], uniqueSumExt[bindex], c = dcoun
 
 for state in np.arange(dcounts.shape[0])[::-1]:
     if dcounts[state] >=3:
-        axes6[0].annotate(goodststperstnames[state], xy=(uniqueEnergies[bindex[state],0], uniqueSumInt[bindex[state]]), 
-                      xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
-                      arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
-        axes6[1].annotate(goodststperstnames[state], xy=(uniqueEnergies[bindex[state],0], uniqueSumExt[bindex[state]]), 
-                      xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
-                      arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
+        print(uniqueKs[bindex[state]], uniqueNames[bindex[state]], dcounts[state])
+#        axes6[0].annotate(goodststperstnames[state], xy=(uniqueEnergies[bindex[state],0], uniqueSumInt[bindex[state]]), 
+#                      xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
+#                      arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
+#        axes6[1].annotate(goodststperstnames[state], xy=(uniqueEnergies[bindex[state],0], uniqueSumExt[bindex[state]]), 
+#                      xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
+#                      arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
 
 cbar5 = plt.colorbar(cs4,format="%d", fraction=0.05, pad=0.01, extend='both')
 cbar5.set_label('Counts of Simulations', fontsize = 15, color = '0.2')
