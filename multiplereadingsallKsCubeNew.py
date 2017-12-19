@@ -142,7 +142,7 @@ cbar2.ax.tick_params(axis='x',colors='0.2')
 cbar2.outline.set_edgecolor('0.2')
 
 fig2.show()
-fig2.savefig(folder_name + 'SimultionDurationkallwo2flags.png', transparent = True)
+#fig2.savefig(folder_name + 'SimultionDurationkallwo2flags.png', transparent = True)
 
 #%%
 tolHinge = 0.1
@@ -183,7 +183,7 @@ countgoodstst = np.sum(dcounts>=3)
 
 
 fig3.show()
-fig3.savefig(folder_name + 'AllStateskallwo2flags.png', transparent = True)
+#fig3.savefig(folder_name + 'AllStateskallwo2flags.png', transparent = True)
 
 #%%
 
@@ -221,7 +221,7 @@ cbar4.ax.tick_params(axis='x',colors='0.2')
 cbar4.outline.set_edgecolor('0.2')
 
 fig4.show()
-fig4.savefig(folder_name + 'StableStatesRestkallwo2flags.png', transparent = True)
+#fig4.savefig(folder_name + 'StableStatesRestkallwo2flags.png', transparent = True)
 
 #%%
 
@@ -269,7 +269,7 @@ for label in lgnd.get_texts():
 lgnd.get_frame().set_alpha(0)
 
 fig5.show()
-fig5.savefig(folder_name + 'StableStatesgoodCountkallwo2flags.png', transparent = True)
+#fig5.savefig(folder_name + 'StableStatesgoodCountkallwo2flags.png', transparent = True)
 
 #%%
 
@@ -287,7 +287,7 @@ axes6[0].scatter(uniqueEnergies[bindex,0], uniqueSumInt[bindex], c = dcounts, cm
 cs4 = axes6[1].scatter(uniqueEnergies[bindex,0], uniqueSumExt[bindex], c = dcounts, cmap = cmap1, vmax = 83, vmin = 3)
 
 for state in np.arange(dcounts.shape[0])[::-1]:
-    if dcounts[state] >=3:
+    if dcounts[state] <3:
         print(uniqueKs[bindex[state]], goodststperstnames[state], dcounts[state])
 #        axes6[0].annotate(goodststperstnames[state], xy=(uniqueEnergies[bindex[state],0], uniqueSumInt[bindex[state]]), 
 #                      xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
@@ -303,4 +303,5 @@ cbar5.ax.tick_params(axis='x',colors='0.2')
 cbar5.outline.set_edgecolor('0.2')
 
 fig6.show()
-fig6.savefig(folder_name + 'StableStatesSumIntandExtAngleskallwo2flags.png', transparent = True)
+fig6.tight_layout()
+#fig6.savefig(folder_name + 'StableStatesSumIntandExtAngleskallwo2flags.png', transparent = True)
