@@ -469,7 +469,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
 
 
 
-    return allFlags, len(differentEnergies[:,0]), differentEnergiesName, differentEnergiesEnergy, differentAngles
+    return allFlags, len(differentEnergies[:,0]), differentEnergiesName, differentEnergiesEnergy, differentAngles, SumIntAngRel[stepsHinge*index+stepsHinge-1], SumExtAngRel[stepsHinge*index+stepsHinge-1]
 
 #hinges = np.zeros(30)
 #

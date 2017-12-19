@@ -25,6 +25,8 @@ folder_name = "Results/cube/sqp/energy/15-Dec-2017_100AngleCnstr/"
 folder_name2 = "Results/cube/sqp/mat/15-Dec-2017_100AngleCnstr/"
 
 uniqueNames = np.empty(0)
+uniqueSumInt = np.empty(0)
+uniqueSumExt = np.empty(0)
 uniqueEnergies = np.empty((0,2))
 uniqueKs = np.empty((0,3), dtype = int)
 uniqueAngles = np.empty((0,allHinges))
@@ -41,8 +43,10 @@ for stephinge in np.arange(7):
             energies = np.nan
             if os.path.exists(folder_name+subfolder_name):
                 print(folder_name+subfolder_name, simulations)
-                flags[stephinge,stepangle,stepedge,:], ststs[stephinge,stepangle,stepedge], names, energies, angles= pc2.ReadandAnalizeFile(folder_name+subfolder_name, plot = False)
+                flags[stephinge,stepangle,stepedge,:], ststs[stephinge,stepangle,stepedge], names, energies, angles, sumint, sumext= pc2.ReadandAnalizeFile(folder_name+subfolder_name, plot = False)
                 uniqueNames = np.append(uniqueNames, names)
+                uniqueSumInt = np.append(uniqueSumInt, sumint)
+                uniqueSumExt = np.append(uniqueSumExt, sumext)
                 uniqueEnergies = np.append(uniqueEnergies, energies, axis = 0)
                 uniqueAngles = np.append(uniqueAngles, angles, axis = 0)
                 for i in np.arange(len(energies)):
@@ -138,7 +142,7 @@ cbar2.ax.tick_params(axis='x',colors='0.2')
 cbar2.outline.set_edgecolor('0.2')
 
 fig2.show()
-#fig2.savefig(folder_name + 'SimultionDurationkallwo2flags.png', transparent = True)
+fig2.savefig(folder_name + 'SimultionDurationkallwo2flags.png', transparent = True)
 
 #%%
 tolHinge = 0.1
@@ -179,7 +183,7 @@ countgoodstst = np.sum(dcounts>=3)
 
 
 fig3.show()
-#fig3.savefig(folder_name + 'AllStateskallwo2flags.png', transparent = True)
+fig3.savefig(folder_name + 'AllStateskallwo2flags.png', transparent = True)
 
 #%%
 
@@ -217,7 +221,7 @@ cbar4.ax.tick_params(axis='x',colors='0.2')
 cbar4.outline.set_edgecolor('0.2')
 
 fig4.show()
-#fig4.savefig(folder_name + 'StableStatesRestkallwo2flags.png', transparent = True)
+fig4.savefig(folder_name + 'StableStatesRestkallwo2flags.png', transparent = True)
 
 #%%
 
@@ -275,22 +279,19 @@ pc2.NiceGraph2D(axes6[1], r'Average $\Delta\theta$ [rad]', 'Sum of external angl
 axes6[0].yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%g $\pi$'))
 axes6[1].yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%g $\pi$'))
 
-internalAngles = np.array([1,2,3,7,8,12,13,17,21,22,26,30])-1
-externalAngles = np.delete(np.arange(np.size(uniqueAngles, axis =1)), internalAngles)
-
 cmap2 = cm.Set2
 cmap2.set_over('r')
 cmap2.set_under('0.2')
 
-axes6[0].scatter(uniqueEnergies[bindex,0], np.sum(aangles[:,internalAngles],axis = 1), c = dcounts, cmap = cmap1, vmax = 83, vmin = 3)
-cs4 = axes6[1].scatter(uniqueEnergies[bindex,0], np.sum(aangles[:,externalAngles],axis = 1), c = dcounts, cmap = cmap1, vmax = 83, vmin = 3)
+axes6[0].scatter(uniqueEnergies[bindex,0], uniqueSumInt[bindex], c = dcounts, cmap = cmap1, vmax = 83, vmin = 3)
+cs4 = axes6[1].scatter(uniqueEnergies[bindex,0], uniqueSumExt[bindex], c = dcounts, cmap = cmap1, vmax = 83, vmin = 3)
 
 for state in np.arange(dcounts.shape[0])[::-1]:
     if dcounts[state] >=3:
-        axes6[0].annotate(goodststperstnames[state], xy=(uniqueEnergies[bindex[state],0], np.sum(aangles[:,internalAngles],axis = 1)[state]), 
+        axes6[0].annotate(goodststperstnames[state], xy=(uniqueEnergies[bindex[state],0], uniqueSumInt[bindex[state]]), 
                       xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
                       arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
-        axes6[1].annotate(goodststperstnames[state], xy=(uniqueEnergies[bindex[state],0], np.sum(aangles[:,externalAngles],axis = 1)[state]), 
+        axes6[1].annotate(goodststperstnames[state], xy=(uniqueEnergies[bindex[state],0], uniqueSumExt[bindex[state]]), 
                       xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
                       arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
 
@@ -299,3 +300,6 @@ cbar5.set_label('Counts of Simulations', fontsize = 15, color = '0.2')
 cbar5.ax.tick_params(axis='y',colors='0.2')
 cbar5.ax.tick_params(axis='x',colors='0.2')
 cbar5.outline.set_edgecolor('0.2')
+
+fig6.show()
+fig6.savefig(folder_name + 'StableStatesSumIntandExtAngleskallwo2flags.png', transparent = True)
