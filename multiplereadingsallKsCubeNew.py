@@ -275,3 +275,27 @@ pc2.NiceGraph2D(axes6[1], r'Average $\Delta\theta$ [rad]', 'Sum of external angl
 axes6[0].yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%g $\pi$'))
 axes6[1].yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%g $\pi$'))
 
+internalAngles = np.array([1,2,3,7,8,12,13,17,21,22,26,30])-1
+externalAngles = np.delete(np.arange(np.size(uniqueAngles, axis =1)), internalAngles)
+
+cmap2 = cm.Set2
+cmap2.set_over('r')
+cmap2.set_under('0.2')
+
+axes6[0].scatter(uniqueEnergies[bindex,0], np.sum(aangles[:,internalAngles],axis = 1), c = dcounts, cmap = cmap1, vmax = 83, vmin = 3)
+cs4 = axes6[1].scatter(uniqueEnergies[bindex,0], np.sum(aangles[:,externalAngles],axis = 1), c = dcounts, cmap = cmap1, vmax = 83, vmin = 3)
+
+for state in np.arange(dcounts.shape[0])[::-1]:
+    if dcounts[state] >=3:
+        axes6[0].annotate(goodststperstnames[state], xy=(uniqueEnergies[bindex[state],0], np.sum(aangles[:,internalAngles],axis = 1)[state]), 
+                      xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
+                      arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
+        axes6[1].annotate(goodststperstnames[state], xy=(uniqueEnergies[bindex[state],0], np.sum(aangles[:,externalAngles],axis = 1)[state]), 
+                      xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
+                      arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
+
+cbar5 = plt.colorbar(cs4,format="%d", fraction=0.05, pad=0.01, extend='both')
+cbar5.set_label('Counts of Simulations', fontsize = 15, color = '0.2')
+cbar5.ax.tick_params(axis='y',colors='0.2')
+cbar5.ax.tick_params(axis='x',colors='0.2')
+cbar5.outline.set_edgecolor('0.2')
