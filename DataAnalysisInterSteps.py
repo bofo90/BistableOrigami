@@ -248,13 +248,13 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         if error:
             notConvHinges = np.append(notConvHinges,np.array([[i, exflFol[(i+1)*stepsHinge-1], exflRel[(i+1)*stepsHinge-1]]]), axis = 0)
             hingesMask[i] = np.NaN
-            print(hingeName[i])
+#            print(hingeName[i])
             
     notConverged = sum(np.isnan(hingesMask))
     converged = totHingeNum - notConverged
     ############################################ normalize the flag counts
     allFlags = np.sum(np.add(flagCountFol,flagCountRel), axis = 0)
-    allFlags = allFlags/totHingeNum/2
+    allFlags = allFlags/totHingeNum
     for i in np.arange(totalflags):
         flagCountFol[:,i] = flagCountFol[:,i]/hingeCount
         flagCountRel[:,i] = flagCountRel[:,i]/hingeCount
@@ -309,8 +309,8 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
 #    #differentEnergies = np.array(differentEnergies)
     ######################### Problems: double counting of stable states that are close to each other due to the ill definition of neighbourhoods.
     #########################           Additionally counting states that didn't converge.
-    print('Total converged percentage:', converged/totHingeNum)
-    print('Not converged: ', notConverged, '/', totHingeNum)
+#    print('Total converged percentage:', converged/totHingeNum)
+#    print('Not converged: ', notConverged, '/', totHingeNum)
     
     ###################### Analysis of angles to find stable states
     convHinges = np.empty(0, dtype = int)
@@ -322,7 +322,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
             finalAngles = np.append(finalAngles, [dataAngles[2*hinge+1,sortAngleIndex]], axis = 0)
             convHinges = np.append(convHinges, hinge)
     
-    angles, index, counts = np.unique(finalAngles, axis = 0, return_index = True, return_counts = True)
+    differentAngles, index, counts = np.unique(finalAngles, axis = 0, return_index = True, return_counts = True)
     differentEnergies = np.column_stack((convHinges[index], counts))
     differentEnergiesName = hingeName[convHinges[index]]
     differentEnergiesEnergy = np.column_stack((eHingeRel[convHinges[index]*stepsHinge+stepsHinge-1], 
@@ -432,7 +432,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
                 ax8.annotate(hingeName[hinge], xy=(eEdgeRel[stepsHinge*hinge+stepsHinge-1], abs(max(MaxStrRel[stepsHinge*hinge+stepsHinge-1],MinStrRel[stepsHinge*hinge+stepsHinge-1], key=abs))), 
                               xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
                               arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
-                print(hingeName[differentEnergies[findit[0],0]], differentEnergies[findit[0],1])    
+#                print(hingeName[differentEnergies[findit[0],0]], differentEnergies[findit[0],1])    
                 
         cs1 = ax1.scatter(differentEnergiesEnergy[:,1], differentEnergiesEnergy[:,0], c = differentEnergies[:,1],
                           label = differentEnergiesName, cmap = cmap1, vmax = maxststs)
@@ -469,7 +469,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
 
 
 
-    return allFlags, len(differentEnergies[:,0]), differentEnergiesName, differentEnergiesEnergy
+    return allFlags, len(differentEnergies[:,0]), differentEnergiesName, differentEnergiesEnergy, differentAngles, SumIntAngRel[stepsHinge*index+stepsHinge-1], SumExtAngRel[stepsHinge*index+stepsHinge-1]
 
 #hinges = np.zeros(30)
 #
