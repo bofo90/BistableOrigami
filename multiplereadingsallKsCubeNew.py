@@ -288,7 +288,7 @@ cs4 = axes6[1].scatter(uniqueEnergies[bindex,0], uniqueSumExt[bindex], c = dcoun
 
 for state in np.arange(dcounts.shape[0])[::-1]:
     if dcounts[state] >=3:
-        print(uniqueKs[bindex[state]], uniqueNames[bindex[state]], dcounts[state])
+        print(uniqueKs[bindex[state]], goodststperstnames[state], dcounts[state])
 #        axes6[0].annotate(goodststperstnames[state], xy=(uniqueEnergies[bindex[state],0], uniqueSumInt[bindex[state]]), 
 #                      xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
 #                      arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))

@@ -480,5 +480,5 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
 #            hinges[np.size(row)] +=1
 #%%
 if __name__ == "__main__":
-    folder_name = "Results/cube/sqp/energy/13-Dec-2017_noAngleCnstr\kh0.010_kta1.000_ke3.162_kf1.000"
+    folder_name = "Results/cube/sqp/energy/15-Dec-2017_100AngleCnstr\kh0.001_kta0.562_ke0.316_kf1.000"
     ReadandAnalizeFile(folder_name, khinge = 0.001, kedge = 10)
