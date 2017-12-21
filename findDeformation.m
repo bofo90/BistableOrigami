@@ -131,7 +131,7 @@ for iter=1:length(opt.angleConstrFinal)
 
             t2 = toc;
             fprintf(', time: %1.2f, exitflag: %d\n',t2-t1,exflexfl(2,2))
-        case {'interior-point', 'sqp','Active-Set'}
+        case {'interior-point', 'sqp','active-set'}
             [E(1,2),~,Eedge(1,2),Eface(1,2),Ehinge(1,2),EtargetAngle(1,2), ~]=Energy(u0,extrudedUnitCell,opt);
             exfl(1,2) = 1;
             prevKtargetAngle = opt.KtargetAngle;
