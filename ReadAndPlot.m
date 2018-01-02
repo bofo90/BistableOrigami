@@ -8,7 +8,7 @@ switch opt.plot
         extraName = sprintf('/kh%2.3f_kta%2.3f_ke%2.3f_kf%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
         folderResults = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat', opt.saveFile, extraName);
         if ~exist(folderResults, 'dir')
-            fprintf('No folder with results:' + folderResults + '\n');
+            fprintf(['No folder with results:',folderResults,'\n']);
         else
             if strcmp(opt.plot,'savedata')
                 folderEnergy = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/energy', opt.saveFile, extraName);
@@ -65,6 +65,7 @@ switch opt.plot
                     nameFolderPlot=[pwd,'/Results/',opt.template,'/',opt.relAlgor,'/images',...
                         opt.saveFile,extraName];
                     nameFilePlot = ['/',opt.template,'_',mat2str(hingeSet'),'.png'];
+                    
                     if ~exist(nameFolderPlot, 'dir')
                         mkdir(nameFolderPlot);
                     end
@@ -73,6 +74,7 @@ switch opt.plot
                     x = size(result.deform(1).interV,2)+0.5;
                     line([x x],[-1.1*pi 1.1*pi], 'Color', [0 0 0])
                     saveas(gcf, [nameFolderPlot, nameFilePlot]);
+                    savefig([nameFolderPlot,'/',opt.template,'_',mat2str(hingeSet')])
                     close 'all';                    
                     
                     if strcmp(opt.onlyUnitCell, 'on')

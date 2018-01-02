@@ -32,9 +32,9 @@ if strcmp(opt.plot,'result')
                         for i = 1:size(hingeList, 1)
                             row = hingeList(i, :);
                             hinges = row(0~=row);
-%                             if length(hinges) > 3
-%                                 break
-%                             end
+                            if length(hinges) > opt.maxHinges
+                                break
+                            end
                             if strcmp(opt.onlyUnitCell, 'on')
                                 opt.angleConstrFinal(1).val = [hinges(:), (pi*opt.constAnglePerc) * ones(length(hinges), 1)];
                             else

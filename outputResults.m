@@ -502,8 +502,10 @@ function printHigRes(f,opt,nam,nameFolder)
     pause(1/opt.frames)
     switch opt.saveFig
         case 'on'
+            
 %             name=[nameFolder,'/',opt.template,'_',num2str(opt.plotPer),'_',nam];
             name=[nameFolder,'/',opt.template,nam,'.png'];
+            savefig([nameFolder,'/',opt.template,nam])
             figpos=getpixelposition(f); %dont need to change anything here
             resolution=get(0,'ScreenPixelsPerInch'); %dont need to change anything here
             set(f,'paperunits','inches','papersize',figpos(3:4)/resolution,...
