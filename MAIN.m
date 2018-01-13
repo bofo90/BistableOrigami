@@ -23,16 +23,35 @@ opt=initOpt('inputType','individual', 'plot','result',...
             'constrFace','on','constrEdge','off',...
             'Khinge',0.01,'Kedge',4,'Kface',100,'KtargetAngle',1,...
             'stepkHinge', 1, 'stepkTargetAngle', 3, 'stepkEdge', 1,...
-            'stepMaxStrech', 1, 'maxStretch', nan,'maxHinges',inf);
+            'stepMaxStrech', 1, 'maxStretch', nan,'maxHinges',inf,'minHinges',0);
 
 %opt.saveFile = strcat('/',date,'_temp');
-opt.saveFile = strcat('/','_Pres_Ventura_truestrain')
+opt.saveFile = strcat('/','_Pres_Ventura')
 %         opt.saveFile = '/13-Dec-2017_noAngleCnstr';
 
 %-pi if its the extruded version, pi if its
 %only the internal polyheron
 %hingeSet = [3 8 13 17 21 26 22 30]; %Multistable cube
 hingeSet = [3 8 12 16 17 21];
+hingeSet = [1 2 3 13 41];
+hingeSet = [1 7 2 16 21 17 8 12];
+% 1 2 13 23 36
+% 1 2 13 37 41
+% 1 2 19 37
+% 1 2 3 13 14
+% 1 2 3 14
+% 1 2 3 37
+% 1 2 7 13 41
+% 1 2 7 28 37
+% 1 3 18 37
+% 1 3 19
+% 1 3 24 37 41
+% 1 3 7 13 41
+% 1 3 7 28 37
+% 1 3 9 24 36
+% 1 3 9 28 37
+% 1 9 18 24
+% 3 9 32];
 %hingeSet = [1];
 if strcmp(opt.onlyUnitCell, 'on')
     opt.angleConstrFinal(1).val=[ hingeSet(:) , (pi*opt.constAnglePerc) *ones(length(hingeSet), 1)];
@@ -51,9 +70,9 @@ tic;
 opt.options=optimoptions('fmincon','GradConstr','on','GradObj','on',...
                          'tolfun',1e-8,'tolx',1e-9, 'tolcon',1e-9,...
                          'Display','off','DerivativeCheck','off',...
-                         'maxfunevals',30000, 'MaxIterations', 5000,...
+                         'maxfunevals',30000, 'MaxIterations', 1000,...
                          'Algorithm', opt.folAlgor, 'OutputFcn',@outfun,...
-                         'RelLineSrchBnd', 0.05, 'RelLineSrchBndDuration', 10e10);
+                         'RelLineSrchBnd', 0.025, 'RelLineSrchBndDuration', 10e10);
 
 %                          'FiniteDifferenceType', 'central', 'FiniteDifferenceStepSize', eps^(1));
 

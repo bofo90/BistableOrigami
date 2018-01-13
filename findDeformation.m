@@ -32,7 +32,7 @@ if strcmp(opt.plot,'result')
                         for i = 1:size(hingeList, 1)
                             row = hingeList(i, :);
                             hinges = row(0~=row);
-                            if length(hinges) > opt.maxHinges
+                            if length(hinges) > opt.maxHinges || length(hinges)<opt.minHinges
                                 break
                             end
                             if strcmp(opt.onlyUnitCell, 'on')
@@ -214,8 +214,8 @@ extrudedUnitCell.node=extrudedUnitCell.node+[u(1:3:end) u(2:3:end) u(3:3:end)];
 %ENERGY ASSOCIATED TO EDGE STRETCHING
 if strcmp(opt.constrEdge,'off')
     [dEdge, Jedge]=getEdge(extrudedUnitCell);
-    Eedge=sum(1/2*opt.Kedge*log((extrudedUnitCell.edgeL'+dEdge)./extrudedUnitCell.edgeL').^2);
-    dE=dE+opt.Kedge*Jedge'*(log((extrudedUnitCell.edgeL'+dEdge)./extrudedUnitCell.edgeL')./(extrudedUnitCell.edgeL'+dEdge));
+    Eedge=1/2*opt.Kedge*sum(dEdge.^2);
+    dE=dE+opt.Kedge*Jedge'*dEdge;
 end
 
 %ENERGY ASSOCIATED TO FACE BENDING
