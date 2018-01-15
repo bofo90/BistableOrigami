@@ -12,6 +12,7 @@ clearvars -global
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ksim = [2 6 1];
 opt=initOpt('inputType','individual', 'plot','result',... 
             'template','triangular prism','onlyUnitCell', 'off',...
             'createFig', 'on','saveFig','on','saveMovie', 'off',...
@@ -19,39 +20,20 @@ opt=initOpt('inputType','individual', 'plot','result',...
             'periodic','off','figDPI',200,'safeMovieAntiAlias', 0,...
             'folAlgor', 'active-set','relAlgor', 'active-set',...
             'gradDescStep', 1e-1, 'gradDescTol', 1e-9,...
-            'readAngFile', 'on','gethistory', 'on',...
+            'readAngFile', 'off','gethistory', 'on',...
             'constrFace','on','constrEdge','off',...
             'Khinge',0.01,'Kedge',1,'Kface',100,'KtargetAngle',1,...
             'stepkHinge', 1, 'stepkTargetAngle', 3, 'stepkEdge', 1,...
             'stepMaxStrech', 1, 'maxStretch', 0.3,'maxHinges',inf,'minHinges',0);
 
 %opt.saveFile = strcat('/',date,'_temp');
-opt.saveFile = strcat('/','_Pres_Ventura')
-%         opt.saveFile = '/13-Dec-2017_noAngleCnstr';
+opt.saveFile = strcat('/','_Pres_Ventura');
 
 %-pi if its the extruded version, pi if its
 %only the internal polyheron
-%hingeSet = [3 8 13 17 21 26 22 30]; %Multistable cube
 hingeSet = [3 8 12 16 17];
-%hingeSet = [3 8 12];
-% 1 2 13 23 36
-% 1 2 13 37 41
-% 1 2 19 37
-% 1 2 3 13 14
-% 1 2 3 14
-% 1 2 3 37
-% 1 2 7 13 41
-% 1 2 7 28 37
-% 1 3 18 37
-% 1 3 19
-% 1 3 24 37 41
-% 1 3 7 13 41
-% 1 3 7 28 37
-% 1 3 9 24 36
-% 1 3 9 28 37
-% 1 9 18 24
-% 3 9 32];
-%hingeSet = [1];
+
+
 if strcmp(opt.onlyUnitCell, 'on')
     opt.angleConstrFinal(1).val=[ hingeSet(:) , (pi*opt.constAnglePerc) *ones(length(hingeSet), 1)];
 else
