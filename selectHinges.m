@@ -120,8 +120,6 @@ function dis = getDistance(G)
 % OUTPUT
 % dis - a distance matrix
 % ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-% last modified on Jun 07, 2017
-% yun
 
 % initialising...
 H = height(G.Nodes);
@@ -359,35 +357,6 @@ else% N >= 2
             end
         end
     end 
-    
-    
-
-%     if N == size(G.Nodes,1)/2
-%         allHinges = 1:height(G.Nodes);
-%         
-%         for i = 1:(index-1)
-%             newSet = allHinges;
-%             newSet(hinges(i,:)) = [];
-%             newDisMat = dis(newSet, newSet);
-%             newDisEig = round(1000*sort(eig(newDisMat))') / 1000; % round off 
-% 
-%             % if newDisEig is not in cache, add current solution
-% %             sameEig = sum(distanceEig(1:index,:) == newDisEig, 2);
-%             cachedistanceEig = distanceEig(1:index,:);
-%             for eigenvalue = 1:N
-%                 sameEig = cachedistanceEig(:,eigenvalue) == newDisEig(eigenvalue);
-%                 cachedistanceEig = cachedistanceEig(any(sameEig,2),:);
-%             end
-%             if size(cachedistanceEig,1) < 1
-% 
-% %             if ~sum(sameEig == N)
-%                 hinges(index, :) = newSet;
-%                 distanceEig(index, :) = newDisEig;
-%                 index = index+1;
-%             end
-%         end
-%         
-%     end
     
     hinges( ~any(hinges,2),:) = [];
 end

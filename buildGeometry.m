@@ -322,7 +322,6 @@ extrudedUnitCell.solidify=[];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %BUILD EXTRUDED UNIT CELL
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Modified by Agustin on30-10-2017
 
 for ne=1:length(unitCell.Polyhedron)
     nNodeSolid=size(extrudedUnitCell.node,1);
@@ -416,8 +415,6 @@ for i=1:size(extrudedUnitCell.nodeHingeEx,1)
     [~,extrudedUnitCell.theta(i)]=JacobianHinge(extrudedUnitCell.node(extrudedUnitCell.nodeHingeEx(i,:),:));
 end
 
-
-
 %Reference Nodes
 if strcmp(opt.periodic,'on')
     extrudedUnitCell.ref=[];
@@ -430,7 +427,6 @@ end
 
 %Internal Hinges
 %added by Agustin Iniguez
-
 i = 1;
 internalHinges = length(unitCell.Polyhedron.node);
 for hinge = 1: length(extrudedUnitCell.nodeHingeEx)
