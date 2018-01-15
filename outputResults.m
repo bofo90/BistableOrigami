@@ -92,7 +92,7 @@ if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(op
         %the mode
         maxAxis=[0 0 0];
         minAxis=[0 0 0];
-        Imax=opt.interval+1;
+        Imax=2;
         Imin=-1;
         for nMode=1:result.numMode
             fram=0;

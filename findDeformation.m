@@ -53,6 +53,7 @@ end
 
 for iter=1:length(opt.angleConstrFinal)
     
+    %%%%%% Folding part %%%%%%
     %initialize variables of the result
     u0=zeros(3*size(extrudedUnitCell.node,1),1);
     initialiseGlobalx(u0, theta0);
@@ -60,82 +61,51 @@ for iter=1:length(opt.angleConstrFinal)
     V(:,1)=u0;
     [E(1,1),~,Eedge(1,1),Eface(1,1),Ehinge(1,1),EtargetAngle(1,1), ~]=Energy(u0,extrudedUnitCell,opt);
     exfl(1,1) = 1;
+    result = [];
     
+    %Run the Folding of the structure
     fprintf(['Angle contrain:', mat2str(opt.angleConstrFinal(iter).val(:,1)') ,'\n']);
     extrudedUnitCell.angleConstr=opt.angleConstrFinal(iter).val;
-    for inter=1:opt.interval
-        fprintf('load: %d, step: %1.2f',2*iter-1,inter/opt.interval);
-        t1 = toc;
-        extrudedUnitCell.angleConstr(:,2)=theta0(extrudedUnitCell.angleConstr(:,1))+inter*(-theta0(extrudedUnitCell.angleConstr(:,1))+opt.angleConstrFinal(iter).val(:,2))/opt.interval;
-        %Determine new equilibrium
-        [V(:,inter+1),~,exfl(inter+1,1),output]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
-        u0 = V(:,inter+1);
-        %Determine energy of that equilibrium
-        [E(inter+1,1),~,Eedge(inter+1,1),Eface(inter+1,1),Ehinge(inter+1,1),EtargetAngle(inter+1,1), ~]=Energy(u0,extrudedUnitCell,opt);
-        t2 = toc;
-        fprintf(', time: %1.2f, exitflag: %d\n',t2-t1,exfl(inter+1,1));
-    end
-    
-    angles1 = getGlobalAngles;     
-    if strcmp(opt.gethistory, 'on')
-        V = getGlobalAllx;
-    end
-    if strcmp(opt.gethistory, 'off')
-        angles1 = [angles1(:,1) angles1(:,end)];
-    end
+    fprintf('Folding load: %d, \t',iter);
+    t1 = toc;
+    %Determine new equilibrium
+    [V(:,2),~,exfl(2,1),output]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
+    u0 = V(:,2);
+    %Determine energy of that equilibrium
+    [E(2,1),~,Eedge(2,1),Eface(2,1),Ehinge(2,1),EtargetAngle(2,1), ~]=Energy(u0,extrudedUnitCell,opt);
+    t2 = toc;
+    fprintf(', time: %1.2f, exitflag: %d\n',t2-t1,exfl(2,1));
 
+    [result, lastAngle] = SaveResultPos(result, opt, V, output, 1);
     
-    result.deform(1).V=[V(1:3:end,end) V(2:3:end,end) V(3:3:end,end)];
-    result.deform(1).Ve=V(:,end);
-    result.deform(1).theta = angles1(:,end);
-    result.deform(1).output = output;
-    for j=1:size(V,2)
-        result.deform(1).interV(j).V=[V(1:3:end,j) V(2:3:end,j) V(3:3:end,j)];
-        result.deform(1).interV(j).Ve=V(:,j);
-        result.deform(1).interV(j).theta = angles1(:,j);
-    end
-    
+    %%%%%% Releasing part %%%%%%
+    %initialize variables of the result again
+    initialiseGlobalx(u0, lastAngle);
     clearvars V;
     V(:,1)=u0;
-    initialiseGlobalx(u0, angles1(:,end));
-
     [E(1,2),~,Eedge(1,2),Eface(1,2),Ehinge(1,2),EtargetAngle(1,2), ~]=Energy(u0,extrudedUnitCell,opt);
     exfl(1,2) = 1;
-    prevKtargetAngle = opt.KtargetAngle;
+    
+    %change algorithm for releasing
     opt.options.Algorithm = opt.relAlgor;
-    for inter = 1:opt.relInterval
-        fprintf('load: %d, step: %1.2f',2*iter,inter/opt.relInterval)
-        t1 = toc;
-        opt.KtargetAngle = prevKtargetAngle - (prevKtargetAngle/opt.relInterval)*inter;
-        [V(:,inter+1),~,exfl(inter+1,2),output]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
-        u0 = V(:,inter+1);
-        [E(inter+1,2),~,Eedge(inter+1,2),Eface(inter+1,2),Ehinge(inter+1,2),EtargetAngle(inter+1,2), ~]=Energy(u0,extrudedUnitCell,opt);
-        t2 = toc;
-        fprintf(', time: %1.2f, exitflag: %d\n',t2-t1,exfl(inter+1,2))
-    end
+        
+    %Run the Releasing of the structure
+    fprintf('Releasing load: %d, \t',iter);
+    t1 = toc;
+    opt.KtargetAngle = 0;
+    [V(:,2),~,exfl(2,2),output]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
+    u0 = V(:,2);
+    [E(2,2),~,Eedge(2,2),Eface(2,2),Ehinge(2,2),EtargetAngle(2,2), ~]=Energy(u0,extrudedUnitCell,opt);
+    t2 = toc;
+    fprintf(', time: %1.2f, exitflag: %d\n',t2-t1,exfl(2,2))
+
+    %Return to original options
     opt.options.Algorithm = opt.folAlgor;
-    opt.KtargetAngle = prevKtargetAngle;
     extrudedUnitCell.angleConstr=[];
 
-    
-    angles2 = getGlobalAngles;
-    if strcmp(opt.gethistory, 'on')
-        V = getGlobalAllx;
-    end
-    if strcmp(opt.gethistory, 'off')
-        angles2 = [angles2(:,1) angles2(:,end)];
-    end
-    
-    result.deform(2).V=[V(1:3:end,end) V(2:3:end,end) V(3:3:end,end)];
-    result.deform(2).Ve=V(:,end);
-    result.deform(2).theta = angles2(:,end);
-    result.deform(2).output = output;
-    for j=1:size(V,2)
-        result.deform(2).interV(j).V=[V(1:3:end,j) V(2:3:end,j) V(3:3:end,j)];
-        result.deform(2).interV(j).Ve=V(:,j);
-        result.deform(2).interV(j).theta = angles2(:,j);
-    end
-    
+    [result, ~] = SaveResultPos(result, opt, V, output, 2);
+      
+    %Save energy data in the result variable
     result.E=E;
     result.Eedge=Eedge;
     result.Eface=Eface;
@@ -144,17 +114,39 @@ for iter=1:length(opt.angleConstrFinal)
     result.exfl = exfl;
     result.numMode=length(result.deform);
     
+    %Save the result in a file
     fileName = strcat(folderName,'/',opt.template,'_',...
         mat2str(opt.angleConstrFinal(iter).val(:,1)'),'.mat');
     save(fileName, 'result');
     
+    %Clear variables for next fold
     clearvars result E Eedge Eface Ehinge EtargetAngle exfl;
     fclose('all');
-
-    %update angle starting point
-%     [~,~,~,~,~,~,theta0]=Energy(u0,extrudedUnitCell,opt);
 end
 
+function [result, lastAngle] = SaveResultPos(result, opt, Positions, minimizationOuput, state)
+
+%Get Angles from global variable
+angles = getGlobalAngles;     
+switch opt.gethistory
+    case 'on'
+        Positions = getGlobalAllx;
+    case 'off'
+        angles = [angles(:,1) angles(:,end)];
+end
+
+%Arrange results in a better way to save them
+result.deform(state).V=[Positions(1:3:end,end) Positions(2:3:end,end) Positions(3:3:end,end)];
+result.deform(state).Ve=Positions(:,end);
+result.deform(state).theta = angles(:,end);
+result.deform(state).output = minimizationOuput;
+for j=1:size(Positions,2)
+    result.deform(state).interV(j).V=[Positions(1:3:end,j) Positions(2:3:end,j) Positions(3:3:end,j)];
+    result.deform(state).interV(j).Ve=Positions(:,j);
+    result.deform(state).interV(j).theta = angles(:,j);
+end
+
+lastAngle = angles(:,end);
 
 
 
