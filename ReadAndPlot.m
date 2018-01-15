@@ -57,7 +57,7 @@ switch opt.analysis
                     dlmwrite(fAngles, AllAngles, 'delimiter', ',', '-append','precision',7);
                 end
                 
-                if strcmp(opt.createFig, 'on')
+                if strcmp(opt.createFig, 'on') || strcmp(opt.analysis, 'plot')
                     
                     nameFolderPlot=[pwd,'/Results/',opt.template,'/',opt.relAlgor,'/images',...
                         opt.saveFile,extraName];

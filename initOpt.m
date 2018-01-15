@@ -51,9 +51,18 @@ opt.frames=30;
 %Scales the amplitude of the modes
 %Value between 0 and 1: 0 no deformation, 1 some hinge angles will be zero
 opt.scale=0.75;
+
+%Create plots ('on' or 'off')
+%Plot figures when analysis 'selecthinges', 'result' or 'savedata' is used.
+%In 'plot' and 'info' this option does not apply. The figure will be
+%created anyways
+opt.creatFig = 'off';
+%Save figures ('on' or 'off')
+opt.saveFig = 'off';
 %Save all results in a gif file
 %Options: 'on' or 'off'
 opt.saveMovie='off';
+
 %When using periodic boundary condtions, number of unit cells to show
 %Integer value >0
 opt.plotPer=2;
