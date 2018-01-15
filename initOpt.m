@@ -22,7 +22,7 @@ function opt=initOpt(varargin)
 %   selecting the analysis selecthinges. If it already exists, by turning 
 %   this option 'on' all the possible hinge selections will be read from 
 %   the file. Turn it 'off' and the user will have to provide a hinge 
-%   selection.
+%   selection. Works for simulating a deformation and for plotting it. 
 %
 %See the intiOpt() file for a few other (less important) options. 
 
