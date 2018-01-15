@@ -2,8 +2,9 @@ function findDeformation(unitCell,extrudedUnitCell,opt)
 
 %Show details geometries (if requested)
 if strcmp(opt.analysis,'result')
+    fprintf('Maximum stretching %1.2f.\n', opt.maxStretch);
+    fprintf('kH %f\tkTA %f\tkE %f\tkF %f\n', opt.Khinge, opt.KtargetAngle, opt.Kedge, opt.Kface);
     if strcmp(opt.readHingeFile,'off')
-        fprintf('Maximum stretching %1.2f.\n', opt.maxStretch);
         metadataFile(opt, unitCell, extrudedUnitCell);
         nonlinearFolding(unitCell,extrudedUnitCell,opt);
     else
@@ -13,7 +14,6 @@ if strcmp(opt.analysis,'result')
             fprintf('Hinge-selection file does not exist.\n');
         else
             hingeList = dlmread(fileHinges);
-            fprintf('kH %f\tkTA %f\tkE %f\tkF %f\n', opt.Khinge, opt.KtargetAngle, opt.Kedge, opt.Kface);
             metadataFile(opt, unitCell, extrudedUnitCell);
             for i = 1:size(hingeList, 1)
                 row = hingeList(i, :);
@@ -39,24 +39,28 @@ function nonlinearFolding(unitCell,extrudedUnitCell,opt)
 %INITIALIZE LINEAR CONSTRAINTS
 [Aeq, Beq]=linearConstr(unitCell,extrudedUnitCell,opt);
 
-%FIND DEFORMATION
+%Save some variables
 theta0=extrudedUnitCell.theta;
-max_iter = 100000;
 extrudedUnitCell.angleConstr=[];
 
+%Create file for saving the results
 extraName = sprintf('/kh%2.3f_kta%2.3f_ke%2.3f_kf%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
 folderName = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat', opt.saveFile, extraName);
 if ~exist(folderName, 'dir')
     mkdir(folderName);
 end
 
+
 for iter=1:length(opt.angleConstrFinal)
-    clearvars V;
+    
+    %initialize variables of the result
     u0=zeros(3*size(extrudedUnitCell.node,1),1);
     initialiseGlobalx(u0, theta0);
+    clearvars V;
     V(:,1)=u0;
     [E(1,1),~,Eedge(1,1),Eface(1,1),Ehinge(1,1),EtargetAngle(1,1), ~]=Energy(u0,extrudedUnitCell,opt);
     exfl(1,1) = 1;
+    
     fprintf(['Angle contrain:', mat2str(opt.angleConstrFinal(iter).val(:,1)') ,'\n']);
     extrudedUnitCell.angleConstr=opt.angleConstrFinal(iter).val;
     for inter=1:opt.interval
@@ -95,38 +99,24 @@ for iter=1:length(opt.angleConstrFinal)
     V(:,1)=u0;
     initialiseGlobalx(u0, angles1(:,end));
 
-    switch opt.relAlgor
-        case 'gradDesc'
-            fprintf('load: %d, step: 1.00',2*iter)
-            t1 = toc;
-            extrudedUnitCell.angleConstr=[];
-            [E(1,2),~,Eedge(1,2),Eface(1,2),Ehinge(1,2),EtargetAngle(1,2), ~]=Energy(u0,extrudedUnitCell,opt);
-            exfl(1,2) = 1;
-            [V, exfl(2,2)] = gradDescent(extrudedUnitCell, opt, u0, max_iter);
-            u0=V(:,end);
-            [E(2,2),~,Eedge(2,2),Eface(2,2),Ehinge(2,2),EtargetAngle(2,2), ~]=Energy(u0,extrudedUnitCell,opt);
-
-            t2 = toc;
-            fprintf(', time: %1.2f, exitflag: %d\n',t2-t1,exflexfl(2,2))
-        case {'interior-point', 'sqp','active-set'}
-            [E(1,2),~,Eedge(1,2),Eface(1,2),Ehinge(1,2),EtargetAngle(1,2), ~]=Energy(u0,extrudedUnitCell,opt);
-            exfl(1,2) = 1;
-            prevKtargetAngle = opt.KtargetAngle;
-            opt.options.Algorithm = opt.relAlgor;
-            for inter = 1:opt.relInterval
-                fprintf('load: %d, step: %1.2f',2*iter,inter/opt.relInterval)
-                t1 = toc;
-                opt.KtargetAngle = prevKtargetAngle - (prevKtargetAngle/opt.relInterval)*inter;
-                [V(:,inter+1),~,exfl(inter+1,2),output]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
-                u0 = V(:,inter+1);
-                [E(inter+1,2),~,Eedge(inter+1,2),Eface(inter+1,2),Ehinge(inter+1,2),EtargetAngle(inter+1,2), ~]=Energy(u0,extrudedUnitCell,opt);
-                t2 = toc;
-                fprintf(', time: %1.2f, exitflag: %d\n',t2-t1,exfl(inter+1,2))
-            end
-            opt.options.Algorithm = opt.folAlgor;
-            opt.KtargetAngle = prevKtargetAngle;
-            extrudedUnitCell.angleConstr=[];
+    [E(1,2),~,Eedge(1,2),Eface(1,2),Ehinge(1,2),EtargetAngle(1,2), ~]=Energy(u0,extrudedUnitCell,opt);
+    exfl(1,2) = 1;
+    prevKtargetAngle = opt.KtargetAngle;
+    opt.options.Algorithm = opt.relAlgor;
+    for inter = 1:opt.relInterval
+        fprintf('load: %d, step: %1.2f',2*iter,inter/opt.relInterval)
+        t1 = toc;
+        opt.KtargetAngle = prevKtargetAngle - (prevKtargetAngle/opt.relInterval)*inter;
+        [V(:,inter+1),~,exfl(inter+1,2),output]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
+        u0 = V(:,inter+1);
+        [E(inter+1,2),~,Eedge(inter+1,2),Eface(inter+1,2),Ehinge(inter+1,2),EtargetAngle(inter+1,2), ~]=Energy(u0,extrudedUnitCell,opt);
+        t2 = toc;
+        fprintf(', time: %1.2f, exitflag: %d\n',t2-t1,exfl(inter+1,2))
     end
+    opt.options.Algorithm = opt.folAlgor;
+    opt.KtargetAngle = prevKtargetAngle;
+    extrudedUnitCell.angleConstr=[];
+
     
     angles2 = getGlobalAngles;
     if strcmp(opt.gethistory, 'on')
