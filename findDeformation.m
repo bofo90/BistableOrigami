@@ -16,30 +16,16 @@ if strcmp(opt.plot,'result')
         if ~exist(fileHinges, 'file')
             fprintf('Hinge-selection file does not exist.\n');
         else
-            simul = 1;
             hingeList = dlmread(fileHinges);
-            orikHinge = opt.Khinge;
-            orikTargetAngle = opt.KtargetAngle;
-            orikEdge = opt.Kedge;
-            for stephinge = 1:opt.stepkHinge
-                opt.Khinge = orikHinge*10^((stephinge-1)/4);
-                for stepangle = 1:(opt.stepkTargetAngle-stephinge-1)
-                    opt.KtargetAngle = orikTargetAngle*10^(-(stepangle-1)/4);
-                    for stepedge = 1:opt.stepkEdge
-                        opt.Kedge = orikEdge*10^((stepedge-1)/2);
-                        fprintf('kH %f\tkTA %f\tkE %f\tkF %f\tSimulation %d\n', opt.Khinge,opt.KtargetAngle, opt.Kedge, opt.Kface,simul );
-                        metadataFile(opt, unitCell, extrudedUnitCell);
-                        for i = 1:size(hingeList, 1)
-                            row = hingeList(i, :);
-                            hinges = row(0~=row);
-                            if length(hinges) <= opt.maxHinges && length(hinges) >= opt.minHinges
-                                opt.angleConstrFinal(1).val = [hinges(:), (-pi*opt.constAnglePerc) * ones(length(hinges), 1)];
-                                fprintf('Hinge selection number %d/%d. ', i, size(hingeList, 1));
-                                nonlinearFolding(unitCell,extrudedUnitCell,opt);
-                            end
-                        end
-                        simul = simul+1;
-                    end
+            fprintf('kH %f\tkTA %f\tkE %f\tkF %f\n', opt.Khinge, opt.KtargetAngle, opt.Kedge, opt.Kface);
+            metadataFile(opt, unitCell, extrudedUnitCell);
+            for i = 1:size(hingeList, 1)
+                row = hingeList(i, :);
+                hinges = row(0~=row);
+                if length(hinges) <= opt.maxHinges && length(hinges) >= opt.minHinges
+                    opt.angleConstrFinal(1).val = [hinges(:), (-pi*opt.constAnglePerc) * ones(length(hinges), 1)];
+                    fprintf('Hinge selection number %d/%d. ', i, size(hingeList, 1));
+                    nonlinearFolding(unitCell,extrudedUnitCell,opt);
                 end
             end
         end
