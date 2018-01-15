@@ -5,11 +5,14 @@ switch opt.analysis
         result = [];
         outputResults(unitCell,extrudedUnitCell,result,opt);
     case {'result', 'savedata', 'plot'}
+        %get file of results
         extraName = sprintf('/kh%2.3f_kta%2.3f_ke%2.3f_kf%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
         folderResults = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat', opt.saveFile, extraName);
         if ~exist(folderResults, 'dir')
             fprintf(['No folder with results:',folderResults,'\n']);
         else
+            
+            %create folder of data with files
             if strcmp(opt.analysis,'savedata')
                 folderEnergy = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/energy', opt.saveFile, extraName);
                 [fMassDist, fHinge, fEnergy, fAngles] = makeFileswHeaders(folderEnergy, folderResults);
@@ -32,7 +35,7 @@ switch opt.analysis
                 if ~isequal(hingeSet, opt.angleConstrFinal(1).val(:,1)) && strcmp(opt.readHingeFile,'off')
                     continue;
                 end
-                extrudedUnitCell.angleConstr = [hingeSet(:), -pi*0.985 * ones(length(hingeSet), 1)];
+                extrudedUnitCell.angleConstr = [hingeSet(:), -pi*opt.constAnglePerc*ones(length(hingeSet), 1)];
                 % load results from file
                 load(strcat(folderResults,'/', allFiles(ct).name));
                 succesfullFiles = succesfullFiles + 1;
@@ -41,12 +44,6 @@ switch opt.analysis
                 if strcmp(opt.analysis, 'savedata')
                     [CM, Radios, Stdev, EhingeInt, SumIntAngles, SumExtAngles, maxStrech, minStrech] =...
                                                 getData(extrudedUnitCell, opt, result);
-%                     EhingeInt = startEndValues(EhingeInt, result);
-%                     CM = startEndValues(CM, result);
-%                     Radios = startEndValues(Radios, result);
-%                     Stdev = startEndValues(Stdev, result);
-%                     maxStrech = startEndValues(maxStrech, result);
-%                     minStrech = startEndValues(minStrech, result);
                     Energies = [ones(length(result.E),1)*(ct-directories), result.Eedge,...
                         result.Eface, result.Ehinge, result.EtargetAngle, EhingeInt, result.exfl];
                     PosStad = [ones(length(result.E),1,1)*(ct-directories),...
@@ -216,72 +213,7 @@ end
 maxStrech = max(dEdge);
 minStrech = min(dEdge);
 
-function values = startEndValues(allValues, result)
-
-if size(allValues,3) == 1
-    values = [allValues(1,:);...
-        allValues(size(result.deform(1).interV,2),1) allValues(size(result.deform(2).interV,2),2)];
-else
-    firstvalues = allValues(1,:,:);
-    lastvalues1 = allValues(size(result.deform(1).interV,2),1,:);
-    lastvalues2 = allValues(size(result.deform(2).interV,2),2,:);
-    lastvalues = cat(2, lastvalues1, lastvalues2);
-    values = cat(1, firstvalues, lastvalues);
-    
-end
-
-
-function [extrudedUnitCell, result] = extrudeInnerPolyhedra(extrudedUnitCell,result, extrutionLength)
-%%% Assuming only one unit cell
-Faces = extrudedUnitCell.face;
-Nodes = size(extrudedUnitCell.node,1);
-rep = 0;
-for i=1:length(Faces)      
-    nNo=size(extrudedUnitCell.node,1);
-    nodeNum=Faces{i};
-    nodeNumNew=nNo+1:nNo+length(nodeNum);
-    
-%     normal = getNormal(extrudedUnitCell.node, nodeNum(1), nodeNum(2), nodeNum(3),[0 0 0]);
-    normal = getavNormal(extrudedUnitCell.node(Faces{i},:), [0 0 0]);
-    extrudedUnitCell.node(nodeNumNew,:)=extrudedUnitCell.node(nodeNum,:)+extrutionLength*ones(length(nodeNum),1)*normal;
-    
-    for j = 1:result.numMode
-        for k = 1:length(result.deform(j).interV)
-            movedNodes = extrudedUnitCell.node(1:Nodes,:)+result.deform(j).interV(k).V(1:Nodes,:);
-%             normal = getNormal(movedNodes, nodeNum(1), nodeNum(2), nodeNum(3),normal);
-            normal = getavNormal(movedNodes(Faces{i},:), normal);
-            newNodes = movedNodes(nodeNum,:)+extrutionLength*ones(length(nodeNum),1)*normal;
-            result.deform(j).interV(k).V(nodeNumNew,:) = newNodes - extrudedUnitCell.node(nodeNumNew,:);
-            result.deform(j).interV(k).Ve=result.deform(j).interV(k).V(:,end);
-        end
-        movedNodes = extrudedUnitCell.node(1:Nodes,:)+result.deform(j).V(1:Nodes,:);
-%         normal = getNormal(movedNodes, nodeNum(1), nodeNum(2), nodeNum(3),normal);
-        normal = getavNormal(movedNodes(Faces{i},:), normal);
-        newNodes = movedNodes(nodeNum,:)+extrutionLength*ones(length(nodeNum),1)*normal;
-        result.deform(j).V(nodeNumNew,:)= newNodes - extrudedUnitCell.node(nodeNumNew,:);
-        result.deform(j).Ve=result.deform(j).V(:,end);
-    end
-    index=[1:length(nodeNum) 1];
-    for j=1:length(nodeNum)   
-        rep=rep+1;
-        extrudedUnitCell.face{rep}=[nodeNum(index(j)) nodeNum(index(j+1)) nodeNumNew(index(j+1)) nodeNumNew(index(j))];
-    end
-end
-
-function normal = getNormal(nodes, node1, node2, node3,prevnormal)
-
-a=nodes(node2,:)-nodes(node1,:);
-b=nodes(node3,:)-nodes(node1,:);
-alpha=acos(sum(a.*b)/(norm(a)*norm(b)));
-if imag(alpha) > 0
-    alpha = 0;
-end
-normal=cross(a,b)/(norm(a)*norm(b)*sin(alpha));
-if sum(isinf(normal))
-    normal = prevnormal;
-end
-
-function normal = getavNormal(nodes,prevnormal)
+function normal = getavNormal(nodes,prevnormal) %%%%This can be used to get the normal of the faces
 
 center = mean(nodes,1);
 node1 = 1;
