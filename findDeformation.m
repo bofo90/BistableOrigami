@@ -66,7 +66,7 @@ for iter=1:length(opt.angleConstrFinal)
     %Run the Folding of the structure
     fprintf(['Angle contrain:', mat2str(opt.angleConstrFinal(iter).val(:,1)') ,'\n']);
     extrudedUnitCell.angleConstr=opt.angleConstrFinal(iter).val;
-    fprintf('Folding load: %d, \t',iter);
+    fprintf('Folding:\t');
     t1 = toc;
     %Determine new equilibrium
     [V(:,2),~,exfl(2,1),output]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
@@ -74,7 +74,7 @@ for iter=1:length(opt.angleConstrFinal)
     %Determine energy of that equilibrium
     [E(2,1),~,Eedge(2,1),Eface(2,1),Ehinge(2,1),EtargetAngle(2,1), ~]=Energy(u0,extrudedUnitCell,opt);
     t2 = toc;
-    fprintf(', time: %1.2f, exitflag: %d\n',t2-t1,exfl(2,1));
+    fprintf('time %1.2f, exitflag %d\n',t2-t1,exfl(2,1));
 
     [result, lastAngle] = SaveResultPos(result, opt, V, output, 1);
     
@@ -91,7 +91,7 @@ for iter=1:length(opt.angleConstrFinal)
         
     %Run the Releasing of the structure
     opt.KtargetAngle = 0;
-    fprintf('Releasing load: %d, \t',iter);
+    fprintf('Releasing:\t');
     t1 = toc;
     %Determine new equilibrium
     [V(:,2),~,exfl(2,2),output]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
@@ -99,7 +99,7 @@ for iter=1:length(opt.angleConstrFinal)
     %Determine energy of that equilibrium
     [E(2,2),~,Eedge(2,2),Eface(2,2),Ehinge(2,2),EtargetAngle(2,2), ~]=Energy(u0,extrudedUnitCell,opt);
     t2 = toc;
-    fprintf(', time: %1.2f, exitflag: %d\n',t2-t1,exfl(2,2))
+    fprintf('time %1.2f, exitflag %d\n',t2-t1,exfl(2,2))
 
     %Return to original options
     opt.options.Algorithm = opt.folAlgor;
@@ -149,11 +149,6 @@ for j=1:size(Positions,2)
 end
 
 lastAngle = angles(:,end);
-
-
-
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -410,6 +405,12 @@ for i=1:size(extrudedUnitCell.nodeHingeEx,1)
     end
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Functions to extract information from Global Variable
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function initialiseGlobalx(u0, theta)
 global poop
 poop.x = [];
@@ -417,8 +418,6 @@ poop.theta = [];
 poop.x = [poop.x u0];
 poop.theta = [poop.theta theta];
 poop.flag = 0;
-
-
 
 function theta = getGlobalx(extrudedUnitCell)
 global poop
