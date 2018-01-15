@@ -3,13 +3,9 @@ function findDeformation(unitCell,extrudedUnitCell,opt)
 %Show details geometries (if requested)
 if strcmp(opt.plot,'result')
     if strcmp(opt.readAngFile,'off')
-        oriMaxStrech = opt.maxStretch;
-        for inter = 1:opt.stepMaxStrech
-            opt.maxStretch = (oriMaxStrech/opt.stepMaxStrech)*inter;
-            fprintf('Maximum stretching %1.2f.\n', opt.maxStretch);
-            metadataFile(opt, unitCell, extrudedUnitCell);
-            nonlinearFolding(unitCell,extrudedUnitCell,opt);
-        end
+        fprintf('Maximum stretching %1.2f.\n', opt.maxStretch);
+        metadataFile(opt, unitCell, extrudedUnitCell);
+        nonlinearFolding(unitCell,extrudedUnitCell,opt);
     else
         opt.angleConstrFinal = [];
         fileHinges = strcat(pwd, '/Results/hingeList_reduced/', opt.template, '.csv');
