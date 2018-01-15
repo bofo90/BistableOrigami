@@ -90,11 +90,13 @@ for iter=1:length(opt.angleConstrFinal)
     opt.options.Algorithm = opt.relAlgor;
         
     %Run the Releasing of the structure
+    opt.KtargetAngle = 0;
     fprintf('Releasing load: %d, \t',iter);
     t1 = toc;
-    opt.KtargetAngle = 0;
+    %Determine new equilibrium
     [V(:,2),~,exfl(2,2),output]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
     u0 = V(:,2);
+    %Determine energy of that equilibrium
     [E(2,2),~,Eedge(2,2),Eface(2,2),Ehinge(2,2),EtargetAngle(2,2), ~]=Energy(u0,extrudedUnitCell,opt);
     t2 = toc;
     fprintf(', time: %1.2f, exitflag: %d\n',t2-t1,exfl(2,2))
@@ -229,7 +231,7 @@ if ~isnan(opt.constAnglePerc)
 end
 %MAXIMUM AND MINIMUM EDGE STRECHING
 if strcmp(opt.constrEdge,'off') && ~isnan(opt.maxStretch)
-    [normStrech, DnormStrech]=getEdgeNorm(extrudedUnitCell);
+    [normStrech, DnormStrech]=getEdge(extrudedUnitCell);
     C2 = [-normStrech-opt.maxStretch; normStrech-opt.maxStretch];
     DC2 = [-DnormStrech; DnormStrech];
 end
@@ -351,9 +353,9 @@ for i=1:size(extrudedUnitCell.edge,1)
     coor2=extrudedUnitCell.node(extrudedUnitCell.edge(i,2),:);
     dx=coor2-coor1;
     L=sqrt(dx*dx');
-    dEdge(i)=(L-extrudedUnitCell.edgeL(i));%/extrudedUnitCell.edgeL(i);            
-    Jedge(i,3*extrudedUnitCell.edge(i,1)-2:3*extrudedUnitCell.edge(i,1))=-dx/L;%/extrudedUnitCell.edgeL(i);
-    Jedge(i,3*extrudedUnitCell.edge(i,2)-2:3*extrudedUnitCell.edge(i,2))=dx/L;%/extrudedUnitCell.edgeL(i);
+    dEdge(i)=(L-extrudedUnitCell.edgeL(i))/extrudedUnitCell.edgeL(i);            
+    Jedge(i,3*extrudedUnitCell.edge(i,1)-2:3*extrudedUnitCell.edge(i,1))=-dx/L/extrudedUnitCell.edgeL(i);
+    Jedge(i,3*extrudedUnitCell.edge(i,2)-2:3*extrudedUnitCell.edge(i,2))=dx/L/extrudedUnitCell.edgeL(i);
 end
 
 
@@ -387,43 +389,6 @@ for i=1:length(extrudedUnitCell.face)
 end
 
 
-function [dFace, Jface]=getConvFace(extrudedUnitCell)
-rep=0;
-tnf=0;
-for i=1:length(extrudedUnitCell.face)
-    tnf=tnf+length(extrudedUnitCell.face{i})-1;
-end
-dFace=zeros(tnf,1);
-Jface=zeros(tnf,size(extrudedUnitCell.node,1)*3);
-for i=1:length(extrudedUnitCell.face)
-    endpoint = length(extrudedUnitCell.face{i});
-    coor1=extrudedUnitCell.node(extrudedUnitCell.face{i}(1),:);
-    coor2=extrudedUnitCell.node(extrudedUnitCell.face{i}(2),:);
-    coor3=extrudedUnitCell.node(extrudedUnitCell.face{i}(3),:);
-    a=cross(coor2-coor1,coor3-coor2);
-    a = a/norm(a);
-    for j=1:endpoint-1
-        rep=rep+1;
-        coor1=extrudedUnitCell.node(extrudedUnitCell.face{i}(mod(j,endpoint)+1),:);
-        coor2=extrudedUnitCell.node(extrudedUnitCell.face{i}(mod(j+1,endpoint)+1),:);
-        coor3=extrudedUnitCell.node(extrudedUnitCell.face{i}(mod(j+2,endpoint)+1),:);
-        b = cross(coor2-coor1,coor3-coor2);
-        b = b/norm(b);
-        dFace(rep) = a*b'-1;
-        Jface(rep,3*extrudedUnitCell.face{i}(1)-2:3*extrudedUnitCell.face{i}(1))=b;
-        Jface(rep,3*extrudedUnitCell.face{i}(j+1)-2:3*extrudedUnitCell.face{i}(j+1))=a;
-        
-        
-%         coor4=extrudedUnitCell.node(extrudedUnitCell.face{i}(3+j),:);
-%         Jface(rep,3*extrudedUnitCell.face{i}(1)-2:3*extrudedUnitCell.face{i}(1))=cross((coor3-coor2),(coor3-coor4));
-%         Jface(rep,3*extrudedUnitCell.face{i}(2)-2:3*extrudedUnitCell.face{i}(2))=cross((coor3-coor1),(coor4-coor1));
-%         Jface(rep,3*extrudedUnitCell.face{i}(3)-2:3*extrudedUnitCell.face{i}(3))=cross((coor4-coor1),(coor2-coor1));
-%         Jface(rep,3*extrudedUnitCell.face{i}(3+j)-2:3*extrudedUnitCell.face{i}(3+j))=cross((coor2-coor1),(coor3-coor1));
-%         dFace(rep)=(coor4-coor1)*a';
-    end
-end
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %HINGE ANGLE AND JACOBIAN
@@ -444,88 +409,6 @@ for i=1:size(extrudedUnitCell.nodeHingeEx,1)
 %         fprintf('angle %d energy\n', i);
     end
 end
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%         YUN's addition                                        %%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-function [deformationV, exitFlag] = ...
-    gradDescent(original_extrudedUnitCell, opt, u0, max_iter)
-% gradient descent method with a penalty imposed for preventing faces from
-% corssing over each other.
-% ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-% INPUT
-% original_extrudedUnitCell - extruded unit cell without applying any
-%                             deformations
-% opt      - options
-% u0       - coordinates of all nodes
-% max_iter - maximum number of iterations
-% ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-% OUTPUT
-% deformationV - an array containing the deformation in each iteration
-% exitFlag     - if exitFlag = 1, convergence occured within max_iter
-%                if exitFlag = 0, max_iter is reached without convergence
-% ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-% last modified on May 22, 2017
-% yun
-
-
-original_extrudedUnitCell.angleConstr = [];
-exitFlag = 2;
-
-% getting ready for the loop
-u = u0(:);
-deformationV(:,1) = u0(:);
-ct = 0;
-difference = Inf;
-e_prev = Inf;
-% fprintf('\n_ %d _',difference)
-while ct <= max_iter && difference > opt.gradDescTol
-    % energy of current u
-    [e, de, ~, ~, ~, ~, theta] = Energy(u, original_extrudedUnitCell, opt);
-    % uses penalty to prevent faces from crossing over
-    e = e + penalty(theta);
-   
-    
-    % get the new solution from jacobian
-    u_new = u - opt.gradDescStep .* de(:);
-    
-    % calculate difference between two consecutive solutions
-    difference = abs(e - e_prev) / ...
-        size(original_extrudedUnitCell.edge,1); % normalised to the number of hinges
-    
-    % prepare for next step
-    ct = ct + 1;
-    if isequal(mod(ct,1000), 0)
-        deformationV(:,size(deformationV,2)+1) = u_new(:);
-    end
-    u = u_new;
-    e_prev = e;
-%     fprintf(' %d_\n', e)
-end
-
-if ct > max_iter
-    exitFlag = 0;
-    deformationV(:,size(deformationV,2)+1) = u(:);
-end
-
-if difference <= opt.gradDescTol
-    exitFlag = 1;
-    deformationV(:,size(deformationV,2)+1) = u(:);
-end
-
-
-function ePen = penalty(theta)
-% A penalty function which punished theta value outside the range of
-% [-0.95*pi, 0.95*pi].
-% The range is not [-pi, pi]
-% ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-% last modified on May 22, 2017
-% yun
-
-ePen = sum(max(0, 0.5 .* (theta - 0.95*pi) .* (theta + 0.95*pi)));
 
 function initialiseGlobalx(u0, theta)
 global poop
