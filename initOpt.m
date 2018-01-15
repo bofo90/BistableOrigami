@@ -3,26 +3,22 @@ function opt=initOpt(varargin)
 %specific options use initOpt('option1',value1,'option2',value2,...).
 %
 %The most important options are:
-%1) 'inputType': 'preDefined', 'individual' or 'user'.
+%1) 'inputType': 'individual'
 %2) 'template': any string indicating the specific template used to generate 
 %   the architected material. 
-%   -> When 'preDefined' is used, possible values are '#1','#2',...'#28' as 
-%   defined in Fig. 3 and the supplementary information Fig. S6. Other 
-%   values relate directly to the figures in the paper: Fig1a, Fig1b, 
-%   Fig1c, Fig2f, Fig2g, Fig4a, Fig6#a, Fig6#b, Fig6#c, Fig6#d.
 %   -> When 'individual' is used, possible values are the names of the
 %   platonic solids, archimedean solids and some prisms, including: 
 %   'tetrahedron', 'cube', 'octahedron', truncated tetrahedron',
 %   'cuboctahedron', 'truncated cube', 'truncated octahedron',
 %   'rhombicuboctahedron', 'truncated cuboctahedron', 'triangular prism',
 %   'hexagonal prism', 'octagonal prism' and 'decagonal prism'.
-%   -> When 'user' is used, a string needs to be provided of a script file 
-%   (without the .m extension). An example is provided as 'userInputFile',
-%   which also provides more information on defining your own user file.
-%3) 'plot': 'info', 'result' or 'modes'. 'info' should be used when setting 
-%   up a new template, while 'result' will run the mode analysis and 
-%   determine the deformation modes. 'modes' is a summarized version of
-%   'result'.
+%3) 'plot': 'selecthinges', 'info', 'result', 'savedata' or 'plot'. 
+%   'selecthinges' runs the program to select all possible hinges for a
+%   defined template. 'info' should be used when setting up a new template,
+%   while 'result' will run the simulation and fold the structure saving 
+%   the results in .mat files. 'savedata' will read the results, save 
+%   the analysis on .csv files and can plot the defomrmation of the 
+%   structure. 'plot' only does the latter.
 %
 %See the intiOpt() file for a few other (less important) options. 
 
@@ -30,13 +26,14 @@ function opt=initOpt(varargin)
 %GEOMETRY OPTIONS DEFAULT VALUES
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Input type that defines from which database to choose from
-%Options: 'preDefined', 'inidividual' or 'user'
-opt.inputType='preDefined';
 %Name of the template
-opt.template='#18';
+opt.template='cube';
 %Turn periodic boundary conditions on or off
 %Options: 'on' or 'off'
-opt.periodic='on';
+opt.periodic='off';
+%Extrusion length
+%Value >0
+opt.Lextrude=1;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %PLOT AND MOVIE OPTIONS DEFAULT VALUES
@@ -63,12 +60,6 @@ opt.EL=14;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %ANALYSIS OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Extrusion length
-%Value >0
-opt.Lextrude=1;
-%Random offset for hinge stiffness
-%Any value, but typically equal to zero or 1e-7
-opt.perturbStiff=1e-7; %small value to seperate modes with same frequency.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %UPDATE OPTIONS BASED ON INPUT

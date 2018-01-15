@@ -33,11 +33,7 @@ if strcmp(opt.plot,'result')
                             row = hingeList(i, :);
                             hinges = row(0~=row);
                             if length(hinges) <= opt.maxHinges && length(hinges) >= opt.minHinges
-                                if strcmp(opt.onlyUnitCell, 'on')
-                                    opt.angleConstrFinal(1).val = [hinges(:), (pi*opt.constAnglePerc) * ones(length(hinges), 1)];
-                                else
-                                    opt.angleConstrFinal(1).val = [hinges(:), (-pi*opt.constAnglePerc) * ones(length(hinges), 1)];
-                                end
+                                opt.angleConstrFinal(1).val = [hinges(:), (-pi*opt.constAnglePerc) * ones(length(hinges), 1)];
                                 fprintf('Hinge selection number %d/%d. ', i, size(hingeList, 1));
                                 nonlinearFolding(unitCell,extrudedUnitCell,opt);
                             end
@@ -264,11 +260,7 @@ extrudedUnitCell.node=extrudedUnitCell.node+[u(1:3:end) u(2:3:end) u(3:3:end)];
 %MAXIMUM AND MINIMUM ANGLES
 if ~isnan(opt.constAnglePerc)
     [angles, Dangles]=getHinge(extrudedUnitCell, extrudedUnitCellPrev);
-    if strcmp(opt.onlyUnitCell, 'on')
-        C1 = [-angles-(pi*opt.constAnglePerc-pi); angles-pi*opt.constAnglePerc];
-    else
-        C1 = [-angles-pi*opt.constAnglePerc; angles-pi*opt.constAnglePerc];
-    end
+    C1 = [-angles-pi*opt.constAnglePerc; angles-pi*opt.constAnglePerc];
     DC1 = [-Dangles; Dangles];
 end
 %MAXIMUM AND MINIMUM EDGE STRECHING

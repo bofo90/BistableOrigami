@@ -10,7 +10,7 @@ function selectHinges(unitCell, extrudedUnitCell, opt)
 %%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %This is the function for selecting hinges
-if strcmp(opt.plot, 'selectHinges')
+if strcmp(opt.plot, 'selecthinges')
     fprintf('Creating graph...\n');
     [G] = buildGraph(unitCell, extrudedUnitCell);
     fprintf('Calculating distances...\n');

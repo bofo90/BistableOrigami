@@ -77,9 +77,6 @@ switch opt.plot
                     savefig([nameFolderPlot,'/',opt.template,'_',mat2str(hingeSet')])
                     close 'all';                    
                     
-                    if strcmp(opt.onlyUnitCell, 'on')
-                       [extrudedUnitCell, result] = extrudeInnerPolyhedra(extrudedUnitCell,result,1); 
-                    end
                     outputResults(unitCell,extrudedUnitCell,result,opt);
                 end
                 close all;
