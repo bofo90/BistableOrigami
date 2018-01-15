@@ -189,7 +189,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         
     stepsHinge = int(len(hingeNum)/len(hingeName))
     totHingeNum = len(hingeName)
-    totalflags = 8
+    totalflags = 10
     #%%
     #######################################################################################################################
     ##################### Analize the data
@@ -228,22 +228,22 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         error = False
 #        flagCountFol[actuatedHinges[i]-1,exflFol[i*stepsHinge+1]+3]  += 1
 #        flagCountRel[actuatedHinges[i]-1,exflRel[i*stepsHinge+1]+3]  += 1
-        if exflFol[(i+1)*stepsHinge-1] != 1:# and exflFol[(i+1)*stepsHinge-1] != 2:
+        if exflFol[(i+1)*stepsHinge-1] != 1 and exflFol[(i+1)*stepsHinge-1] != 5:
             flagCountFol[actuatedHinges[i]-1,exflFol[(i+1)*stepsHinge-1]+3]  += 1
             error = True
-        if exflRel[(i+1)*stepsHinge-1] != 1 and not error:# and exflRel[(i+1)*stepsHinge-1] != 2:
+        if exflRel[(i+1)*stepsHinge-1] != 1 and not error and exflRel[(i+1)*stepsHinge-1] != 5:
             flagCountRel[actuatedHinges[i]-1,exflRel[(i+1)*stepsHinge-1]+3]  += 1
             error = True
         if not error:
             #check if max/min angle not bigger than pi or -pi
             if MaxAngles[i*2+1] > np.around(np.pi,digitPi) or MinAngles[i*2+1] < -np.around(np.pi,digitPi):
                 flagCountRel[actuatedHinges[i]-1,6]  += 1
-                exflRel[(i+1)*stepsHinge-1] = 3
+                exflRel[(i+1)*stepsHinge-1] = (totalflags-3)-2
                 error = True
             #check for max/min strech not bigger than a tolerance
             if (MaxStrRel[(i+1)*stepsHinge-1] > tolStretch or MinStrRel[(i+1)*stepsHinge-1]  < -tolStretch) and not error:
                 flagCountRel[actuatedHinges[i]-1,7]  += 1
-                exflRel[(i+1)*stepsHinge-1] = 4
+                exflRel[(i+1)*stepsHinge-1] = (totalflags-3)-1
                 error = True
         if error:
             notConvHinges = np.append(notConvHinges,np.array([[i, exflFol[(i+1)*stepsHinge-1], exflRel[(i+1)*stepsHinge-1]]]), axis = 0)
@@ -410,9 +410,9 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     #            ax3.scatter(eEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1], c = c)
                 ax2.scatter(RadRel[stepsHinge*hinge+stepsHinge-1], StdRel[stepsHinge*hinge+stepsHinge-1], c = col, label = hingeName[hinge])
                 ax4.scatter(CMxRel[stepsHinge*hinge+stepsHinge-1], CMyRel[stepsHinge*hinge+stepsHinge-1], CMzRel[stepsHinge*hinge+stepsHinge-1], c = col)
-            ax5.scatter(eHingeRel[stepsHinge*hinge+stepsHinge-1], SumIntAngRel[stepsHinge*hinge+stepsHinge-1], c = col)
-            ax10.scatter(eHingeRel[stepsHinge*hinge+stepsHinge-1], SumExtAngRel[stepsHinge*hinge+stepsHinge-1], c = col)
-            ax8.scatter(eEdgeRel[stepsHinge*hinge+stepsHinge-1], abs(max(MaxStrRel[stepsHinge*hinge+stepsHinge-1],MinStrRel[stepsHinge*hinge+stepsHinge-1], key=abs)), c = col)
+                ax5.scatter(eHingeRel[stepsHinge*hinge+stepsHinge-1], SumIntAngRel[stepsHinge*hinge+stepsHinge-1], c = col)
+                ax10.scatter(eHingeRel[stepsHinge*hinge+stepsHinge-1], SumExtAngRel[stepsHinge*hinge+stepsHinge-1], c = col)
+                ax8.scatter(eEdgeRel[stepsHinge*hinge+stepsHinge-1], abs(max(MaxStrRel[stepsHinge*hinge+stepsHinge-1],MinStrRel[stepsHinge*hinge+stepsHinge-1], key=abs)), c = col)
 #                ax8.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], MaxStrRel[stepsHinge*hinge+stepsHinge-1], c = col)
 #                ax9.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], abs(MinStrRel[stepsHinge*hinge+stepsHinge-1]), c = col)
 #            ax1.plot(eEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
@@ -432,7 +432,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
                 ax8.annotate(hingeName[hinge], xy=(eEdgeRel[stepsHinge*hinge+stepsHinge-1], abs(max(MaxStrRel[stepsHinge*hinge+stepsHinge-1],MinStrRel[stepsHinge*hinge+stepsHinge-1], key=abs))), 
                               xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
                               arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
-#                print(hingeName[differentEnergies[findit[0],0]], differentEnergies[findit[0],1])    
+                print(hingeName[differentEnergies[findit[0],0]], differentEnergies[findit[0],1])    
                 
         cs1 = ax1.scatter(differentEnergiesEnergy[:,1], differentEnergiesEnergy[:,0], c = differentEnergies[:,1],
                           label = differentEnergiesName, cmap = cmap1, vmax = maxststs)
@@ -480,5 +480,5 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
 #            hinges[np.size(row)] +=1
 #%%
 if __name__ == "__main__":
-    folder_name = "Results/cube/sqp/energy/15-Dec-2017_100AngleCnstr\kh0.001_kta0.562_ke0.316_kf1.000"
+    folder_name = "Results/cube/Active-Set\energy\_Pres_Ventura\kh0.010_kta1.000_ke1.000_kf100.000"
     ReadandAnalizeFile(folder_name, khinge = 0.001, kedge = 10)

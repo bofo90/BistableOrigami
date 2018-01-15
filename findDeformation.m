@@ -32,15 +32,14 @@ if strcmp(opt.plot,'result')
                         for i = 1:size(hingeList, 1)
                             row = hingeList(i, :);
                             hinges = row(0~=row);
-                            if length(hinges) > opt.maxHinges || length(hinges)<opt.minHinges
-                            else
-                            if strcmp(opt.onlyUnitCell, 'on')
-                                opt.angleConstrFinal(1).val = [hinges(:), (pi*opt.constAnglePerc) * ones(length(hinges), 1)];
-                            else
-                                opt.angleConstrFinal(1).val = [hinges(:), (-pi*opt.constAnglePerc) * ones(length(hinges), 1)];
-                            end
-                            fprintf('Hinge selection number %d/%d. ', i, size(hingeList, 1));
-                            nonlinearFolding(unitCell,extrudedUnitCell,opt);
+                            if length(hinges) <= opt.maxHinges && length(hinges) >= opt.minHinges
+                                if strcmp(opt.onlyUnitCell, 'on')
+                                    opt.angleConstrFinal(1).val = [hinges(:), (pi*opt.constAnglePerc) * ones(length(hinges), 1)];
+                                else
+                                    opt.angleConstrFinal(1).val = [hinges(:), (-pi*opt.constAnglePerc) * ones(length(hinges), 1)];
+                                end
+                                fprintf('Hinge selection number %d/%d. ', i, size(hingeList, 1));
+                                nonlinearFolding(unitCell,extrudedUnitCell,opt);
                             end
                         end
                         simul = simul+1;
