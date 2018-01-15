@@ -8,7 +8,7 @@ opt.date = datestr(now(), 'yyyy-mm-dd HH:MM:SS');
 [~, gitRev] = system('git rev-parse --verify --short HEAD');
 opt.gitVersion = gitRev;
     
-if strcmp(opt.plot,'result')
+if strcmp(opt.analysis,'result')
     metadata.minimizationOpt = opt.options;
     metadata.options = rmfield(opt,{'options','angleConstrFinal'});
     metadata.UnitCell.nodes = size(unitCell.Polyhedron.node,1);

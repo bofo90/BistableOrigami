@@ -1,8 +1,8 @@
 function findDeformation(unitCell,extrudedUnitCell,opt)
 
 %Show details geometries (if requested)
-if strcmp(opt.plot,'result')
-    if strcmp(opt.readAngFile,'off')
+if strcmp(opt.analysis,'result')
+    if strcmp(opt.readHingeFile,'off')
         fprintf('Maximum stretching %1.2f.\n', opt.maxStretch);
         metadataFile(opt, unitCell, extrudedUnitCell);
         nonlinearFolding(unitCell,extrudedUnitCell,opt);

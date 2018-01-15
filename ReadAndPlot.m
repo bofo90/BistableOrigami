@@ -1,6 +1,6 @@
 function ReadAndPlot(unitCell, extrudedUnitCell, opt)
 
-switch opt.plot
+switch opt.analysis
     case 'info'
         result = [];
         outputResults(unitCell,extrudedUnitCell,result,opt);
@@ -10,7 +10,7 @@ switch opt.plot
         if ~exist(folderResults, 'dir')
             fprintf(['No folder with results:',folderResults,'\n']);
         else
-            if strcmp(opt.plot,'savedata')
+            if strcmp(opt.analysis,'savedata')
                 folderEnergy = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/energy', opt.saveFile, extraName);
                 [fMassDist, fHinge, fEnergy, fAngles] = makeFileswHeaders(folderEnergy, folderResults);
                 
@@ -29,7 +29,7 @@ switch opt.plot
 
                 % parse the file name to get back hinge set
                 hingeSet = getHingeSet(allFiles(ct).name);
-                if ~isequal(hingeSet, opt.angleConstrFinal(1).val(:,1)) && strcmp(opt.readAngFile,'off')
+                if ~isequal(hingeSet, opt.angleConstrFinal(1).val(:,1)) && strcmp(opt.readHingeFile,'off')
                     continue;
                 end
                 extrudedUnitCell.angleConstr = [hingeSet(:), -pi*0.985 * ones(length(hingeSet), 1)];
@@ -38,7 +38,7 @@ switch opt.plot
                 succesfullFiles = succesfullFiles + 1;
                 fprintf('Plot of Hinges number %d/%d\n', succesfullFiles, length(allFiles)-directories);
                 
-                if strcmp(opt.plot, 'savedata')
+                if strcmp(opt.analysis, 'savedata')
                     [CM, Radios, Stdev, EhingeInt, SumIntAngles, SumExtAngles, maxStrech, minStrech] =...
                                                 getData(extrudedUnitCell, opt, result);
 %                     EhingeInt = startEndValues(EhingeInt, result);
@@ -216,7 +216,7 @@ end
 maxStrech = max(dEdge);
 minStrech = min(dEdge);
 
-function values = startEndValues(allValues, result);
+function values = startEndValues(allValues, result)
 
 if size(allValues,3) == 1
     values = [allValues(1,:);...

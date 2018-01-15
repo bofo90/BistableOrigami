@@ -80,7 +80,7 @@ hl2=plotOpt(opt);
 opt.xlim=xlim;
 opt.ylim=ylim;
 opt.zlim=zlim;
-if strcmp(opt.plot,'result') || strcmp(opt.plot,'savedata') || strcmp(opt.plot,'plot')
+if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(opt.analysis,'plot')
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %PREPARE PLOTTING OF DEFORMED CONFIGURATION
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -124,7 +124,7 @@ if strcmp(opt.plot,'result') || strcmp(opt.plot,'savedata') || strcmp(opt.plot,'
     end
 end
 
-if strcmp(opt.plot,'info')
+if strcmp(opt.analysis,'info')
     %First make solid face with 100% transparency
     for nc=1:size(extrudedUnitCell.latVec,1)
         for i=3:10
@@ -228,7 +228,7 @@ if strcmp(opt.plot,'info')
     printHigRes(f6,opt,'_extrudedPolyhedraEdges',nameFolder);
 end
 
-if strcmp(opt.plot,'result') || strcmp(opt.plot,'savedata') || strcmp(opt.plot,'plot')
+if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(opt.analysis,'plot')
         %First make solid face with 100% transparency
         for nc=1:size(extrudedUnitCell.latVec,1)
             for i=3:10
@@ -469,7 +469,7 @@ function printGif(opt,fram,f,nameFolder,nam)
     pause(1/opt.frames)
     if strcmp(opt.saveMovie,'on')
         name=[nameFolder,'/',opt.template, nam];
-        switch opt.plot
+        switch opt.analysis
             case 'modes'
                 name=[name,'_Modes_'];
         end
