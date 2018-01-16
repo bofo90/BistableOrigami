@@ -380,7 +380,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
 #        NiceGraph2D(ax9, 'Hinge-Set Number', 'Min final streching')            
                     
         width = 0.5
-        colors = cm.Set2(np.linspace(0, 1, totalflags))
+        colors = cm.tab10(np.linspace(0, 1, totalflags))
         for i, c in zip(reversed(np.arange(totalflags)), reversed(colors)):
             if np.sum(flagCountFol[:,i]+flagCountRel[:,i]) == 0:  ###### block to plot non-present flags
                 continue
@@ -480,5 +480,5 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
 #            hinges[np.size(row)] +=1
 #%%
 if __name__ == "__main__":
-    folder_name = "Results/cube/Active-Set\energy\_Pres_Ventura\kh0.010_kta1.000_ke1.000_kf100.000"
+    folder_name = "Results/cube/Active-Set\energy\_NoMaxStretch\kh0.010_kta1.000_ke1.000_kf100.000"
     ReadandAnalizeFile(folder_name, khinge = 0.001, kedge = 10)
