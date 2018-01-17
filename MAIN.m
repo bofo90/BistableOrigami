@@ -22,11 +22,11 @@ opt=initOpt('template','cube','analysis','result','readHingeFile','on',...
             'maxStretch', nan,...
             'maxHinges',inf,'minHinges',0);%Only work when readHingeFile is 'on'
 
-%opt.saveFile = strcat('/',date,'_temp');
+% opt.saveFile = strcat('/','temp');
 opt.saveFile = strcat('/',date,'_NoMaxStretch');
 
-hingeSet = [12 7 8 13 21 22 30];
-opt.angleConstrFinal(1).val=[ hingeSet(:) , (-pi*opt.constAnglePerc) *ones(length(hingeSet), 1)];
+hingeSet = [7 3 13 21 26 22 30];
+opt.angleConstrFinal(1).val=[ hingeSet(:) , (-pi*(opt.constAnglePerc-0.005)) *ones(length(hingeSet), 1)];
 
 tic;
 
