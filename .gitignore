@@ -1,7 +1,6 @@
 *.asv
 DataEnergy/
-Results/*
-!Results/hingeList_reduced
+Results/
 __pycache__/
 *.txt
 *.fig
