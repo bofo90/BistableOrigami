@@ -189,7 +189,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         
     stepsHinge = int(len(hingeNum)/len(hingeName))
     totHingeNum = len(hingeName)
-    totalflags = 10
+    totalflags = 11
     #%%
     #######################################################################################################################
     ##################### Analize the data
@@ -228,10 +228,10 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         error = False
 #        flagCountFol[actuatedHinges[i]-1,exflFol[i*stepsHinge+1]+3]  += 1
 #        flagCountRel[actuatedHinges[i]-1,exflRel[i*stepsHinge+1]+3]  += 1
-        if exflFol[(i+1)*stepsHinge-1] != 1 and exflFol[(i+1)*stepsHinge-1] != 5:
+        if exflFol[(i+1)*stepsHinge-1] != 1 and exflFol[(i+1)*stepsHinge-1] != 5:# and exflFol[(i+1)*stepsHinge-1] != -2:
             flagCountFol[actuatedHinges[i]-1,exflFol[(i+1)*stepsHinge-1]+3]  += 1
             error = True
-        if exflRel[(i+1)*stepsHinge-1] != 1 and not error and exflRel[(i+1)*stepsHinge-1] != 5:
+        if exflRel[(i+1)*stepsHinge-1] != 1 and not error and exflRel[(i+1)*stepsHinge-1] != 5:# and exflRel[(i+1)*stepsHinge-1] != -2:
             flagCountRel[actuatedHinges[i]-1,exflRel[(i+1)*stepsHinge-1]+3]  += 1
             error = True
         if not error:
@@ -312,6 +312,12 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
 #    print('Total converged percentage:', converged/totHingeNum)
 #    print('Not converged: ', notConverged, '/', totHingeNum)
     
+    ###################### Normalize the angles to be proportional to Pi and shift the angle sum to easier understanding
+    SumIntAngFol = SumIntAngFol/np.pi+internalHinges
+    SumIntAngRel = SumIntAngRel/np.pi+internalHinges
+    SumExtAngFol = (SumExtAngFol/np.pi-(totalnumberHinges-internalHinges))*(-1)
+    SumExtAngRel = (SumExtAngRel/np.pi-(totalnumberHinges-internalHinges))*(-1)
+
     ###################### Analysis of angles to find stable states
     convHinges = np.empty(0, dtype = int)
     finalAngles = np.empty((0,np.size(dataAngles,1)))
@@ -322,19 +328,29 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
             finalAngles = np.append(finalAngles, [dataAngles[2*hinge+1,sortAngleIndex]], axis = 0)
             convHinges = np.append(convHinges, hinge)
     
-    differentAngles, index, counts = np.unique(finalAngles, axis = 0, return_index = True, return_counts = True)
-    differentEnergies = np.column_stack((convHinges[index], counts))
-    differentEnergiesName = hingeName[convHinges[index]]
-    differentEnergiesEnergy = np.column_stack((eHingeRel[convHinges[index]*stepsHinge+stepsHinge-1], 
+    if np.size(finalAngles) > 0:
+        differentAngles, index, counts = np.unique(finalAngles, axis = 0, return_index = True, return_counts = True)
+        differentEnergies = np.column_stack((convHinges[index], counts))
+        differentEnergiesName = hingeName[convHinges[index]]
+        differentEnergiesEnergy = np.column_stack((eHingeRel[convHinges[index]*stepsHinge+stepsHinge-1], 
                                                 eEdgeRel[convHinges[index]*stepsHinge+stepsHinge-1]))
-   
-    ###################### Normalize the angles to be proportional to Pi and shift the angle sum to easier understanding
+    else:
+        print('Error: No stable states found.\n')
+        if plot:
+            fig5 = plt.figure(4,figsize=(cm2inch(35), cm2inch(20)))
+            ax6 = plt.subplot(111)
+            NiceGraph2D(ax6, '# of actuated Hinges', 'percentage # of flags', [0.5, 0], [len(hingeCount)+0.5, 1+0.01], [np.arange(len(hingeCount))+1, np.arange(0,1.1,0.1)])       
+            width = 0.5
+            colors = cm.tab10(np.linspace(0, 1, totalflags))
+            for i, c in zip(reversed(np.arange(totalflags)), reversed(colors)):
+                if np.sum(flagCountFol[:,i]+flagCountRel[:,i]) == 0:  ###### block to plot non-present flags
+                    continue
+                ax6.bar(np.arange(len(hingeCount))+1, flagCountFol[:,i]+flagCountRel[:,i], width, color=c, label = i-3, bottom = np.sum(flagCountFol[:,:i],1)+np.sum(flagCountRel[:,:i],1))
+            ax6.legend(loc = 2, fontsize =15, framealpha = 0.5, edgecolor = 'inherit', fancybox = False)
+            s = 'Convergence: %.2f\nNon Convergence states: %d/%d' %(converged/totHingeNum, notConverged,totHingeNum)
+            ax6.set_title(s)
+        return allFlags, 0, [], [], [], [], []
 
-    SumIntAngFol = SumIntAngFol/np.pi+internalHinges
-    SumIntAngRel = SumIntAngRel/np.pi+internalHinges
-    SumExtAngFol = (SumExtAngFol/np.pi-(totalnumberHinges-internalHinges))*(-1)
-    SumExtAngRel = (SumExtAngRel/np.pi-(totalnumberHinges-internalHinges))*(-1)
-    
     
     #%%
     #######################################################################################################################
@@ -387,7 +403,6 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
             ax6.bar(np.arange(len(hingeCount))+1, flagCountFol[:,i]+flagCountRel[:,i], width, color=c, label = i-3, bottom = np.sum(flagCountFol[:,:i],1)+np.sum(flagCountRel[:,:i],1))
 #            ax6.bar(np.arange(len(hingeCount))+1, flagCountFol[:,i], width, color=c, bottom = np.sum(flagCountFol[:,:i],1), label = i-3)
 #            ax7.bar(np.arange(len(hingeCount))+1, flagCountRel[:,i], width, color=c, bottom = np.sum(flagCountRel[:,:i],1))
-        
         
         ax6.legend(loc = 2, fontsize =15, framealpha = 0.5, edgecolor = 'inherit', fancybox = False)
         s = 'Convergence: %.2f\nNon Convergence states: %d/%d' %(converged/totHingeNum, notConverged,totHingeNum)
@@ -480,5 +495,5 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
 #            hinges[np.size(row)] +=1
 #%%
 if __name__ == "__main__":
-    folder_name = "Results/cube/Active-Set\energy\_NoMaxStretch\kh0.010_kta1.000_ke1.000_kf100.000"
+    folder_name = "Results/cube/Active-Set/energy/18-Jan-2018_NoMaxStretch\kh0.010_kta1.000_ke1.000_kf100.000"
     ReadandAnalizeFile(folder_name, khinge = 0.001, kedge = 10)
