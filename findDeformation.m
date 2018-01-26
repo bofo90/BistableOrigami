@@ -227,7 +227,7 @@ if ~isnan(opt.constAnglePerc)
 end
 %MAXIMUM AND MINIMUM EDGE STRECHING
 if strcmp(opt.constrEdge,'off') && ~isnan(opt.maxStretch)
-    [normStrech, DnormStrech]=getEdge(extrudedUnitCell);
+    [normStrech, DnormStrech]=getEdgeNorm(extrudedUnitCell);
     C2 = [-normStrech-opt.maxStretch; normStrech-opt.maxStretch];
     DC2 = [-DnormStrech; DnormStrech];
 end
@@ -245,7 +245,6 @@ end
 %ENERGY ASSOCIATED TO FACE BENDING
 if strcmp(opt.constrFace,'on')
     [Ceq2, DCeq2]=getFace(extrudedUnitCell);
-%     [Ceq3, DCeq3]=getConvFace(extrudedUnitCell);
 end
 %FINAL CONSTRAINTS
 Ceq=[Ceq1; Ceq2; Ceq3];
