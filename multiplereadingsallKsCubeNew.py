@@ -15,7 +15,7 @@ import matplotlib.ticker as ticker
 
 internalHinges = 9
 allHinges = 36
-flags = np.empty((7, 7, 3, 8)) #6 possible flags
+flags = np.empty((7, 7, 3, 11)) #6 possible flags
 flags[:] = np.NaN
 ststs = np.empty((7, 7, 3))
 ststs[:] = np.NaN
@@ -94,11 +94,9 @@ allflags = np.ma.masked_where(np.isnan(allflags), allflags)
 flags = np.ma.masked_where(np.isnan(flags), flags)
 
 for edge, ax in zip(np.arange(3), axes1.flat):
-    cs1 = ax.pcolormesh(x2, y2, flags[:,:,edge,5].T, cmap=cmap, norm = norm)
-#axes1[0,1].pcolormesh(x2, y2, flags[:,:,1], cmap=cmap, norm = norm)
-#axes1[1,0].pcolormesh(x2, y2, flags[:,:,3], cmap=cmap, norm = norm)
-#axes1[1,1].pcolormesh(x2, y2, flags[:,:,5], cmap=cmap, norm = norm)
-#
+#    cs1 = ax.pcolormesh(x2, y2, flags[:,:,edge,5].T, cmap=cmap, norm = norm)
+    cs1 = ax.pcolormesh(x2, y2, allflags[:,:,edge].T, cmap=cmap, norm = norm)
+
 cbar = plt.colorbar(cs1, format="%.2f", ax =axes1.ravel().tolist(), fraction=0.05, pad=0.01)
 cbar.set_label('Non-Convergence rate', fontsize = 15, color = '0.2')
 cbar.ax.tick_params(axis='y',colors='0.2')
