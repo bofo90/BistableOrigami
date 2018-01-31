@@ -171,8 +171,12 @@ extrudedUnitCell.node=extrudedUnitCell.node+[u(1:3:end) u(2:3:end) u(3:3:end)];
 %ENERGY ASSOCIATED TO EDGE STRETCHING
 if strcmp(opt.constrEdge,'off')
     [dEdge, Jedge]=getEdge(extrudedUnitCell);
-    Eedge=1/2*opt.Kedge*sum(dEdge.^2);
-    dE=dE+opt.Kedge*Jedge'*dEdge;
+    notdiagonal = 1:size(extrudedUnitCell.edge,1);
+    notdiagonal(extrudedUnitCell.diagonals) = [];
+    Eedge=1/2*opt.Kedgediag*sum(dEdge(extrudedUnitCell.diagonals).^2);
+    dE=dE+opt.Kedgediag*Jedge(extrudedUnitCell.diagonals,:)'*dEdge(extrudedUnitCell.diagonals);
+    Eedge=Eedge + 1/2*opt.Kedge*sum(dEdge(notdiagonal).^2);
+    dE=dE+opt.Kedge*Jedge(notdiagonal,:)'*dEdge(notdiagonal);
 end
 
 %ENERGY ASSOCIATED TO FACE BENDING
