@@ -174,8 +174,8 @@ extrudedUnitCell.node=extrudedUnitCell.node+[u(1:3:end) u(2:3:end) u(3:3:end)];
 if strcmp(opt.constrEdge,'off')
     [dEdge, Jedge]=getEdge(extrudedUnitCell);
     %shearing energy
-    Ediag=1/2*opt.Kedgediag*sum(dEdge(extrudedUnitCell.diagonals).^2);
-    dE=dE+opt.Kedgediag*Jedge(extrudedUnitCell.diagonals,:)'*dEdge(extrudedUnitCell.diagonals);
+    Ediag=1/2*opt.Kdiag*sum(dEdge(extrudedUnitCell.diagonals).^2);
+    dE=dE+opt.Kdiag*Jedge(extrudedUnitCell.diagonals,:)'*dEdge(extrudedUnitCell.diagonals);
     %streching energy
     notdiagonal = 1:size(extrudedUnitCell.edge,1);
     notdiagonal(extrudedUnitCell.diagonals) = [];
