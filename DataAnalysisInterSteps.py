@@ -209,12 +209,16 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         tolHinge = 0.008
         normalized = normalized + 'hn'
     if ~np.isnan(kedge) and ~np.isnan(kdiag):
-        eEdgeFol = np.sqrt(eEdgeFol*2/kedge/totalnumberEdges)
-        eEdgeRel = np.sqrt(eEdgeRel*2/kedge/totalnumberEdges)
-        eDiagFol = np.sqrt(eDiagFol*2/kdiag/totalnumberDiag)
-        eDiagRel = np.sqrt(eDiagRel*2/kdiag/totalnumberDiag)
-        eAllEdgeFol = eEdgeFol + eDiagFol
-        eAllEdgeRel = eEdgeRel + eDiagRel
+        eEdgeFol = eEdgeFol*2/kedge
+        eEdgeRel = eEdgeRel*2/kedge
+        eDiagFol = eDiagFol*2/kdiag
+        eDiagRel = eDiagRel*2/kdiag
+        eAllEdgeFol = np.sqrt((eEdgeFol + eDiagFol)/(totalnumberEdges+totalnumberDiag))
+        eAllEdgeRel = np.sqrt((eEdgeRel + eDiagRel)/(totalnumberEdges+totalnumberDiag))
+        eEdgeFol = np.sqrt(eEdgeFol/totalnumberEdges)
+        eEdgeRel = np.sqrt(eEdgeRel/totalnumberEdges)
+        eDiagFol = np.sqrt(eDiagFol/totalnumberDiag)
+        eDiagRel = np.sqrt(eDiagRel/totalnumberDiag)
         tolEdge = 0.0001
         normalized = normalized + 'en'
     
