@@ -32,7 +32,7 @@ switch opt.analysis
 
                 % parse the file name to get back hinge set
                 hingeSet = getHingeSet(allFiles(ct).name);
-                if ~isequal(hingeSet, opt.angleConstrFinal(1).val(:,1)) && strcmp(opt.readHingeFile,'off')
+                if ~isequal(hingeSet, opt.angleConstrFinal(end).val(:,1)) && strcmp(opt.readHingeFile,'off')
                     continue;
                 end
                 extrudedUnitCell.angleConstr = [hingeSet(:), -pi*opt.constAnglePerc*ones(length(hingeSet), 1)];

@@ -7,7 +7,19 @@ if strcmp(opt.analysis,'result')
     switch opt.readHingeFile
         case 'off'
             metadataFile(opt, unitCell, extrudedUnitCell);
-            nonlinearFolding(unitCell,extrudedUnitCell,opt);
+            hingesFold = opt.angleConstrFinal(1).val;
+            angles1 = linspace(extrudedUnitCell.theta(hingesFold(1,1)),hingesFold(1,2),2);
+            angles2 = linspace(extrudedUnitCell.theta(hingesFold(2,1)),hingesFold(2,2),2);
+            opt.angleConstrFinal = [];
+            for theta1 = angles1
+                for theta2 = angles2
+                    opt.angleConstFinal(1).val = [hingesFold(1,1) theta1];
+                    opt.angleConstFinal(2).val = [hingesFold(:,1) [theta1;theta2]];
+                    fprintf('Hinge angle %d %d.\n', theta1, theta2);
+                    nonlinearFolding(unitCell,extrudedUnitCell,opt);
+                end
+            end  
+%             
         case 'on'
             opt.angleConstrFinal = [];
             fileHinges = strcat(pwd, '/Results/hingeList_reduced/', opt.template, '.csv');
