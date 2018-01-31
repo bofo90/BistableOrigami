@@ -430,8 +430,8 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
                 ax8.scatter(eEdgeRel[stepsHinge*hinge+stepsHinge-1], abs(max(MaxStrRel[stepsHinge*hinge+stepsHinge-1],MinStrRel[stepsHinge*hinge+stepsHinge-1], key=abs)), c = col)
 #                ax8.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], MaxStrRel[stepsHinge*hinge+stepsHinge-1], c = col)
 #                ax9.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], abs(MinStrRel[stepsHinge*hinge+stepsHinge-1]), c = col)
-            ax1.plot(eEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
-            ax1.scatter(eEdgeRel[stepsHinge*hinge+stepsHinge-1],  eHingeRel[stepsHinge*hinge+stepsHinge-1], c = col)                
+#            ax1.plot(eEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
+#            ax1.scatter(eEdgeRel[stepsHinge*hinge+stepsHinge-1],  eHingeRel[stepsHinge*hinge+stepsHinge-1], c = col)                
     #            ax3.plot(eEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
     #            ax2.plot(RadRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  StdRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
             if len(findit) != 0:# and differentEnergies[findit[0],1] > maxststs:
