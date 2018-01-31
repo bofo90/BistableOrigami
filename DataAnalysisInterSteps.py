@@ -97,7 +97,7 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.spines['right'].set_color(gray)
     return
 
-def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan):
+def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan, kdiag = np.nan):
 #    
 #plot = True
 #khinge = 0.01
@@ -119,16 +119,18 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     hingeNum = dataEnergy[0,:].astype(int)
     eEdgeFol = dataEnergy[1,:]
     eEdgeRel = dataEnergy[2,:]
-    eFaceFol = dataEnergy[3,:]
-    eFaceRel = dataEnergy[4,:]
-    eHingeFol = dataEnergy[5,:]
-    eHingeRel = dataEnergy[6,:]
-    eTAngleFol = dataEnergy[7,:]
-    eTAngleRel = dataEnergy[8,:]
-    eHinIntFol = dataEnergy[9,:]
-    eHinIntRel = dataEnergy[10,:]
-    exflFol = dataEnergy[11,:].astype(int)
-    exflRel = dataEnergy[12,:].astype(int)
+    eDiagFol = dataEnergy[3,:]
+    eDiagRel = dataEnergy[4,:]    
+    eFaceFol = dataEnergy[5,:]
+    eFaceRel = dataEnergy[6,:]
+    eHingeFol = dataEnergy[7,:]
+    eHingeRel = dataEnergy[8,:]
+    eTAngleFol = dataEnergy[9,:]
+    eTAngleRel = dataEnergy[10,:]
+    eHinIntFol = dataEnergy[11,:]
+    eHinIntRel = dataEnergy[12,:]
+    exflFol = dataEnergy[13,:].astype(int)
+    exflRel = dataEnergy[14,:].astype(int)
     
     hingeName = np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', unpack = True, usecols = [1], dtype=bytes).astype(str)    
     
@@ -172,8 +174,10 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         internalHinges = int(metadata.get('extUnitCell', 'intHinges'))
         totalnumberHinges = int(metadata.get('extUnitCell', 'Hinges'))
         totalnumberEdges = int(metadata.get('extUnitCell', 'Edges'))
+        totalnumberDiag = int(metadata.get('extUnitCell', 'Diag'))
         khinge = float(metadata.get('options','kHinge'))
         kedge = float(metadata.get('options','kEdge'))
+        kdiag = float(metadata.get('options','kDiag'))
         kface = float(metadata.get('options','kFace'))
     else:
         raise FileNotFoundError('No metafile found at the given directory. Changes to the script to put manually the variables are needed\n') 
@@ -204,9 +208,13 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         eHinIntRel = np.sqrt(eHinIntRel*2/khinge/internalHinges)
         tolHinge = 0.008
         normalized = normalized + 'hn'
-    if ~np.isnan(kedge):
+    if ~np.isnan(kedge) and ~np.isnan(kdiag):
         eEdgeFol = np.sqrt(eEdgeFol*2/kedge/totalnumberEdges)
         eEdgeRel = np.sqrt(eEdgeRel*2/kedge/totalnumberEdges)
+        eDiagFol = np.sqrt(eDiagFol*2/kdiag/totalnumberDiag)
+        eDiagRel = np.sqrt(eDiagRel*2/kdiag/totalnumberDiag)
+        eAllEdgeFol = eEdgeFol + eDiagFol
+        eAllEdgeRel = eEdgeRel + eDiagRel
         tolEdge = 0.0001
         normalized = normalized + 'en'
     
@@ -261,7 +269,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         
     ############################################ ordering the last energies on the release according to the number of actuated hinges
 #    lasteHingeRel = eHingeRel[stepsHinge-1::stepsHinge]
-#    lasteEdgeRel = eEdgeRel[stepsHinge-1::stepsHinge]
+#    lasteEdgeRel = eAllEdgeRel[stepsHinge-1::stepsHinge]
 ##    for hinge in np.arange(totHingeNum):
 ##        if np.isnan(hingesMask[hinge]):
 ##            lasteHingeRel[hinge] = np.nan
@@ -333,7 +341,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         differentEnergies = np.column_stack((convHinges[index], counts))
         differentEnergiesName = hingeName[convHinges[index]]
         differentEnergiesEnergy = np.column_stack((eHingeRel[convHinges[index]*stepsHinge+stepsHinge-1], 
-                                                eEdgeRel[convHinges[index]*stepsHinge+stepsHinge-1]))
+                                                eAllEdgeRel[convHinges[index]*stepsHinge+stepsHinge-1]))
     else:
         print('Error: No stable states found.\n')
         if plot:
@@ -359,13 +367,13 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     if plot:
         fig1 = plt.figure(0,figsize=(cm2inch(35), cm2inch(20)))
         ax1 = plt.subplot(111)#
-        NiceGraph2D(ax1, r'Average $\Delta$L',  r'Average $\Delta\theta$ [rad]')#, [min(eEdgeRel[stepsHinge-1::stepsHinge]), np.NaN],[0.0014,  np.NaN] )
+        NiceGraph2D(ax1, r'Average $\Delta$L',  r'Average $\Delta\theta$ [rad]')#, [min(eAllEdgeRel[stepsHinge-1::stepsHinge]), np.NaN],[0.0014,  np.NaN] )
     #    ax3 = plt.subplot(122)
     #    NiceGraph2D(ax3, 'Edge Energy',  'Hinge Energy', [0.00025, 0.012],[0.01375,  0.029] )
         
         fig2 = plt.figure(1,figsize=(cm2inch(35), cm2inch(20)))
         ax2 = plt.subplot(111)
-        NiceGraph2D(ax2, 'Average Radius', 'StDev of Radius')#, [min(eEdgeRel[stepsHinge-1::stepsHinge]), np.NaN],[max(eEdgeRel[stepsHinge-1::stepsHinge]), np.NaN], buffer = [0.00001, 0.0])
+        NiceGraph2D(ax2, 'Average Radius', 'StDev of Radius')#, [min(eAllEdgeRel[stepsHinge-1::stepsHinge]), np.NaN],[max(eAllEdgeRel[stepsHinge-1::stepsHinge]), np.NaN], buffer = [0.00001, 0.0])
         
         fig3 = plt.figure(2,figsize=(cm2inch(35), cm2inch(20)))
         ax4 = plt.subplot(111, projection='3d')
@@ -422,20 +430,20 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
                 col = '#FE9128'
             findit = np.where(differentEnergies[:,0] == hinge)[0]
             if len(findit) != 0:
-    #            ax3.scatter(eEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1], c = c)
+    #            ax3.scatter(eAllEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1], c = c)
                 ax2.scatter(RadRel[stepsHinge*hinge+stepsHinge-1], StdRel[stepsHinge*hinge+stepsHinge-1], c = col, label = hingeName[hinge])
                 ax4.scatter(CMxRel[stepsHinge*hinge+stepsHinge-1], CMyRel[stepsHinge*hinge+stepsHinge-1], CMzRel[stepsHinge*hinge+stepsHinge-1], c = col)
                 ax5.scatter(eHingeRel[stepsHinge*hinge+stepsHinge-1], SumIntAngRel[stepsHinge*hinge+stepsHinge-1], c = col)
                 ax10.scatter(eHingeRel[stepsHinge*hinge+stepsHinge-1], SumExtAngRel[stepsHinge*hinge+stepsHinge-1], c = col)
-                ax8.scatter(eEdgeRel[stepsHinge*hinge+stepsHinge-1], abs(max(MaxStrRel[stepsHinge*hinge+stepsHinge-1],MinStrRel[stepsHinge*hinge+stepsHinge-1], key=abs)), c = col)
+                ax8.scatter(eAllEdgeRel[stepsHinge*hinge+stepsHinge-1], abs(max(MaxStrRel[stepsHinge*hinge+stepsHinge-1],MinStrRel[stepsHinge*hinge+stepsHinge-1], key=abs)), c = col)
 #                ax8.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], MaxStrRel[stepsHinge*hinge+stepsHinge-1], c = col)
 #                ax9.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], abs(MinStrRel[stepsHinge*hinge+stepsHinge-1]), c = col)
-#            ax1.plot(eEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
-#            ax1.scatter(eEdgeRel[stepsHinge*hinge+stepsHinge-1],  eHingeRel[stepsHinge*hinge+stepsHinge-1], c = col)                
-    #            ax3.plot(eEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
+#            ax1.plot(eAllEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
+#            ax1.scatter(eAllEdgeRel[stepsHinge*hinge+stepsHinge-1],  eHingeRel[stepsHinge*hinge+stepsHinge-1], c = col)                
+    #            ax3.plot(eAllEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
     #            ax2.plot(RadRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  StdRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
             if len(findit) != 0:# and differentEnergies[findit[0],1] > maxststs:
-#                ax1.annotate(hingeName[hinge], xy=(eEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1]), 
+#                ax1.annotate(hingeName[hinge], xy=(eAllEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1]), 
 #                              xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
 #                              arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
 #                ax5.annotate(hingeName[hinge], xy=(eHingeRel[stepsHinge*hinge+stepsHinge-1], SumIntAngRel[stepsHinge*hinge+stepsHinge-1]), 
@@ -444,7 +452,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
 #                ax10.annotate(hingeName[hinge], xy=(eHingeRel[stepsHinge*hinge+stepsHinge-1], SumExtAngRel[stepsHinge*hinge+stepsHinge-1]), 
 #                              xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
 #                              arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
-#                ax8.annotate(hingeName[hinge], xy=(eEdgeRel[stepsHinge*hinge+stepsHinge-1], abs(max(MaxStrRel[stepsHinge*hinge+stepsHinge-1],MinStrRel[stepsHinge*hinge+stepsHinge-1], key=abs))), 
+#                ax8.annotate(hingeName[hinge], xy=(eAllEdgeRel[stepsHinge*hinge+stepsHinge-1], abs(max(MaxStrRel[stepsHinge*hinge+stepsHinge-1],MinStrRel[stepsHinge*hinge+stepsHinge-1], key=abs))), 
 #                              xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
 #                              arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
                 print(hingeName[differentEnergies[findit[0],0]], differentEnergies[findit[0],1])    
