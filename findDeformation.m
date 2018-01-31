@@ -60,7 +60,7 @@ for iter=1:length(opt.angleConstrFinal)
     initialiseGlobalx(u0, theta0);
     clearvars V;
     V(:,1)=u0;
-    [E(1,1),~,Eedge(1,1),Eface(1,1),Ehinge(1,1),EtargetAngle(1,1), ~]=Energy(u0,extrudedUnitCell,opt);
+    [E(1,1),~,Eedge(1,1),Ediag(1,1),Eface(1,1),Ehinge(1,1),EtargetAngle(1,1), ~]=Energy(u0,extrudedUnitCell,opt);
     exfl(1,1) = 1;
     result = [];
     
@@ -73,7 +73,7 @@ for iter=1:length(opt.angleConstrFinal)
     [V(:,2),~,exfl(2,1),output]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
     u0 = V(:,2);
     %Determine energy of that equilibrium
-    [E(2,1),~,Eedge(2,1),Eface(2,1),Ehinge(2,1),EtargetAngle(2,1), ~]=Energy(u0,extrudedUnitCell,opt);
+    [E(2,1),~,Eedge(2,1),Ediag(2,1),Eface(2,1),Ehinge(2,1),EtargetAngle(2,1), ~]=Energy(u0,extrudedUnitCell,opt);
     t2 = toc;
     fprintf('time %1.2f, exitflag %d\n',t2-t1,exfl(2,1));
 
@@ -84,7 +84,7 @@ for iter=1:length(opt.angleConstrFinal)
     initialiseGlobalx(u0, lastAngle);
     clearvars V;
     V(:,1)=u0;
-    [E(1,2),~,Eedge(1,2),Eface(1,2),Ehinge(1,2),EtargetAngle(1,2), ~]=Energy(u0,extrudedUnitCell,opt);
+    [E(1,2),~,Eedge(1,2),Ediag(1,2),Eface(1,2),Ehinge(1,2),EtargetAngle(1,2), ~]=Energy(u0,extrudedUnitCell,opt);
     exfl(1,2) = 1;
     
     %change algorithm for releasing
@@ -98,7 +98,7 @@ for iter=1:length(opt.angleConstrFinal)
     [V(:,2),~,exfl(2,2),output]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
     u0 = V(:,2);
     %Determine energy of that equilibrium
-    [E(2,2),~,Eedge(2,2),Eface(2,2),Ehinge(2,2),EtargetAngle(2,2), ~]=Energy(u0,extrudedUnitCell,opt);
+    [E(2,2),~,Eedge(2,2),Ediag(2,2),Eface(2,2),Ehinge(2,2),EtargetAngle(2,2), ~]=Energy(u0,extrudedUnitCell,opt);
     t2 = toc;
     fprintf('time %1.2f, exitflag %d\n',t2-t1,exfl(2,2))
 
@@ -111,6 +111,7 @@ for iter=1:length(opt.angleConstrFinal)
     %Save energy data in the result variable
     result.E=E;
     result.Eedge=Eedge;
+    result.Ediag=Ediag;
     result.Eface=Eface;
     result.Ehinge=Ehinge;
     result.EtargetAngle=EtargetAngle;    
@@ -156,10 +157,11 @@ lastAngle = angles(:,end);
 %ENERGY
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [E, dE,Eedge,Eface,Ehinge,EtargetAngle,theta]=Energy(u,extrudedUnitCell,opt)
+function [E, dE,Eedge,Ediag,Eface,Ehinge,EtargetAngle,theta]=Energy(u,extrudedUnitCell,opt)
 
 E=0; dE=zeros(3*size(extrudedUnitCell.node,1),1);
 Eedge=0;
+Ediag = 0;
 Eface=0;
 Ehinge=0;
 EtargetAngle=0;
@@ -171,11 +173,13 @@ extrudedUnitCell.node=extrudedUnitCell.node+[u(1:3:end) u(2:3:end) u(3:3:end)];
 %ENERGY ASSOCIATED TO EDGE STRETCHING
 if strcmp(opt.constrEdge,'off')
     [dEdge, Jedge]=getEdge(extrudedUnitCell);
+    %shearing energy
+    Ediag=1/2*opt.Kedgediag*sum(dEdge(extrudedUnitCell.diagonals).^2);
+    dE=dE+opt.Kedgediag*Jedge(extrudedUnitCell.diagonals,:)'*dEdge(extrudedUnitCell.diagonals);
+    %streching energy
     notdiagonal = 1:size(extrudedUnitCell.edge,1);
     notdiagonal(extrudedUnitCell.diagonals) = [];
-    Eedge=1/2*opt.Kedgediag*sum(dEdge(extrudedUnitCell.diagonals).^2);
-    dE=dE+opt.Kedgediag*Jedge(extrudedUnitCell.diagonals,:)'*dEdge(extrudedUnitCell.diagonals);
-    Eedge=Eedge + 1/2*opt.Kedge*sum(dEdge(notdiagonal).^2);
+    Eedge=1/2*opt.Kedge*sum(dEdge(notdiagonal).^2);
     dE=dE+opt.Kedge*Jedge(notdiagonal,:)'*dEdge(notdiagonal);
 end
 
@@ -201,7 +205,7 @@ end
 EtargetAngle=1/2*opt.KtargetAngle*sum(dtheta.^2);
 
 %TOTAL ENERGY
-E=Eedge+Eface+Ehinge+EtargetAngle;
+E=Eedge+Ediag+Eface+Ehinge+EtargetAngle;
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
