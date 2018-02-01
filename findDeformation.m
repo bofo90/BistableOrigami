@@ -8,15 +8,16 @@ if strcmp(opt.analysis,'result')
         case 'off'
             metadataFile(opt, unitCell, extrudedUnitCell);
             hingesFold = opt.angleConstrFinal(1).val;
-            angles1 = linspace(extrudedUnitCell.theta(hingesFold(1,1)),hingesFold(1,2),2);
-            angles2 = linspace(extrudedUnitCell.theta(hingesFold(2,1)),hingesFold(2,2),2);
+            steps = 5;
+            angles1 = linspace(extrudedUnitCell.theta(hingesFold(1,1)),hingesFold(1,2),steps);
+            angles2 = linspace(extrudedUnitCell.theta(hingesFold(2,1)),hingesFold(2,2),steps);
             opt.angleConstrFinal = [];
-            for theta1 = angles1
-                for theta2 = angles2
-                    opt.angleConstFinal(1).val = [hingesFold(1,1) theta1];
-                    opt.angleConstFinal(2).val = [hingesFold(:,1) [theta1;theta2]];
-                    fprintf('Hinge angle %d %d.\n', theta1, theta2);
-                    nonlinearFolding(unitCell,extrudedUnitCell,opt);
+            for theta1 = 1:steps
+                for theta2 = 1:steps
+                    opt.angleConstrFinal(1).val = [hingesFold(1,1) angles1(theta1)];
+                    opt.angleConstrFinal(2).val = [hingesFold(:,1) [angles1(theta1);angles2(theta2)]];
+                    fprintf('Hinge angle %d %d.\n', angles1(theta1), angles2(theta2));
+                    nonlinearFolding(unitCell,extrudedUnitCell,opt, theta1, theta2);
                 end
             end  
 %             
@@ -47,7 +48,7 @@ end
 %NON-LINEAR ANALYSIS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function nonlinearFolding(unitCell,extrudedUnitCell,opt)
+function nonlinearFolding(unitCell,extrudedUnitCell,opt, stepang1, stepang2)
 
 %INITIALIZE LINEAR CONSTRAINTS
 [Aeq, Beq]=linearConstr(unitCell,extrudedUnitCell,opt);
@@ -108,7 +109,7 @@ result.numMode=length(result.deform);
 
 %Save the result in a file
 fileName = strcat(folderName,'/',opt.template,'_',...
-    mat2str(opt.angleConstrFinal(iter).val(:,1)'),'.mat');
+    mat2str(opt.angleConstrFinal(iter).val(:,1)'),'_',int2str(stepang1),'_',int2str(stepang2),'.mat');
 save(fileName, 'result');
 
 %Clear variables for next fold

@@ -12,7 +12,7 @@ clearvars -global
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-opt=initOpt('template','truncated tetrahedron','analysis','result','readHingeFile','off',...
+opt=initOpt('template','truncated tetrahedron','analysis','savedata','readHingeFile','off',...
             'createFig', 'off','saveFig','off','saveMovie', 'off',...
             'figDPI',200,'safeMovieAntiAlias', 0,...
             'folAlgor', 'active-set','relAlgor', 'active-set',...
@@ -25,7 +25,7 @@ opt=initOpt('template','truncated tetrahedron','analysis','result','readHingeFil
 opt.saveFile = strcat('/',date,'_Energylandscape');
 % opt.saveFile = strcat('/','26-Jan-2018_30MaxStretch_images');
 
-hingeSet = [24 3];
+hingeSet = [3 24];
 opt.angleConstrFinal(1).val=[ hingeSet(:) , (-pi*(opt.constAnglePerc-0.005)) *ones(length(hingeSet), 1)];
 
 tic;
