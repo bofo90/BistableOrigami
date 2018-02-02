@@ -31,9 +31,14 @@ switch opt.analysis
                 end
 
                 % parse the file name to get back hinge set
-                hingeSet = getHingeSet(allFiles(ct).name);
-                if ~isequal(hingeSet, opt.angleConstrFinal(end).val(:,1)) && strcmp(opt.readHingeFile,'off')
-                    continue;
+                resfilename = allFiles(ct).name;
+                hingeSet = getHingeSet(resfilename);
+                if strcmp(opt.readHingeFile,'off')
+                    if ~isequal(hingeSet, opt.angleConstrFinal(end).val(:,1))
+                        continue;
+                    elseif ~strcmp(resfilename(1:end-4), '[3 24]_Ang1_2_Angl2_3')
+                        continue;
+                    end
                 end
                 extrudedUnitCell.angleConstr = [hingeSet(:), -pi*opt.constAnglePerc*ones(length(hingeSet), 1)];
                 % load results from file
@@ -61,7 +66,7 @@ switch opt.analysis
                     
                     nameFolderPlot=[pwd,'/Results/',opt.template,'/',opt.relAlgor,'/images',...
                         opt.saveFile,extraName];
-                    nameFilePlot = ['/',opt.template,'_',mat2str(hingeSet'),'.png'];
+                    nameFilePlot = ['/',resfilename(1:end-4),'_AnglEv.png'];
                     
                     if ~exist(nameFolderPlot, 'dir')
                         mkdir(nameFolderPlot);
@@ -71,10 +76,10 @@ switch opt.analysis
                     x = size(result.deform(1).interV,2)+0.5;
                     line([x x],[-1.1*pi 1.1*pi], 'Color', [0 0 0])
                     saveas(gcf, [nameFolderPlot, nameFilePlot]);
-                    savefig([nameFolderPlot,'/',opt.template,'_',mat2str(hingeSet')])
+                    savefig([nameFolderPlot,'/',resfilename(1:end-4),'_AnglEv.fig'])
                     close 'all';                    
                     
-                    outputResults(unitCell,extrudedUnitCell,result,opt);
+                    outputResults(unitCell,extrudedUnitCell,result,opt,resfilename(1:end-4));
                 end
                 close all;
             end
@@ -146,7 +151,7 @@ fclose(fid) ;                                          % Closes file.
 function [hingeSet] = getHingeSet(fileName)
 
 parsedName = strsplit(fileName(1:end-4), '_');
-hingeSetStr = parsedName{2};
+hingeSetStr = parsedName{1};
 hingeSetStr = strrep(hingeSetStr, '[', '');
 hingeSetStr = strrep(hingeSetStr, ']', '');
 hingeSetStr = strsplit(hingeSetStr(1:end), ' ');

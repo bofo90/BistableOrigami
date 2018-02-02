@@ -8,7 +8,7 @@ if strcmp(opt.analysis,'result')
         case 'off'
             metadataFile(opt, unitCell, extrudedUnitCell);
             hingesFold = opt.angleConstrFinal(1).val;
-            steps = 5;
+            steps = 3;
             angles1 = linspace(extrudedUnitCell.theta(hingesFold(1,1)),hingesFold(1,2),steps);
             angles2 = linspace(extrudedUnitCell.theta(hingesFold(2,1)),hingesFold(2,2),steps);
             opt.angleConstrFinal = [];
@@ -108,8 +108,8 @@ result.exfl = exfl;
 result.numMode=length(result.deform);
 
 %Save the result in a file
-fileName = strcat(folderName,'/',opt.template,'_',...
-    mat2str(opt.angleConstrFinal(iter).val(:,1)'),'_',int2str(stepang1),'_',int2str(stepang2),'.mat');
+fileName = strcat(folderName,'/',mat2str(opt.angleConstrFinal(iter).val(:,1)'),...
+    '_Ang1_',int2str(stepang1),'_Angl2_',int2str(stepang2),'.mat');
 save(fileName, 'result');
 
 %Clear variables for next fold
