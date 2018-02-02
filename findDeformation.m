@@ -106,6 +106,7 @@ result.Ehinge=Ehinge;
 result.EtargetAngle=EtargetAngle;    
 result.exfl = exfl;
 result.numMode=length(result.deform);
+result.anglConstr = opt.angleConstrFinal(end).val;
 
 %Save the result in a file
 fileName = strcat(folderName,'/',mat2str(opt.angleConstrFinal(iter).val(:,1)'),...
