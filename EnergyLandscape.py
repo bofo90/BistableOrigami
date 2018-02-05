@@ -150,21 +150,24 @@ if inverted:
 else:
     totEnergysort = totEnergysort.reshape((divitheta1,divitheta2)).T
 
-
+sep1 = (closingAngl1[0]-closingAngl1[-1])/(divitheta1-1)/2
+sep2 = (closingAngl2[0]-closingAngl2[-1])/(divitheta2-1)/2
 
 fig1 = plt.figure(0,figsize=(cm2inch(35), cm2inch(20)))
 ax1 = plt.subplot(111)
 if inverted:
-    NiceGraph2D(ax1, 'Theta1 [rad]', 'Theta2 [rad]',mincoord = [-closingAngl2[0], -closingAngl1[0]], maxcoord = [-closingAngl2[-1], -closingAngl1[-1]],  divisions = [divitheta2, divitheta1])
+    NiceGraph2D(ax1, 'Theta1 [rad]', 'Theta2 [rad]',mincoord = [-closingAngl2[0], -closingAngl1[0]], 
+                maxcoord = [-closingAngl2[-1], -closingAngl1[-1]],  divisions = [divitheta2, divitheta1], buffer = [sep2, sep1])
 else:
-    NiceGraph2D(ax1, 'Theta1 [rad]', 'Theta2 [rad]',mincoord = [-closingAngl1[0], -closingAngl2[0]], maxcoord = [-closingAngl1[-1], -closingAngl2[-1]],  divisions = [divitheta1, divitheta2])
-
-
+    NiceGraph2D(ax1, 'Theta1 [rad]', 'Theta2 [rad]',mincoord = [-closingAngl1[0], -closingAngl2[0]], 
+                maxcoord = [-closingAngl1[-1], -closingAngl2[-1]],  divisions = [divitheta1, divitheta2], buffer = [sep1, sep2])
 
 if inverted:
-    cs1 = ax1.imshow(totEnergysort[::-1,:], extent=[theta2[0,0],theta2[0,-1],theta1[0,0],theta1[-1,0]], cmap = cm.copper, aspect = 'auto',vmax = 0.64)
+    cs1 = ax1.imshow(totEnergysort, extent=[theta2[0,0]-sep2,theta2[0,-1]+sep2,theta1[0,0]-sep1,theta1[-1,0]+sep1], 
+                     cmap = cm.copper, aspect = 'auto',vmax = 0.64, origin = 'lower')
 else:
-    cs1 = ax1.imshow(totEnergysort[::-1,:], extent=[theta1[0,0],theta1[-1,0],theta2[0,0],theta2[0,-1]], cmap = cm.copper, aspect = 'auto',vmax = 0.64)
+    cs1 = ax1.imshow(totEnergysort, extent=[theta1[0,0]-sep1,theta1[-1,0]+sep1,theta2[0,0]-sep2,theta2[0,-1]+sep2], 
+                     cmap = cm.copper, aspect = 'auto',vmax = 0.64, origin = 'lower')
 
 ax1.xaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
 ax1.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
