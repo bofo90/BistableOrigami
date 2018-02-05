@@ -94,7 +94,7 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     return
 
 folder_name = "Results/truncated tetrahedron/active-set/energy/05-Feb-2018_Energylandscape_3to24\kh0.001_kta1.000_ke1.000_kf100.000"
-
+inverted = False
 plt.close('all')
 #%%
 #######################################################################################################################
@@ -133,24 +133,44 @@ closingAngl2 =  np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', u
 
 
 #%%
-
 divitheta1 = len(np.unique(closingAngl1))
 divitheta2 = len(np.unique(closingAngl2))
+
+sortAngl = np.lexsort((closingAngl2, closingAngl1))
+closingAngl1 = closingAngl1[sortAngl[::-1]]
+closingAngl2 = closingAngl2[sortAngl[::-1]]
 
 theta1 = -closingAngl1.reshape((divitheta1,divitheta2))
 theta2 = -closingAngl2.reshape((divitheta1,divitheta2))
 
+totEnergysort = eTotalRel[1::2]
+totEnergysort = totEnergysort[sortAngl[::-1]]
+if inverted:
+    totEnergysort = totEnergysort.reshape((divitheta1,divitheta2))
+else:
+    totEnergysort = totEnergysort.reshape((divitheta1,divitheta2)).T
+
+
 
 fig1 = plt.figure(0,figsize=(cm2inch(35), cm2inch(20)))
 ax1 = plt.subplot(111)
-NiceGraph2D(ax1, 'Theta1 [rad]', 'Theta2 [rad]',mincoord = [-closingAngl1[0], -closingAngl2[0]], maxcoord = [-closingAngl1[-1], -closingAngl2[-1]],  divisions = [divitheta1, divitheta2])
+if inverted:
+    NiceGraph2D(ax1, 'Theta1 [rad]', 'Theta2 [rad]',mincoord = [-closingAngl2[0], -closingAngl1[0]], maxcoord = [-closingAngl2[-1], -closingAngl1[-1]],  divisions = [divitheta2, divitheta1])
+else:
+    NiceGraph2D(ax1, 'Theta1 [rad]', 'Theta2 [rad]',mincoord = [-closingAngl1[0], -closingAngl2[0]], maxcoord = [-closingAngl1[-1], -closingAngl2[-1]],  divisions = [divitheta1, divitheta2])
 
-cs1 = ax1.imshow(eTotalRel[1::2].reshape((divitheta1,divitheta2)).T, extent=[theta1[0,0],theta1[-1,0],theta2[0,0],theta2[0,-1]], cmap = cm.copper, aspect = 'auto')#theta1[:,0],theta2[0,:],
+
+
+if inverted:
+    cs1 = ax1.imshow(totEnergysort[::-1,:], extent=[theta2[0,0],theta2[0,-1],theta1[0,0],theta1[-1,0]], cmap = cm.copper, aspect = 'auto',vmax = 0.64)
+else:
+    cs1 = ax1.imshow(totEnergysort[::-1,:], extent=[theta1[0,0],theta1[-1,0],theta2[0,0],theta2[0,-1]], cmap = cm.copper, aspect = 'auto',vmax = 0.64)
+
 ax1.xaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
 ax1.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
 
 cbar = plt.colorbar(cs1,  ax = ax1, fraction=0.05, pad=0.01)#format="%d", extend = 'max'
-cbar.set_ticks(np.linspace(0, max(eTotalRel[1::2]), 5))
+cbar.set_ticks(np.linspace(0, 0.64, 5))
 cbar.set_label('Energy', fontsize = 15, color = '0.2')
 cbar.ax.tick_params(axis='y',colors='0.2')
 cbar.ax.tick_params(axis='x',colors='0.2')
