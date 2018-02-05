@@ -95,6 +95,7 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
 
 folder_name = "Results/truncated tetrahedron/active-set/energy/05-Feb-2018_Energylandscape_3to24\kh0.001_kta1.000_ke1.000_kf100.000"
 inverted = False
+tolAngleSS = 0.087 # equivalent to 5 degrees
 plt.close('all')
 #%%
 #######################################################################################################################
@@ -130,9 +131,21 @@ hingeName = np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', unpac
 closingAngl1 =  np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', unpack = True, usecols = [2])/np.pi
 closingAngl2 =  np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', unpack = True, usecols = [3])/np.pi
 
+dataAngles = np.loadtxt(folder_name+file_name4,skiprows=1, delimiter = ',')
+dataAngles = np.delete(dataAngles, 0, 1)
+MaxAngles = np.max(dataAngles, axis = 1)
+MinAngles = np.min(dataAngles, axis = 1)
 
 
 #%%
+###Check if a folding pattern didnt converge
+if len(np.unique(exflFol))>2:
+    print('Error: There was at least one non convergent fold pattern.\n')
+if len(np.unique(exflRel))>2:
+    print('Error: There was at least one non convergent release pattern.\n')
+
+
+##Do the energy landscape plot
 divitheta1 = len(np.unique(closingAngl1))
 divitheta2 = len(np.unique(closingAngl2))
 
@@ -143,12 +156,12 @@ closingAngl2 = closingAngl2[sortAngl[::-1]]
 theta1 = -closingAngl1.reshape((divitheta1,divitheta2))
 theta2 = -closingAngl2.reshape((divitheta1,divitheta2))
 
-totEnergysort = eTotalRel[1::2]
+totEnergysort = eTotalFol[1::2]
 totEnergysort = totEnergysort[sortAngl[::-1]]
 if inverted:
-    totEnergysort = totEnergysort.reshape((divitheta1,divitheta2))
+    totEnergyMat = totEnergysort.reshape((divitheta1,divitheta2))
 else:
-    totEnergysort = totEnergysort.reshape((divitheta1,divitheta2)).T
+    totEnergyMat = totEnergysort.reshape((divitheta1,divitheta2)).T
 
 sep1 = (closingAngl1[0]-closingAngl1[-1])/(divitheta1-1)/2
 sep2 = (closingAngl2[0]-closingAngl2[-1])/(divitheta2-1)/2
@@ -163,10 +176,10 @@ else:
                 maxcoord = [-closingAngl1[-1], -closingAngl2[-1]],  divisions = [divitheta1, divitheta2], buffer = [sep1, sep2])
 
 if inverted:
-    cs1 = ax1.imshow(totEnergysort, extent=[theta2[0,0]-sep2,theta2[0,-1]+sep2,theta1[0,0]-sep1,theta1[-1,0]+sep1], 
+    cs1 = ax1.imshow(totEnergyMat, extent=[theta2[0,0]-sep2,theta2[0,-1]+sep2,theta1[0,0]-sep1,theta1[-1,0]+sep1], 
                      cmap = cm.copper, aspect = 'auto',vmax = 0.64, origin = 'lower')
 else:
-    cs1 = ax1.imshow(totEnergysort, extent=[theta1[0,0]-sep1,theta1[-1,0]+sep1,theta2[0,0]-sep2,theta2[0,-1]+sep2], 
+    cs1 = ax1.imshow(totEnergyMat, extent=[theta1[0,0]-sep1,theta1[-1,0]+sep1,theta2[0,0]-sep2,theta2[0,-1]+sep2], 
                      cmap = cm.copper, aspect = 'auto',vmax = 0.64, origin = 'lower')
 
 ax1.xaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
@@ -183,7 +196,16 @@ fig1.tight_layout()
 fig1.show()
 fig1.savefig(folder_name + '/EnergyLand.png', transparent = False)
 
+#Analysis for stable states
 
+finalAngles = np.empty((0,np.size(dataAngles,1)))
+dataAngles = np.around(dataAngles/tolAngleSS)*tolAngleSS ## Here you conisder the tolerance for angles to recognize stable states
+for hinge in sortAngl:
+    sortAllAngIndex = np.lexsort((dataAngles[2*hinge+1,:],dataAngles[2*hinge,:]))
+    finalAngles = np.append(finalAngles, [dataAngles[2*hinge+1,sortAllAngIndex]], axis = 0)
+
+differentAngles, index, counts = np.unique(finalAngles, axis = 0, return_index = True, return_counts = True)
+differentEnergies = np.column_stack((sortAngl[index], counts))
 
 
 

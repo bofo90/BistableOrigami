@@ -22,10 +22,10 @@ opt=initOpt('template','truncated tetrahedron','analysis','result','readHingeFil
             'maxStretch', 0.3,...
             'maxHinges',inf,'minHinges',0);    %Only work when readHingeFile is 'on'
 
-opt.saveFile = strcat('/',date,'_Energylandscape_3to24');
+opt.saveFile = strcat('/',date,'_Energylandscape_24to3');
 % opt.saveFile = strcat('/','01-Feb-2018_Energylandscape');
 
-hingeSet = [3 24];
+hingeSet = [24 3];
 opt.angleConstrFinal(1).val=[ hingeSet(:) , (-pi*(opt.constAnglePerc-0.005)) *ones(length(hingeSet), 1)];
 
 tic;
