@@ -16,6 +16,7 @@ if strcmp(opt.analysis,'result')
                 for theta2 = 1:steps
                     opt.angleConstrFinal(1).val = [hingesFold(1,1) angles1(theta1)];
                     opt.angleConstrFinal(2).val = [hingesFold(:,1) [angles1(theta1);angles2(theta2)]];
+                    opt.angleConstrFinal(3).val = [];
                     fprintf('Hinge angle %d %d.\n', angles1(theta1), angles2(theta2));
                     nonlinearFolding(unitCell,extrudedUnitCell,opt, theta1, theta2);
                 end
@@ -81,7 +82,11 @@ for iter=1:length(opt.angleConstrFinal)
     
     
     %Run the Folding of the structure
-    fprintf(['Angle contrain:', mat2str(opt.angleConstrFinal(iter).val(:,1)') ,'\n']);
+    if isempty(opt.angleConstrFinal(iter).val)
+        fprintf('Angle contrain: None\n');
+    else
+        fprintf(['Angle contrain:', mat2str(opt.angleConstrFinal(iter).val(:,1)') ,'\n']);
+    end
     extrudedUnitCell.angleConstr=opt.angleConstrFinal(iter).val;
     fprintf('Folding:\t');
     t1 = toc;
@@ -106,10 +111,10 @@ result.Ehinge=Ehinge;
 result.EtargetAngle=EtargetAngle;    
 result.exfl = exfl;
 result.numMode=length(result.deform);
-result.anglConstr = opt.angleConstrFinal(end).val;
+result.anglConstr = opt.angleConstrFinal(2).val;
 
 %Save the result in a file
-fileName = strcat(folderName,'/',mat2str(opt.angleConstrFinal(iter).val(:,1)'),...
+fileName = strcat(folderName,'/',mat2str(opt.angleConstrFinal(2).val(:,1)'),...
     '_Ang1_',int2str(stepang1),'_Angl2_',int2str(stepang2),'.mat');
 save(fileName, 'result');
 
