@@ -93,7 +93,7 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.spines['right'].set_color(gray)
     return
 
-folder_name = "Results/truncated tetrahedron/active-set/energy/02-Feb-2018_Energylandscape_inv\kh0.001_kta1.000_ke1.000_kf100.000"
+folder_name = "Results/truncated tetrahedron/active-set/energy/05-Feb-2018_Energylandscape_3to24\kh0.001_kta1.000_ke1.000_kf100.000"
 
 plt.close('all')
 #%%
@@ -155,6 +155,10 @@ cbar.set_label('Energy', fontsize = 15, color = '0.2')
 cbar.ax.tick_params(axis='y',colors='0.2')
 cbar.ax.tick_params(axis='x',colors='0.2')
 cbar.outline.set_edgecolor('0.2')
+
+fig1.tight_layout()
+fig1.show()
+fig1.savefig(folder_name + '/EnergyLand.png', transparent = False)
 
 
 
