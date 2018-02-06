@@ -93,9 +93,9 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.spines['right'].set_color(gray)
     return
 
-folder_name = "Results/truncated tetrahedron/active-set/energy/05-Feb-2018_Energylandscape_3to24\kh0.001_kta1.000_ke1.000_kf100.000"
-inverted = False
-tolAngleSS = 0.087 # equivalent to 5 degrees
+folder_name = "Results/truncated tetrahedron/active-set/energy/05-Feb-2018_Energylandscape_24to3\kh0.001_kta1.000_ke1.000_kf100.000"
+inverted = True
+tolAngleSS = 0.174 # equivalent to 10 degrees
 plt.close('all')
 #%%
 #######################################################################################################################
@@ -169,10 +169,10 @@ sep2 = (closingAngl2[0]-closingAngl2[-1])/(divitheta2-1)/2
 fig1 = plt.figure(0,figsize=(cm2inch(35), cm2inch(20)))
 ax1 = plt.subplot(111)
 if inverted:
-    NiceGraph2D(ax1, 'Theta1 [rad]', 'Theta2 [rad]',mincoord = [-closingAngl2[0], -closingAngl1[0]], 
+    NiceGraph2D(ax1, 'Hinge 3 [rad]', 'Hinge 24 [rad]',mincoord = [-closingAngl2[0], -closingAngl1[0]], 
                 maxcoord = [-closingAngl2[-1], -closingAngl1[-1]],  divisions = [divitheta2, divitheta1], buffer = [sep2, sep1])
 else:
-    NiceGraph2D(ax1, 'Theta1 [rad]', 'Theta2 [rad]',mincoord = [-closingAngl1[0], -closingAngl2[0]], 
+    NiceGraph2D(ax1, 'Hinge 3 [rad]', 'Hinge 24 [rad]',mincoord = [-closingAngl1[0], -closingAngl2[0]], 
                 maxcoord = [-closingAngl1[-1], -closingAngl2[-1]],  divisions = [divitheta1, divitheta2], buffer = [sep1, sep2])
 
 if inverted:
@@ -200,7 +200,7 @@ fig1.savefig(folder_name + '/EnergyLand.png', transparent = False)
 
 finalAngles = np.empty((0,np.size(dataAngles,1)))
 dataAngles = np.around(dataAngles/tolAngleSS)*tolAngleSS ## Here you conisder the tolerance for angles to recognize stable states
-for hinge in sortAngl:
+for hinge in sortAngl[::-1]:
     sortAllAngIndex = np.lexsort((dataAngles[2*hinge+1,:],dataAngles[2*hinge,:]))
     finalAngles = np.append(finalAngles, [dataAngles[2*hinge+1,sortAllAngIndex]], axis = 0)
 
@@ -216,10 +216,10 @@ fig2 = plt.figure(1,figsize=(cm2inch(35), cm2inch(20)))
 ax2 = plt.subplot(111)
 
 if inverted:
-    NiceGraph2D(ax2, 'Theta1 [rad]', 'Theta2 [rad]',mincoord = [-closingAngl2[0], -closingAngl1[0]], 
+    NiceGraph2D(ax2, 'Hinge 3 [rad]', 'Hinge 24 [rad]',mincoord = [-closingAngl2[0], -closingAngl1[0]], 
                 maxcoord = [-closingAngl2[-1], -closingAngl1[-1]],  divisions = [divitheta2, divitheta1], buffer = [sep2, sep1])
 else:
-    NiceGraph2D(ax2, 'Theta1 [rad]', 'Theta2 [rad]',mincoord = [-closingAngl1[0], -closingAngl2[0]], 
+    NiceGraph2D(ax2, 'Hinge 3 [rad]', 'Hinge 24 [rad]',mincoord = [-closingAngl1[0], -closingAngl2[0]], 
                 maxcoord = [-closingAngl1[-1], -closingAngl2[-1]],  divisions = [divitheta1, divitheta2], buffer = [sep1, sep2])
 
 if inverted:
