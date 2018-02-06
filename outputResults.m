@@ -348,6 +348,7 @@ if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(op
             pause(1)
 %             fprintf('end part');
             for framMode=1:length(plotextrudedUnitCell.mode(nMode).frame)
+%                 framMode = length(plotextrudedUnitCell.mode(nMode).frame);
 %                 pause();
                 for nc=1:size(extrudedUnitCell.latVec,1)
                     for i=3:10     
