@@ -204,11 +204,41 @@ for hinge in sortAngl:
     sortAllAngIndex = np.lexsort((dataAngles[2*hinge+1,:],dataAngles[2*hinge,:]))
     finalAngles = np.append(finalAngles, [dataAngles[2*hinge+1,sortAllAngIndex]], axis = 0)
 
-differentAngles, index, counts = np.unique(finalAngles, axis = 0, return_index = True, return_counts = True)
+differentAngles, index, inverse, counts = np.unique(finalAngles, axis = 0, return_index = True, return_inverse = True, return_counts = True)
 differentEnergies = np.column_stack((sortAngl[index], counts))
 
+if inverted:
+    stableStateMat = inverse.reshape((divitheta1,divitheta2))
+else:
+    stableStateMat = inverse.reshape((divitheta1,divitheta2)).T
 
+fig2 = plt.figure(1,figsize=(cm2inch(35), cm2inch(20)))
+ax2 = plt.subplot(111)
 
+if inverted:
+    NiceGraph2D(ax2, 'Theta1 [rad]', 'Theta2 [rad]',mincoord = [-closingAngl2[0], -closingAngl1[0]], 
+                maxcoord = [-closingAngl2[-1], -closingAngl1[-1]],  divisions = [divitheta2, divitheta1], buffer = [sep2, sep1])
+else:
+    NiceGraph2D(ax2, 'Theta1 [rad]', 'Theta2 [rad]',mincoord = [-closingAngl1[0], -closingAngl2[0]], 
+                maxcoord = [-closingAngl1[-1], -closingAngl2[-1]],  divisions = [divitheta1, divitheta2], buffer = [sep1, sep2])
 
+if inverted:
+    cs2 = ax2.imshow(stableStateMat, extent=[theta2[0,0]-sep2,theta2[0,-1]+sep2,theta1[0,0]-sep1,theta1[-1,0]+sep1], 
+                     cmap = cm.tab10, aspect = 'auto', origin = 'lower')
+else:
+    cs2 = ax2.imshow(stableStateMat, extent=[theta1[0,0]-sep1,theta1[-1,0]+sep1,theta2[0,0]-sep2,theta2[0,-1]+sep2], 
+                     cmap = cm.tab10, aspect = 'auto', origin = 'lower')
 
+ax2.xaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
+ax2.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
 
+cbar2 = plt.colorbar(cs2,  ax = ax2, fraction=0.05, pad=0.01, format="")#, extend = 'max'
+cbar2.set_ticks(np.linspace(0, max(inverse), max(inverse)+1))
+#cbar2.set_label('Energy', fontsize = 15, color = '0.2')
+cbar2.ax.tick_params(axis='y',colors='0.2')
+cbar2.ax.tick_params(axis='x',colors='0.2')
+cbar2.outline.set_edgecolor('0.2')
+
+fig2.tight_layout()
+fig2.show()
+fig2.savefig(folder_name + '/StableStates.png', transparent = False)
