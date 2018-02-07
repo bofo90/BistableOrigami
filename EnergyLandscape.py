@@ -93,16 +93,17 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.spines['right'].set_color(gray)
     return
 
-folder_name = "Results/truncated tetrahedron/active-set/energy/05-Feb-2018_Energylandscape_24to3\kh0.001_kta1.000_ke1.000_kf100.000"
+folder_name = "Results/truncated tetrahedron/active-set/energy/06-Feb-2018_Energylandscape_24to3\kh0.001_kta1.000_ke1.000_kf100.000"
 inverted = True
 tolAngleSS = 0.174 # equivalent to 10 degrees
+maxEnergy = 0.48
 plt.close('all')
 #%%
 #######################################################################################################################
 ##################### Reading Files
 #######################################################################################################################
 
-file_name1 = "/EnergyData.csv"
+file_name1 = "/EnergyData.csv" 
 file_name2 = "/Hinges.csv"
 file_name3 = "/PosStad.csv"
 file_name4 = "/Angles.csv"
@@ -177,16 +178,16 @@ else:
 
 if inverted:
     cs1 = ax1.imshow(totEnergyMat, extent=[theta2[0,0]-sep2,theta2[0,-1]+sep2,theta1[0,0]-sep1,theta1[-1,0]+sep1], 
-                     cmap = cm.copper, aspect = 'auto',vmax = 0.64, origin = 'lower')
+                     cmap = cm.rainbow, aspect = 'auto',vmax = maxEnergy, origin = 'lower')
 else:
     cs1 = ax1.imshow(totEnergyMat, extent=[theta1[0,0]-sep1,theta1[-1,0]+sep1,theta2[0,0]-sep2,theta2[0,-1]+sep2], 
-                     cmap = cm.copper, aspect = 'auto',vmax = 0.64, origin = 'lower')
+                     cmap = cm.rainbow, aspect = 'auto',vmax = maxEnergy, origin = 'lower')
 
 ax1.xaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
 ax1.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
 
-cbar = plt.colorbar(cs1,  ax = ax1, fraction=0.05, pad=0.01)#format="%d", extend = 'max'
-cbar.set_ticks(np.linspace(0, 0.64, 5))
+cbar = plt.colorbar(cs1,  ax = ax1, fraction=0.05, pad=0.01, extend = 'max')#format="%d", 
+cbar.set_ticks(np.linspace(0, maxEnergy, 5))
 cbar.set_label('Energy', fontsize = 15, color = '0.2')
 cbar.ax.tick_params(axis='y',colors='0.2')
 cbar.ax.tick_params(axis='x',colors='0.2')
@@ -224,10 +225,10 @@ else:
 
 if inverted:
     cs2 = ax2.imshow(stableStateMat, extent=[theta2[0,0]-sep2,theta2[0,-1]+sep2,theta1[0,0]-sep1,theta1[-1,0]+sep1], 
-                     cmap = cm.tab10, aspect = 'auto', origin = 'lower')
+                     cmap = cm.Set3, aspect = 'auto', origin = 'lower')
 else:
     cs2 = ax2.imshow(stableStateMat, extent=[theta1[0,0]-sep1,theta1[-1,0]+sep1,theta2[0,0]-sep2,theta2[0,-1]+sep2], 
-                     cmap = cm.tab10, aspect = 'auto', origin = 'lower')
+                     cmap = cm.Set3, aspect = 'auto', origin = 'lower')
 
 ax2.xaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
 ax2.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
