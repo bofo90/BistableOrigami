@@ -14,7 +14,7 @@ if strcmp(opt.analysis,'result')
             opt.angleConstrFinal = [];
             for theta1 = 1:steps
                 for theta2 = 1:steps
-                    opt.angleConstrFinal(1).val = [hingesFold(1,1) angles1(theta1)];
+                    opt.angleConstrFinal(1).val = [hingesFold(:,1) [angles1(theta1);extrudedUnitCell.theta(hingesFold(2,1))]];
                     opt.angleConstrFinal(2).val = [hingesFold(:,1) [angles1(theta1);angles2(theta2)]];
                     opt.angleConstrFinal(3).val = [];
                     fprintf('Hinge angle %d %d.\n', angles1(theta1), angles2(theta2));
