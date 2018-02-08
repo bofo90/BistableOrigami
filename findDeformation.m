@@ -12,8 +12,8 @@ if strcmp(opt.analysis,'result')
             angles1 = linspace(extrudedUnitCell.theta(hingesFold(1,1)),hingesFold(1,2),steps);
             angles2 = linspace(extrudedUnitCell.theta(hingesFold(2,1)),hingesFold(2,2),steps);
             opt.angleConstrFinal = [];
-            for theta1 = 1:steps
-                for theta2 = 1:steps
+            for theta1 = 20:20
+                for theta2 = 20:20
                     opt.angleConstrFinal(1).val = [hingesFold(:,1) [angles1(theta1);extrudedUnitCell.theta(hingesFold(2,1))]];
                     opt.angleConstrFinal(2).val = [hingesFold(:,1) [angles1(theta1);angles2(theta2)]];
                     opt.angleConstrFinal(3).val = [];
