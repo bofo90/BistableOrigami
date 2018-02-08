@@ -93,8 +93,8 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.spines['right'].set_color(gray)
     return
 
-folder_name = "Results/truncated tetrahedron/active-set/energy/06-Feb-2018_Energylandscape_3to24\kh0.001_kta1.000_ke1.000_kf100.000"
-inverted = False
+folder_name = "Results/truncated tetrahedron/active-set/energy/06-Feb-2018_Energylandscape_24to3\kh0.001_kta1.000_ke1.000_kf100.000"
+inverted = True
 tolAngleSS = 0.174 # equivalent to 10 degrees
 maxEnergy = 0.44
 plt.close('all')
@@ -137,6 +137,8 @@ dataAngles = np.delete(dataAngles, 0, 1)
 MaxAngles = np.max(dataAngles, axis = 1)
 MinAngles = np.min(dataAngles, axis = 1)
 
+TotSimul = np.size(closingAngl1)
+IterPerSimul = np.int(np.size(dataAngles,0)/TotSimul)
 
 #%%
 ###Check if a folding pattern didnt converge
@@ -158,6 +160,7 @@ theta1 = -closingAngl1.reshape((divitheta1,divitheta2))
 theta2 = -closingAngl2.reshape((divitheta1,divitheta2))
 
 totEnergysort = eTotalFol[1::2]
+#totEnergysort = eTAngleFol[1::2]
 totEnergysort = totEnergysort[sortAngl[::-1]]
 if inverted:
     totEnergyMat = totEnergysort.reshape((divitheta1,divitheta2))
@@ -196,14 +199,16 @@ cbar.outline.set_edgecolor('0.2')
 fig1.tight_layout()
 fig1.show()
 fig1.savefig(folder_name + '/EnergyLand.png', transparent = False)
+#fig1.savefig(folder_name + '/EnergyTA.png', transparent = False)
 
+######################################################################
 #Analysis for stable states
 
 finalAngles = np.empty((0,np.size(dataAngles,1)))
 dataAngles = np.around(dataAngles/tolAngleSS)*tolAngleSS ## Here you conisder the tolerance for angles to recognize stable states
 for hinge in sortAngl[::-1]:
-    sortAllAngIndex = np.lexsort((dataAngles[2*hinge+1,:],dataAngles[2*hinge,:]))
-    finalAngles = np.append(finalAngles, [dataAngles[2*hinge+1,sortAllAngIndex]], axis = 0)
+    sortAllAngIndex = np.lexsort((dataAngles[IterPerSimul*(hinge+1)-1,:],dataAngles[IterPerSimul*hinge,:]))
+    finalAngles = np.append(finalAngles, [dataAngles[IterPerSimul*(hinge+1)-1,sortAllAngIndex]], axis = 0)
 
 differentAngles, index, inverse, counts = np.unique(finalAngles, axis = 0, return_index = True, return_inverse = True, return_counts = True)
 differentEnergies = np.column_stack((sortAngl[index], counts))
@@ -217,10 +222,10 @@ fig2 = plt.figure(1,figsize=(cm2inch(35), cm2inch(20)))
 ax2 = plt.subplot(111)
 
 if inverted:
-    NiceGraph2D(ax2, 'Hinge 3 [rad]', 'Hinge 24 [rad]',mincoord = [-closingAngl2[0], -closingAngl1[0]], 
+    NiceGraph2D(ax2, 'TargAngl Hinge 3 [rad]', 'TargAngl Hinge 24 [rad]',mincoord = [-closingAngl2[0], -closingAngl1[0]], 
                 maxcoord = [-closingAngl2[-1], -closingAngl1[-1]],  divisions = [divitheta2, divitheta1], buffer = [sep2, sep1])
 else:
-    NiceGraph2D(ax2, 'Hinge 3 [rad]', 'Hinge 24 [rad]',mincoord = [-closingAngl1[0], -closingAngl2[0]], 
+    NiceGraph2D(ax2, 'TargAngl Hinge 3 [rad]', 'TargAngl Hinge 24 [rad]',mincoord = [-closingAngl1[0], -closingAngl2[0]], 
                 maxcoord = [-closingAngl1[-1], -closingAngl2[-1]],  divisions = [divitheta1, divitheta2], buffer = [sep1, sep2])
 
 if inverted:
@@ -243,3 +248,34 @@ cbar2.outline.set_edgecolor('0.2')
 fig2.tight_layout()
 fig2.show()
 fig2.savefig(folder_name + '/StableStates.png', transparent = False)
+
+#############################################################################
+#Plot of real angles
+
+realtheta1 = -dataAngles[2::IterPerSimul,2]/np.pi
+realtheta1 = realtheta1[sortAngl[::-1]]
+realtheta2 = -dataAngles[2::IterPerSimul,23]/np.pi
+realtheta2 = realtheta2[sortAngl[::-1]]
+
+fig3 = plt.figure(2,figsize=(cm2inch(35), cm2inch(20)))
+ax3 = plt.subplot(111)
+NiceGraph2D(ax3, 'Hinge 3 [rad]', 'Hinge 24 [rad]', mincoord = [min(realtheta1), min(realtheta2)], 
+                maxcoord = [max(realtheta1), max(realtheta2)],  divisions = [divitheta2, divitheta1], buffer = [sep2, sep1])
+
+cmap1, norm1 = from_levels_and_colors(np.linspace(0,maxEnergy,1000), cm.rainbow(np.linspace(0, 1, 1000-1)))
+cmap1.set_over('r')
+cs3 = ax3.scatter(realtheta1, realtheta2, c = totEnergysort, cmap = cmap1, vmax = maxEnergy, s = 500, marker = 's')
+
+ax3.xaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
+ax3.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
+
+cbar3 = plt.colorbar(cs3, ax = ax3, fraction=0.05, pad=0.01, extend = 'max')
+cbar3.set_ticks(np.linspace(0, maxEnergy, 5))
+cbar3.set_label('Energy', fontsize = 15, color = '0.2')
+cbar3.ax.tick_params(axis='y',colors='0.2')
+cbar3.ax.tick_params(axis='x',colors='0.2')
+cbar3.outline.set_edgecolor('0.2')
+
+fig3.tight_layout()
+fig3.show()
+#fig3.savefig(folder_name + '/RealAngles-Energy.png', transparent = False)
