@@ -8,9 +8,9 @@ if strcmp(opt.analysis,'result')
         case 'off'
             metadataFile(opt, unitCell, extrudedUnitCell);
             hingesFold = opt.angleConstrFinal(1).val;
-            steps = 25;
-            angles1 = linspace(extrudedUnitCell.theta(hingesFold(1,1)),hingesFold(1,2),steps);
-            angles2 = linspace(extrudedUnitCell.theta(hingesFold(2,1)),hingesFold(2,2),steps);
+            steps = 40;
+            angles1 = linspace(pi*(opt.constAnglePerc-0.005)-pi,hingesFold(1,2),steps);
+            angles2 = linspace(pi*(opt.constAnglePerc-0.005)-pi,hingesFold(2,2),steps);
             opt.angleConstrFinal = [];
             for theta1 = 1:steps
                 for theta2 = 1:steps
