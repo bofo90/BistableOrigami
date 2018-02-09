@@ -152,6 +152,9 @@ if len(np.unique(exflRel))>2:
 divitheta1 = len(np.unique(closingAngl1))
 divitheta2 = len(np.unique(closingAngl2))
 
+tickstheta1 = 5
+tickstheta2 = 5
+
 sortAngl = np.lexsort((closingAngl2, closingAngl1))
 closingAngl1 = -closingAngl1[sortAngl[::-1]]
 closingAngl2 = -closingAngl2[sortAngl[::-1]]
@@ -173,11 +176,11 @@ sep2 = (closingAngl2[-1]-closingAngl2[0])/(divitheta2-1)/2
 fig1 = plt.figure(0,figsize=(cm2inch(24.1), cm2inch(20)))
 ax1 = plt.subplot(111)
 if inverted:
-    NiceGraph2D(ax1, 'Hinge 3 [rad]', 'Hinge 24 [rad]',mincoord = [closingAngl2[0], closingAngl1[0]], 
-                maxcoord = [closingAngl2[-1], closingAngl1[-1]],  divisions = [divitheta2, divitheta1], buffer = [sep2, sep1])
+    NiceGraph2D(ax1, 'TargAngl Hinge 3 [rad]', 'TargAngl Hinge 24 [rad]',mincoord = [closingAngl2[0], closingAngl1[0]], 
+                maxcoord = [closingAngl2[-1], closingAngl1[-1]],  divisions = [tickstheta2, tickstheta1], buffer = [sep2, sep1])
 else:
-    NiceGraph2D(ax1, 'Hinge 3 [rad]', 'Hinge 24 [rad]',mincoord = [closingAngl1[0], closingAngl2[0]], 
-                maxcoord = [closingAngl1[-1], closingAngl2[-1]],  divisions = [divitheta1, divitheta2], buffer = [sep1, sep2])
+    NiceGraph2D(ax1, 'TargAngl Hinge 3 [rad]', 'TargAngl Hinge 24 [rad]',mincoord = [closingAngl1[0], closingAngl2[0]], 
+                maxcoord = [closingAngl1[-1], closingAngl2[-1]],  divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
 
 if inverted:
     cs1 = ax1.imshow(totEnergyMat, extent=[theta2[0,0]-sep2,theta2[0,-1]+sep2,theta1[0,0]-sep1,theta1[-1,0]+sep1], 
@@ -223,10 +226,10 @@ ax2 = plt.subplot(111)
 
 if inverted:
     NiceGraph2D(ax2, 'TargAngl Hinge 3 [rad]', 'TargAngl Hinge 24 [rad]',mincoord = [closingAngl2[0], closingAngl1[0]], 
-                maxcoord = [closingAngl2[-1], closingAngl1[-1]],  divisions = [divitheta2, divitheta1], buffer = [sep2, sep1])
+                maxcoord = [closingAngl2[-1], closingAngl1[-1]],  divisions = [tickstheta2,tickstheta1], buffer = [sep2, sep1])
 else:
     NiceGraph2D(ax2, 'TargAngl Hinge 3 [rad]', 'TargAngl Hinge 24 [rad]',mincoord = [closingAngl1[0], closingAngl2[0]], 
-                maxcoord = [closingAngl1[-1], closingAngl2[-1]],  divisions = [divitheta1, divitheta2], buffer = [sep1, sep2])
+                maxcoord = [closingAngl1[-1], closingAngl2[-1]],  divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
 
 if inverted:
     cs2 = ax2.imshow(stableStateMat, extent=[theta2[0,0]-sep2,theta2[0,-1]+sep2,theta1[0,0]-sep1,theta1[-1,0]+sep1], 
@@ -259,8 +262,12 @@ realtheta2 = realtheta2[sortAngl[::-1]]
 
 fig3 = plt.figure(2,figsize=(cm2inch(24.1), cm2inch(20)))
 ax3 = plt.subplot(111)
-NiceGraph2D(ax3, 'Hinge 3 [rad]', 'Hinge 24 [rad]', mincoord = [min(realtheta1), min(realtheta2)], 
-                maxcoord = [max(realtheta1), max(realtheta2)],  divisions = [divitheta2, divitheta1], buffer = [sep2, sep1])
+if inverted:
+    NiceGraph2D(ax3, 'Hinge 3 [rad]', 'Hinge 24 [rad]', mincoord = [min(realtheta1), min(realtheta2)], 
+                    maxcoord = [max(realtheta1), max(realtheta2)],  divisions = [tickstheta2, tickstheta1], buffer = [sep2, sep1])
+else:
+    NiceGraph2D(ax3, 'Hinge 3 [rad]', 'Hinge 24 [rad]', mincoord = [min(realtheta1), min(realtheta2)], 
+                    maxcoord = [max(realtheta1), max(realtheta2)],  divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
 
 cmap1, norm1 = from_levels_and_colors(np.linspace(0,maxEnergy,1000), cm.rainbow(np.linspace(0, 1, 1000-1)))
 cmap1.set_over('r')
