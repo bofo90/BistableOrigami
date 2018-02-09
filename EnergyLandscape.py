@@ -93,10 +93,10 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.spines['right'].set_color(gray)
     return
 
-folder_name = "Results/truncated tetrahedron/sqp/energy/07-Feb-2018_Energylandscape_24to3\kh0.001_kta1.000_ke1.000_kf100.000"
-inverted = True
+folder_name = "Results/truncated tetrahedron/sqp/energy/09-Feb-2018_Energylandscape_3to24\kh0.001_kta100.000_ke3.000_kf100.000"
+inverted = False
 tolAngleSS = 0.174 # equivalent to 10 degrees
-maxEnergy = 0.44
+maxEnergy = 1.32
 plt.close('all')
 #%%
 #######################################################################################################################
@@ -163,6 +163,10 @@ theta1 = closingAngl1.reshape((divitheta1,divitheta2))
 theta2 = closingAngl2.reshape((divitheta1,divitheta2))
 
 totEnergysort = eTotalFol[1::2]
+#totEnergysort = eDiagFol[1::2]+eEdgeFol[1::2]
+#totEnergysort = eEdgeFol[1::2]
+#totEnergysort = eDiagFol[1::2]
+#totEnergysort = eHingeFol[1::2]
 #totEnergysort = eTAngleFol[1::2]
 totEnergysort = totEnergysort[sortAngl[::-1]]
 if inverted:
@@ -202,6 +206,10 @@ cbar.outline.set_edgecolor('0.2')
 fig1.tight_layout()
 fig1.show()
 fig1.savefig(folder_name + '/EnergyLand.png', transparent = False)
+#fig1.savefig(folder_name + '/EnergyAllEdges.png', transparent = False)
+#fig1.savefig(folder_name + '/EnergyEdge.png', transparent = False)
+#fig1.savefig(folder_name + '/EnergyDiag.png', transparent = False)
+#fig1.savefig(folder_name + '/EnergyHinge.png', transparent = False)
 #fig1.savefig(folder_name + '/EnergyTA.png', transparent = False)
 
 ######################################################################
