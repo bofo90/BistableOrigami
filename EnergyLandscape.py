@@ -93,8 +93,8 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.spines['right'].set_color(gray)
     return
 
-folder_name = "Results/truncated tetrahedron/active-set/energy/10-Feb-2018_Energylandscape_24to3\kh0.001_kta100.000_ke3.000_kf100.000"
-inverted = True
+folder_name = "Results/truncated tetrahedron/active-set/energy/09-Feb-2018_Energylandscape_3to24\kh0.001_kta100.000_ke3.000_kf100.000"
+inverted = False
 tolAngleSS = 0.174 # equivalent to 10 degrees
 maxEnergy = 1.32
 plt.close('all')
@@ -188,10 +188,10 @@ else:
 
 if inverted:
     cs1 = ax1.imshow(totEnergyMat, extent=[theta2[0,0]-sep2,theta2[0,-1]+sep2,theta1[0,0]-sep1,theta1[-1,0]+sep1], 
-                     cmap = cm.rainbow, aspect = 'auto',vmax = maxEnergy, origin = 'lower')
+                     cmap = cm.nipy_spectral, aspect = 'auto',vmax = maxEnergy, origin = 'lower')
 else:
     cs1 = ax1.imshow(totEnergyMat, extent=[theta1[0,0]-sep1,theta1[-1,0]+sep1,theta2[0,0]-sep2,theta2[0,-1]+sep2], 
-                     cmap = cm.rainbow, aspect = 'auto',vmax = maxEnergy, origin = 'lower')
+                     cmap = cm.nipy_spectral, aspect = 'auto',vmax = maxEnergy, origin = 'lower')
 
 ax1.xaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
 ax1.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
@@ -205,12 +205,12 @@ cbar.outline.set_edgecolor('0.2')
 
 fig1.tight_layout()
 fig1.show()
-fig1.savefig(folder_name + '/EnergyLand.png', transparent = False)
-#fig1.savefig(folder_name + '/EnergyAllEdges.png', transparent = False)
-#fig1.savefig(folder_name + '/EnergyEdge.png', transparent = False)
-#fig1.savefig(folder_name + '/EnergyDiag.png', transparent = False)
-#fig1.savefig(folder_name + '/EnergyHinge.png', transparent = False)
-#fig1.savefig(folder_name + '/EnergyTA.png', transparent = False)
+fig1.savefig(folder_name + '/EnergyLand.png', transparent = True)
+#fig1.savefig(folder_name + '/EnergyAllEdges.png', transparent = True)
+#fig1.savefig(folder_name + '/EnergyEdge.png', transparent = True)
+#fig1.savefig(folder_name + '/EnergyDiag.png', transparent = True)
+#fig1.savefig(folder_name + '/EnergyHinge.png', transparent = True)
+#fig1.savefig(folder_name + '/EnergyTA.png', transparent = True)
 
 ######################################################################
 #Analysis for stable states
@@ -241,10 +241,10 @@ else:
 
 if inverted:
     cs2 = ax2.imshow(stableStateMat, extent=[theta2[0,0]-sep2,theta2[0,-1]+sep2,theta1[0,0]-sep1,theta1[-1,0]+sep1], 
-                     cmap = cm.Set3, aspect = 'auto', origin = 'lower')
+                     cmap = cm.gist_rainbow, aspect = 'auto', origin = 'lower')
 else:
     cs2 = ax2.imshow(stableStateMat, extent=[theta1[0,0]-sep1,theta1[-1,0]+sep1,theta2[0,0]-sep2,theta2[0,-1]+sep2], 
-                     cmap = cm.Set3, aspect = 'auto', origin = 'lower')
+                     cmap = cm.gist_rainbow, aspect = 'auto', origin = 'lower')
 
 ax2.xaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
 ax2.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
@@ -258,7 +258,7 @@ cbar2.outline.set_edgecolor('0.2')
 
 fig2.tight_layout()
 fig2.show()
-fig2.savefig(folder_name + '/StableStates.png', transparent = False)
+fig2.savefig(folder_name + '/StableStates.png', transparent = True)
 
 #############################################################################
 #Plot of real angles
@@ -277,8 +277,8 @@ else:
     NiceGraph2D(ax3, 'Hinge 3 [rad]', 'Hinge 24 [rad]', mincoord = [min(realtheta1), min(realtheta2)], 
                     maxcoord = [max(realtheta1), max(realtheta2)],  divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
 
-cmap1, norm1 = from_levels_and_colors(np.linspace(0,maxEnergy,1000), cm.rainbow(np.linspace(0, 1, 1000-1)))
-cmap1.set_over('r')
+cmap1, norm1 = from_levels_and_colors(np.linspace(0,maxEnergy,1000), cm.nipy_spectral(np.linspace(0, 1, 1000)), extend = 'max')
+
 cs3 = ax3.scatter(realtheta1, realtheta2, c = totEnergysort, cmap = cmap1, vmax = maxEnergy, s = 150, marker = 's')
 
 ax3.xaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
@@ -293,4 +293,4 @@ cbar3.outline.set_edgecolor('0.2')
 
 fig3.tight_layout()
 fig3.show()
-fig3.savefig(folder_name + '/RealAngles-Energy.png', transparent = False)
+fig3.savefig(folder_name + '/RealAngles-Energy.png', transparent = True)
