@@ -239,12 +239,15 @@ else:
     NiceGraph2D(ax2, 'TargAngl Hinge 3 [rad]', 'TargAngl Hinge 24 [rad]',mincoord = [closingAngl1[0], closingAngl2[0]], 
                 maxcoord = [closingAngl1[-1], closingAngl2[-1]],  divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
 
+cmap2, norm2 = from_levels_and_colors(np.linspace(0,np.size(differentEnergies,0),np.size(differentEnergies,0)+1),
+                                      cm.gist_rainbow(np.linspace(0, 1, np.size(differentEnergies,0))))
+
 if inverted:
     cs2 = ax2.imshow(stableStateMat, extent=[theta2[0,0]-sep2,theta2[0,-1]+sep2,theta1[0,0]-sep1,theta1[-1,0]+sep1], 
-                     cmap = cm.gist_rainbow, aspect = 'auto', origin = 'lower')
+                     cmap = cmap2, aspect = 'auto', origin = 'lower')
 else:
     cs2 = ax2.imshow(stableStateMat, extent=[theta1[0,0]-sep1,theta1[-1,0]+sep1,theta2[0,0]-sep2,theta2[0,-1]+sep2], 
-                     cmap = cm.gist_rainbow, aspect = 'auto', origin = 'lower')
+                     cmap = cmap2, aspect = 'auto', origin = 'lower')
 
 ax2.xaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
 ax2.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
@@ -277,9 +280,9 @@ else:
     NiceGraph2D(ax3, 'Hinge 3 [rad]', 'Hinge 24 [rad]', mincoord = [min(realtheta1), min(realtheta2)], 
                     maxcoord = [max(realtheta1), max(realtheta2)],  divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
 
-cmap1, norm1 = from_levels_and_colors(np.linspace(0,maxEnergy,1000), cm.nipy_spectral(np.linspace(0, 1, 1000)), extend = 'max')
+cmap3, norm3 = from_levels_and_colors(np.linspace(0,maxEnergy,1000), cm.nipy_spectral(np.linspace(0, 1, 1000)), extend = 'max')
 
-cs3 = ax3.scatter(realtheta1, realtheta2, c = totEnergysort, cmap = cmap1, vmax = maxEnergy, s = 150, marker = 's')
+cs3 = ax3.scatter(realtheta1, realtheta2, c = totEnergysort, cmap = cmap3, vmax = maxEnergy, s = 150, marker = 's')
 
 ax3.xaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
 ax3.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
