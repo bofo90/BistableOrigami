@@ -8,7 +8,7 @@ if strcmp(opt.analysis,'result')
         case 'off'
             metadataFile(opt, unitCell, extrudedUnitCell);
             hingesFold = opt.angleConstrFinal(1).val;
-            steps = 2;
+            steps = 1;
             angles1 = linspace(pi*(opt.constAnglePerc-0.005)-pi,hingesFold(1,2),steps);
             angles2 = linspace(pi*(opt.constAnglePerc-0.005)-pi,hingesFold(2,2),steps);
             opt.angleConstrFinal = [];
@@ -75,8 +75,7 @@ for iter=1:length(opt.angleConstrFinal)
     %initialize variables of the result
 
     [V, exfl, output, E] = FoldStructure(u0, theta0, extrudedUnitCell, opt, iter, Aeq, Beq);
-    [result, theta0] = SaveResultPos(result, opt, V, output, iter);
-    u0 = V(:,2);
+    [result, theta0, u0] = SaveResultPos(result, opt, V, output, iter);
 
 end   
       
@@ -127,7 +126,7 @@ t2 = toc;
 fprintf('time %1.2f, exitflag %d\n',t2-t1,exfl(2,iter));
 
 
-function [result, lastAngle] = SaveResultPos(result, opt, Positions, minimizationOuput, state)
+function [result, lastAngle, lastPosition] = SaveResultPos(result, opt, Positions, minimizationOuput, state)
 
 %Get Angles from global variable
 angles = getGlobalAngles;     
@@ -150,6 +149,7 @@ for j=1:size(Positions,2)
 end
 
 lastAngle = angles(:,end);
+lastPosition = Positions(:,end);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
