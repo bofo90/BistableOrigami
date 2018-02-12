@@ -8,7 +8,7 @@ if strcmp(opt.analysis,'result')
         case 'off'
             metadataFile(opt, unitCell, extrudedUnitCell);
             hingesFold = opt.angleConstrFinal(1).val;
-            steps = 40;
+            steps = 2;
             angles1 = linspace(pi*(opt.constAnglePerc-0.005)-pi,hingesFold(1,2),steps);
             angles2 = linspace(pi*(opt.constAnglePerc-0.005)-pi,hingesFold(2,2),steps);
             opt.angleConstrFinal = [];
@@ -54,10 +54,6 @@ function nonlinearFolding(unitCell,extrudedUnitCell,opt, stepang1, stepang2)
 %INITIALIZE LINEAR CONSTRAINTS
 [Aeq, Beq]=linearConstr(unitCell,extrudedUnitCell,opt);
 
-%Save some variables
-theta0=extrudedUnitCell.theta;
-extrudedUnitCell.angleConstr=[];
-
 %Create file for saving the results
 extraName = sprintf('/kh%2.3f_kta%2.3f_ke%2.3f_kf%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
 folderName = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat', opt.saveFile, extraName);
@@ -65,50 +61,32 @@ if ~exist(folderName, 'dir')
     mkdir(folderName);
 end
 
+%Create variables
+extrudedUnitCell.angleConstr=[];
 result = [];
-u0=zeros(3*size(extrudedUnitCell.node,1),1);
 
+%initialize to extruded state
+u0=zeros(3*size(extrudedUnitCell.node,1),1);
+theta0=extrudedUnitCell.theta;
 
 for iter=1:length(opt.angleConstrFinal)
     
     %%%%%% Folding part %%%%%%
     %initialize variables of the result
-    
-    initialiseGlobalx(u0, theta0);
-    clearvars V;
-    V(:,1)=u0;
-    [E(1,iter),~,Eedge(1,iter),Ediag(1,iter),Eface(1,iter),Ehinge(1,iter),EtargetAngle(1,iter), ~]=Energy(u0,extrudedUnitCell,opt);
-    exfl(1,iter) = 1;
-    
-    
-    %Run the Folding of the structure
-    if isempty(opt.angleConstrFinal(iter).val)
-        fprintf('Angle contrain: None\n');
-    else
-        fprintf(['Angle contrain:', mat2str(opt.angleConstrFinal(iter).val(:,1)') ,'\n']);
-    end
-    extrudedUnitCell.angleConstr=opt.angleConstrFinal(iter).val;
-    fprintf('Folding:\t');
-    t1 = toc;
-    %Determine new equilibrium
-    [V(:,2),~,exfl(2,iter),output]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
-    u0 = V(:,2);
-    %Determine energy of that equilibrium
-    [E(2,iter),~,Eedge(2,iter),Ediag(2,iter),Eface(2,iter),Ehinge(2,iter),EtargetAngle(2,iter), ~]=Energy(u0,extrudedUnitCell,opt);
-    t2 = toc;
-    fprintf('time %1.2f, exitflag %d\n',t2-t1,exfl(2,iter));
 
+    [V, exfl, output, E] = FoldStructure(u0, theta0, extrudedUnitCell, opt, iter, Aeq, Beq);
     [result, theta0] = SaveResultPos(result, opt, V, output, iter);
+    u0 = V(:,2);
 
 end   
       
 %Save energy data in the result variable
-result.E=E;
-result.Eedge=Eedge;
-result.Ediag=Ediag;
-result.Eface=Eface;
-result.Ehinge=Ehinge;
-result.EtargetAngle=EtargetAngle;    
+result.E=E.E;
+result.Eedge=E.Eedge;
+result.Ediag=E.Ediag;
+result.Eface=E.Eface;
+result.Ehinge=E.Ehinge;
+result.EtargetAngle=E.EtargetAngle;    
 result.exfl = exfl;
 result.numMode=length(result.deform);
 result.anglConstr = opt.angleConstrFinal(2).val;
@@ -121,6 +99,32 @@ save(fileName, 'result');
 %Clear variables for next fold
 clearvars result E Eedge Eface Ehinge EtargetAngle exfl;
 fclose('all');
+
+function [V, exfl, output, E] = FoldStructure(u0, theta0, extrudedUnitCell, opt, iter, Aeq, Beq)
+
+initialiseGlobalx(u0, theta0);
+V = [];
+V(:,1)=u0;
+[E.E(1,iter),~,E.Eedge(1,iter),E.Ediag(1,iter),E.Eface(1,iter),E.Ehinge(1,iter),E.EtargetAngle(1,iter), ~]=Energy(u0,extrudedUnitCell,opt);
+exfl(1,iter) = 1;
+
+
+%Run the Folding of the structure
+if isempty(opt.angleConstrFinal(iter).val)
+    fprintf('Angle contrain: None\n');
+else
+    fprintf(['Angle contrain:', mat2str(opt.angleConstrFinal(iter).val(:,1)') ,'\n']);
+end
+extrudedUnitCell.angleConstr=opt.angleConstrFinal(iter).val;
+fprintf('Folding:\t');
+t1 = toc;
+%Determine new equilibrium
+[V(:,2),~,exfl(2,iter),output]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
+u0 = V(:,2);
+%Determine energy of that equilibrium
+[E.E(2,iter),~,E.Eedge(2,iter),E.Ediag(2,iter),E.Eface(2,iter),E.Ehinge(2,iter),E.EtargetAngle(2,iter), ~]=Energy(u0,extrudedUnitCell,opt);
+t2 = toc;
+fprintf('time %1.2f, exitflag %d\n',t2-t1,exfl(2,iter));
 
 
 function [result, lastAngle] = SaveResultPos(result, opt, Positions, minimizationOuput, state)
