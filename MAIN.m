@@ -12,7 +12,7 @@ clearvars -global
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-opt=initOpt('template','truncated tetrahedron','analysis','result','readHingeFile','off',...
+opt=initOpt('template','truncated tetrahedron','analysis','savedata','readHingeFile','on',...
             'createFig', 'off','saveFig','on','saveMovie', 'off',...
             'figDPI',200,'safeMovieAntiAlias', 0,...
             'folAlgor', 'active-set','relAlgor', 'active-set',...
@@ -22,8 +22,8 @@ opt=initOpt('template','truncated tetrahedron','analysis','result','readHingeFil
             'maxStretch', 0.3,...
             'maxHinges',inf,'minHinges',0);    %Only work when readHingeFile is 'on'
 
-opt.saveFile = strcat('/',date,'_Energylandscape_3to24temp');
-% opt.saveFile = strcat('/','08-Feb-2018_Energylandscape_24to3');
+% opt.saveFile = strcat('/',date,'_Energylandscape_3to24');
+opt.saveFile = strcat('/','10-Feb-2018_Energylandscape_24to3');
 
 hingeSet = [3 24];
 opt.angleConstrFinal(1).val=[ hingeSet(:) , (-pi*(opt.constAnglePerc-0.005)) *ones(length(hingeSet), 1)];
@@ -53,11 +53,6 @@ selectHinges(unitCell, extrudedUnitCell, opt);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 findDeformation(unitCell,extrudedUnitCell,opt);
 
-opt.saveFile = strcat('/',date,'_Energylandscape_24to3temp');
-hingeSet = [24 3];
-opt.angleConstrFinal(1).val=[ hingeSet(:) , (-pi*(opt.constAnglePerc-0.005)) *ones(length(hingeSet), 1)];
-
-findDeformation(unitCell,extrudedUnitCell,opt);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %OUTPUT AND PLOT GEOMETRY
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -93,8 +93,8 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.spines['right'].set_color(gray)
     return
 
-folder_name = "Results/truncated tetrahedron/sqp/energy/09-Feb-2018_Energylandscape_3to24\kh0.001_kta100.000_ke3.000_kf100.000"
-inverted = False
+folder_name = "Results/truncated tetrahedron/active-set/energy/10-Feb-2018_Energylandscape_24to3\kh0.001_kta100.000_ke3.000_kf100.000"
+inverted = True
 tolAngleSS = 0.174 # equivalent to 10 degrees
 maxEnergy = 1.32
 plt.close('all')
@@ -279,7 +279,7 @@ else:
 
 cmap1, norm1 = from_levels_and_colors(np.linspace(0,maxEnergy,1000), cm.rainbow(np.linspace(0, 1, 1000-1)))
 cmap1.set_over('r')
-cs3 = ax3.scatter(realtheta1, realtheta2, c = totEnergysort, cmap = cmap1, vmax = maxEnergy, s = 360, marker = 's')
+cs3 = ax3.scatter(realtheta1, realtheta2, c = totEnergysort, cmap = cmap1, vmax = maxEnergy, s = 150, marker = 's')
 
 ax3.xaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
 ax3.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
