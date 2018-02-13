@@ -48,7 +48,7 @@ if ~exist(folderName, 'dir')
     mkdir(folderName);
 end
 
-steps = 40;
+steps = 25;
 hingesFold = opt.angleConstrFinal(1).val;
 angles1 = linspace(extrudedUnitCell.theta(hingesFold(1,1)),hingesFold(1,2),steps);
 angles2 = linspace(extrudedUnitCell.theta(hingesFold(2,1)),hingesFold(2,2),steps);
