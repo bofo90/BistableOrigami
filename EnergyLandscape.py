@@ -93,7 +93,7 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.spines['right'].set_color(gray)
     return
 
-folder_name = "Results/truncated tetrahedron/active-set/energy/09-Feb-2018_Energylandscape_3to24\kh0.001_kta100.000_ke3.000_kf100.000"
+folder_name = "Results/truncated tetrahedron/active-set/energy/13-Feb-2018_EnergyLandPath_3to24\kh0.001_kta100.000_ke3.000_kf100.000"
 inverted = False
 tolAngleSS = 0.174 # equivalent to 10 degrees
 maxEnergy = 1.32

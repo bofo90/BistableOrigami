@@ -48,7 +48,7 @@ if ~exist(folderName, 'dir')
     mkdir(folderName);
 end
 
-steps = 3;
+steps = 40;
 hingesFold = opt.angleConstrFinal(1).val;
 angles1 = linspace(extrudedUnitCell.theta(hingesFold(1,1)),hingesFold(1,2),steps);
 angles2 = linspace(extrudedUnitCell.theta(hingesFold(2,1)),hingesFold(2,2),steps);
@@ -57,6 +57,7 @@ angles2 = linspace(extrudedUnitCell.theta(hingesFold(2,1)),hingesFold(2,2),steps
 extrudedUnitCell.angleConstr=[];
 result = [];
 opt.angleConstrFinal = [];
+E = [];
 
 %initialize to extruded state
 u0=zeros(3*size(extrudedUnitCell.node,1),1);
@@ -66,7 +67,7 @@ for ang1 = 1:steps
     
     opt.angleConstrFinal(1).val = [hingesFold(:,1) [angles1(ang1);extrudedUnitCell.theta(hingesFold(2,1))]];
     fprintf('First Folding till %d.\n', angles1(ang1));
-    [V, exfl, output, E] = FoldStructure(u0, theta0, extrudedUnitCell, opt, 1, Aeq, Beq);
+    [V, exfl, output, E] = FoldStructure(u0, theta0, E, extrudedUnitCell, opt, 1, Aeq, Beq);
     [result, theta1, u1] = SaveResultPos(result, opt, V, output, 1);
     u0 = u1;
     theta0 = theta1;   
@@ -79,12 +80,12 @@ for ang1 = 1:steps
         fprintf('Hinge angle %d %d.\n', angles1(ang1), angles2(ang2));
 
         %%%%%% Folding part %%%%%%
-        [V, exfl, output, E] = FoldStructure(u1, theta1, extrudedUnitCell, opt, 2, Aeq, Beq);
+        [V, exfl, output, E] = FoldStructure(u1, theta1, E, extrudedUnitCell, opt, 2, Aeq, Beq);
         [result, theta1, u1] = SaveResultPos(result, opt, V, output, 2);
 
         
         %%%%%% Releasing part %%%%%%
-        [V, exfl, output, E] = FoldStructure(u1, theta1, extrudedUnitCell, opt, 3, Aeq, Beq);
+        [V, exfl, output, E] = FoldStructure(u1, theta1, E, extrudedUnitCell, opt, 3, Aeq, Beq);
         [result, ~, ~] = SaveResultPos(result, opt, V, output, 3);
         
         %Save energy data in the result variable
@@ -106,7 +107,7 @@ end
 clearvars result E exfl output;
 fclose('all');
 
-function [V, exfl, output, E] = FoldStructure(u0, theta0, extrudedUnitCell, opt, iter, Aeq, Beq)
+function [V, exfl, output, E] = FoldStructure(u0, theta0, E, extrudedUnitCell, opt, iter, Aeq, Beq)
 
 initialiseGlobalx(u0, theta0);
 V = [];
