@@ -80,15 +80,7 @@ for iter=1:length(opt.angleConstrFinal)
 end   
       
 %Save energy data in the result variable
-result.E=E.E;
-result.Eedge=E.Eedge;
-result.Ediag=E.Ediag;
-result.Eface=E.Eface;
-result.Ehinge=E.Ehinge;
-result.EtargetAngle=E.EtargetAngle;    
-result.exfl = exfl;
-result.numMode=length(result.deform);
-result.anglConstr = opt.angleConstrFinal(2).val;
+result = SaveResultEnergy(result, E, exfl, opt);
 
 %Save the result in a file
 fileName = strcat(folderName,'/',mat2str(opt.angleConstrFinal(2).val(:,1)'),...
@@ -150,6 +142,18 @@ end
 
 lastAngle = angles(:,end);
 lastPosition = Positions(:,end);
+
+function result = SaveResultEnergy(result, E, exfl, opt)
+
+result.E=E.E;
+result.Eedge=E.Eedge;
+result.Ediag=E.Ediag;
+result.Eface=E.Eface;
+result.Ehinge=E.Ehinge;
+result.EtargetAngle=E.EtargetAngle;    
+result.exfl = exfl;
+result.numMode=length(result.deform);
+result.anglConstr = opt.angleConstrFinal(2).val;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
