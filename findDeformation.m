@@ -7,20 +7,7 @@ if strcmp(opt.analysis,'result')
     switch opt.readHingeFile
         case 'off'
             metadataFile(opt, unitCell, extrudedUnitCell);
-            hingesFold = opt.angleConstrFinal(1).val;
-            steps = 1;
-            angles1 = linspace(pi*(opt.constAnglePerc-0.005)-pi,hingesFold(1,2),steps);
-            angles2 = linspace(pi*(opt.constAnglePerc-0.005)-pi,hingesFold(2,2),steps);
-            opt.angleConstrFinal = [];
-            for theta1 = 1:steps
-                for theta2 = 1:steps
-                    opt.angleConstrFinal(1).val = [hingesFold(:,1) [angles1(theta1);extrudedUnitCell.theta(hingesFold(2,1))]];
-                    opt.angleConstrFinal(2).val = [hingesFold(:,1) [angles1(theta1);angles2(theta2)]];
-                    opt.angleConstrFinal(3).val = [];
-                    fprintf('Hinge angle %d %d.\n', angles1(theta1), angles2(theta2));
-                    nonlinearFolding(unitCell,extrudedUnitCell,opt, theta1, theta2);
-                end
-            end  
+            nonlinearFolding(unitCell,extrudedUnitCell,opt);
 %             
         case 'on'
             opt.angleConstrFinal = [];
@@ -49,7 +36,7 @@ end
 %NON-LINEAR ANALYSIS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function nonlinearFolding(unitCell,extrudedUnitCell,opt, stepang1, stepang2)
+function nonlinearFolding(unitCell,extrudedUnitCell,opt)
 
 %INITIALIZE LINEAR CONSTRAINTS
 [Aeq, Beq]=linearConstr(unitCell,extrudedUnitCell,opt);
@@ -61,34 +48,62 @@ if ~exist(folderName, 'dir')
     mkdir(folderName);
 end
 
+steps = 3;
+hingesFold = opt.angleConstrFinal(1).val;
+angles1 = linspace(extrudedUnitCell.theta(hingesFold(1,1)),hingesFold(1,2),steps);
+angles2 = linspace(extrudedUnitCell.theta(hingesFold(2,1)),hingesFold(2,2),steps);
+
 %Create variables
 extrudedUnitCell.angleConstr=[];
 result = [];
+opt.angleConstrFinal = [];
 
 %initialize to extruded state
 u0=zeros(3*size(extrudedUnitCell.node,1),1);
 theta0=extrudedUnitCell.theta;
 
-for iter=1:length(opt.angleConstrFinal)
+for ang1 = 1:steps
     
-    %%%%%% Folding part %%%%%%
-    %initialize variables of the result
+    opt.angleConstrFinal(1).val = [hingesFold(:,1) [angles1(ang1);extrudedUnitCell.theta(hingesFold(2,1))]];
+    fprintf('First Folding till %d.\n', angles1(ang1));
+    [V, exfl, output, E] = FoldStructure(u0, theta0, extrudedUnitCell, opt, 1, Aeq, Beq);
+    [result, theta1, u1] = SaveResultPos(result, opt, V, output, 1);
+    u0 = u1;
+    theta0 = theta1;   
+            
+    for ang2 = 1:steps
+        
+        opt.angleConstrFinal(2).val = [hingesFold(:,1) [angles1(ang1);angles2(ang2)]];
+        opt.angleConstrFinal(3).val = [];
+        
+        fprintf('Hinge angle %d %d.\n', angles1(ang1), angles2(ang2));
 
-    [V, exfl, output, E] = FoldStructure(u0, theta0, extrudedUnitCell, opt, iter, Aeq, Beq);
-    [result, theta0, u0] = SaveResultPos(result, opt, V, output, iter);
+        %%%%%% Folding part %%%%%%
+        [V, exfl, output, E] = FoldStructure(u1, theta1, extrudedUnitCell, opt, 2, Aeq, Beq);
+        [result, theta1, u1] = SaveResultPos(result, opt, V, output, 2);
 
-end   
+        
+        %%%%%% Releasing part %%%%%%
+        [V, exfl, output, E] = FoldStructure(u1, theta1, extrudedUnitCell, opt, 3, Aeq, Beq);
+        [result, ~, ~] = SaveResultPos(result, opt, V, output, 3);
+        
+        %Save energy data in the result variable
+        result = SaveResultEnergy(result, E, exfl, opt);
+
+        %Save the result in a file
+        fileName = strcat(folderName,'/',mat2str(opt.angleConstrFinal(2).val(:,1)'),...
+            '_Ang1_',int2str(ang1),'_Angl2_',int2str(ang2),'.mat');
+        save(fileName, 'result');
+        result.deform(3) = [];        
+        
+    end
+    
+    result.deform(2) = [];
+    
+end
       
-%Save energy data in the result variable
-result = SaveResultEnergy(result, E, exfl, opt);
-
-%Save the result in a file
-fileName = strcat(folderName,'/',mat2str(opt.angleConstrFinal(2).val(:,1)'),...
-    '_Ang1_',int2str(stepang1),'_Angl2_',int2str(stepang2),'.mat');
-save(fileName, 'result');
-
 %Clear variables for next fold
-clearvars result E Eedge Eface Ehinge EtargetAngle exfl;
+clearvars result E exfl output;
 fclose('all');
 
 function [V, exfl, output, E] = FoldStructure(u0, theta0, extrudedUnitCell, opt, iter, Aeq, Beq)
@@ -134,10 +149,15 @@ result.deform(state).V=[Positions(1:3:end,end) Positions(2:3:end,end) Positions(
 result.deform(state).Ve=Positions(:,end);
 result.deform(state).theta = angles(:,end);
 result.deform(state).output = minimizationOuput;
+
+if ~isfield(result.deform(state), 'interV')
+    result.deform(state).interV = [];
+end
+
 for j=1:size(Positions,2)
-    result.deform(state).interV(j).V=[Positions(1:3:end,j) Positions(2:3:end,j) Positions(3:3:end,j)];
-    result.deform(state).interV(j).Ve=Positions(:,j);
-    result.deform(state).interV(j).theta = angles(:,j);
+    result.deform(state).interV(end+1).V=[Positions(1:3:end,j) Positions(2:3:end,j) Positions(3:3:end,j)];
+    result.deform(state).interV(end).Ve=Positions(:,j);
+    result.deform(state).interV(end).theta = angles(:,j);
 end
 
 lastAngle = angles(:,end);
