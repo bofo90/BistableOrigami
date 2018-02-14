@@ -6,7 +6,7 @@ from matplotlib.colors import from_levels_and_colors
 import numpy as np
 import configparser
 import os.path
-
+import scipy.cluster.hierarchy as hierarch
 
 def isfloat(value):
   try:
@@ -95,7 +95,6 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
 
 folder_name = "Results/truncated tetrahedron/active-set/energy/13-Feb-2018_EnergyLandPath_3to24\kh0.001_kta100.000_ke3.000_kf100.000"
 inverted = False
-tolAngleSS = 0.174 # equivalent to 10 degrees
 maxEnergy = 1.6
 plt.close('all')
 #%%
@@ -216,13 +215,15 @@ fig1.savefig(folder_name + '/EnergyLand.png', transparent = True)
 #Analysis for stable states
 
 finalAngles = np.empty((0,np.size(dataAngles,1)))
-dataAnglesNorm = np.around(dataAngles/tolAngleSS)*tolAngleSS ## Here you conisder the tolerance for angles to recognize stable states
 for hinge in sortAngl[::-1]:
-    sortAllAngIndex = np.lexsort((dataAnglesNorm[IterPerSimul*(hinge+1)-1,:],dataAnglesNorm[IterPerSimul*hinge,:]))
-    finalAngles = np.append(finalAngles, [dataAnglesNorm[IterPerSimul*(hinge+1)-1,sortAllAngIndex]], axis = 0)
+    sortAllAngIndex = np.lexsort((dataAngles[IterPerSimul*(hinge+1)-1,:],dataAngles[IterPerSimul*hinge,:]))
+    finalAngles = np.append(finalAngles, [dataAngles[IterPerSimul*(hinge+1)-1,sortAllAngIndex]], axis = 0)
 
-differentAngles, index, inverse, counts = np.unique(finalAngles, axis = 0, return_index = True, return_inverse = True, return_counts = True)
-differentEnergies = np.column_stack((sortAngl[index], counts))
+Z = hierarch.linkage(finalAngles, 'ward')
+inverse = hierarch.fcluster(Z, 1, criterion='distance')
+
+#differentAngles, index, inverse, counts = np.unique(finalAngles, axis = 0, return_index = True, return_inverse = True, return_counts = True)
+#differentEnergies = np.column_stack((sortAngl[index], counts))
 
 if inverted:
     stableStateMat = inverse.reshape((divitheta1,divitheta2))
@@ -239,8 +240,8 @@ else:
     NiceGraph2D(ax2, 'TargAngl Hinge 3 [rad]', 'TargAngl Hinge 24 [rad]',mincoord = [closingAngl1[0], closingAngl2[0]], 
                 maxcoord = [closingAngl1[-1], closingAngl2[-1]],  divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
 
-cmap2, norm2 = from_levels_and_colors(np.linspace(0,np.size(differentEnergies,0),np.size(differentEnergies,0)+1),
-                                      cm.Set3(np.linspace(0, 1, np.size(differentEnergies,0)))) #gist_rainbow
+cmap2, norm2 = from_levels_and_colors(np.linspace(0,np.max(inverse),np.max(inverse)+1),
+                                      cm.Set3(np.linspace(0, 1, np.max(inverse)))) #gist_rainbow
 
 if inverted:
     cs2 = ax2.imshow(stableStateMat, extent=[theta2[0,0]-sep2,theta2[0,-1]+sep2,theta1[0,0]-sep1,theta1[-1,0]+sep1], 
