@@ -96,7 +96,7 @@ for ang1 = 1:steps
             '_Ang1_',int2str(ang1),'_Angl2_',int2str(ang2),'.mat');
         save(fileName, 'result');
         result.deform(3) = [];        
-        
+        fclose('all');
     end
     
     result.deform(2) = [];
@@ -105,7 +105,7 @@ end
       
 %Clear variables for next fold
 clearvars result E exfl output;
-fclose('all');
+
 
 function [V, exfl, output, E] = FoldStructure(u0, theta0, E, extrudedUnitCell, opt, iter, Aeq, Beq)
 

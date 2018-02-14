@@ -22,10 +22,10 @@ opt=initOpt('template','truncated tetrahedron','analysis','result','readHingeFil
             'maxStretch', 0.3,...
             'maxHinges',inf,'minHinges',0);    %Only work when readHingeFile is 'on'
 
-opt.saveFile = strcat('/',date,'_EnergyLandPath_3to24');
+opt.saveFile = strcat('/',date,'_EnergyLandPath_24to3');
 % opt.saveFile = strcat('/','13-Feb-2018_EnergyLandPath_24to3');
 
-hingeSet = [3 24];
+hingeSet = [24 3];
 opt.angleConstrFinal(1).val=[ hingeSet(:) , (-pi*(opt.constAnglePerc-0.005)) *ones(length(hingeSet), 1)];
 
 tic;
@@ -51,12 +51,6 @@ selectHinges(unitCell, extrudedUnitCell, opt);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %ANALYSIS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-findDeformation(unitCell,extrudedUnitCell,opt);
-
-opt.saveFile = strcat('/',date,'_EnergyLandPath_24to3');
-hingeSet = [24 3];
-opt.angleConstrFinal(1).val=[ hingeSet(:) , (-pi*(opt.constAnglePerc-0.005)) *ones(length(hingeSet), 1)];
-
 findDeformation(unitCell,extrudedUnitCell,opt);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
