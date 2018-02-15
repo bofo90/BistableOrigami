@@ -195,8 +195,6 @@ SStheta1 = -dataAngles[3::IterPerSimul,2]/np.pi
 SStheta1 = SStheta1[sortAngl[::-1]]
 SStheta2 = -dataAngles[3::IterPerSimul,23]/np.pi
 SStheta2 = SStheta2[sortAngl[::-1]]
-    
-cs4 = ax1.scatter(SStheta1, SStheta2, c = 'k', marker = '*')    
 
 ax1.xaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
 ax1.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
@@ -296,6 +294,8 @@ else:
 cmap3, norm3 = from_levels_and_colors(np.linspace(0,maxEnergy,1000), cm.rainbow(np.linspace(0, 1, 1000)), extend = 'max')
 
 cs3 = ax3.scatter(realtheta1, realtheta2, c = totEnergysort, cmap = cmap3, vmax = maxEnergy, s = 360, marker = 's') #150 #360
+
+cs4 = ax1.scatter(SStheta1, SStheta2, c = inverse, cmap = cmap2, s = 200, marker = '*')  
 
 ax3.xaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
 ax3.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))

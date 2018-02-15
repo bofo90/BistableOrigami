@@ -48,7 +48,7 @@ if ~exist(folderName, 'dir')
     mkdir(folderName);
 end
 
-foldAngl = 45;
+foldAngl = 4;
 hingesFold = opt.angleConstrFinal(1).val;
 angles1_1 = extrudedUnitCell.theta(hingesFold(1,1)):(-foldAngl*pi/180):(-0.985*pi);
 angles1_2 = extrudedUnitCell.theta(hingesFold(1,1)):(foldAngl*pi/180):(pi-0.985*pi);
