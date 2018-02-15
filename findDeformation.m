@@ -62,6 +62,7 @@ extrudedUnitCell.angleConstr=[];
 result = [];
 opt.angleConstrFinal = [];
 E = [];
+exfl = [];
 flag1=false;
 
 
@@ -80,7 +81,7 @@ for ang1 = 1:size(angles1,2)
     
     opt.angleConstrFinal(1).val = [hingesFold(:,1) [angles1(ang1);extrudedUnitCell.theta(hingesFold(2,1))]];
     fprintf('First Folding till %d.\n', angles1(ang1));
-    [V, exfl, output, E] = FoldStructure(u0, theta0, E, extrudedUnitCell, opt, 1, Aeq, Beq);
+    [V, exfl, output, E] = FoldStructure(u0, theta0, E, exfl, extrudedUnitCell, opt, 1, Aeq, Beq);
     [result, theta1, u1] = SaveResultPos(result, opt, V, output, 1);
     u0 = u1;
     theta0 = theta1;  
@@ -101,12 +102,12 @@ for ang1 = 1:size(angles1,2)
         end
 
         %%%%%% Folding part %%%%%%
-        [V, exfl, output, E] = FoldStructure(u1, theta1, E, extrudedUnitCell, opt, 2, Aeq, Beq);
+        [V, exfl, output, E] = FoldStructure(u1, theta1, E, exfl, extrudedUnitCell, opt, 2, Aeq, Beq);
         [result, theta1, u1] = SaveResultPos(result, opt, V, output, 2);
 
         
         %%%%%% Releasing part %%%%%%
-        [V, exfl, output, E] = FoldStructure(u1, theta1, E, extrudedUnitCell, opt, 3, Aeq, Beq);
+        [V, exfl, output, E] = FoldStructure(u1, theta1, E, exfl, extrudedUnitCell, opt, 3, Aeq, Beq);
         [result, ~, ~] = SaveResultPos(result, opt, V, output, 3);
         
         %Save energy data in the result variable
@@ -129,7 +130,7 @@ end
 clearvars result E exfl output;
 
 
-function [V, exfl, output, E] = FoldStructure(u0, theta0, E, extrudedUnitCell, opt, iter, Aeq, Beq)
+function [V, exfl, output, E] = FoldStructure(u0, theta0, E, exfl, extrudedUnitCell, opt, iter, Aeq, Beq)
 
 initialiseGlobalx(u0, theta0);
 V = [];
