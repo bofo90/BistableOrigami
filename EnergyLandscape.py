@@ -94,8 +94,8 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.spines['right'].set_color(gray)
     return
 
-folder_name = "Results/truncated tetrahedron/active-set/energy/10-Feb-2018_Energylandscape_24to3\kh0.001_kta100.000_ke3.000_kf100.000"
-inverted = True
+folder_name = "Results/truncated tetrahedron/sqp/energy/15-Feb-2018_temp\kh0.001_kta100.000_ke3.000_kf100.000"
+inverted = False
 maxEnergy = 1.6
 plt.close('all')
 #%%
@@ -110,23 +110,16 @@ file_name4 = "/Angles.csv"
 
 dataEnergy = np.loadtxt(folder_name+file_name1,skiprows=1, delimiter = ',', unpack = True)
 hingeNum = dataEnergy[0,:].astype(int)
-eEdgeFol = dataEnergy[1,:]
-eEdgeRel = dataEnergy[2,:]
-eDiagFol = dataEnergy[3,:]
-eDiagRel = dataEnergy[4,:]    
-eFaceFol = dataEnergy[5,:]
-eFaceRel = dataEnergy[6,:]
-eHingeFol = dataEnergy[7,:]
-eHingeRel = dataEnergy[8,:]
-eTAngleFol = dataEnergy[9,:]
-eTAngleRel = dataEnergy[10,:]
-eHinIntFol = dataEnergy[11,:]
-eHinIntRel = dataEnergy[12,:]
-exflFol = dataEnergy[13,:].astype(int)
-exflRel = dataEnergy[14,:].astype(int)
+eEdge = dataEnergy[1,:]
+eDiag = dataEnergy[2,:]
+eFace = dataEnergy[3,:]
+eHinge = dataEnergy[4,:]
+eTAngle = dataEnergy[5,:]
+exfl = dataEnergy[6,:].astype(int)
 
-eTotalFol= eEdgeFol + eDiagFol +eFaceFol + eHingeFol
-eTotalRel= eEdgeRel + eDiagRel +eFaceRel + eHingeRel
+
+eTotal= eEdge + eDiag +eFace + eHinge
+
 
 hingeName = np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', unpack = True, usecols = [1], dtype=bytes).astype(str)   
 closingAngl1 =  np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', unpack = True, usecols = [2])/np.pi
@@ -137,16 +130,18 @@ dataAngles = np.delete(dataAngles, 0, 1)
 MaxAngles = np.max(dataAngles, axis = 1)
 MinAngles = np.min(dataAngles, axis = 1)
 
-TotSimul = np.size(closingAngl1)
+TotSimul = np.size(hingeName)
 IterPerSimul = np.int(np.size(dataAngles,0)/TotSimul)
+IterPerSimulEnergy = np.int(np.size(dataEnergy,1)/TotSimul)
+NumberAngles = np.size(dataAngles,1)
 
 #%%
 ###Check if a folding pattern didnt converge
-if len(np.unique(exflFol))>2:
+exfl = exfl.reshape(TotSimul,IterPerSimulEnergy)
+flagmask = np.logical_and(exfl !=1,exfl !=5)
+flagmask = flagmask.any(axis= 1)
+if flagmask.any():
     print('Error: There was at least one non convergent fold pattern.\n')
-if len(np.unique(exflRel))>2:
-    print('Error: There was at least one non convergent release pattern.\n')
-
 
 ##Do the energy landscape plot
 divitheta1 = len(np.unique(closingAngl1))
@@ -162,12 +157,14 @@ closingAngl2 = -closingAngl2[sortAngl[::-1]]
 theta1 = closingAngl1.reshape((divitheta1,divitheta2))
 theta2 = closingAngl2.reshape((divitheta1,divitheta2))
 
-totEnergysort = eTotalFol[1::2]
-#totEnergysort = eDiagFol[1::2]+eEdgeFol[1::2]
-#totEnergysort = eEdgeFol[1::2]
-#totEnergysort = eDiagFol[1::2]
-#totEnergysort = eHingeFol[1::2]
-#totEnergysort = eTAngleFol[1::2]
+totEnergysort = eTotal[IterPerSimulEnergy-2::IterPerSimulEnergy]
+#totEnergysort = eDiag[IterPerSimulEnergy-2::IterPerSimulEnergy]+eEdge[IterPerSimulEnergy-2::IterPerSimulEnergy]
+#totEnergysort = eEdge[IterPerSimulEnergy-2::IterPerSimulEnergy]
+#totEnergysort = eDiag[IterPerSimulEnergy-2::IterPerSimulEnergy]
+#totEnergysort = eHinge[IterPerSimulEnergy-2::IterPerSimulEnergy]
+#totEnergysort = eTAngle[IterPerSimulEnergy-2::IterPerSimulEnergy]
+
+totEnergysort = np.ma.masked_array(totEnergysort, mask=flagmask)
 totEnergysort = totEnergysort[sortAngl[::-1]]
 if inverted:
     totEnergyMat = totEnergysort.reshape((divitheta1,divitheta2))
@@ -220,10 +217,13 @@ for hinge in sortAngl[::-1]:
     sortAllAngIndex = np.lexsort((dataAngles[IterPerSimul*(hinge+1)-1,:],dataAngles[IterPerSimul*hinge,:]))
     finalAngles = np.append(finalAngles, [dataAngles[IterPerSimul*(hinge+1)-1,sortAllAngIndex]], axis = 0)
 
+
 Z = hierarch.linkage(finalAngles, 'centroid')
 inverse = hierarch.fcluster(Z, 0.5, criterion='distance')
-c, poop = hierarch.cophenet(Z, pdist(finalAngles))
-print('this is the cophenet of the hierarchical linkage', c)
+c = hierarch.cophenet(Z, pdist(finalAngles))
+print('this is the cophenet of the hierarchical linkage', c[0])
+
+inverse = np.ma.masked_array(inverse, mask=flagmask[sortAngl[::-1]])
 
 if inverted:
     stableStateMat = inverse.reshape((divitheta1,divitheta2))
