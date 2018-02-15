@@ -12,7 +12,7 @@ clearvars -global
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-opt=initOpt('template','truncated tetrahedron','analysis','savedata','readHingeFile','on',...
+opt=initOpt('template','truncated tetrahedron','analysis','plot','readHingeFile','off',...
             'createFig', 'off','saveFig','on','saveMovie', 'on',...
             'figDPI',200,'safeMovieAntiAlias', 0,...
             'folAlgor', 'active-set','relAlgor', 'active-set',...
@@ -22,8 +22,8 @@ opt=initOpt('template','truncated tetrahedron','analysis','savedata','readHingeF
             'maxStretch', 0.3,...
             'maxHinges',inf,'minHinges',0);    %Only work when readHingeFile is 'on'
 
-% opt.saveFile = strcat('/',date,'_temp');
-opt.saveFile = strcat('/','13-Feb-2018_EnergyLandPath_24to3');
+opt.saveFile = strcat('/',date,'_temp');
+% opt.saveFile = strcat('/','13-Feb-2018_EnergyLandPath_24to3');
 
 hingeSet = [3 24];
 opt.angleConstrFinal(1).val=[ hingeSet(:) , (-pi*(opt.constAnglePerc-0.005)) *ones(length(hingeSet), 1)];

@@ -112,6 +112,7 @@ for ang1 = 1:size(angles1,2)
         
         %Save energy data in the result variable
         result = SaveResultEnergy(result, E, exfl, opt);
+        result.angNum = [ang1 ang2];
 
         %Save the result in a file
         fileName = strcat(folderName,'/',mat2str(opt.angleConstrFinal(2).val(:,1)'),...

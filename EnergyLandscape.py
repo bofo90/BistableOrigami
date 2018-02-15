@@ -94,8 +94,8 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.spines['right'].set_color(gray)
     return
 
-folder_name = "Results/truncated tetrahedron/active-set/energy/13-Feb-2018_EnergyLandPath_24to3\kh0.001_kta100.000_ke3.000_kf100.000"
-inverted = True
+folder_name = "Results/truncated tetrahedron/active-set/energy/15-Feb-2018_temp\kh0.001_kta100.000_ke3.000_kf100.000"
+inverted = False
 maxEnergy = 1.6
 plt.close('all')
 #%%
@@ -122,8 +122,9 @@ eTotal= eEdge + eDiag +eFace + eHinge
 
 
 hingeName = np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', unpack = True, usecols = [1], dtype=bytes).astype(str)   
-closingAngl1 =  np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', unpack = True, usecols = [2])/np.pi
-closingAngl2 =  np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', unpack = True, usecols = [3])/np.pi
+closingAngl1 = np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', unpack = True, usecols = [2])/np.pi
+closingAngl2 = np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', unpack = True, usecols = [3])/np.pi
+angleNum = np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', usecols = [4,5])
 
 dataAngles = np.loadtxt(folder_name+file_name4,skiprows=1, delimiter = ',', dtype = np.float64)
 dataAngles = np.delete(dataAngles, 0, 1)
@@ -164,7 +165,7 @@ totEnergysort = eTotal[IterPerSimulEnergy-2::IterPerSimulEnergy]
 #totEnergysort = eHinge[IterPerSimulEnergy-2::IterPerSimulEnergy]
 #totEnergysort = eTAngle[IterPerSimulEnergy-2::IterPerSimulEnergy]
 
-#totEnergysort = np.ma.masked_array(totEnergysort, mask=flagmask)
+totEnergysort = np.ma.masked_array(totEnergysort, mask=flagmask)
 totEnergysort = totEnergysort[sortAngl[::-1]]
 if inverted:
     totEnergyMat = totEnergysort.reshape((divitheta1,divitheta2))
@@ -230,7 +231,11 @@ inverse = hierarch.fcluster(Z, 0.5, criterion='distance')
 c = hierarch.cophenet(Z, pdist(finalAngles))
 print('this is the cophenet of the hierarchical linkage', c[0])
 
-#inverse = np.ma.masked_array(inverse, mask=flagmask[sortAngl[::-1]])
+SS, SSpos = np.unique(inverse, return_index = True)
+angleNum = angleNum[sortAngl[::-1],:]
+print(angleNum[SSpos,:])
+
+inverse = np.ma.masked_array(inverse, mask=flagmask[sortAngl[::-1]])
 
 if inverted:
     stableStateMat = inverse.reshape((divitheta1,divitheta2))

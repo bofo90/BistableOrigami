@@ -36,7 +36,7 @@ switch opt.analysis
                 if strcmp(opt.readHingeFile,'off')
                     if ~isequal(hingeSet, opt.angleConstrFinal(end).val(:,1))
                         continue;
-                    elseif ~strcmp(resfilename(1:end-4), '[24 3]_Ang1_1_Angl2_2')
+                    elseif ~strcmp(resfilename(1:end-4), '[3 24]_Ang1_4_Angl2_4')
                         continue;
                     end
                 end
@@ -55,7 +55,8 @@ switch opt.analysis
                     PosStad = [ones(size(result.E,1),1,1)*(ct-directories),...
                         CM(:,:),Radios, Stdev,maxStrech, minStrech, SumIntAngles, SumExtAngles];
                     Hinges = [num2str(ct-directories),',',mat2str(hingeSet'),',',...
-                        mat2str(result.anglConstr(1,2),5),',', mat2str(result.anglConstr(2,2),5)];
+                        mat2str(result.anglConstr(1,2),5),',', mat2str(result.anglConstr(2,2),5),...
+                        ',',int2str(result.angNum(1)),',',int2str(result.angNum(2))];
                     AllAngles = [extrudedUnitCell.theta];
                     for iter = 1:size(result.deform,2)
                         AllAngles = [AllAngles result.deform(iter).theta];
@@ -117,7 +118,7 @@ fileHinge = strcat(folderEnergy, '/','Hinges.csv');
 if exist(fileHinge, 'file')
     delete(fileHinge) % always start with new file
 end
-headersHinge = {'HingeNumber'; 'ActuatedHinges'; 'Theta1'; 'Theta2'};
+headersHinge = {'HingeNumber'; 'ActuatedHinges'; 'Theta1'; 'Theta2'; 'ThetaNum1'; 'ThetaNum2'};
 writeHeader(fileHinge, headersHinge);
 
 fileMassDist = strcat(folderEnergy, '/','PosStad.csv');
