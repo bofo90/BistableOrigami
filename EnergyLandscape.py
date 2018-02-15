@@ -7,6 +7,7 @@ import numpy as np
 import configparser
 import os.path
 import scipy.cluster.hierarchy as hierarch
+from scipy.spatial.distance import pdist
 
 def isfloat(value):
   try:
@@ -93,8 +94,8 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.spines['right'].set_color(gray)
     return
 
-folder_name = "Results/truncated tetrahedron/active-set/energy/13-Feb-2018_EnergyLandPath_3to24\kh0.001_kta100.000_ke3.000_kf100.000"
-inverted = False
+folder_name = "Results/truncated tetrahedron/active-set/energy/10-Feb-2018_Energylandscape_24to3\kh0.001_kta100.000_ke3.000_kf100.000"
+inverted = True
 maxEnergy = 1.6
 plt.close('all')
 #%%
@@ -219,11 +220,10 @@ for hinge in sortAngl[::-1]:
     sortAllAngIndex = np.lexsort((dataAngles[IterPerSimul*(hinge+1)-1,:],dataAngles[IterPerSimul*hinge,:]))
     finalAngles = np.append(finalAngles, [dataAngles[IterPerSimul*(hinge+1)-1,sortAllAngIndex]], axis = 0)
 
-Z = hierarch.linkage(finalAngles, 'ward')
-inverse = hierarch.fcluster(Z, 1, criterion='distance')
-
-#differentAngles, index, inverse, counts = np.unique(finalAngles, axis = 0, return_index = True, return_inverse = True, return_counts = True)
-#differentEnergies = np.column_stack((sortAngl[index], counts))
+Z = hierarch.linkage(finalAngles, 'centroid')
+inverse = hierarch.fcluster(Z, 0.5, criterion='distance')
+c, poop = hierarch.cophenet(Z, pdist(finalAngles))
+print('this is the cophenet of the hierarchical linkage', c)
 
 if inverted:
     stableStateMat = inverse.reshape((divitheta1,divitheta2))
@@ -241,7 +241,7 @@ else:
                 maxcoord = [closingAngl1[-1], closingAngl2[-1]],  divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
 
 cmap2, norm2 = from_levels_and_colors(np.linspace(0,np.max(inverse),np.max(inverse)+1),
-                                      cm.Set3(np.linspace(0, 1, np.max(inverse)))) #gist_rainbow
+                                      cm.gist_rainbow(np.linspace(0, 1, np.max(inverse)))) #gist_rainbow #Set3
 
 if inverted:
     cs2 = ax2.imshow(stableStateMat, extent=[theta2[0,0]-sep2,theta2[0,-1]+sep2,theta1[0,0]-sep1,theta1[-1,0]+sep1], 
@@ -283,7 +283,7 @@ else:
 
 cmap3, norm3 = from_levels_and_colors(np.linspace(0,maxEnergy,1000), cm.rainbow(np.linspace(0, 1, 1000)), extend = 'max')
 
-cs3 = ax3.scatter(realtheta1, realtheta2, c = totEnergysort, cmap = cmap3, vmax = maxEnergy, s = 360, marker = 's') #150
+cs3 = ax3.scatter(realtheta1, realtheta2, c = totEnergysort, cmap = cmap3, vmax = maxEnergy, s = 360, marker = 's') #150 #360
 
 ax3.xaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
 ax3.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
