@@ -48,36 +48,57 @@ if ~exist(folderName, 'dir')
     mkdir(folderName);
 end
 
-steps = 25;
+foldAngl = 45;
 hingesFold = opt.angleConstrFinal(1).val;
-angles1 = linspace(extrudedUnitCell.theta(hingesFold(1,1)),hingesFold(1,2),steps);
-angles2 = linspace(extrudedUnitCell.theta(hingesFold(2,1)),hingesFold(2,2),steps);
+angles1_1 = extrudedUnitCell.theta(hingesFold(1,1)):(-foldAngl*pi/180):(-0.985*pi);
+angles1_2 = extrudedUnitCell.theta(hingesFold(1,1)):(foldAngl*pi/180):(pi-0.985*pi);
+angles2_1 = extrudedUnitCell.theta(hingesFold(2,1)):(-foldAngl*pi/180):(-0.985*pi);
+angles2_2 = extrudedUnitCell.theta(hingesFold(2,1)):(foldAngl*pi/180):(pi-0.985*pi);
+angles1 = [angles1_1 angles1_2(2:end)];
+angles2 = [angles2_1 angles2_2(2:end)];
 
 %Create variables
 extrudedUnitCell.angleConstr=[];
 result = [];
 opt.angleConstrFinal = [];
 E = [];
+flag1=false;
+
 
 %initialize to extruded state
 u0=zeros(3*size(extrudedUnitCell.node,1),1);
 theta0=extrudedUnitCell.theta;
 
-for ang1 = 1:steps
+for ang1 = 1:size(angles1,2)
+    
+    if angles1(ang1)>extrudedUnitCell.theta(hingesFold(1,1)) && ~flag1
+        u0 = zeros(3*size(extrudedUnitCell.node,1),1);
+        theta0 = extrudedUnitCell.theta;
+        result.deform(1) = [];
+        flag1 = true;
+    end    
     
     opt.angleConstrFinal(1).val = [hingesFold(:,1) [angles1(ang1);extrudedUnitCell.theta(hingesFold(2,1))]];
     fprintf('First Folding till %d.\n', angles1(ang1));
     [V, exfl, output, E] = FoldStructure(u0, theta0, E, extrudedUnitCell, opt, 1, Aeq, Beq);
     [result, theta1, u1] = SaveResultPos(result, opt, V, output, 1);
     u0 = u1;
-    theta0 = theta1;   
+    theta0 = theta1;  
+    flag2=false; 
             
-    for ang2 = 1:steps
+    for ang2 = 1:size(angles2,2)
         
         opt.angleConstrFinal(2).val = [hingesFold(:,1) [angles1(ang1);angles2(ang2)]];
         opt.angleConstrFinal(3).val = [];
         
         fprintf('Hinge angle %d %d.\n', angles1(ang1), angles2(ang2));
+        
+        if angles2(ang2)>extrudedUnitCell.theta(hingesFold(2,1)) && ~flag2
+            u1 = u0;
+            theta1 = theta0;
+            result.deform(2) = [];
+            flag2 = true;
+        end
 
         %%%%%% Folding part %%%%%%
         [V, exfl, output, E] = FoldStructure(u1, theta1, E, extrudedUnitCell, opt, 2, Aeq, Beq);
@@ -95,7 +116,8 @@ for ang1 = 1:steps
         fileName = strcat(folderName,'/',mat2str(opt.angleConstrFinal(2).val(:,1)'),...
             '_Ang1_',int2str(ang1),'_Angl2_',int2str(ang2),'.mat');
         save(fileName, 'result');
-        result.deform(3) = [];        
+        result.deform(3) = [];
+
         fclose('all');
     end
     
