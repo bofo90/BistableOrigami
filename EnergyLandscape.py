@@ -94,8 +94,8 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.spines['right'].set_color(gray)
     return
 
-folder_name = "Results/truncated tetrahedron/sqp/energy/15-Feb-2018_temp\kh0.001_kta100.000_ke3.000_kf100.000"
-inverted = False
+folder_name = "Results/truncated tetrahedron/active-set/energy/13-Feb-2018_EnergyLandPath_24to3\kh0.001_kta100.000_ke3.000_kf100.000"
+inverted = True
 maxEnergy = 1.6
 plt.close('all')
 #%%
@@ -164,7 +164,7 @@ totEnergysort = eTotal[IterPerSimulEnergy-2::IterPerSimulEnergy]
 #totEnergysort = eHinge[IterPerSimulEnergy-2::IterPerSimulEnergy]
 #totEnergysort = eTAngle[IterPerSimulEnergy-2::IterPerSimulEnergy]
 
-totEnergysort = np.ma.masked_array(totEnergysort, mask=flagmask)
+#totEnergysort = np.ma.masked_array(totEnergysort, mask=flagmask)
 totEnergysort = totEnergysort[sortAngl[::-1]]
 if inverted:
     totEnergyMat = totEnergysort.reshape((divitheta1,divitheta2))
@@ -189,6 +189,13 @@ if inverted:
 else:
     cs1 = ax1.imshow(totEnergyMat, extent=[theta1[0,0]-sep1,theta1[-1,0]+sep1,theta2[0,0]-sep2,theta2[0,-1]+sep2], 
                      cmap = cm.rainbow, aspect = 'auto',vmax = maxEnergy, origin = 'lower')
+
+SStheta1 = -dataAngles[3::IterPerSimul,2]/np.pi
+SStheta1 = SStheta1[sortAngl[::-1]]
+SStheta2 = -dataAngles[3::IterPerSimul,23]/np.pi
+SStheta2 = SStheta2[sortAngl[::-1]]
+    
+cs4 = ax1.scatter(SStheta1, SStheta2, c = 'k', marker = '*')    
 
 ax1.xaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
 ax1.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
@@ -223,7 +230,7 @@ inverse = hierarch.fcluster(Z, 0.5, criterion='distance')
 c = hierarch.cophenet(Z, pdist(finalAngles))
 print('this is the cophenet of the hierarchical linkage', c[0])
 
-inverse = np.ma.masked_array(inverse, mask=flagmask[sortAngl[::-1]])
+#inverse = np.ma.masked_array(inverse, mask=flagmask[sortAngl[::-1]])
 
 if inverted:
     stableStateMat = inverse.reshape((divitheta1,divitheta2))
@@ -241,7 +248,7 @@ else:
                 maxcoord = [closingAngl1[-1], closingAngl2[-1]],  divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
 
 cmap2, norm2 = from_levels_and_colors(np.linspace(0,np.max(inverse),np.max(inverse)+1),
-                                      cm.gist_rainbow(np.linspace(0, 1, np.max(inverse)))) #gist_rainbow #Set3
+                                      cm.Set3(np.linspace(0, 1, np.max(inverse)))) #gist_rainbow #Set3
 
 if inverted:
     cs2 = ax2.imshow(stableStateMat, extent=[theta2[0,0]-sep2,theta2[0,-1]+sep2,theta1[0,0]-sep1,theta1[-1,0]+sep1], 
