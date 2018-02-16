@@ -347,9 +347,24 @@ if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(op
         for nMode=1:result.numMode
             pause(1)
 %             fprintf('end part');
-            for framMode=1:length(plotextrudedUnitCell.mode(nMode).frame)
-%                 framMode = length(plotextrudedUnitCell.mode(nMode).frame);
-%                 pause();
+            if strcmp(opt.saveMovie,'on')
+                for framMode=1:length(plotextrudedUnitCell.mode(nMode).frame)
+    %                 framMode = length(plotextrudedUnitCell.mode(nMode).frame);
+                    for nc=1:size(extrudedUnitCell.latVec,1)
+                        for i=3:10     
+                            c=(plotextrudedUnitCell.mode(nMode).frame(framMode).polFace(i).normal*viewCoor'>0);
+                            viewCoor=get(gca,'view');
+                            viewCoor=[sind(viewCoor(1)) -cosd(viewCoor(1)) sind(viewCoor(2))];
+                            set(hs{nc,i},'Vertices',plotextrudedUnitCell.mode(nMode).frame(framMode).lat(nc).coor,'facecolor','flat','facevertexCData',c*colt(4,:)+abs(1-c)*colt(5,:),'facealpha',1.0);
+                        end
+                    end
+                    printGif(opt,framMode,f,nameFolder,[filename,'_',num2str(nMode),'_deformed']);%'_',sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge),
+                    if framMode==length(plotextrudedUnitCell.mode(nMode).frame)
+                        printHigRes(f,opt,[filename,'_',num2str(nMode),'_deformed'],nameFolder);%'_',sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge),
+                    end
+                end
+            else
+                framMode = length(plotextrudedUnitCell.mode(nMode).frame);
                 for nc=1:size(extrudedUnitCell.latVec,1)
                     for i=3:10     
                         c=(plotextrudedUnitCell.mode(nMode).frame(framMode).polFace(i).normal*viewCoor'>0);

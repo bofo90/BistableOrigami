@@ -94,7 +94,7 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.spines['right'].set_color(gray)
     return
 
-folder_name = "Results/truncated tetrahedron/active-set/energy/15-Feb-2018_temp\kh0.001_kta100.000_ke3.000_kf100.000"
+folder_name = "Results/truncated tetrahedron/active-set/energy/15-Feb-2018_EnergyAllAngles_3_24\kh0.001_kta100.000_ke3.000_kf100.000"
 inverted = False
 maxEnergy = 1.6
 plt.close('all')
@@ -225,7 +225,7 @@ for hinge in sortAngl[::-1]:
 
 
 Z = hierarch.linkage(finalAngles, 'centroid')
-inverse = hierarch.fcluster(Z, 0.5, criterion='distance')
+inverse = hierarch.fcluster(Z, 0.6, criterion='distance')
 c = hierarch.cophenet(Z, pdist(finalAngles))
 print('this is the cophenet of the hierarchical linkage', c[0])
 
@@ -293,7 +293,7 @@ else:
 
 cmap3, norm3 = from_levels_and_colors(np.linspace(0,maxEnergy,1000), cm.rainbow(np.linspace(0, 1, 1000)), extend = 'max')
 
-cs3 = ax3.scatter(realtheta1, realtheta2, c = totEnergysort, cmap = cmap3, vmax = maxEnergy, s = 360, marker = 's') #150 #360
+cs3 = ax3.scatter(realtheta1, realtheta2, c = totEnergysort, cmap = cmap3, vmax = maxEnergy, s = 110, marker = 's') #150 #360
 
 cs4 = ax1.scatter(SStheta1, SStheta2, c = inverse, cmap = cmap2, s = 200, marker = '*')  
 
