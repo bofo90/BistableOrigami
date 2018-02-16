@@ -25,7 +25,7 @@ opt=initOpt('template','truncated tetrahedron','analysis','result','readHingeFil
 opt.saveFile = strcat('/',date,'_EnergyAllAngles_3_24_withfreeHinge');
 % opt.saveFile = strcat('/','15-Feb-2018_EnergyAllAngles_3_24');
 
-hingeSet = [24 3];
+hingeSet = [3 24];
 opt.angleConstrFinal(1).val=[ hingeSet(:) , (-pi*(opt.constAnglePerc-0.005)) *ones(length(hingeSet), 1)];
 
 tic;
@@ -51,6 +51,12 @@ selectHinges(unitCell, extrudedUnitCell, opt);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %ANALYSIS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+findDeformation(unitCell,extrudedUnitCell,opt);
+
+opt.saveFile = strcat('/',date,'_EnergyAllAngles_24_3_withfreeHinge');
+hingeSet = [24 3];
+opt.angleConstrFinal(1).val=[ hingeSet(:) , (-pi*(opt.constAnglePerc-0.005)) *ones(length(hingeSet), 1)];
+
 findDeformation(unitCell,extrudedUnitCell,opt);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
