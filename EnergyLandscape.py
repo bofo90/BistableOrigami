@@ -8,6 +8,7 @@ import configparser
 import os.path
 import scipy.cluster.hierarchy as hierarch
 from scipy.spatial.distance import pdist
+#import seaborn as sns
 
 def isfloat(value):
   try:
@@ -94,9 +95,9 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.spines['right'].set_color(gray)
     return
 
-folder_name = "Results/truncated tetrahedron/active-set/energy/15-Feb-2018_EnergyAllAngles_3_24\kh0.001_kta100.000_ke3.000_kf100.000"
-inverted = False
-maxEnergy = 1.6
+folder_name = "Results/truncated tetrahedron/active-set/energy/16-Feb-2018_EnergyAllAngles_24_3\kh0.001_kta100.000_ke3.000_kf100.000"
+inverted = True
+maxEnergy = 1.32
 plt.close('all')
 #%%
 #######################################################################################################################
@@ -178,18 +179,22 @@ sep2 = (closingAngl2[-1]-closingAngl2[0])/(divitheta2-1)/2
 fig1 = plt.figure(0,figsize=(cm2inch(24.1), cm2inch(20)))
 ax1 = plt.subplot(111)
 if inverted:
-    NiceGraph2D(ax1, 'TargAngl Hinge 3 [rad]', 'TargAngl Hinge 24 [rad]',mincoord = [closingAngl2[0], closingAngl1[0]], 
-                maxcoord = [closingAngl2[-1], closingAngl1[-1]],  divisions = [tickstheta2, tickstheta1], buffer = [sep2, sep1])
+    NiceGraph2D(ax1, 'TargAngl Hinge 3 [rad]', 'TargAngl Hinge 24 [rad]',mincoord = [0,0], maxcoord = [1,1],divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
+                
+#                mincoord = [closingAngl2[0], closingAngl1[0]], 
+#                maxcoord = [closingAngl2[-1], closingAngl1[-1]],  divisions = [tickstheta2, tickstheta1], buffer = [sep2, sep1])
 else:
-    NiceGraph2D(ax1, 'TargAngl Hinge 3 [rad]', 'TargAngl Hinge 24 [rad]',mincoord = [closingAngl1[0], closingAngl2[0]], 
-                maxcoord = [closingAngl1[-1], closingAngl2[-1]],  divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
+    NiceGraph2D(ax1, 'TargAngl Hinge 3 [rad]', 'TargAngl Hinge 24 [rad]',mincoord = [0,0], maxcoord = [1,1],divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
+                
+#                mincoord = [closingAngl1[0], closingAngl2[0]], 
+#                maxcoord = [closingAngl1[-1], closingAngl2[-1]],  divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
 
 if inverted:
     cs1 = ax1.imshow(totEnergyMat, extent=[theta2[0,0]-sep2,theta2[0,-1]+sep2,theta1[0,0]-sep1,theta1[-1,0]+sep1], 
-                     cmap = cm.rainbow, aspect = 'auto',vmax = maxEnergy, origin = 'lower') #nipy_spectral
+                     cmap = cm.nipy_spectral, aspect = 'auto',vmax = maxEnergy, origin = 'lower') #nipy_spectral
 else:
     cs1 = ax1.imshow(totEnergyMat, extent=[theta1[0,0]-sep1,theta1[-1,0]+sep1,theta2[0,0]-sep2,theta2[0,-1]+sep2], 
-                     cmap = cm.rainbow, aspect = 'auto',vmax = maxEnergy, origin = 'lower')
+                     cmap = cm.nipy_spectral, aspect = 'auto',vmax = maxEnergy, origin = 'lower')
 
 SStheta1 = -dataAngles[3::IterPerSimul,2]/np.pi
 SStheta1 = SStheta1[sortAngl[::-1]]
@@ -206,15 +211,6 @@ cbar.ax.tick_params(axis='y',colors='0.2')
 cbar.ax.tick_params(axis='x',colors='0.2')
 cbar.outline.set_edgecolor('0.2')
 
-fig1.tight_layout()
-fig1.show()
-fig1.savefig(folder_name + '/EnergyLand.png', transparent = True)
-#fig1.savefig(folder_name + '/EnergyAllEdges.png', transparent = True)
-#fig1.savefig(folder_name + '/EnergyEdge.png', transparent = True)
-#fig1.savefig(folder_name + '/EnergyDiag.png', transparent = True)
-#fig1.savefig(folder_name + '/EnergyHinge.png', transparent = True)
-#fig1.savefig(folder_name + '/EnergyTA.png', transparent = True)
-
 ######################################################################
 #Analysis for stable states
 
@@ -225,7 +221,7 @@ for hinge in sortAngl[::-1]:
 
 
 Z = hierarch.linkage(finalAngles, 'centroid')
-inverse = hierarch.fcluster(Z, 0.6, criterion='distance')
+inverse = hierarch.fcluster(Z, 1, criterion='distance')
 c = hierarch.cophenet(Z, pdist(finalAngles))
 print('this is the cophenet of the hierarchical linkage', c[0])
 
@@ -310,3 +306,12 @@ cbar3.outline.set_edgecolor('0.2')
 fig3.tight_layout()
 fig3.show()
 fig3.savefig(folder_name + '/RealAngles-Energy.png', transparent = True)
+
+fig1.tight_layout()
+fig1.show()
+fig1.savefig(folder_name + '/EnergyLand.png', transparent = True)
+#fig1.savefig(folder_name + '/EnergyAllEdges.png', transparent = True)
+#fig1.savefig(folder_name + '/EnergyEdge.png', transparent = True)
+#fig1.savefig(folder_name + '/EnergyDiag.png', transparent = True)
+#fig1.savefig(folder_name + '/EnergyHinge.png', transparent = True)
+#fig1.savefig(folder_name + '/EnergyTA.png', transparent = True)

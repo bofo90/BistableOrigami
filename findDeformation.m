@@ -51,9 +51,9 @@ end
 foldAngl = 4;
 hingesFold = opt.angleConstrFinal(1).val;
 angles1_1 = extrudedUnitCell.theta(hingesFold(1,1)):(-foldAngl*pi/180):(-0.985*pi);
-angles1_2 = extrudedUnitCell.theta(hingesFold(1,1)):(foldAngl*pi/180):(pi-0.985*pi);
+angles1_2 = extrudedUnitCell.theta(hingesFold(1,1)):(foldAngl*pi/180):-(pi-0.985*pi);
 angles2_1 = extrudedUnitCell.theta(hingesFold(2,1)):(-foldAngl*pi/180):(-0.985*pi);
-angles2_2 = extrudedUnitCell.theta(hingesFold(2,1)):(foldAngl*pi/180):(pi-0.985*pi);
+angles2_2 = extrudedUnitCell.theta(hingesFold(2,1)):(foldAngl*pi/180):-(pi-0.985*pi);
 angles1 = [angles1_1 angles1_2(2:end)];
 angles2 = [angles2_1 angles2_2(2:end)];
 
@@ -79,7 +79,7 @@ for ang1 = 1:size(angles1,2)
         flag1 = true;
     end    
     
-    opt.angleConstrFinal(1).val = [hingesFold(:,1) [angles1(ang1);extrudedUnitCell.theta(hingesFold(2,1))]];
+    opt.angleConstrFinal(1).val = [hingesFold(1,1) angles1(ang1)];
     fprintf('First Folding till %d.\n', angles1(ang1));
     [V, exfl, output, E] = FoldStructure(u0, theta0, E, exfl, extrudedUnitCell, opt, 1, Aeq, Beq);
     [result, theta1, u1] = SaveResultPos(result, opt, V, output, 1);
