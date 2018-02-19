@@ -95,8 +95,8 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.spines['right'].set_color(gray)
     return
 
-folder_name = "Results/truncated tetrahedron/active-set/energy/16-Feb-2018_EnergyAllAngles_24_3\kh0.001_kta100.000_ke3.000_kf100.000"
-inverted = True
+folder_name = "Results/truncated tetrahedron/active-set/energy/16-Feb-2018_EnergyAllAngles_3_24_withfreeHinge\kh0.001_kta100.000_ke3.000_kf100.000"
+inverted = False
 maxEnergy = 1.32
 plt.close('all')
 #%%
@@ -221,7 +221,7 @@ for hinge in sortAngl[::-1]:
 
 
 Z = hierarch.linkage(finalAngles, 'centroid')
-inverse = hierarch.fcluster(Z, 1, criterion='distance')
+inverse = hierarch.fcluster(Z, 1.1, criterion='distance')
 c = hierarch.cophenet(Z, pdist(finalAngles))
 print('this is the cophenet of the hierarchical linkage', c[0])
 
