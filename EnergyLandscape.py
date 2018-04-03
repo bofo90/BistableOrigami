@@ -95,7 +95,7 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.spines['right'].set_color(gray)
     return
 
-folder_name = "Results/tetrahedron/active-set/energy/03-Apr-2018_EnergyAllAngles_1_2\kh0.001_kta100.000_ke3.000_kf100.000"
+folder_name = "Results/triangular prism/active-set/energy/03-Apr-2018_EnergyAllAngles_1_16\kh0.001_kta100.000_ke3.000_kf100.000"
 inverted = False
 maxEnergy = 1.32#1.32
 plt.close('all')
@@ -263,7 +263,7 @@ ax2.xaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
 ax2.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
 
 cbar2 = plt.colorbar(cs2,  ax = ax2, fraction=0.05, pad=0.01)#, extend = 'max'
-cbar2.set_ticks(np.linspace(0, max(inverse), max(inverse)+1))
+cbar2.set_ticks(np.linspace(0, np.max(inverse), np.max(inverse)+1))
 cbar2.set_label('Stable State', fontsize = 15, color = '0.2')
 cbar2.ax.tick_params(axis='y',colors='0.2')
 cbar2.ax.tick_params(axis='x',colors='0.2')
