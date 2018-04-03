@@ -12,7 +12,7 @@ clearvars -global
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-opt=initOpt('template','tetrahedron','analysis','savedata','readHingeFile','on',...
+opt=initOpt('template','triangular prism','analysis','result','readHingeFile','off',...
             'createFig', 'off','saveFig','off','saveMovie', 'off',...
             'figDPI',200,'safeMovieAntiAlias', 0,...
             'folAlgor', 'active-set','relAlgor', 'active-set',...
@@ -22,10 +22,10 @@ opt=initOpt('template','tetrahedron','analysis','savedata','readHingeFile','on',
             'maxStretch', 0.3,...
             'maxHinges',inf,'minHinges',0);    %Only work when readHingeFile is 'on'
 
-opt.saveFile = strcat('/',date,'_EnergyAllAngles_2_1');
+opt.saveFile = strcat('/',date,'_EnergyAllAngles_1_16');
 % opt.saveFile = strcat('/','15-Feb-2018_EnergyAllAngles_3_24');
 
-hingeSet = [2 1];
+hingeSet = [1 16];
 opt.angleConstrFinal(1).val=[ hingeSet(:) , (-pi*(opt.constAnglePerc-0.005)) *ones(length(hingeSet), 1)];
 
 tic;
