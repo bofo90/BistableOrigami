@@ -22,10 +22,10 @@ opt=initOpt('template','triangular prism','analysis','result','readHingeFile','o
             'maxStretch', 0.3,...
             'maxHinges',inf,'minHinges',0);    %Only work when readHingeFile is 'on'
 
-opt.saveFile = strcat('/',date,'_EnergyAllAngles_1_16');
+opt.saveFile = strcat('/',date,'_EnergyAllAngles_16_1');
 % opt.saveFile = strcat('/','15-Feb-2018_EnergyAllAngles_3_24');
 
-hingeSet = [1 16];
+hingeSet = [16 1];
 opt.angleConstrFinal(1).val=[ hingeSet(:) , (-pi*(opt.constAnglePerc-0.005)) *ones(length(hingeSet), 1)];
 
 tic;
