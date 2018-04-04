@@ -95,8 +95,8 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.spines['right'].set_color(gray)
     return
 
-folder_name = "Results/triangular prism/active-set/energy/03-Apr-2018_EnergyAllAngles_8_3\kh0.001_kta100.000_ke3.000_kf100.000"
-inverted = True
+folder_name = "Results/cube/active-set/energy/04-Apr-2018_EnergyAllAngles_1_3\kh0.001_kta100.000_ke3.000_kf100.000"
+inverted = False
 maxEnergy = 1.32#1.32
 plt.close('all')
 #%%
