@@ -12,8 +12,8 @@ clearvars -global
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-opt=initOpt('template','triangular prism','analysis','result','readHingeFile','off',...
-            'createFig', 'off','saveFig','off','saveMovie', 'off',...
+opt=initOpt('template','triangular prism','analysis','plot','readHingeFile','off',...
+            'createFig', 'on','saveFig','on','saveMovie', 'off',...
             'figDPI',200,'safeMovieAntiAlias', 0,...
             'folAlgor', 'active-set','relAlgor', 'active-set',...
             'gethistory', 'off',...
@@ -22,10 +22,10 @@ opt=initOpt('template','triangular prism','analysis','result','readHingeFile','o
             'maxStretch', 0.3,...
             'maxHinges',inf,'minHinges',0);    %Only work when readHingeFile is 'on'
 
-opt.saveFile = strcat('/',date,'_EnergyAllAngles_16_1');
-% opt.saveFile = strcat('/','15-Feb-2018_EnergyAllAngles_3_24');
+% opt.saveFile = strcat('/',date,'_EnergyAllAngles_3_8');
+opt.saveFile = strcat('/','03-Apr-2018_EnergyAllAngles_8_3');
 
-hingeSet = [16 1];
+hingeSet = [8 3];
 opt.angleConstrFinal(1).val=[ hingeSet(:) , (-pi*(opt.constAnglePerc-0.005)) *ones(length(hingeSet), 1)];
 
 tic;
@@ -53,8 +53,9 @@ selectHinges(unitCell, extrudedUnitCell, opt);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 findDeformation(unitCell,extrudedUnitCell,opt);
 
-% opt.saveFile = strcat('/',date,'_EnergyAllAngles_24_3_withfreeHinge');
-% hingeSet = [24 3];
+% opt.saveFile = strcat('/',date,'_EnergyAllAngles_8_3_withfreeHinge');
+% opt.saveFile = strcat('/','03-Apr-2018_EnergyAllAngles_8_3');
+% hingeSet = [8 3];
 % opt.angleConstrFinal(1).val=[ hingeSet(:) , (-pi*(opt.constAnglePerc-0.005)) *ones(length(hingeSet), 1)];
 % 
 % findDeformation(unitCell,extrudedUnitCell,opt);
