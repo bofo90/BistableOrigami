@@ -95,9 +95,9 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.spines['right'].set_color(gray)
     return
 
-folder_name = "Results/triangular prism/active-set/energy/03-Apr-2018_EnergyAllAngles_16_1\kh0.001_kta100.000_ke3.000_kf100.000"
-inverted = True
-maxEnergy = 2.6#1.32
+folder_name = "Results/truncated tetrahedron/active-set/energy/04-Apr-2018_EnergyAllAngles_Kdep_3_24\kh0.010_kta100.000_ke3.000_kf100.000"
+inverted = False
+maxEnergy = 1.32
 plt.close('all')
 #%%
 #######################################################################################################################
@@ -296,9 +296,7 @@ else:
 
 cmap3, norm3 = from_levels_and_colors(np.linspace(0,maxEnergy,1000), cm.rainbow(np.linspace(0, 1, 1000)), extend = 'max')
 
-cs3 = ax3.scatter(realtheta1, realtheta2, c = totEnergysort, cmap = cmap3, vmax = maxEnergy, s = 110, marker = 's') #150 #360
-
-cs4 = ax1.scatter(SStheta1, SStheta2, c = inverse, cmap = cmap2, s = 200, marker = '*')  
+cs3 = ax3.scatter(realtheta1, realtheta2, c = totEnergysort, cmap = cmap3, vmax = maxEnergy, s = 96, marker = 's') #150 #360
 
 ax3.xaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
 ax3.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
@@ -310,6 +308,8 @@ cbar3.ax.tick_params(axis='y',colors='0.2')
 cbar3.ax.tick_params(axis='x',colors='0.2')
 cbar3.outline.set_edgecolor('0.2')
 
+#############################################################################
+#Modifications of plots
 
 #adding boundaries of stables states on energy landscape plot
 for line in np.arange(divitheta1):
@@ -329,6 +329,11 @@ for line in np.arange(divitheta1):
 #                    ax1.plot([theta2[row,line]-sep2,theta2[row,line]+sep2],[theta1[row,line]+sep1,theta1[row,line]+sep1] ,c='k', linewidth = 1.5)
                     ax1.plot([theta2[0,0]-sep2+(2*sep2)*(line),theta2[0,0]-sep2+(2*sep2)*(line+1)],
                               [theta1[0,0]+sep1+(2*sep1)*row,theta1[0,0]+sep1+(2*sep1)*(row)] ,c='k', linewidth = 1)
+          
+#adding stars on final angles of stable states
+ax1.scatter(SStheta1, SStheta2, c = inverse, cmap = cmap2, s = 200, marker = '*', zorder = 3)  
+ax2.scatter(SStheta1, SStheta2, c = inverse, cmap = cmap2, s = 250, marker = '*', edgecolor = 'k', lw = 0.2)              
+            
 
 fig1.tight_layout()
 fig1.show()
