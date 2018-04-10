@@ -311,16 +311,24 @@ cbar3.ax.tick_params(axis='x',colors='0.2')
 cbar3.outline.set_edgecolor('0.2')
 
 
+#adding boundaries of stables states on energy landscape plot
 for line in np.arange(divitheta1):
     for row in np.arange(divitheta2):
+        #Vertical lines of separation
         if line != divitheta1-1:
             if not (np.ma.is_masked(stableStateMat[row,line]) or np.ma.is_masked(stableStateMat[row,line+1])):
                 if stableStateMat[row,line] != stableStateMat[row,line+1]:
-                    ax1.plot([theta2[row,line]+sep2,theta2[row,line]+sep2],[theta1[row,line]-sep1,theta1[row,line]+sep1] ,c='k', linewidth = 1)
+#                    ax1.plot([theta2[row,line]+sep2,theta2[row,line]+sep2],[theta1[row,line]-sep1,theta1[row,line]+sep1] ,c='k', linewidth = 1)
+                    ax1.plot([theta2[0,0]+sep2+(2*sep2)*(line),theta2[0,0]+sep2+(2*sep2)*(line)],
+                              [theta1[0,0]-sep1+(2*sep1)*row,theta1[0,0]-sep1+(2*sep1)*(row+1)] ,c='k', linewidth = 1)
+
+        #Horizontal lines of separation
         if row != divitheta2-1:
             if not (np.ma.is_masked(stableStateMat[row,line]) or np.ma.is_masked(stableStateMat[row+1,line])):
                 if stableStateMat[row+1,line] != stableStateMat[row,line]:
-                    ax1.plot([theta2[row,line]-sep2,theta2[row,line]+sep2],[theta1[row,line]+sep1,theta1[row,line]+sep1] ,c='k', linewidth = 1.5)
+#                    ax1.plot([theta2[row,line]-sep2,theta2[row,line]+sep2],[theta1[row,line]+sep1,theta1[row,line]+sep1] ,c='k', linewidth = 1.5)
+                    ax1.plot([theta2[0,0]-sep2+(2*sep2)*(line),theta2[0,0]-sep2+(2*sep2)*(line+1)],
+                              [theta1[0,0]+sep1+(2*sep1)*row,theta1[0,0]+sep1+(2*sep1)*(row)] ,c='k', linewidth = 1)
 
 fig1.tight_layout()
 fig1.show()
