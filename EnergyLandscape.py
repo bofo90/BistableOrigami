@@ -310,6 +310,17 @@ fig3.tight_layout()
 fig3.show()
 fig3.savefig(folder_name + '/RealAngles-Energy.png', transparent = True)
 
+for line in np.arange(divitheta1):
+    for row in np.arange(divitheta2):
+        if line != divitheta1-1:
+            if not (np.ma.is_masked(stableStateMat[row,line]) or np.ma.is_masked(stableStateMat[row,line+1])):
+                if stableStateMat[row,line] != stableStateMat[row,line+1]:
+                    ax1.plot([theta2[row,line]+sep2,theta2[row,line]+sep2],[theta1[row,line]-sep1,theta1[row,line]+sep1] ,c='k', linewidth = 1)
+        if row != divitheta2-1:
+            if not (np.ma.is_masked(stableStateMat[row,line]) or np.ma.is_masked(stableStateMat[row+1,line])):
+                if stableStateMat[row+1,line] != stableStateMat[row,line]:
+                    ax1.plot([theta2[row,line]-sep2,theta2[row,line]+sep2],[theta1[row,line]+sep1,theta1[row,line]+sep1] ,c='k', linewidth = 1.5)
+
 fig1.tight_layout()
 fig1.show()
 fig1.savefig(folder_name + '/EnergyLand.png', transparent = True)
