@@ -273,10 +273,6 @@ cbar2.ax.tick_params(axis='y',colors='0.2')
 cbar2.ax.tick_params(axis='x',colors='0.2')
 cbar2.outline.set_edgecolor('0.2')
 
-fig2.tight_layout()
-fig2.show()
-fig2.savefig(folder_name + '/StableStates.png', transparent = True)
-
 #############################################################################
 #Plot of real angles
 
@@ -314,9 +310,6 @@ cbar3.ax.tick_params(axis='y',colors='0.2')
 cbar3.ax.tick_params(axis='x',colors='0.2')
 cbar3.outline.set_edgecolor('0.2')
 
-fig3.tight_layout()
-fig3.show()
-fig3.savefig(folder_name + '/RealAngles-Energy.png', transparent = True)
 
 for line in np.arange(divitheta1):
     for row in np.arange(divitheta2):
@@ -337,3 +330,11 @@ fig1.savefig(folder_name + '/EnergyLand.png', transparent = True)
 #fig1.savefig(folder_name + '/EnergyDiag.png', transparent = True)
 #fig1.savefig(folder_name + '/EnergyHinge.png', transparent = True)
 #fig1.savefig(folder_name + '/EnergyTA.png', transparent = True)
+
+fig2.tight_layout()
+fig2.show()
+fig2.savefig(folder_name + '/StableStates.png', transparent = True)
+
+fig3.tight_layout()
+fig3.show()
+fig3.savefig(folder_name + '/RealAngles-Energy.png', transparent = True)
