@@ -95,7 +95,7 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.spines['right'].set_color(gray)
     return
 
-folder_name = "Results/truncated tetrahedron/active-set/energy/04-Apr-2018_EnergyAllAngles_Kdep_3_24\kh0.010_kta100.000_ke3.000_kf100.000"
+folder_name = "Results/truncated tetrahedron/active-set/energy/15-Feb-2018_EnergyAllAngles_3_24\kh0.001_kta100.000_ke3.000_kf100.000"
 inverted = False
 maxEnergy = 1.32
 plt.close('all')
@@ -331,7 +331,7 @@ for line in np.arange(divitheta1):
                               [theta1[0,0]+sep1+(2*sep1)*row,theta1[0,0]+sep1+(2*sep1)*(row)] ,c='k', linewidth = 1)
           
 #adding stars on final angles of stable states
-ax1.scatter(SStheta1, SStheta2, c = inverse, cmap = cmap2, s = 200, marker = '*', zorder = 3)  
+ax1.scatter(SStheta1, SStheta2, c = inverse, cmap = cmap2, s = 200, marker = '*', edgecolor = 'k', lw = 0.2, zorder = 3)  
 ax2.scatter(SStheta1, SStheta2, c = inverse, cmap = cmap2, s = 250, marker = '*', edgecolor = 'k', lw = 0.2)              
             
 
