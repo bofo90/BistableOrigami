@@ -95,9 +95,9 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.spines['right'].set_color(gray)
     return
 
-folder_name = "Results/truncated tetrahedron/active-set/energy/15-Feb-2018_EnergyAllAngles_3_24\kh0.001_kta100.000_ke3.000_kf100.000"
-inverted = False
-maxEnergy = 1.32
+folder_name = "Results/truncated tetrahedron/active-set/energy/16-Feb-2018_EnergyAllAngles_24_3\kh0.001_kta100.000_ke3.000_kf100.000"
+inverted = True
+maxEnergy = 0.75
 plt.close('all')
 #%%
 #######################################################################################################################
@@ -118,10 +118,6 @@ eHinge = dataEnergy[4,:]
 eTAngle = dataEnergy[5,:]
 exfl = dataEnergy[6,:].astype(int)
 
-
-eTotal= eEdge + eDiag +eFace + eHinge
-
-
 hingeName = np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', unpack = True, usecols = [1], dtype=bytes).astype(str)   
 closingAngl1 = np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', unpack = True, usecols = [2])/np.pi
 closingAngl2 = np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', unpack = True, usecols = [3])/np.pi
@@ -139,6 +135,28 @@ NumberAngles = np.size(dataAngles,1)
 
 FoldAng = np.array(hingeName[0][1:-1].split(), int)
 FoldAng = np.sort(FoldAng)
+
+metadataFile = '/metadata.txt'
+
+if os.path.isfile(folder_name+metadataFile):
+    metadata = configparser.RawConfigParser()
+    metadata.read(folder_name+metadataFile)
+
+    totalnumberHinges = int(metadata.get('extUnitCell', 'Hinges'))
+    totalnumberEdges = int(metadata.get('extUnitCell', 'Edges'))
+    totalnumberDiag = int(metadata.get('extUnitCell', 'Diag'))
+    khinge = float(metadata.get('options','kHinge'))
+    kedge = float(metadata.get('options','kEdge'))
+    kdiag = float(metadata.get('options','kDiag'))
+    kface = float(metadata.get('options','kFace'))
+else:
+    raise FileNotFoundError('No metafile found at the given directory. Changes to the script to put manually the variables are needed\n') 
+
+eEdge = eEdge/kedge/totalnumberEdges
+eDiag = eDiag/kdiag/totalnumberDiag
+eHinge = eHinge/khinge/totalnumberHinges
+
+eTotal= eEdge + eDiag + eHinge
 
 #%%
 ###Check if a folding pattern didnt converge
