@@ -36,7 +36,7 @@ switch opt.analysis
                 if strcmp(opt.readHingeFile,'off')
                     if ~isequal(hingeSet, opt.angleConstrFinal(end).val(:,1))
                         continue;
-                    elseif ~strcmp(resfilename(1:end-4), '[8 3]_Ang1_14_Angl2_30')
+                    elseif ~strcmp(resfilename(1:end-4), '[8 3]_Ang1_21_Angl2_16')
                         continue;
                     end
                 end
