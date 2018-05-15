@@ -97,7 +97,7 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
 
 folder_name = "Results/triangular prism/active-set/energy/03-Apr-2018_EnergyAllAngles_8_3\kh0.001_kta100.000_ke3.000_kf100.000"
 inverted = True
-maxEnergy = 1.5
+maxEnergy = 2.2
 plt.close('all')
 #%%
 #######################################################################################################################
@@ -152,9 +152,9 @@ if os.path.isfile(folder_name+metadataFile):
 else:
     raise FileNotFoundError('No metafile found at the given directory. Changes to the script to put manually the variables are needed\n') 
 
-eEdge = eEdge/kedge/totalnumberEdges
-eDiag = eDiag/kdiag/totalnumberDiag
-eHinge = eHinge/khinge/totalnumberHinges
+#eEdge = eEdge/kedge/totalnumberEdges
+#eDiag = eDiag/kdiag/totalnumberDiag
+#eHinge = eHinge/khinge/totalnumberHinges
 
 eTotal= eEdge + eDiag + eHinge
 
@@ -372,6 +372,16 @@ else:
 ax1.scatter(SStheta1, SStheta2, c = inverse, cmap = cmap2, s = 200, marker = '*', edgecolor = 'k', lw = 0.2, zorder = 3)  
 ax2.scatter(SStheta1, SStheta2, c = inverse, cmap = cmap2, s = 250, marker = '*', edgecolor = 'k', lw = 0.2)              
             
+#############################################################################
+#Plot of 1D of energy landscape
+
+fig4 = plt.figure(3,figsize=(cm2inch(24.1), cm2inch(20)))
+ax4 = plt.subplot(111)
+NiceGraph2D(ax4, 'Hinge %d [rad]' %FoldAng[0], 'Energy [a.u.]')
+ax4.xaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
+
+ax4.plot(theta2[31,:],totEnergyMat[31,:])
+
 
 fig1.tight_layout()
 fig1.show()
