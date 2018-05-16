@@ -369,7 +369,9 @@ else:
                                   [theta2[0,0]+sep2+(2*sep2)*row,theta2[0,0]+sep2+(2*sep2)*(row)] ,c='k', linewidth = 1)
           
 #adding stars on final angles of stable states
-ax1.scatter(SStheta1, SStheta2, c = inverse, cmap = cmap2, s = 200, marker = '*', edgecolor = 'k', lw = 0.2, zorder = 3)  
+#ax1.scatter(SStheta1, SStheta2, c = inverse, cmap = cmap2, s = 200, marker = '*', edgecolor = 'k', lw = 0.2, zorder = 3)  
+ax1.scatter(SStheta1[SSpos], SStheta2[SSpos], c = inverse[SSpos], cmap = cmap2, s = 200, marker = '*', edgecolor = 'k', lw = 0.2, zorder = 3)  
+
 ax2.scatter(SStheta1, SStheta2, c = inverse, cmap = cmap2, s = 250, marker = '*', edgecolor = 'k', lw = 0.2)              
             
 #############################################################################
