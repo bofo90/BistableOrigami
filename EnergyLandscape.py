@@ -23,7 +23,7 @@ def cm2inch(value):
 def NiceGraph3D(axes, nameX, nameY, nameZ, mincoord = [np.NaN, np.NaN, np.NaN], maxcoord = [np.NaN, np.NaN, np.NaN],
                 divisions = [np.NaN, np.NaN, np.NaN], buffer = [0.0, 0.0, 0.0]):
     gray = '0.2'
-    matl.rcParams.update({'font.size': 15})
+    matl.rcParams.update({'font.size': 11})
 
     if ~np.isnan(mincoord[0]) and ~np.isnan(maxcoord[0]):
         axes.set_xlim3d([mincoord[0]-buffer[0], maxcoord[0]+buffer[0]])
@@ -63,7 +63,7 @@ def NiceGraph3D(axes, nameX, nameY, nameZ, mincoord = [np.NaN, np.NaN, np.NaN], 
 def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.NaN, np.NaN], divisions = [np.NaN, np.NaN],
                 buffer = [0.0, 0.0, 0.0]):
     gray = '0.2'
-    matl.rcParams.update({'font.size': 15})
+    matl.rcParams.update({'font.size': 11})
 
     if ~np.isnan(mincoord[0]) and ~np.isnan(maxcoord[0]):
         axes.set_xlim([mincoord[0]-buffer[0], maxcoord[0]+buffer[0]])
@@ -200,12 +200,12 @@ sep2 = (closingAngl2[-1]-closingAngl2[0])/(divitheta2-1)/2
 fig1 = plt.figure(0,figsize=(cm2inch(24.1), cm2inch(20)))
 ax1 = plt.subplot(111)
 if inverted:
-    NiceGraph2D(ax1, 'TargAngl Hinge %d [rad]' %FoldAng[0], 'TargAngl Hinge %d [rad]'%FoldAng[1], mincoord = [0,0], maxcoord = [1,1],divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
+    NiceGraph2D(ax1, 'TargAngl Hinge %d [$\pi$ rad]' %FoldAng[0], 'TargAngl Hinge %d [$\pi$ rad]'%FoldAng[1], mincoord = [0,0], maxcoord = [1,1],divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
                 
 #                mincoord = [closingAngl2[0], closingAngl1[0]], 
 #                maxcoord = [closingAngl2[-1], closingAngl1[-1]],  divisions = [tickstheta2, tickstheta1], buffer = [sep2, sep1])
 else:
-    NiceGraph2D(ax1, 'TargAngl Hinge %d [rad]' %FoldAng[0], 'TargAngl Hinge %d [rad]'%FoldAng[1], mincoord = [0,0], maxcoord = [1,1],divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
+    NiceGraph2D(ax1, 'TargAngl Hinge %d [$\pi$ rad]' %FoldAng[0], 'TargAngl Hinge %d [$\pi$ rad]'%FoldAng[1], mincoord = [0,0], maxcoord = [1,1],divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
                 
 #                mincoord = [closingAngl1[0], closingAngl2[0]], 
 #                maxcoord = [closingAngl1[-1], closingAngl2[-1]],  divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
@@ -222,12 +222,12 @@ SStheta1 = SStheta1[sortAngl[::-1]]
 SStheta2 = -dataAngles[3::IterPerSimul,FoldAng[1]-1]/np.pi
 SStheta2 = SStheta2[sortAngl[::-1]]
 
-ax1.xaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
-ax1.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
+ax1.xaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g'))
+ax1.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g'))
 
 cbar = plt.colorbar(cs1,  ax = ax1, fraction=0.05, pad=0.01, extend = 'max')#format="%d", 
 cbar.set_ticks(np.linspace(0, maxEnergy, 5))
-cbar.set_label('Energy', fontsize = 15, color = '0.2')
+cbar.set_label('Energy', fontsize = 11, color = '0.2')
 cbar.ax.tick_params(axis='y',colors='0.2')
 cbar.ax.tick_params(axis='x',colors='0.2')
 cbar.outline.set_edgecolor('0.2')
@@ -261,12 +261,12 @@ fig2 = plt.figure(1,figsize=(cm2inch(24.1), cm2inch(20)))
 ax2 = plt.subplot(111)
 
 if not inverted:
-    NiceGraph2D(ax2, 'TargAngl Hinge %d [rad]' %FoldAng[0], 'TargAngl Hinge %d [rad]'%FoldAng[1], 
+    NiceGraph2D(ax2, 'TargAngl Hinge %d [$\pi$ rad]' %FoldAng[0], 'TargAngl Hinge %d [$\pi$ rad]'%FoldAng[1], 
                 mincoord = [0,0], maxcoord = [1,1],divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
 #                mincoord = [closingAngl2[0], closingAngl1[0]], 
 #                maxcoord = [closingAngl2[-1], closingAngl1[-1]],  divisions = [tickstheta2,tickstheta1], buffer = [sep2, sep1])
 else:
-    NiceGraph2D(ax2, 'TargAngl Hinge %d [rad]' %FoldAng[0], 'TargAngl Hinge %d [rad]'%FoldAng[1], 
+    NiceGraph2D(ax2, 'TargAngl Hinge %d [$\pi$ rad]' %FoldAng[0], 'TargAngl Hinge %d [$\pi$ rad]'%FoldAng[1], 
                 mincoord = [0,0], maxcoord = [1,1],divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
 #                mincoord = [closingAngl1[0], closingAngl2[0]], 
 #                maxcoord = [closingAngl1[-1], closingAngl2[-1]],  divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
@@ -281,12 +281,12 @@ else:
     cs2 = ax2.imshow(stableStateMat, extent=[theta1[0,0]-sep1,theta1[-1,0]+sep1,theta2[0,0]-sep2,theta2[0,-1]+sep2], 
                      cmap = cmap2, aspect = 'auto', origin = 'lower')
 
-ax2.xaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
-ax2.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
+ax2.xaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g'))
+ax2.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g'))
 
 cbar2 = plt.colorbar(cs2,  ax = ax2, fraction=0.05, pad=0.01)#, extend = 'max'
 cbar2.set_ticks(np.linspace(0, np.max(inverse), np.max(inverse)+1))
-cbar2.set_label('Stable State', fontsize = 15, color = '0.2')
+cbar2.set_label('Stable State', fontsize = 11, color = '0.2')
 cbar2.ax.tick_params(axis='y',colors='0.2')
 cbar2.ax.tick_params(axis='x',colors='0.2')
 cbar2.outline.set_edgecolor('0.2')
@@ -302,12 +302,12 @@ realtheta2 = realtheta2[sortAngl[::-1]]
 fig3 = plt.figure(2,figsize=(cm2inch(24.1), cm2inch(20)))
 ax3 = plt.subplot(111)
 if inverted:
-    NiceGraph2D(ax3, 'Hinge %d [rad]' %FoldAng[0], 'Hinge Hinge %d [rad]'%FoldAng[1], 
+    NiceGraph2D(ax3, 'Hinge %d [$\pi$ rad]' %FoldAng[0], 'Hinge Hinge %d [$\pi$ rad]'%FoldAng[1], 
                 mincoord = [0,0], maxcoord = [1,1],divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
 #                mincoord = [min(realtheta1), min(realtheta2)], 
 #                maxcoord = [max(realtheta1), max(realtheta2)],  divisions = [tickstheta2, tickstheta1], buffer = [sep2, sep1])
 else:
-    NiceGraph2D(ax3, 'Hinge %d [rad]' %FoldAng[0], 'Hinge Hinge %d [rad]'%FoldAng[1],
+    NiceGraph2D(ax3, 'Hinge %d [$\pi$ rad]' %FoldAng[0], 'Hinge Hinge %d [$\pi$ rad]'%FoldAng[1],
                 mincoord = [0,0], maxcoord = [1,1],divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
 #                mincoord = [min(realtheta1), min(realtheta2)], 
 #                maxcoord = [max(realtheta1), max(realtheta2)],  divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
@@ -316,12 +316,12 @@ cmap3, norm3 = from_levels_and_colors(np.linspace(0,maxEnergy,1000), cm.rainbow(
 
 cs3 = ax3.scatter(realtheta1, realtheta2, c = totEnergysort, cmap = cmap3, vmax = maxEnergy, s = 96, marker = 's') #150 #360
 
-ax3.xaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
-ax3.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g $\pi$'))
+ax3.xaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g'))
+ax3.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g'))
 
 cbar3 = plt.colorbar(cs3, ax = ax3, fraction=0.05, pad=0.01, extend = 'max')
 cbar3.set_ticks(np.linspace(0, maxEnergy, 5))
-cbar3.set_label('Energy', fontsize = 15, color = '0.2')
+cbar3.set_label('Energy', fontsize = 11, color = '0.2')
 cbar3.ax.tick_params(axis='y',colors='0.2')
 cbar3.ax.tick_params(axis='x',colors='0.2')
 cbar3.outline.set_edgecolor('0.2')
@@ -387,7 +387,7 @@ ax4.plot(theta2[31,:],totEnergyMat[31,:])
 
 fig1.tight_layout()
 fig1.show()
-fig1.savefig(folder_name + '/EnergyLand.png', transparent = True)
+fig1.savefig(folder_name + '/EnergyLand.pdf', transparent = True)
 #fig1.savefig(folder_name + '/EnergyAllEdges.png', transparent = True)
 #fig1.savefig(folder_name + '/EnergyEdge.png', transparent = True)
 #fig1.savefig(folder_name + '/EnergyDiag.png', transparent = True)
