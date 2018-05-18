@@ -95,9 +95,9 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.spines['right'].set_color(gray)
     return
 
-folder_name = "Results/triangular prism/active-set/energy/03-Apr-2018_EnergyAllAngles_8_3\kh0.001_kta100.000_ke3.000_kf100.000"
+folder_name = "Results/triangular prism/active-set/energy/17-May-2018_EnergyAllAngles_Kdep_8_3\kh0.075_kta100.000_ke3.000_kf100.000"
 inverted = True
-maxEnergy = 2.2
+maxEnergy = 3
 plt.close('all')
 #%%
 #######################################################################################################################
@@ -387,7 +387,7 @@ ax4.plot(theta2[31,:],totEnergyMat[31,:])
 
 fig1.tight_layout()
 fig1.show()
-fig1.savefig(folder_name + '/EnergyLand.pdf', transparent = True)
+#fig1.savefig(folder_name + '/EnergyLand.pdf', transparent = True)
 #fig1.savefig(folder_name + '/EnergyAllEdges.png', transparent = True)
 #fig1.savefig(folder_name + '/EnergyEdge.png', transparent = True)
 #fig1.savefig(folder_name + '/EnergyDiag.png', transparent = True)
@@ -396,8 +396,12 @@ fig1.savefig(folder_name + '/EnergyLand.pdf', transparent = True)
 
 fig2.tight_layout()
 fig2.show()
-fig2.savefig(folder_name + '/StableStates.png', transparent = True)
+#fig2.savefig(folder_name + '/StableStates.png', transparent = True)
 
 fig3.tight_layout()
 fig3.show()
-fig3.savefig(folder_name + '/RealAngles-Energy.png', transparent = True)
+#fig3.savefig(folder_name + '/RealAngles-Energy.png', transparent = True)
+
+fig4.tight_layout()
+fig4.show()
+#fig4.savefig(folder_name + '/EnergyLand1D.pdf', transparent = True)

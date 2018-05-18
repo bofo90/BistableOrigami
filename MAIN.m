@@ -12,18 +12,18 @@ clearvars -global
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-opt=initOpt('template','triangular prism','analysis','plot','readHingeFile','off',...
-            'createFig', 'on','saveFig','on','saveMovie', 'off',...
+opt=initOpt('template','triangular prism','analysis','savedata','readHingeFile','on',...
+            'createFig', 'off','saveFig','off','saveMovie', 'off',...
             'figDPI',200,'safeMovieAntiAlias', 0,...
             'folAlgor', 'active-set','relAlgor', 'active-set',...
             'gethistory', 'off',...
             'constrEdge','off','constrFace','on','constAnglePerc',0.99,... 
-            'Khinge',0.001,'Kedge',3,'Kdiag',3,'Kface',100,'KtargetAngle',100,...
+            'Khinge',0.075,'Kedge',3,'Kdiag',3,'Kface',100,'KtargetAngle',100,...
             'maxStretch', 0.3,...
             'maxHinges',inf,'minHinges',0);    %Only work when readHingeFile is 'on'
 
-% opt.saveFile = strcat('/',date,'_EnergyAllAngles_Kdep_3_24');
-opt.saveFile = strcat('/','03-Apr-2018_EnergyAllAngles_8_3');
+% opt.saveFile = strcat('/',date,'_EnergyAllAngles_Kdep_8_3');
+opt.saveFile = strcat('/','17-May-2018_EnergyAllAngles_Kdep_8_3');
 
 hingeSet = [8 3];
 opt.angleConstrFinal(1).val=[ hingeSet(:) , (-pi*(opt.constAnglePerc-0.005)) *ones(length(hingeSet), 1)];
@@ -54,9 +54,11 @@ selectHinges(unitCell, extrudedUnitCell, opt);
 findDeformation(unitCell,extrudedUnitCell,opt);
 
 % opt.saveFile = strcat('/',date,'_EnergyAllAngles_Kdep_3_24');
-% % hingeSet = [3 24];
-% % opt.angleConstrFinal(1).val=[ hingeSet(:) , (-pi*(opt.constAnglePerc-0.005)) *ones(length(hingeSet), 1)];
-% opt.Khinge = 0.1;
+% hingeSet = [3 24];
+% opt.angleConstrFinal(1).val=[ hingeSet(:) , (-pi*(opt.constAnglePerc-0.005)) *ones(length(hingeSet), 1)];
+% opt.Khinge = 0.05;
+% findDeformation(unitCell,extrudedUnitCell,opt);
+% opt.Khinge = 0.075;
 % findDeformation(unitCell,extrudedUnitCell,opt);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
