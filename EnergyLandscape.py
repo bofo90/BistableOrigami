@@ -406,10 +406,10 @@ def EnergyLandscape(folder_name, inverted, maxEnergy = 4.5, plot = False):
         fig4.show()
         #fig4.savefig(folder_name + '/EnergyLand1D.pdf', transparent = True)
         
-        return theta2[31,:],totEnergyMat[31,:]
+    return theta2[31,:],totEnergyMat[31,:]
     
 if __name__ == "__main__":
-    folder_name = "Results/triangular prism/active-set/energy/17-May-2018_EnergyAllAngles_Kdep_8_3\kh0.100_kta100.000_ke3.000_kf100.000"
+    folder_name = "Results/triangular prism/active-set/energy/17-May-2018_EnergyAllAngles_Kdep_8_3\kh0.010_kta100.000_ke3.000_kf100.000"
     #folder_name = "Results/triangular prism/active-set/energy/03-Apr-2018_EnergyAllAngles_8_3\kh0.001_kta100.000_ke3.000_kf100.000"
     inverted = True
     maxEnergy = 4.5
