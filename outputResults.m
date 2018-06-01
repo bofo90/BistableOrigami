@@ -142,6 +142,7 @@ if strcmp(opt.analysis,'info')
             end               
         end
     end
+    printHigRes(f1,opt,[opt.template,'_internalPolyhedra'],nameFolder); 
     close(f)
     %PLOT ALL INFORMATION
     f=figure('Position', [0 0 800 800]);hold on;
