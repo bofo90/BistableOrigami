@@ -81,10 +81,22 @@ switch geom
         Polyhedron.node=([0 0 0;1 0 0;1/2 sqrt(3)/2 0;0 0 1;1 0 1;1/2 sqrt(3)/2 1]);
         Polyhedron.edge=[1 2;2 3;3 1;4 5;5 6;6 4;1 4;2 5;3 6];
         Polyhedron.face={[1 2 5 4];[2 3 6 5];[3 1 4 6];[3 2 1];[4 5 6]};
+     case {'pentagonal prism'}
+        theta=(0:2*pi/5:2*pi);r=1/(2*acos(2*pi/5));x=r^2*cos(theta);y=r^2*sin(theta);
+        Polyhedron.node=[[x(1:5)';x(1:5)'],[y(1:5)';y(1:5)'],[zeros(5,1);ones(5,1)]]; 
+        Polyhedron.edge=[1 2; 2 3; 3 4; 4 5; 5 1; 6 7; 7 8; 8 9; 9 10; 10 6; 1 6; 2 7; 3 8; 4 9; 5 10];
+        Polyhedron.face={[5:-1:1];[6:10];[1 2 7 6];[2 3 8 7];[3 4 9 8];[4 5 10 9];[5 1 6 10]};
+        Polyhedron.node(:,1:2)=Polyhedron.node(:,1:2)/norm(Polyhedron.node(1,:)-Polyhedron.node(2,:));
      case {'hexagonal prism'}
         Polyhedron.node=([0 0 0;1 0 0; 1.5 sqrt(3)/2 0;1 sqrt(3) 0;0 sqrt(3) 0;-0.5 sqrt(3)/2 0;0 0 1;1 0 1;1.5 sqrt(3)/2 1;1 sqrt(3) 1;0 sqrt(3) 1;-0.5 sqrt(3)/2 1]);
         Polyhedron.edge=[1 2;2 3;3 4;4 5;5 6;6 1;7 8;8 9;9 10;10 11;11 12;12 7;1 7;2 8;3 9;4 10;5 11;6 12];
         Polyhedron.face={[6 5 4 3 2 1];[7 8 9 10 11 12];[1 2 8 7];[2 3 9 8];[3 4 10 9];[4 5 11 10];[5 6 12 11];[6 1 7 12]};
+     case {'heptagonal prism'}
+        theta=(0:2*pi/7:2*pi);r=1/(2*acos(2*pi/7));x=r^2*cos(theta);y=r^2*sin(theta);
+        Polyhedron.node=[[x(1:7)';x(1:7)'],[y(1:7)';y(1:7)'],[zeros(7,1);ones(7,1)]]; 
+        Polyhedron.edge=[1 2; 2 3; 3 4; 4 5; 5 6; 6 7; 7 1; 8 9; 9 10; 10 11; 11 12; 12 13; 13 14; 14 8; 1 8; 2 9; 3 10; 4 11; 5 12; 6 13; 7 14];
+        Polyhedron.face={[7:-1:1];[8:14];[1 2 9 8];[2 3 10 9];[3 4 11 10];[4 5 12 11];[5 6 13 12];[6 7 14 13];[7 1 8 14]};
+        Polyhedron.node(:,1:2)=Polyhedron.node(:,1:2)/norm(Polyhedron.node(1,:)-Polyhedron.node(2,:));
      case {'octagonal prism'}
         Polyhedron.node=[0,-(1/2)*csc(pi/8),-(1/2);0,-(1/2)*csc(pi/8),1/2;0,1/2*csc(pi/8),-(1/2);0,1/2*csc(pi/8),1/2;-(1/2)*csc(pi/8),0,-(1/2);-(1/2)*csc(pi/8),0,1/2;1/2*csc(pi/8),0,-(1/2);1/2*csc(pi/8),0,1/2;-(csc(pi/8)/(2*sqrt(2))),-(csc(pi/8)/(2*sqrt(2))),-(1/2);-(csc(pi/8)/(2*sqrt(2))),-(csc(pi/8)/(2*sqrt(2))),1/2;-(csc(pi/8)/(2*sqrt(2))),csc(pi/8)/(2*sqrt(2)),-(1/2);-(csc(pi/8)/(2*sqrt(2))),csc(pi/8)/(2*sqrt(2)),1/2;csc(pi/8)/(2*sqrt(2)),-(csc(pi/8)/(2*sqrt(2))),-(1/2);csc(pi/8)/(2*sqrt(2)),-(csc(pi/8)/(2*sqrt(2))),1/2;csc(pi/8)/(2*sqrt(2)),csc(pi/8)/(2*sqrt(2)),-(1/2);csc(pi/8)/(2*sqrt(2)),csc(pi/8)/(2*sqrt(2)),1/2];
         Polyhedron.edge=[1,2;1,9;1,13;2,10;2,14;3,4;3,11;3,15;4,12;4,16;5,6;5,9;5,11;6,10;6,12;7,8;7,13;7,15;8,14;8,16;9,10;11,12;13,14;15,16];
