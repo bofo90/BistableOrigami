@@ -95,11 +95,14 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.spines['right'].set_color(gray)
     return
 
+
+#%%
+def EnergyLandscape(folder_name, inverted, maxEnergy = 4.5, plot = False):
 #%%
 #######################################################################################################################
 ##################### Reading Files
 #######################################################################################################################
-def EnergyLandscape(folder_name, inverted, maxEnergy = 4.5, plot = False):
+
     plt.close('all')
     file_name1 = "/EnergyData.csv" 
     file_name2 = "/Hinges.csv"
@@ -230,7 +233,7 @@ def EnergyLandscape(folder_name, inverted, maxEnergy = 4.5, plot = False):
         cbar.ax.tick_params(axis='y',colors='0.2')
         cbar.ax.tick_params(axis='x',colors='0.2')
         cbar.outline.set_edgecolor('0.2')
-    
+    #%%
     ######################################################################
     #Analysis for stable states
     
@@ -291,6 +294,7 @@ def EnergyLandscape(folder_name, inverted, maxEnergy = 4.5, plot = False):
         cbar2.ax.tick_params(axis='x',colors='0.2')
         cbar2.outline.set_edgecolor('0.2')
     
+    #%%
     #############################################################################
     #Plot of real angles
     
@@ -326,7 +330,7 @@ def EnergyLandscape(folder_name, inverted, maxEnergy = 4.5, plot = False):
         cbar3.ax.tick_params(axis='y',colors='0.2')
         cbar3.ax.tick_params(axis='x',colors='0.2')
         cbar3.outline.set_edgecolor('0.2')
-    
+    #%%
         #############################################################################
         #Modifications of plots
         
@@ -372,7 +376,7 @@ def EnergyLandscape(folder_name, inverted, maxEnergy = 4.5, plot = False):
         #ax1.scatter(SStheta1, SStheta2, c = inverse, cmap = cmap2, s = 200, marker = '*', edgecolor = 'k', lw = 0.2, zorder = 3)  
         ax1.scatter(SStheta1[SSpos], SStheta2[SSpos], c = inverse[SSpos], cmap = cmap2, s = 200, marker = '*', edgecolor = 'k', lw = 0.2, zorder = 3)  
         
-        ax2.scatter(SStheta1, SStheta2, c = inverse, cmap = cmap2, s = 250, marker = '*', edgecolor = 'k', lw = 0.2)              
+        ax2.scatter(SStheta1[SSpos], SStheta2[SSpos], c = inverse[SSpos], cmap = cmap2, s = 250, marker = '*', edgecolor = 'k', lw = 0.2)              
                     
         #############################################################################
         #Plot of 1D of energy landscape
@@ -405,11 +409,11 @@ def EnergyLandscape(folder_name, inverted, maxEnergy = 4.5, plot = False):
         fig4.tight_layout()
         fig4.show()
         #fig4.savefig(folder_name + '/EnergyLand1D.pdf', transparent = True)
-        
+#%%        
     return theta2[31,:],totEnergyMat[31,:]
-    
+#%%    
 if __name__ == "__main__":
-    folder_name = "Results/triangular prism/active-set/energy/17-May-2018_EnergyAllAngles_Kdep_8_3\kh0.010_kta100.000_ke3.000_kf100.000"
+    folder_name = "Results/triangular prism/active-set/energy/03-Apr-2018_EnergyAllAngles_8_3\kh0.001_kta100.000_ke3.000_kf100.000"
     #folder_name = "Results/triangular prism/active-set/energy/03-Apr-2018_EnergyAllAngles_8_3\kh0.001_kta100.000_ke3.000_kf100.000"
     inverted = True
     maxEnergy = 4.5
