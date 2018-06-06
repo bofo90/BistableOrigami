@@ -12,7 +12,7 @@ clearvars -global
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-opt=initOpt('template','cuboctahedron','analysis','selecthinges','readHingeFile','off',...
+opt=initOpt('template','nonagonal prism','analysis','selecthinges','readHingeFile','off',...
             'createFig', 'off','saveFig','off','saveMovie', 'off',...
             'figDPI',200,'safeMovieAntiAlias', 0,...
             'folAlgor', 'active-set','relAlgor', 'active-set',...
@@ -47,6 +47,13 @@ opt.options=optimoptions('fmincon','GradConstr','on','GradObj','on',...
 %SELECT HINGES
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 selectHinges(unitCell, extrudedUnitCell, opt);
+
+opt.template = 'decagonal prism';
+
+[unitCell,extrudedUnitCell,opt]=buildGeometry(opt);
+selectHinges(unitCell, extrudedUnitCell, opt);
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %ANALYSIS

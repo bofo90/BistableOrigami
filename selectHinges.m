@@ -275,7 +275,7 @@ for N = 1:height(G.Nodes)-1  %height(G.Nodes)-1
     hingeSetsPrev(N+1).all = hingeSets;
     
     if N >= opt.maxHinges
-        break
+        break;
     end
 end
 
