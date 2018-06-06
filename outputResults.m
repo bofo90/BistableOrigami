@@ -443,7 +443,7 @@ function refVec=detrefVec(unitCell,result,opt,ref)
     end
     
 function plotg=prepEffPlot(som,viewCoor)
-    for i=3:10
+    for i=3:12
         plotg.polFace(i).nod=[];
         plotg.polFace(i).index=[];
     end
@@ -460,7 +460,7 @@ function plotg=prepEffPlot(som,viewCoor)
             plotg.lat(nc).coorNew=som.nodeNew+ones(size(som.nodeNew,1),1)*(som.latVec(nc,:));
         end
     end
-    for i=3:10
+    for i=3:12
         plotg.polFace(i).normal(1,:)=[0,0,0];
         for j=1:size(plotg.polFace(i).nod,1)
             n1a=plotg.lat(nc).coor(plotg.polFace(i).nod(j,2),1:3)-plotg.lat(nc).coor(plotg.polFace(i).nod(j,1),1:3);
