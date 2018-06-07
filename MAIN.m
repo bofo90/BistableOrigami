@@ -12,7 +12,7 @@ clearvars -global
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-opt=initOpt('template','nonagonal prism','analysis','selecthinges','readHingeFile','off',...
+opt=initOpt('template','decagonal prism','analysis','info','readHingeFile','off',...
             'createFig', 'off','saveFig','off','saveMovie', 'off',...
             'figDPI',200,'safeMovieAntiAlias', 0,...
             'folAlgor', 'active-set','relAlgor', 'active-set',...
@@ -48,25 +48,10 @@ opt.options=optimoptions('fmincon','GradConstr','on','GradObj','on',...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 selectHinges(unitCell, extrudedUnitCell, opt);
 
-opt.template = 'decagonal prism';
-
-[unitCell,extrudedUnitCell,opt]=buildGeometry(opt);
-selectHinges(unitCell, extrudedUnitCell, opt);
-
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %ANALYSIS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 findDeformation(unitCell,extrudedUnitCell,opt);
-
-% opt.saveFile = strcat('/',date,'_EnergyAllAngles_Kdep_3_24');
-% hingeSet = [3 24];
-% opt.angleConstrFinal(1).val=[ hingeSet(:) , (-pi*(opt.constAnglePerc-0.005)) *ones(length(hingeSet), 1)];
-% opt.Khinge = 0.05;
-% findDeformation(unitCell,extrudedUnitCell,opt);
-% opt.Khinge = 0.075;
-% findDeformation(unitCell,extrudedUnitCell,opt);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %OUTPUT AND PLOT GEOMETRY
