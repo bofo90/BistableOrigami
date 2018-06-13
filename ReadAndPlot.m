@@ -24,7 +24,7 @@ switch opt.analysis
             succesfullFiles = 0;
             
             for ct = 1:length(allFiles)
-                if allFiles(ct).isdir || strcmp(allFiles(ct).name(1:8), 'metadata')
+                if allFiles(ct).isdir || strcmp(allFiles(ct).name(1:end-4), 'metadata')
                     % skip all directories and metadata file
                     directories = directories+1;
                     continue;
@@ -52,11 +52,10 @@ switch opt.analysis
                     Energies = [ones(size(result.E,2),1)*(ct-directories), result.Eedge(2,:)',...
                         result.Ediag(2,:)', result.Eface(2,:)', result.Ehinge(2,:)',...
                         result.EtargetAngle(2,:)', result.exfl(2,:)'];
-                    PosStad = [ones(size(result.E,1),1,1)*(ct-directories),...
+                    PosStad = [ones(size(result.E,2),1,1)*(ct-directories),...
                         CM(:,:),Radios, Stdev,maxStrech, minStrech, SumIntAngles, SumExtAngles];
                     Hinges = [num2str(ct-directories),',',mat2str(hingeSet'),',',...
-                        mat2str(result.anglConstr(1,2),5),',', mat2str(result.anglConstr(2,2),5),...
-                        ',',int2str(result.angNum(1)),',',int2str(result.angNum(2))];
+                        mat2str(result.anglConstr(1,2),5)];
                     AllAngles = [extrudedUnitCell.theta];
                     for iter = 1:size(result.deform,2)
                         AllAngles = [AllAngles result.deform(iter).theta];
@@ -118,7 +117,7 @@ fileHinge = strcat(folderEnergy, '/','Hinges.csv');
 if exist(fileHinge, 'file')
     delete(fileHinge) % always start with new file
 end
-headersHinge = {'HingeNumber'; 'ActuatedHinges'; 'Theta1'; 'Theta2'; 'ThetaNum1'; 'ThetaNum2'};
+headersHinge = {'HingeNumber'; 'ActuatedHinges'; 'Theta1'};
 writeHeader(fileHinge, headersHinge);
 
 fileMassDist = strcat(folderEnergy, '/','PosStad.csv');
