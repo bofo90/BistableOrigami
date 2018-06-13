@@ -6,6 +6,8 @@ from matplotlib.colors import from_levels_and_colors
 import numpy as np
 import configparser
 import os.path
+import scipy.cluster.hierarchy as hierarch
+from scipy.spatial.distance import pdist
 #import pylab as P
 #import csv
 #import glob
@@ -97,7 +99,7 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.spines['right'].set_color(gray)
     return
 
-def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan, kdiag = np.nan):
+def ReadandAnalizeFile(folder_name, plot = False, khinge = np.nan, kedge = np.nan, kdiag = np.nan):
 #    
 #plot = True
 #khinge = 0.01
@@ -171,7 +173,6 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     normalized = ''   
     tolStretch = 0.3 #max precentage of allowed stretch
     digitPi = 4 # digits of pi for rounding to see if angles go beyond it and "not converge"
-    tolAngleSS = 0.087 # equivalent to 5 degrees
         
     stepsHinge = int(len(hingeNum)/len(hingeName))
     totHingeNum = len(hingeName)
@@ -252,17 +253,36 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     SumIntAng = SumIntAng/np.pi+internalHinges
     SumExtAng = (SumExtAng/np.pi-(totalnumberHinges-internalHinges))*(-1)
 
+    #%%
     ###################### Analysis of angles to find stable states
-    convHinges = np.empty(0, dtype = int)
-    finalAngles = np.empty((0,np.size(dataAngles,1)))
-    dataAngles = np.around(dataAngles/tolAngleSS)*tolAngleSS ## Here you conisder the tolerance for angles to recognize stable states
-    for hinge in orderedHinges:
-        if ~np.isnan(hingesMask[hinge]):
-            sortAngleIndex = np.lexsort((dataAngles[2*hinge+1,:],dataAngles[2*hinge,:]))
-            finalAngles = np.append(finalAngles, [dataAngles[2*hinge+1,sortAngleIndex]], axis = 0)
-            convHinges = np.append(convHinges, hinge)
     
-    if np.size(finalAngles) > 0:
+    finalAngles = np.empty((0,np.size(dataAngles,1)))
+    for hinge in np.arange(totHingeNum):
+        sortAllAngIndex = np.lexsort((dataAngles[(stepsHinge+1)*(hinge+1)-1,:],dataAngles[(stepsHinge+1)*hinge,:]))
+        finalAngles = np.append(finalAngles, [dataAngles[(stepsHinge+1)*(hinge+1)-1,sortAllAngIndex]], axis = 0)
+        
+    Z = hierarch.linkage(finalAngles, 'centroid')
+    inverse = hierarch.fcluster(Z, 1, criterion='distance')
+    c = hierarch.cophenet(Z, pdist(finalAngles))
+    print('this is the cophenet of the hierarchical linkage', c[0])
+    
+    ###################### Plot the cluster and see how are the results related
+#    plt.figure(figsize=(25, 10))
+#    plt.title('Hierarchical Clustering Dendrogram')
+#    plt.xlabel('sample index')
+#    plt.ylabel('distance')
+#    hierarch.dendrogram(
+#        Z,
+#        truncate_mode='lastp',  # show only the last p merged clusters
+#        p=50,  # show only the last p merged clusters
+#        leaf_rotation=90.,  # rotates the x axis labels
+#        leaf_font_size=8.,  # font size for the x axis labels
+#        show_contracted=True,
+#    )
+#    plt.show()
+    
+    
+    if np.any(inverse[np.logical_not(flagmask.any(axis = 1))] != 1):
         differentAngles, index, counts = np.unique(finalAngles, axis = 0, return_index = True, return_counts = True)
         differentEnergies = np.column_stack((convHinges[index], counts))
         differentEnergiesName = hingeName[convHinges[index]]
