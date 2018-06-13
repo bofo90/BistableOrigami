@@ -123,30 +123,21 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     eFace = dataEnergy[3,:]
     eHinge = dataEnergy[4,:]
     eTAngle = dataEnergy[5,:]
-    exfl = dataEnergy[6,:].astype(int)
+    eHinInt = dataEnergy[6,:]
+    exfl = dataEnergy[7,:].astype(int)
         
     hingeName = np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', unpack = True, usecols = [1], dtype=bytes).astype(str)    
         
     dataPosStad = np.loadtxt(folder_name+file_name3,skiprows=1, delimiter = ',', unpack = True)
-    #### If there is no metadata file the order of this data is not the same as here shown
-    CMxFol = dataPosStad[1,:]
-    CMxRel = dataPosStad[2,:]
-    CMyFol = dataPosStad[3,:]
-    CMyRel = dataPosStad[4,:]
-    CMzFol = dataPosStad[5,:]
-    CMzRel = dataPosStad[6,:]
-    RadFol = dataPosStad[7,:]
-    RadRel = dataPosStad[8,:]
-    StdFol = dataPosStad[9,:]
-    StdRel = dataPosStad[10,:]
-    MaxStrFol = dataPosStad[11,:]
-    MaxStrRel = dataPosStad[12,:]
-    MinStrFol = dataPosStad[13,:]
-    MinStrRel = dataPosStad[14,:]
-    SumIntAngFol = dataPosStad[15,:]
-    SumIntAngRel = dataPosStad[16,:]
-    SumExtAngFol = dataPosStad[17,:]
-    SumExtAngRel = dataPosStad[18,:]
+    CMx = dataPosStad[1,:]
+    CMy = dataPosStad[2,:]
+    CMz = dataPosStad[3,:]
+    Rad = dataPosStad[4,:]
+    Std = dataPosStad[5,:]
+    MaxStr = dataPosStad[6,:]
+    MinStr = dataPosStad[7,:]
+    SumIntAng = dataPosStad[8,:]
+    SumExtAng = dataPosStad[9,:]
     
     dataAngles = np.loadtxt(folder_name+file_name4,skiprows=1, delimiter = ',', dtype = np.float64)
     dataAngles = np.delete(dataAngles, 0, 1)
@@ -177,8 +168,6 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         #### If there is no metadata file the order of the dataPosStad is not the same as here shown           
         
         
-    tolHinge = 0.003
-    tolEdge = 0.01
     normalized = ''   
     tolStretch = 0.3 #max precentage of allowed stretch
     digitPi = 4 # digits of pi for rounding to see if angles go beyond it and "not converge"
@@ -195,24 +184,15 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
 
     ############################################ Modify data to have a normalized energy (or just difference in angle/length)
     if ~np.isnan(khinge):
-        eHingeFol = np.sqrt(eHingeFol*2/khinge/totalnumberHinges)
-        eHingeRel = np.sqrt(eHingeRel*2/khinge/totalnumberHinges)
-        eHinIntFol = np.sqrt(eHinIntFol*2/khinge/internalHinges)
-        eHinIntRel = np.sqrt(eHinIntRel*2/khinge/internalHinges)
-        tolHinge = 0.008
+        eHinge = np.sqrt(eHinge*2/khinge/totalnumberHinges)
+        eHinInt = np.sqrt(eHinInt*2/khinge/internalHinges)
         normalized = normalized + 'hn'
     if ~np.isnan(kedge) and ~np.isnan(kdiag):
-        eEdgeFol = eEdgeFol*2/kedge
-        eEdgeRel = eEdgeRel*2/kedge
-        eDiagFol = eDiagFol*2/kdiag
-        eDiagRel = eDiagRel*2/kdiag
-        eAllEdgeFol = np.sqrt((eEdgeFol + eDiagFol)/(totalnumberEdges+totalnumberDiag))
-        eAllEdgeRel = np.sqrt((eEdgeRel + eDiagRel)/(totalnumberEdges+totalnumberDiag))
-        eEdgeFol = np.sqrt(eEdgeFol/totalnumberEdges)
-        eEdgeRel = np.sqrt(eEdgeRel/totalnumberEdges)
-        eDiagFol = np.sqrt(eDiagFol/totalnumberDiag)
-        eDiagRel = np.sqrt(eDiagRel/totalnumberDiag)
-        tolEdge = 0.0001
+        eEdge = eEdge*2/kedge
+        eDiag = eDiag*2/kdiag
+        eAllEdge = np.sqrt((eEdge + eDiag)/(totalnumberEdges+totalnumberDiag))
+        eEdge = np.sqrt(eEdge/totalnumberEdges)
+        eDiag = np.sqrt(eDiag/totalnumberDiag)
         normalized = normalized + 'en'
     
     ############################################ get the number of actuated hinges for each hinge-set
