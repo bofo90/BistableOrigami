@@ -116,24 +116,17 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     file_name4 = "/Angles.csv"
 
     dataEnergy = np.loadtxt(folder_name+file_name1,skiprows=1, delimiter = ',', unpack = True)
+    
     hingeNum = dataEnergy[0,:].astype(int)
-    eEdgeFol = dataEnergy[1,:]
-    eEdgeRel = dataEnergy[2,:]
-    eDiagFol = dataEnergy[3,:]
-    eDiagRel = dataEnergy[4,:]    
-    eFaceFol = dataEnergy[5,:]
-    eFaceRel = dataEnergy[6,:]
-    eHingeFol = dataEnergy[7,:]
-    eHingeRel = dataEnergy[8,:]
-    eTAngleFol = dataEnergy[9,:]
-    eTAngleRel = dataEnergy[10,:]
-    eHinIntFol = dataEnergy[11,:]
-    eHinIntRel = dataEnergy[12,:]
-    exflFol = dataEnergy[13,:].astype(int)
-    exflRel = dataEnergy[14,:].astype(int)
-    
+    eEdge = dataEnergy[1,:]
+    eDiag = dataEnergy[2,:]
+    eFace = dataEnergy[3,:]
+    eHinge = dataEnergy[4,:]
+    eTAngle = dataEnergy[5,:]
+    exfl = dataEnergy[6,:].astype(int)
+        
     hingeName = np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', unpack = True, usecols = [1], dtype=bytes).astype(str)    
-    
+        
     dataPosStad = np.loadtxt(folder_name+file_name3,skiprows=1, delimiter = ',', unpack = True)
     #### If there is no metadata file the order of this data is not the same as here shown
     CMxFol = dataPosStad[1,:]
@@ -155,7 +148,7 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
     SumExtAngFol = dataPosStad[17,:]
     SumExtAngRel = dataPosStad[18,:]
     
-    dataAngles = np.loadtxt(folder_name+file_name4,skiprows=1, delimiter = ',')
+    dataAngles = np.loadtxt(folder_name+file_name4,skiprows=1, delimiter = ',', dtype = np.float64)
     dataAngles = np.delete(dataAngles, 0, 1)
     MaxAngles = np.max(dataAngles, axis = 1)
     MinAngles = np.min(dataAngles, axis = 1)
@@ -507,5 +500,5 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
 #            hinges[np.size(row)] +=1
 #%%
 if __name__ == "__main__":
-    folder_name = "Results/truncated tetrahedron/active-set/energy/02-Feb-2018_Energylandscape\kh0.001_kta1.000_ke1.000_kf100.000"
+    folder_name = "Results/tetrahedron/active-set/energy/13-Jun-2018_temp\kh0.001_kta100.000_ke3.000_kf100.000"
     ReadandAnalizeFile(folder_name)
