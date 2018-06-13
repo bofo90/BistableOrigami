@@ -195,47 +195,50 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         eDiag = np.sqrt(eDiag/totalnumberDiag)
         normalized = normalized + 'en'
     
+    #%%
     ############################################ get the number of actuated hinges for each hinge-set
     actuatedHinges = np.zeros(totHingeNum, dtype = int)
     hingeCount = np.zeros(internalHinges)   
     for hinge in np.arange(totHingeNum):
         actuatedHinges[hinge] = len(hingeName[hinge].split())
         hingeCount[actuatedHinges[hinge]-1] += 1
+        
+    #%%
     ############################################ order the hinge-set according to the number of actuated hinges
     orderedHinges = np.argsort(actuatedHinges)
     
     ############################################ count the different flags and Mask the hinge-sets that didnt converge
+    exfl = exfl.reshape(totHingeNum,stepsHinge)
+    flagmask = np.logical_and(exfl !=1,exfl !=5)
+    
+    
+    
     flagCountFol = np.zeros((internalHinges, totalflags))
     flagCountRel = np.zeros((internalHinges, totalflags))
     hingesMask = np.arange(totHingeNum, dtype = float)
     notConvHinges = np.empty((0,3), dtype = int)
     for i in np.arange(totHingeNum):
-        error = False
-#        flagCountFol[actuatedHinges[i]-1,exflFol[i*stepsHinge+1]+3]  += 1
-#        flagCountRel[actuatedHinges[i]-1,exflRel[i*stepsHinge+1]+3]  += 1
-        if exflFol[(i+1)*stepsHinge-1] != 1 and exflFol[(i+1)*stepsHinge-1] != 5:# and exflFol[(i+1)*stepsHinge-1] != -2:
-            flagCountFol[actuatedHinges[i]-1,exflFol[(i+1)*stepsHinge-1]+3]  += 1
-            error = True
-        if exflRel[(i+1)*stepsHinge-1] != 1 and not error and exflRel[(i+1)*stepsHinge-1] != 5:# and exflRel[(i+1)*stepsHinge-1] != -2:
-            flagCountRel[actuatedHinges[i]-1,exflRel[(i+1)*stepsHinge-1]+3]  += 1
-            error = True
-        if not error:
+        if flagmask[i,0]:
+            flagCountFol[actuatedHinges[i]-1,exfl[i,0]]  += 1
+        if flagmask[i,1]:# and exflRel[(i+1)*stepsHinge-1] != -2:
+            flagCountRel[actuatedHinges[i]-1,exfl[i,1]]  += 1
+        if flagmask[i,:].any():
             #check if max/min angle not bigger than pi or -pi
-            if MaxAngles[i*2+1] > np.around(np.pi,digitPi) or MinAngles[i*2+1] < -np.around(np.pi,digitPi):
+            if MaxAngles[i*3+2] > np.around(np.pi,digitPi) or MinAngles[i*3+2] < -np.around(np.pi,digitPi):
                 flagCountRel[actuatedHinges[i]-1,6]  += 1
-                exflRel[(i+1)*stepsHinge-1] = (totalflags-3)-2
-                error = True
+                exfl[i,1] = 6
+                flagmask[i,1] = True
             #check for max/min strech not bigger than a tolerance
-            if (MaxStrRel[(i+1)*stepsHinge-1] > tolStretch or MinStrRel[(i+1)*stepsHinge-1]  < -tolStretch) and not error:
+            if (MaxStr[(i+1)*stepsHinge-1] > tolStretch or MinStr[(i+1)*stepsHinge-1]  < -tolStretch) and not flagmask[i,1]:
                 flagCountRel[actuatedHinges[i]-1,7]  += 1
-                exflRel[(i+1)*stepsHinge-1] = (totalflags-3)-1
-                error = True
-        if error:
-            notConvHinges = np.append(notConvHinges,np.array([[i, exflFol[(i+1)*stepsHinge-1], exflRel[(i+1)*stepsHinge-1]]]), axis = 0)
+                exfl[i,1] = 7
+                flagmask[i,1] = True
+        if flagmask[i,:].any():
+            notConvHinges = np.append(notConvHinges,np.array([[i, exfl[i,0],exfl[i,1]]]), axis = 0)
             hingesMask[i] = np.NaN
 #            print(hingeName[i])
             
-    notConverged = sum(np.isnan(hingesMask))
+    notConverged = sum(flagmask.any(axis = 1))
     converged = totHingeNum - notConverged
     ############################################ normalize the flag counts
     allFlags = np.sum(np.add(flagCountFol,flagCountRel), axis = 0)
@@ -244,64 +247,10 @@ def ReadandAnalizeFile(folder_name, plot = True, khinge = np.nan, kedge = np.nan
         flagCountFol[:,i] = flagCountFol[:,i]/hingeCount
         flagCountRel[:,i] = flagCountRel[:,i]/hingeCount
         
-    ############################################ ordering the last energies on the release according to the number of actuated hinges
-#    lasteHingeRel = eHingeRel[stepsHinge-1::stepsHinge]
-#    lasteEdgeRel = eAllEdgeRel[stepsHinge-1::stepsHinge]
-##    for hinge in np.arange(totHingeNum):
-##        if np.isnan(hingesMask[hinge]):
-##            lasteHingeRel[hinge] = np.nan
-##            lasteEdgeRel[hinge] = np.nan
-#    lasteHingeRel = lasteHingeRel[orderedHinges]
-#    lasteEdgeRel = lasteEdgeRel[orderedHinges]
-#    energies = np.append(lasteHingeRel, lasteEdgeRel)
-#    ############################################ going through all hinges in order and see all the neighbours in energy
-#    print('Stable State hinge selection:')
-#    differentEnergies = np.empty((0,2), dtype = int)
-#    differentEnergiesName = np.empty(0)
-#    differentEnergiesEnergy = np.empty((0,2))
-#    for hinge in np.arange(totHingeNum):
-#        if ~np.isnan(hingesMask[orderedHinges[hinge]]):
-#            hingeeHinge = lasteHingeRel[hinge]
-#            hingeeEdge = lasteEdgeRel[hinge]
-#            sameEnergy = np.where(np.logical_and(np.logical_and(energies[:totHingeNum]>=hingeeHinge-tolHinge,
-#                                                                energies[:totHingeNum]<=hingeeHinge+tolHinge),
-#                                                 np.logical_and(energies[totHingeNum:]>=hingeeEdge-tolEdge, 
-#                                                                energies[totHingeNum:]<=hingeeEdge+tolEdge)))[0]
-#            ############################################ see if at least one of the neighbours converge (including the selected one)
-#            i = 0
-#            if len(notConvHinges) > 0:
-#                #goes through all hinges in the same neighbourhood and see if they dont converge. 
-#                #If one converges, it stops. If non converges gives i =-1
-#                while len(np.where(notConvHinges[:,0] == orderedHinges[sameEnergy[i]])[0]) != 0:
-#                    i = i + 1
-#                    if i >= len(sameEnergy):
-#                        i = -1
-#                        break
-#            ############################################ save the new state or not according to the convergance
-#            if i != -1:
-#                findit = np.where(differentEnergies[:,0] == orderedHinges[sameEnergy[i]])[0]
-#                if len(findit) == 0:
-#                    stablehinge = orderedHinges[hinge]
-#                    differentEnergies = np.append(differentEnergies,np.array([[stablehinge, len(sameEnergy)]]), axis = 0)
-#                    differentEnergiesName = np.append(differentEnergiesName, np.array(hingeName[stablehinge]))
-#                    differentEnergiesEnergy = np.append(differentEnergiesEnergy, np.array([[lasteHingeRel[hinge],lasteEdgeRel[hinge]]]), axis = 0)
-#                    print(hingeName[stablehinge])
-#                elif findit >= 1:
-#                    print(hingeName[orderedHinges[hinge]], findit) 
-#            else:
-#    #            nonConvStates += len(sameEnergy)
-#                print('State from non convergent hinges')
-#    #differentEnergies = np.array(differentEnergies)
-    ######################### Problems: double counting of stable states that are close to each other due to the ill definition of neighbourhoods.
-    #########################           Additionally counting states that didn't converge.
-#    print('Total converged percentage:', converged/totHingeNum)
-#    print('Not converged: ', notConverged, '/', totHingeNum)
-    
+    #%%
     ###################### Normalize the angles to be proportional to Pi and shift the angle sum to easier understanding
-    SumIntAngFol = SumIntAngFol/np.pi+internalHinges
-    SumIntAngRel = SumIntAngRel/np.pi+internalHinges
-    SumExtAngFol = (SumExtAngFol/np.pi-(totalnumberHinges-internalHinges))*(-1)
-    SumExtAngRel = (SumExtAngRel/np.pi-(totalnumberHinges-internalHinges))*(-1)
+    SumIntAng = SumIntAng/np.pi+internalHinges
+    SumExtAng = (SumExtAng/np.pi-(totalnumberHinges-internalHinges))*(-1)
 
     ###################### Analysis of angles to find stable states
     convHinges = np.empty(0, dtype = int)
