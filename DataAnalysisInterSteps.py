@@ -99,7 +99,7 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.spines['right'].set_color(gray)
     return
 
-def ReadandAnalizeFile(folder_name, plot = False, khinge = np.nan, kedge = np.nan, kdiag = np.nan):
+def ReadandAnalizeFile(folder_name, plot = False, normalize = False):
 #    
 #plot = True
 #khinge = 0.01
@@ -127,6 +127,8 @@ def ReadandAnalizeFile(folder_name, plot = False, khinge = np.nan, kedge = np.na
     eTAngle = dataEnergy[5,:]
     eHinInt = dataEnergy[6,:]
     exfl = dataEnergy[7,:].astype(int)
+    
+    eAllEdge = eEdge + eFace
         
     hingeName = np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', unpack = True, usecols = [1], dtype=bytes).astype(str)    
         
@@ -169,8 +171,6 @@ def ReadandAnalizeFile(folder_name, plot = False, khinge = np.nan, kedge = np.na
         raise FileNotFoundError('No metafile found at the given directory. Changes to the script to put manually the variables are needed\n') 
         #### If there is no metadata file the order of the dataPosStad is not the same as here shown           
         
-        
-    normalized = ''   
     tolStretch = 0.3 #max precentage of allowed stretch
     digitPi = 4 # digits of pi for rounding to see if angles go beyond it and "not converge"
         
@@ -184,17 +184,15 @@ def ReadandAnalizeFile(folder_name, plot = False, khinge = np.nan, kedge = np.na
 
 
     ############################################ Modify data to have a normalized energy (or just difference in angle/length)
-    if ~np.isnan(khinge):
+    if normalize:
         eHinge = np.sqrt(eHinge*2/khinge/totalnumberHinges)
         eHinInt = np.sqrt(eHinInt*2/khinge/internalHinges)
-        normalized = normalized + 'hn'
-    if ~np.isnan(kedge) and ~np.isnan(kdiag):
         eEdge = eEdge*2/kedge
         eDiag = eDiag*2/kdiag
         eAllEdge = np.sqrt((eEdge + eDiag)/(totalnumberEdges+totalnumberDiag))
         eEdge = np.sqrt(eEdge/totalnumberEdges)
         eDiag = np.sqrt(eDiag/totalnumberDiag)
-        normalized = normalized + 'en'
+        normalized = 'norm'
     
     #%%
     ############################################ get the number of actuated hinges for each hinge-set
@@ -216,7 +214,6 @@ def ReadandAnalizeFile(folder_name, plot = False, khinge = np.nan, kedge = np.na
     
     flagCountFol = np.zeros((internalHinges, totalflags))
     flagCountRel = np.zeros((internalHinges, totalflags))
-    hingesMask = np.arange(totHingeNum, dtype = float)
     notConvHinges = np.empty((0,3), dtype = int)
     for i in np.arange(totHingeNum):
         if flagmask[i,0]:
@@ -236,11 +233,12 @@ def ReadandAnalizeFile(folder_name, plot = False, khinge = np.nan, kedge = np.na
                 flagmask[i,1] = True
         if flagmask[i,:].any():
             notConvHinges = np.append(notConvHinges,np.array([[i, exfl[i,0],exfl[i,1]]]), axis = 0)
-            hingesMask[i] = np.NaN
+#            hingesMask[i] = np.NaN
 #            print(hingeName[i])
             
     notConverged = sum(flagmask.any(axis = 1))
     converged = totHingeNum - notConverged
+    hingesMask = np.logical_not(flagmask.any(axis = 1))
     ############################################ normalize the flag counts
     allFlags = np.sum(np.add(flagCountFol,flagCountRel), axis = 0)
     allFlags = allFlags/totHingeNum
@@ -280,16 +278,19 @@ def ReadandAnalizeFile(folder_name, plot = False, khinge = np.nan, kedge = np.na
 #        show_contracted=True,
 #    )
 #    plt.show()
+    inverse = np.ma.masked_array(inverse, mask=flagmask.any(axis = 1))
     
+    SS, SSpos, SScounts = np.unique(inverse, return_index = True, return_counts=True)
+
+    differentEnergies = np.column_stack((SSpos, SScounts))
+    differentEnergiesName = hingeName[SSpos]
+    differentEnergiesEnergy = np.column_stack((eHinge[SSpos*stepsHinge+stepsHinge-1], 
+                                                eAllEdge[SSpos*stepsHinge+stepsHinge-1]))
     
-    if np.any(inverse[np.logical_not(flagmask.any(axis = 1))] != 1):
-        differentAngles, index, counts = np.unique(finalAngles, axis = 0, return_index = True, return_counts = True)
-        differentEnergies = np.column_stack((convHinges[index], counts))
-        differentEnergiesName = hingeName[convHinges[index]]
-        differentEnergiesEnergy = np.column_stack((eHingeRel[convHinges[index]*stepsHinge+stepsHinge-1], 
-                                                eAllEdgeRel[convHinges[index]*stepsHinge+stepsHinge-1]))
-    else:
-        print('Error: No stable states found.\n')
+
+
+    if np.size(SS) == 1:
+        print('Error: No additional stable states found.\n')
         if plot:
             fig5 = plt.figure(4,figsize=(cm2inch(35), cm2inch(20)))
             ax6 = plt.subplot(111)
