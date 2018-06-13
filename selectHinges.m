@@ -272,7 +272,11 @@ for N = 1:height(G.Nodes)-1  %height(G.Nodes)-1
         end
     end
     
-    hingeSetsPrev(N+1).all = hingeSets;    
+    hingeSetsPrev(N+1).all = hingeSets;
+    
+    if N >= opt.maxHinges
+        break;
+    end
 end
 
 saveHinges(hingeSetsPrev, opt, G)

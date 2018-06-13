@@ -1,4 +1,4 @@
-function outputResults(unitCell,extrudedUnitCell,result,opt)
+function outputResults(unitCell,extrudedUnitCell,result,opt,filename)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %PLOT INFO FOR IMPLEMENTATION OF NEW GEOMETRIES
@@ -142,6 +142,7 @@ if strcmp(opt.analysis,'info')
             end               
         end
     end
+    printHigRes(f1,opt,[opt.template,'_internalPolyhedra'],nameFolder); 
     close(f)
     %PLOT ALL INFORMATION
     f=figure('Position', [0 0 800 800]);hold on;
@@ -172,7 +173,7 @@ if strcmp(opt.analysis,'info')
     end 
     hl2=plotOpt(opt); 
     axis tight
-    printHigRes(f,opt,'_internalPolyhedraVertFaces',nameFolder); 
+    printHigRes(f,opt,[opt.template,'_internalPolyhedraVertFaces'],nameFolder); 
     %EXTRUDED STATE
     [f4,hs,hie,his] = copyFigure(unitCell,extrudedUnitCell,opt,hs,hie,his);   
     for nc=1:size(extrudedUnitCell.latVec,1)
@@ -189,7 +190,7 @@ if strcmp(opt.analysis,'info')
         end
     end
     set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);
-    printHigRes(f4,opt,'_extrudedPolyhedra',nameFolder); 
+    printHigRes(f4,opt,[opt.template,'_extrudedPolyhedra'],nameFolder); 
     %EXTRUDED STATE 'INFO
     [f5,hs,hie,his] = copyFigure(unitCell,extrudedUnitCell,opt,hs,hie,his); hold on 
     for nc=1:size(extrudedUnitCell.latVec,1)
@@ -206,7 +207,7 @@ if strcmp(opt.analysis,'info')
             text(coorText(1),coorText(2),coorText(3),num2str(i),'fontsize',20)
         end
     set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);
-    printHigRes(f5,opt,'_extrudedPolyhedraVert',nameFolder); 
+    printHigRes(f5,opt,[opt.template,'_extrudedPolyhedraVert'],nameFolder); 
     %EXTRUDED STATE 'INFO' ANGLE NUMBERS
     [f6,hs,hie,his] = copyFigure(unitCell,extrudedUnitCell,opt,hs,hie,his); hold on 
     for nc=1:size(extrudedUnitCell.latVec,1)
@@ -225,7 +226,7 @@ if strcmp(opt.analysis,'info')
             text(coorText(1),coorText(2),coorText(3),num2str(i),'fontsize',20)
         end
     set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);
-    printHigRes(f6,opt,'_extrudedPolyhedraEdges',nameFolder);
+    printHigRes(f6,opt,[opt.template,'_extrudedPolyhedraEdges'],nameFolder);
 end
 
 if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(opt.analysis,'plot')
@@ -339,7 +340,7 @@ if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(op
             end
         end
         set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);
-%         printHigRes(f,opt,'_0_undeformed',nameFolder);     
+%         printHigRes(f,opt,[filename,'_0_undeformed'],nameFolder);     
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %PLOT MODES INDIVIDUALLY
@@ -347,8 +348,24 @@ if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(op
         for nMode=1:result.numMode
             pause(1)
 %             fprintf('end part');
-            for framMode=1:length(plotextrudedUnitCell.mode(nMode).frame)
-%                 pause();
+            if strcmp(opt.saveMovie,'on')
+                for framMode=1:length(plotextrudedUnitCell.mode(nMode).frame)
+    %                 framMode = length(plotextrudedUnitCell.mode(nMode).frame);
+                    for nc=1:size(extrudedUnitCell.latVec,1)
+                        for i=3:10     
+                            c=(plotextrudedUnitCell.mode(nMode).frame(framMode).polFace(i).normal*viewCoor'>0);
+                            viewCoor=get(gca,'view');
+                            viewCoor=[sind(viewCoor(1)) -cosd(viewCoor(1)) sind(viewCoor(2))];
+                            set(hs{nc,i},'Vertices',plotextrudedUnitCell.mode(nMode).frame(framMode).lat(nc).coor,'facecolor','flat','facevertexCData',c*colt(4,:)+abs(1-c)*colt(5,:),'facealpha',1.0);
+                        end
+                    end
+                    printGif(opt,framMode,f,nameFolder,[filename,'_',num2str(nMode),'_deformed']);%'_',sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge),
+                    if framMode==length(plotextrudedUnitCell.mode(nMode).frame)
+                        printHigRes(f,opt,[filename,'_',num2str(nMode),'_deformed'],nameFolder);%'_',sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge),
+                    end
+                end
+            else
+                framMode = length(plotextrudedUnitCell.mode(nMode).frame);
                 for nc=1:size(extrudedUnitCell.latVec,1)
                     for i=3:10     
                         c=(plotextrudedUnitCell.mode(nMode).frame(framMode).polFace(i).normal*viewCoor'>0);
@@ -357,9 +374,9 @@ if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(op
                         set(hs{nc,i},'Vertices',plotextrudedUnitCell.mode(nMode).frame(framMode).lat(nc).coor,'facecolor','flat','facevertexCData',c*colt(4,:)+abs(1-c)*colt(5,:),'facealpha',1.0);
                     end
                 end
-                printGif(opt,framMode,f,nameFolder,['_',mat2str(extrudedUnitCell.angleConstr(:,1)'),'_',num2str(nMode),'_deformed']);%'_',sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge),
+                printGif(opt,framMode,f,nameFolder,[filename,'_',num2str(nMode),'_deformed']);%'_',sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge),
                 if framMode==length(plotextrudedUnitCell.mode(nMode).frame)
-                    printHigRes(f,opt,['_',mat2str(extrudedUnitCell.angleConstr(:,1)'),'_',num2str(nMode),'_deformed'],nameFolder);%'_',sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge),
+                    printHigRes(f,opt,[filename,'_',num2str(nMode),'_deformed'],nameFolder);%'_',sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge),
                 end
             end
             
@@ -426,7 +443,7 @@ function refVec=detrefVec(unitCell,result,opt,ref)
     end
     
 function plotg=prepEffPlot(som,viewCoor)
-    for i=3:10
+    for i=3:12
         plotg.polFace(i).nod=[];
         plotg.polFace(i).index=[];
     end
@@ -443,7 +460,7 @@ function plotg=prepEffPlot(som,viewCoor)
             plotg.lat(nc).coorNew=som.nodeNew+ones(size(som.nodeNew,1),1)*(som.latVec(nc,:));
         end
     end
-    for i=3:10
+    for i=3:12
         plotg.polFace(i).normal(1,:)=[0,0,0];
         for j=1:size(plotg.polFace(i).nod,1)
             n1a=plotg.lat(nc).coor(plotg.polFace(i).nod(j,2),1:3)-plotg.lat(nc).coor(plotg.polFace(i).nod(j,1),1:3);
@@ -468,7 +485,7 @@ function hl2=plotOpt(opt)
 function printGif(opt,fram,f,nameFolder,nam)
     pause(1/opt.frames)
     if strcmp(opt.saveMovie,'on')
-        name=[nameFolder,'/',opt.template, nam];
+        name=[nameFolder,'/', nam];
         switch opt.analysis
             case 'modes'
                 name=[name,'_Modes_'];
@@ -504,8 +521,8 @@ function printHigRes(f,opt,nam,nameFolder)
         case 'on'
             
 %             name=[nameFolder,'/',opt.template,'_',num2str(opt.plotPer),'_',nam];
-            name=[nameFolder,'/',opt.template,nam,'.png'];
-            savefig([nameFolder,'/',opt.template,nam])
+            name=[nameFolder,'/',nam,'.png'];
+            savefig([nameFolder,'/',nam])
             figpos=getpixelposition(f); %dont need to change anything here
             resolution=get(0,'ScreenPixelsPerInch'); %dont need to change anything here
             set(f,'paperunits','inches','papersize',figpos(3:4)/resolution,...

@@ -318,6 +318,7 @@ extrudedUnitCell.edgeHinge=[];
 extrudedUnitCell.node=[];
 extrudedUnitCell.face=[];
 extrudedUnitCell.solidify=[];
+extrudedUnitCell.diagonals = [];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %BUILD EXTRUDED UNIT CELL
@@ -332,12 +333,20 @@ for ne=1:length(unitCell.Polyhedron)
             nodeNum=nNodeSolid+unitCell.Polyhedron(ne).face{unitCell.Polyhedron(ne).solidify(i)};
             extrudedUnitCell.face{end+1}=nodeNum;
             extrudedUnitCell.edgeHinge=[extrudedUnitCell.edgeHinge; nodeNum(1) nodeNum(2) nodeNum(end)];
+            extrudedUnitCell.edge = [extrudedUnitCell.edge; nodeNum(1) nodeNum(2)]; 
             for j=2:length(nodeNum)-1
                 extrudedUnitCell.edgeHinge=[extrudedUnitCell.edgeHinge; nodeNum(j) nodeNum(j+1) nodeNum(j-1)];
+                extrudedUnitCell.edge = [extrudedUnitCell.edge; nodeNum(j) nodeNum(j+1)]; 
             end
             extrudedUnitCell.edgeHinge=[extrudedUnitCell.edgeHinge; nodeNum(end) nodeNum(1) nodeNum(end-1)];
-            edges = nchoosek(nodeNum,2);
-            extrudedUnitCell.edge= [extrudedUnitCell.edge; edges];
+            extrudedUnitCell.edge = [extrudedUnitCell.edge; nodeNum(end) nodeNum(1)]; 
+            diagonals = nchoosek(nodeNum,2);
+            edges = or(ismember(diagonals,extrudedUnitCell.edge, 'rows'),...
+                ismember(fliplr(diagonals),extrudedUnitCell.edge, 'rows'));
+            diagonals (edges,:) = [];
+            firstdiagonal = size(extrudedUnitCell.edge,1)+1;
+            extrudedUnitCell.edge = [extrudedUnitCell.edge; diagonals];
+            extrudedUnitCell.diagonals = [extrudedUnitCell.diagonals firstdiagonal:size(extrudedUnitCell.edge,1)];
         end
     end
     rep=length(extrudedUnitCell.face);   
@@ -362,7 +371,9 @@ for ne=1:length(unitCell.Polyhedron)
             extrudedUnitCell.edge([end+1],:)=[nodeNumNew(index(i+1)) nodeNumNew(index(i))];
             extrudedUnitCell.edge([end+1],:)=[nodeNumNew(index(i)) nodeNum(index(i))];
             extrudedUnitCell.edge([end+1],:)=[nodeNumNew(index(i)) nodeNum(index(i+1))];
+            extrudedUnitCell.diagonals([end+1]) = size(extrudedUnitCell.edge,1); 
             extrudedUnitCell.edge([end+1],:)=[nodeNumNew(index(i+1)) nodeNum(index(i))];
+            extrudedUnitCell.diagonals([end+1]) = size(extrudedUnitCell.edge,1);
             extrudedUnitCell.edgeHinge([end+1],:)=[nodeNum(index(i)) nodeNum(index(i+1)) nodeNumNew(index(i+1)) nodeNumNew(index(i))];
             extrudedUnitCell.edgeHinge([end+1],:)=[nodeNum(index(i+1)) nodeNumNew(index(i+1)) nodeNumNew(index(i)) nodeNum(index(i))];
             extrudedUnitCell.edgeHinge([end+1],:)=[nodeNumNew(index(i)) nodeNum(index(i)) nodeNum(index(i+1)) nodeNumNew(index(i+1))]; 

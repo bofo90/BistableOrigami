@@ -31,26 +31,37 @@ switch opt.analysis
                 end
 
                 % parse the file name to get back hinge set
-                hingeSet = getHingeSet(allFiles(ct).name);
-                if ~isequal(hingeSet, opt.angleConstrFinal(1).val(:,1)) && strcmp(opt.readHingeFile,'off')
-                    continue;
+                resfilename = allFiles(ct).name;
+                hingeSet = getHingeSet(resfilename);
+                if strcmp(opt.readHingeFile,'off')
+                    if ~isequal(hingeSet, opt.angleConstrFinal(end).val(:,1))
+                        continue;
+                    elseif ~strcmp(resfilename(1:end-4), '[8 3]_Ang1_18_Angl2_27')
+                        continue;
+                    end
                 end
                 extrudedUnitCell.angleConstr = [hingeSet(:), -pi*opt.constAnglePerc*ones(length(hingeSet), 1)];
                 % load results from file
-                load(strcat(folderResults,'/', allFiles(ct).name));
+                load(strcat(folderResults,'/', allFiles(ct).name), 'result');
                 succesfullFiles = succesfullFiles + 1;
                 fprintf('Plot of Hinges number %d/%d\n', succesfullFiles, length(allFiles)-directories);
                 
                 if strcmp(opt.analysis, 'savedata')
-                    [CM, Radios, Stdev, EhingeInt, SumIntAngles, SumExtAngles, maxStrech, minStrech] =...
+                    [CM, Radios, Stdev, ~, SumIntAngles, SumExtAngles, maxStrech, minStrech] =...
                                                 getData(extrudedUnitCell, opt, result);
-                    Energies = [ones(length(result.E),1)*(ct-directories), result.Eedge,...
-                        result.Eface, result.Ehinge, result.EtargetAngle, EhingeInt, result.exfl];
-                    PosStad = [ones(length(result.E),1,1)*(ct-directories),...
+                    Energies = [ones(size(result.E,2),1)*(ct-directories), result.Eedge(2,:)',...
+                        result.Ediag(2,:)', result.Eface(2,:)', result.Ehinge(2,:)',...
+                        result.EtargetAngle(2,:)', result.exfl(2,:)'];
+                    PosStad = [ones(size(result.E,1),1,1)*(ct-directories),...
                         CM(:,:),Radios, Stdev,maxStrech, minStrech, SumIntAngles, SumExtAngles];
-                    Hinges = [num2str(ct-directories),',',mat2str(hingeSet')];
-                    AllAngles = [extrudedUnitCell.theta result.deform(end).theta]';
-                    AllAngles = [ones(size(AllAngles,1),1)*(ct-directories) AllAngles];
+                    Hinges = [num2str(ct-directories),',',mat2str(hingeSet'),',',...
+                        mat2str(result.anglConstr(1,2),5),',', mat2str(result.anglConstr(2,2),5),...
+                        ',',int2str(result.angNum(1)),',',int2str(result.angNum(2))];
+                    AllAngles = [extrudedUnitCell.theta];
+                    for iter = 1:size(result.deform,2)
+                        AllAngles = [AllAngles result.deform(iter).theta];
+                    end
+                    AllAngles = [ones(size(AllAngles,2),1)*(ct-directories) AllAngles'];
                     dlmwrite(fMassDist, PosStad, 'delimiter', ',', '-append','precision',7);
                     dlmwrite(fHinge, Hinges, 'delimiter', '', '-append');
                     dlmwrite(fEnergy, Energies, 'delimiter', ',', '-append','precision',7);
@@ -61,20 +72,26 @@ switch opt.analysis
                     
                     nameFolderPlot=[pwd,'/Results/',opt.template,'/',opt.relAlgor,'/images',...
                         opt.saveFile,extraName];
-                    nameFilePlot = ['/',opt.template,'_',mat2str(hingeSet'),'.png'];
+                    nameFilePlot = ['/',resfilename(1:end-4),'_AnglEv.png'];
                     
                     if ~exist(nameFolderPlot, 'dir')
                         mkdir(nameFolderPlot);
                     end
-                    allangles = [result.deform(1).interV(:).theta result.deform(2).interV(:).theta];
+                    allangles = [];
+                    for iter = 1:size(result.deform,2)
+                        allangles = [allangles result.deform(iter).interV(:).theta];
+                    end
                     plot(allangles')
-                    x = size(result.deform(1).interV,2)+0.5;
-                    line([x x],[-1.1*pi 1.1*pi], 'Color', [0 0 0])
+                    x = 0;
+                    for iter = 1:(size(result.deform,2)-1)
+                        x = x + size(result.deform(iter).interV,2)+0.5;
+                        line([x x],[-1.1*pi 1.1*pi], 'Color', [0 0 0])
+                    end
                     saveas(gcf, [nameFolderPlot, nameFilePlot]);
-                    savefig([nameFolderPlot,'/',opt.template,'_',mat2str(hingeSet')])
+                    savefig([nameFolderPlot,'/',resfilename(1:end-4),'_AnglEv.fig'])
                     close 'all';                    
                     
-                    outputResults(unitCell,extrudedUnitCell,result,opt);
+                    outputResults(unitCell,extrudedUnitCell,result,opt,resfilename(1:end-4));
                 end
                 close all;
             end
@@ -93,16 +110,15 @@ fileEnergy = strcat(folderEnergy, '/','EnergyData.csv');
 if exist(fileEnergy, 'file')
     delete(fileEnergy) % always start with new file
 end
-headersEnergy = {'Hinge Number'; 'EdgeEnergyFol'; 'EdgeEnergyRel'; 'FaceEnergyFol'; 'FaceEnergyRel'; ...
-    'HingeEnergyFol'; 'HingeEnergyRel'; 'TargetAngleEnergyFol'; 'TargetAngleEnergyRel'; ...
-    'IntHingeEnergyFol'; 'IntHingeEnergyRel'; 'FlagsFol'; 'FlagsRel'};
+headersEnergy = {'Hinge Number'; 'EdgeEnergy';'DiagonalEnergy'; 'FaceEnergy'; ...
+    'HingeEnergy'; 'TargetAngleEnergy'; 'Flags'};
 writeHeader(fileEnergy, headersEnergy);
 
 fileHinge = strcat(folderEnergy, '/','Hinges.csv');
 if exist(fileHinge, 'file')
     delete(fileHinge) % always start with new file
 end
-headersHinge = {'HingeNumber'; 'ActuatedHinges'};
+headersHinge = {'HingeNumber'; 'ActuatedHinges'; 'Theta1'; 'Theta2'; 'ThetaNum1'; 'ThetaNum2'};
 writeHeader(fileHinge, headersHinge);
 
 fileMassDist = strcat(folderEnergy, '/','PosStad.csv');
@@ -145,7 +161,7 @@ fclose(fid) ;                                          % Closes file.
 function [hingeSet] = getHingeSet(fileName)
 
 parsedName = strsplit(fileName(1:end-4), '_');
-hingeSetStr = parsedName{2};
+hingeSetStr = parsedName{1};
 hingeSetStr = strrep(hingeSetStr, '[', '');
 hingeSetStr = strrep(hingeSetStr, ']', '');
 hingeSetStr = strsplit(hingeSetStr(1:end), ' ');
@@ -154,32 +170,33 @@ hingeSet = str2double(hingeSetStr)';
 
 function [CM, Radios, Stdev, EhingeInt, SumIntAngles, SumExtAngles, maxStrech, minStrech] =...
     getData(extrudedUnitCell, opt, result)
-CM = zeros(2,length(result.deform),3);
-Radios = zeros(2,length(result.deform));
-Stdev = zeros(2,length(result.deform));
-EhingeInt = zeros(2,length(result.deform));
-SumIntAngles = zeros(2,length(result.deform));
-SumExtAngles = zeros(2,length(result.deform));
-maxStrech = zeros(2,length(result.deform));
-minStrech = zeros(2,length(result.deform));
+CM = zeros(2,2,3);
+Radios = zeros(2,2);
+Stdev = zeros(2,2);
+EhingeInt = zeros(2,2);
+SumIntAngles = zeros(2,2);
+SumExtAngles = zeros(2,2);
+maxStrech = zeros(2,2);
+minStrech = zeros(2,2);
 
-for iter = 1:length(result.deform)
-%     for inter = 1:length(result.deform(iter).interV)
-    startPos = extrudedUnitCell.node + result.deform(iter).interV(1).V;
-    endPos = extrudedUnitCell.node + result.deform(iter).interV(end).V;
+foldingIterations = length(result.deform)-2;
+for iter = 1:2
+    currIter = foldingIterations+iter;
+    startPos = extrudedUnitCell.node + result.deform(currIter).interV(1).V;
+    endPos = extrudedUnitCell.node + result.deform(currIter).interV(end).V;
     CM(:,iter,:) = [mean(startPos); mean(endPos)]; %CM(inter, iter,:)
     startAllRad = sqrt(sum(abs(startPos-CM(1,iter)).^2,2));
     endAllRad = sqrt(sum(abs(endPos-CM(2,iter)).^2,2));
     Radios(:,iter) = [mean(startAllRad);mean(endAllRad)];
     Stdev(:,iter) = [std(startAllRad);std(endAllRad)];
     [EhingeInt(1,iter),SumIntAngles(1,iter), SumExtAngles(1,iter)] =...
-        getIntEnergy(result.deform(iter).interV(1), opt, extrudedUnitCell);
+        getIntEnergy(result.deform(currIter).interV(1), opt, extrudedUnitCell);
     [EhingeInt(2,iter),SumIntAngles(2,iter), SumExtAngles(2,iter)] =...
-        getIntEnergy(result.deform(iter).interV(end), opt, extrudedUnitCell);
+        getIntEnergy(result.deform(currIter).interV(end), opt, extrudedUnitCell);
     [maxStrech(1,iter), minStrech(1,iter)] = ...
-        getExtremeStreching(result.deform(iter).interV(1).Ve, opt, extrudedUnitCell);
+        getExtremeStreching(result.deform(currIter).interV(1).Ve, opt, extrudedUnitCell);
     [maxStrech(2,iter), minStrech(2,iter)] = ...
-        getExtremeStreching(result.deform(iter).interV(end).Ve, opt, extrudedUnitCell);
+        getExtremeStreching(result.deform(currIter).interV(end).Ve, opt, extrudedUnitCell);
 %     end
 end
 

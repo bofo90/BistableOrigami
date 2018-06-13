@@ -81,22 +81,59 @@ switch geom
         Polyhedron.node=([0 0 0;1 0 0;1/2 sqrt(3)/2 0;0 0 1;1 0 1;1/2 sqrt(3)/2 1]);
         Polyhedron.edge=[1 2;2 3;3 1;4 5;5 6;6 4;1 4;2 5;3 6];
         Polyhedron.face={[1 2 5 4];[2 3 6 5];[3 1 4 6];[3 2 1];[4 5 6]};
+     case {'pentagonal prism'}
+        Polyhedron = createPrism(5, Polyhedron);
      case {'hexagonal prism'}
         Polyhedron.node=([0 0 0;1 0 0; 1.5 sqrt(3)/2 0;1 sqrt(3) 0;0 sqrt(3) 0;-0.5 sqrt(3)/2 0;0 0 1;1 0 1;1.5 sqrt(3)/2 1;1 sqrt(3) 1;0 sqrt(3) 1;-0.5 sqrt(3)/2 1]);
         Polyhedron.edge=[1 2;2 3;3 4;4 5;5 6;6 1;7 8;8 9;9 10;10 11;11 12;12 7;1 7;2 8;3 9;4 10;5 11;6 12];
         Polyhedron.face={[6 5 4 3 2 1];[7 8 9 10 11 12];[1 2 8 7];[2 3 9 8];[3 4 10 9];[4 5 11 10];[5 6 12 11];[6 1 7 12]};
+     case {'heptagonal prism'}
+        Polyhedron = createPrism(7, Polyhedron);
      case {'octagonal prism'}
         Polyhedron.node=[0,-(1/2)*csc(pi/8),-(1/2);0,-(1/2)*csc(pi/8),1/2;0,1/2*csc(pi/8),-(1/2);0,1/2*csc(pi/8),1/2;-(1/2)*csc(pi/8),0,-(1/2);-(1/2)*csc(pi/8),0,1/2;1/2*csc(pi/8),0,-(1/2);1/2*csc(pi/8),0,1/2;-(csc(pi/8)/(2*sqrt(2))),-(csc(pi/8)/(2*sqrt(2))),-(1/2);-(csc(pi/8)/(2*sqrt(2))),-(csc(pi/8)/(2*sqrt(2))),1/2;-(csc(pi/8)/(2*sqrt(2))),csc(pi/8)/(2*sqrt(2)),-(1/2);-(csc(pi/8)/(2*sqrt(2))),csc(pi/8)/(2*sqrt(2)),1/2;csc(pi/8)/(2*sqrt(2)),-(csc(pi/8)/(2*sqrt(2))),-(1/2);csc(pi/8)/(2*sqrt(2)),-(csc(pi/8)/(2*sqrt(2))),1/2;csc(pi/8)/(2*sqrt(2)),csc(pi/8)/(2*sqrt(2)),-(1/2);csc(pi/8)/(2*sqrt(2)),csc(pi/8)/(2*sqrt(2)),1/2];
         Polyhedron.edge=[1,2;1,9;1,13;2,10;2,14;3,4;3,11;3,15;4,12;4,16;5,6;5,9;5,11;6,10;6,12;7,8;7,13;7,15;8,14;8,16;9,10;11,12;13,14;15,16];
         Polyhedron.face={[13,1,9,5,11,3,15,7];[8,16,4,12,6,10,2,14];[7,15,16,8];[15,3,4,16];[3,11,12,4];[11,5,6,12];[5,9,10,6];[9,1,2,10];[1,13,14,2];[13,7,8,14]};
         n=length(Polyhedron.face); 
+     case {'nonagonal prism'}
+        Polyhedron = createPrism(9, Polyhedron);
      case {'decagonal prism'}
-        theta=(0:2*pi/12:2*pi);r=1/(2*acos(2*pi/12));x=r^2*cos(theta);y=r^2*sin(theta);
-        Polyhedron.node=[[x(1:12)';x(1:12)'],[y(1:12)';y(1:12)'],[zeros(12,1);ones(12,1)]];         
-        Polyhedron.edge=[1 2; 2 3; 3 4; 4 5; 5 6; 6 7; 7 8; 8 9; 9 10; 10 11; 11 12; 12 1; 13 14; 14 15; 15 16; 16 17; 17 18; 18 19; 19 20; 20 21; 21 22; 22 23; 23 24; 24 13; 1 13; 2 14; 3 15; 4 16; 5 17; 6 18; 7 19; 8 20; 9 21; 10 22; 11 23; 12 24];
-        Polyhedron.face={[12:-1:1];[13:24];[1 2 14 13];[2 3 15 14];[3 4 16 15];[4 5 17 16];[5 6 18 17];[6 7 19 18];[7 8 20 19];[8 9 21 20];[9 10 22 21];[10 11 23 22];[11 12 24 23];[12 1 13 24]};
-        Polyhedron.node(:,1:2)=Polyhedron.node(:,1:2)/norm(Polyhedron.node(1,:)-Polyhedron.node(2,:));  
-    otherwise
+        Polyhedron = createPrism(10, Polyhedron);
+     case {'dodecagonal prism'}
+        Polyhedron = createPrism(12, Polyhedron);
+     otherwise
         error('Geometry does not excist\n')
 end
 Polyhedron.nFace=length(Polyhedron.face);
+
+function Polyhedron = createPrism(sides, Polyhedron)
+
+theta=(0:2*pi/sides:2*pi);
+r=1/(2*acos(2*pi/sides));
+x=r^2*cos(theta);
+y=r^2*sin(theta);
+
+Polyhedron.node=[[x(1:sides)';x(1:sides)'],[y(1:sides)';y(1:sides)'],[zeros(sides,1);ones(sides,1)]];
+Polyhedron.node(:,1:2)=Polyhedron.node(:,1:2)/norm(Polyhedron.node(1,:)-Polyhedron.node(2,:)); 
+
+Polyhedron.face={[sides:-1:1];[sides+1:2*sides]};
+
+for i=1:sides-1
+   Polyhedron.edge(end+1,:) = [i i+1];
+   Polyhedron.edge(end+1,:) = [i+sides i+1+sides];
+   Polyhedron.edge(end+1,:) = [i i+sides];
+   
+   Polyhedron.face(end+1) = {[i i+1 i+1+sides i+sides]}; 
+end
+
+Polyhedron.edge(end+1,:) = [sides 1];
+Polyhedron.edge(end+1,:) = [2*sides 1+sides];
+Polyhedron.edge(end+1,:) = [sides 2*sides];
+
+Polyhedron.face(end+1) = {[sides 1 1+sides 2*sides]}; 
+
+ 
+
+
+
+
+

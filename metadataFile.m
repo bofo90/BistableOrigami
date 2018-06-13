@@ -15,7 +15,8 @@ if strcmp(opt.analysis,'result')
     metadata.UnitCell.edges = size(unitCell.Polyhedron.edge,1);
     metadata.UnitCell.faces = size(unitCell.Polyhedron.face,1);
     metadata.extUnitCell.nodes = size(extrudedUnitCell.node,1);
-    metadata.extUnitCell.edges = size(extrudedUnitCell.edge,1);
+    metadata.extUnitCell.edges = size(extrudedUnitCell.edge,1)-size(extrudedUnitCell.diagonals,2);
+    metadata.extUnitCell.diag = size(extrudedUnitCell.diagonals,2);
     metadata.extUnitCell.faces = size(extrudedUnitCell.face,2);
     metadata.extUnitCell.hinges = size(extrudedUnitCell.nodeHingeEx,1);
     metadata.extUnitCell.intHinges = size(extrudedUnitCell.innerHinges,2);
