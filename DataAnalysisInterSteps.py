@@ -198,7 +198,8 @@ def ReadandAnalizeFile(folder_name, plot = False, normalize = False):
     ############################################ get the number of actuated hinges for each hinge-set
     actuatedHinges = np.zeros(totHingeNum, dtype = int)
     hingeCount = np.zeros(internalHinges)   
-    for hinge in np.arange(totHingeNum):
+    allHinges = np.arange(totHingeNum)
+    for hinge in allHinges:
         actuatedHinges[hinge] = len(hingeName[hinge].split())
         hingeCount[actuatedHinges[hinge]-1] += 1
         
@@ -215,7 +216,7 @@ def ReadandAnalizeFile(folder_name, plot = False, normalize = False):
     flagCountFol = np.zeros((internalHinges, totalflags))
     flagCountRel = np.zeros((internalHinges, totalflags))
     notConvHinges = np.empty((0,3), dtype = int)
-    for i in np.arange(totHingeNum):
+    for i in allHinges:
         if flagmask[i,0]:
             flagCountFol[actuatedHinges[i]-1,exfl[i,0]]  += 1
         if flagmask[i,1]:# and exflRel[(i+1)*stepsHinge-1] != -2:
@@ -239,6 +240,7 @@ def ReadandAnalizeFile(folder_name, plot = False, normalize = False):
     notConverged = sum(flagmask.any(axis = 1))
     converged = totHingeNum - notConverged
     hingesMask = np.logical_not(flagmask.any(axis = 1))
+    convHinges = allHinges[hingesMask]
     ############################################ normalize the flag counts
     allFlags = np.sum(np.add(flagCountFol,flagCountRel), axis = 0)
     allFlags = allFlags/totHingeNum
@@ -259,9 +261,9 @@ def ReadandAnalizeFile(folder_name, plot = False, normalize = False):
         sortAllAngIndex = np.lexsort((dataAngles[(stepsHinge+1)*(hinge+1)-1,:],dataAngles[(stepsHinge+1)*hinge,:]))
         finalAngles = np.append(finalAngles, [dataAngles[(stepsHinge+1)*(hinge+1)-1,sortAllAngIndex]], axis = 0)
         
-    Z = hierarch.linkage(finalAngles, 'centroid')
+    Z = hierarch.linkage(finalAngles[hingesMask], 'centroid')
     inverse = hierarch.fcluster(Z, 1, criterion='distance')
-    c = hierarch.cophenet(Z, pdist(finalAngles))
+    c = hierarch.cophenet(Z, pdist(finalAngles[hingesMask]))
     print('this is the cophenet of the hierarchical linkage', c[0])
     
     ###################### Plot the cluster and see how are the results related
@@ -278,10 +280,10 @@ def ReadandAnalizeFile(folder_name, plot = False, normalize = False):
 #        show_contracted=True,
 #    )
 #    plt.show()
-    inverse = np.ma.masked_array(inverse, mask=flagmask.any(axis = 1))
-    
-    SS, SSpos, SScounts = np.unique(inverse, return_index = True, return_counts=True)
 
+    
+    SS, SSposmasked, SScounts = np.unique(inverse, return_index = True, return_counts=True)
+    SSpos = convHinges[SSposmasked]
     differentEnergies = np.column_stack((SSpos, SScounts))
     differentEnergiesName = hingeName[SSpos]
     differentEnergiesEnergy = np.column_stack((eHinge[SSpos*stepsHinge+stepsHinge-1], 
