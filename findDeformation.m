@@ -433,7 +433,7 @@ if poop.flag
     extrudedUnitCell.node=extrudedUnitCell.node+[poop.x(1:3:end,end) poop.x(2:3:end,end) poop.x(3:3:end,end)];
     for i=1:size(extrudedUnitCell.nodeHingeEx,1)
         [~,theta(i)]=JacobianHinge(extrudedUnitCell.node(extrudedUnitCell.nodeHingeEx(i,:),:));
-        if abs(poop.theta(i,end)-theta(i)) > 0.50*2*pi
+        if abs(poop.theta(i,end)-theta(i)) >= 0.5*2*pi
             theta(i) = theta(i)+sign(poop.theta(i,end))*2*pi;
 %             fprintf('angle %d global\n', i);
         end
