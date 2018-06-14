@@ -59,14 +59,13 @@ end
 %%%%%% Folding part %%%%%%
 %Run the Folding of the structure
 initialiseGlobalx(u0, theta0);
-steps = 2;
-angles = theta0(opt.angleConstrFinal(1).val(:,1)) + linspace(0,1,steps+1).*(opt.angleConstrFinal(1).val(:,2) - theta0(opt.angleConstrFinal(1).val(:,1)));
+angles = theta0(opt.angleConstrFinal(1).val(:,1)) + linspace(0,1,opt.steps+1).*(opt.angleConstrFinal(1).val(:,2) - theta0(opt.angleConstrFinal(1).val(:,1)));
 V(:,1)=u0;
 [E.E(1,1),~,E.Eedge(1,1),E.Ediag(1,1),E.Eface(1,1),E.Ehinge(1,1),E.EtargetAngle(1,1), ~]=Energy(u0,extrudedUnitCell,opt);
 exfl(1,1) = 1;
 exfl(2,1) = 1;
 Etemp = [];
-for anglestep = 2:steps+1
+for anglestep = 2:opt.steps+1
     exfltemp = [];
     opt.angleConstrFinal(1).val(:,2) = angles(:,anglestep);
     [Vtemp, exfltemp, output, ~] = FoldStructure(u0, Etemp, exfltemp, extrudedUnitCell, opt, 1, Aeq, Beq);
