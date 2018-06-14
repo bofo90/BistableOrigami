@@ -371,37 +371,37 @@ def ReadandAnalizeFile(folder_name, plot = False, normalize = False):
         cmap1.set_over('r')
     
     
-        for hinge in np.arange(totHingeNum):
-            if ~np.isnan(hingesMask[hinge]):
+        for hinge in allHinges:
+            if hingesMask[hinge]:
                 col = '#36648B'
-
             else:
                 col = '#FE9128'
             findit = np.where(differentEnergies[:,0] == hinge)[0]
+            i = hinge*stepsHinge+stepsHinge-1
             if len(findit) != 0:
-    #            ax3.scatter(eAllEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1], c = c)
-                ax2.scatter(RadRel[stepsHinge*hinge+stepsHinge-1], StdRel[stepsHinge*hinge+stepsHinge-1], c = col, label = hingeName[hinge])
-                ax4.scatter(CMxRel[stepsHinge*hinge+stepsHinge-1], CMyRel[stepsHinge*hinge+stepsHinge-1], CMzRel[stepsHinge*hinge+stepsHinge-1], c = col)
-                ax5.scatter(eHingeRel[stepsHinge*hinge+stepsHinge-1], SumIntAngRel[stepsHinge*hinge+stepsHinge-1], c = col)
-                ax10.scatter(eHingeRel[stepsHinge*hinge+stepsHinge-1], SumExtAngRel[stepsHinge*hinge+stepsHinge-1], c = col)
-                ax8.scatter(eAllEdgeRel[stepsHinge*hinge+stepsHinge-1], abs(max(MaxStrRel[stepsHinge*hinge+stepsHinge-1],MinStrRel[stepsHinge*hinge+stepsHinge-1], key=abs)), c = col)
-#                ax8.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], MaxStrRel[stepsHinge*hinge+stepsHinge-1], c = col)
-#                ax9.scatter(hingeNum[stepsHinge*hinge+stepsHinge-1], abs(MinStrRel[stepsHinge*hinge+stepsHinge-1]), c = col)
-#            ax1.plot(eAllEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
-#            ax1.scatter(eAllEdgeRel[stepsHinge*hinge+stepsHinge-1],  eHingeRel[stepsHinge*hinge+stepsHinge-1], c = col)                
-    #            ax3.plot(eAllEdgeRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHingeRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
-    #            ax2.plot(RadRel[stepsHinge*hinge:stepsHinge*(hinge+1)],  StdRel[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
+#                ax3.scatter(eAllEdge[i], eHinge[i], c = c)
+                ax2.scatter(Rad[i], Std[i], c = col, label = hingeName[hinge])
+                ax4.scatter(CMx[i], CMy[i], CMz[i], c = col)
+                ax5.scatter(eHinge[i], SumIntAng[i], c = col)
+                ax10.scatter(eHinge[i], SumExtAng[i], c = col)
+                ax8.scatter(eAllEdge[i], abs(max(MaxStr[i],MinStr[i], key=abs)), c = col)
+#                ax8.scatter(hingeNum[i], MaxStr[i], c = col)
+#                ax9.scatter(hingeNum[i], abs(MinStrRel[i]), c = col)
+#            ax1.plot(eAllEdge[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHinge[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
+#            ax1.scatter(eAllEdge[i],  eHinge[i], c = col)                
+    #            ax3.plot(eAllEdge[stepsHinge*hinge:stepsHinge*(hinge+1)],  eHinge[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
+    #            ax2.plot(Rad[stepsHinge*hinge:stepsHinge*(hinge+1)],  Std[stepsHinge*hinge:stepsHinge*(hinge+1)], '--',c = col)
             if len(findit) != 0:# and differentEnergies[findit[0],1] > maxststs:
-#                ax1.annotate(hingeName[hinge], xy=(eAllEdgeRel[stepsHinge*hinge+stepsHinge-1], eHingeRel[stepsHinge*hinge+stepsHinge-1]), 
+#                ax1.annotate(hingeName[hinge], xy=(eAllEdge[i], eHinge[i]), 
 #                              xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
 #                              arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
-#                ax5.annotate(hingeName[hinge], xy=(eHingeRel[stepsHinge*hinge+stepsHinge-1], SumIntAngRel[stepsHinge*hinge+stepsHinge-1]), 
+#                ax5.annotate(hingeName[hinge], xy=(eHinge[i], SumIntAng[i]), 
 #                              xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
 #                              arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
-#                ax10.annotate(hingeName[hinge], xy=(eHingeRel[stepsHinge*hinge+stepsHinge-1], SumExtAngRel[stepsHinge*hinge+stepsHinge-1]), 
+#                ax10.annotate(hingeName[hinge], xy=(eHinge[i], SumExtAng[i]), 
 #                              xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
 #                              arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
-#                ax8.annotate(hingeName[hinge], xy=(eAllEdgeRel[stepsHinge*hinge+stepsHinge-1], abs(max(MaxStrRel[stepsHinge*hinge+stepsHinge-1],MinStrRel[stepsHinge*hinge+stepsHinge-1], key=abs))), 
+#                ax8.annotate(hingeName[hinge], xy=(eAllEdge[i], abs(max(MaxStr[i],MinStr[i], key=abs))), 
 #                              xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
 #                              arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
                 print(hingeName[differentEnergies[findit[0],0]], differentEnergies[findit[0],1])    
