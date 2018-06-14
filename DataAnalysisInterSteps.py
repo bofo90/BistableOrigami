@@ -193,6 +193,8 @@ def ReadandAnalizeFile(folder_name, plot = False, normalize = False):
         eEdge = np.sqrt(eEdge/totalnumberEdges)
         eDiag = np.sqrt(eDiag/totalnumberDiag)
         normalized = 'norm'
+    else:
+        normalized = ''
     
     #%%
     ############################################ get the number of actuated hinges for each hinge-set
@@ -218,18 +220,18 @@ def ReadandAnalizeFile(folder_name, plot = False, normalize = False):
     notConvHinges = np.empty((0,3), dtype = int)
     for i in allHinges:
         if flagmask[i,0]:
-            flagCountFol[actuatedHinges[i]-1,exfl[i,0]]  += 1
+            flagCountFol[actuatedHinges[i]-1,exfl[i,0]+3]  += 1
         if flagmask[i,1]:# and exflRel[(i+1)*stepsHinge-1] != -2:
-            flagCountRel[actuatedHinges[i]-1,exfl[i,1]]  += 1
+            flagCountRel[actuatedHinges[i]-1,exfl[i,1]+3]  += 1
         if flagmask[i,:].any():
             #check if max/min angle not bigger than pi or -pi
             if MaxAngles[i*3+2] > np.around(np.pi,digitPi) or MinAngles[i*3+2] < -np.around(np.pi,digitPi):
-                flagCountRel[actuatedHinges[i]-1,6]  += 1
+                flagCountRel[actuatedHinges[i]-1,9]  += 1
                 exfl[i,1] = 6
                 flagmask[i,1] = True
             #check for max/min strech not bigger than a tolerance
             if (MaxStr[(i+1)*stepsHinge-1] > tolStretch or MinStr[(i+1)*stepsHinge-1]  < -tolStretch) and not flagmask[i,1]:
-                flagCountRel[actuatedHinges[i]-1,7]  += 1
+                flagCountRel[actuatedHinges[i]-1,10]  += 1
                 exfl[i,1] = 7
                 flagmask[i,1] = True
         if flagmask[i,:].any():
@@ -441,7 +443,7 @@ def ReadandAnalizeFile(folder_name, plot = False, normalize = False):
 
 
 
-    return allFlags, len(differentEnergies[:,0]), differentEnergiesName, differentEnergiesEnergy, differentAngles, SumIntAngRel[stepsHinge*convHinges[index]+stepsHinge-1], SumExtAngRel[stepsHinge*convHinges[index]+stepsHinge-1]
+    return allFlags, len(differentEnergies[:,0]), differentEnergiesName, differentEnergiesEnergy, SumIntAng[stepsHinge*SSpos+stepsHinge-1], SumExtAng[stepsHinge*SSpos+stepsHinge-1]
 
 #hinges = np.zeros(30)
 #
@@ -452,5 +454,5 @@ def ReadandAnalizeFile(folder_name, plot = False, normalize = False):
 #            hinges[np.size(row)] +=1
 #%%
 if __name__ == "__main__":
-    folder_name = "Results/tetrahedron/active-set/energy/13-Jun-2018_temp\kh0.001_kta100.000_ke3.000_kf100.000"
-    ReadandAnalizeFile(folder_name)
+    folder_name = "Results/triangular prism/sqp/energy/14-Jun-2018_temp\kh0.001_kta100.000_ke3.000_kf100.000"
+    ReadandAnalizeFile(folder_name, plot = True)
