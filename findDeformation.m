@@ -58,7 +58,27 @@ end
     
 %%%%%% Folding part %%%%%%
 %Run the Folding of the structure
-[V, exfl, output, E] = FoldStructure(u0, theta0, E, exfl, extrudedUnitCell, opt, 1, Aeq, Beq);
+initialiseGlobalx(u0, theta0);
+steps = 2;
+angles = theta0(opt.angleConstrFinal(1).val(:,1)) + linspace(0,1,steps+1).*(opt.angleConstrFinal(1).val(:,2) - theta0(opt.angleConstrFinal(1).val(:,1)));
+V(:,1)=u0;
+[E.E(1,1),~,E.Eedge(1,1),E.Ediag(1,1),E.Eface(1,1),E.Ehinge(1,1),E.EtargetAngle(1,1), ~]=Energy(u0,extrudedUnitCell,opt);
+exfl(1,1) = 1;
+exfl(2,1) = 1;
+Etemp = [];
+for anglestep = 2:steps+1
+    exfltemp = [];
+    opt.angleConstrFinal(1).val(:,2) = angles(:,anglestep);
+    [Vtemp, exfltemp, output, ~] = FoldStructure(u0, Etemp, exfltemp, extrudedUnitCell, opt, 1, Aeq, Beq);
+    u0 = Vtemp(:,2);
+    if exfltemp(2,1) ~= 1
+        exfl(2,1) = exfltemp(2,1);
+    end
+end
+V(:,2)=u0;
+extrudedUnitCell.angleConstr=opt.angleConstrFinal(1).val;
+[E.E(2,1),~,E.Eedge(2,1),E.Ediag(2,1),E.Eface(2,1),E.Ehinge(2,1),E.EtargetAngle(2,1), ~]=Energy(u0,extrudedUnitCell,opt);
+extrudedUnitCell.angleConstr=[];
 [result, theta1,u1] = SaveResultPos(result, opt, V, output, 1);
 
 %%%%%% Releasing part %%%%%%
@@ -66,7 +86,8 @@ end
 opt.options.Algorithm = opt.relAlgor;
 opt.angleConstrFinal(2).val = [];
 
-[V, exfl, output, E] = FoldStructure(u1, theta1, E, exfl, extrudedUnitCell, opt, 2, Aeq, Beq);
+initialiseGlobalx(u1, theta1);
+[V, exfl, output, E] = FoldStructure(u1, E, exfl, extrudedUnitCell, opt, 2, Aeq, Beq);
 [result, ~,~] = SaveResultPos(result, opt, V, output, 2);
 
 %Return to original options
@@ -82,9 +103,8 @@ save(fileName, 'result');
 clearvars result E exfl output;
 fclose('all');
 
-function [V, exfl, output, E] = FoldStructure(u0, theta0, E, exfl, extrudedUnitCell, opt, iter, Aeq, Beq)
+function [V, exfl, output, E] = FoldStructure(u0, E, exfl, extrudedUnitCell, opt, iter, Aeq, Beq)
 
-initialiseGlobalx(u0, theta0);
 V = [];
 V(:,1)=u0;
 [E.E(1,iter),~,E.Eedge(1,iter),E.Ediag(1,iter),E.Eface(1,iter),E.Ehinge(1,iter),E.EtargetAngle(1,iter), ~]=Energy(u0,extrudedUnitCell,opt);
