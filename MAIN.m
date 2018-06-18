@@ -12,7 +12,7 @@ clearvars -global
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-opt=initOpt('template','cuboctahedron','analysis','result','readHingeFile','on',...
+opt=initOpt('template','truncated octahedron','analysis','result','readHingeFile','on',...
             'createFig', 'off','saveFig','off','saveMovie', 'off',...
             'figDPI',200,'safeMovieAntiAlias', 0,...
             'folAlgor', 'sqp','relAlgor', 'sqp',...
@@ -23,9 +23,9 @@ opt=initOpt('template','cuboctahedron','analysis','result','readHingeFile','on',
             'maxHinges',3,'minHinges',0);    %Only work when readHingeFile is 'on'
 
 opt.saveFile = strcat('/',date,'_AllHinges');
-% opt.saveFile = strcat('/','17-May-2018_EnergyAllAngles_Kdep_8_3');
+% opt.saveFile = strcat('/','15-Jun-2018_AllHinges');
 
-hingeSet = [1 23 32 41];
+hingeSet = [2 14 31];
 opt.angleConstrFinal(1).val=[ hingeSet(:) , -(pi-pi*(opt.constAnglePerc-0.005)) *ones(length(hingeSet), 1)];
 
 tic;
