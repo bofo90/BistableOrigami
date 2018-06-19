@@ -17,13 +17,17 @@ if strcmp(opt.analysis,'result')
             else
                 hingeList = dlmread(fileHinges);
                 metadataFile(opt, unitCell, extrudedUnitCell);
-                for i = 1:size(hingeList, 1)
+                maxHinge = opt.maxHinges;
+                minHinge = opt.minHinges;
+                numHinges = size(hingeList, 1);
+                anglFold = (-pi*(opt.constAnglePerc-0.005));
+                parfor i = 1:numHinges
                     row = hingeList(i, :);
                     hinges = row(0~=row);
-                    if length(hinges) <= opt.maxHinges && length(hinges) >= opt.minHinges
-                        opt.angleConstrFinal(1).val = [hinges(:), (-pi*(opt.constAnglePerc-0.005)) * ones(length(hinges), 1)];
-                        fprintf('Hinge selection number %d/%d.\n', i, size(hingeList, 1));
-                        nonlinearFolding(unitCell,extrudedUnitCell,opt);
+                    if length(hinges) <= maxHinge && length(hinges) >= minHinge
+                        angles = [hinges(:), anglFold * ones(length(hinges), 1)];
+                        fprintf('Hinge selection number %d/%d.\n', i, numHinges);
+                        nonlinearFolding(unitCell,extrudedUnitCell,opt, angles);
                     end
                 end
             end
@@ -36,12 +40,13 @@ end
 %NON-LINEAR ANALYSIS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function nonlinearFolding(unitCell,extrudedUnitCell,opt)
+function nonlinearFolding(unitCell,extrudedUnitCell,opt,angtemp)
 
 %INITIALIZE LINEAR CONSTRAINTS
 [Aeq, Beq]=linearConstr(unitCell,extrudedUnitCell,opt);
 
 %Save some variables
+opt.angleConstrFinal(1).val = angtemp;
 extrudedUnitCell.angleConstr=[];
 result = [];
 E=[];
@@ -118,14 +123,14 @@ else
 end
 extrudedUnitCell.angleConstr=opt.angleConstrFinal(iter).val;
 fprintf('Folding:\t');
-t1 = toc;
+% t1 = toc;
 %Determine new equilibrium
 [V(:,2),~,exfl(2,iter),output]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
 u0 = V(:,2);
 %Determine energy of that equilibrium
 [E.E(2,iter),~,E.Eedge(2,iter),E.Ediag(2,iter),E.Eface(2,iter),E.Ehinge(2,iter),E.EtargetAngle(2,iter), ~]=Energy(u0,extrudedUnitCell,opt);
-t2 = toc;
-fprintf('time %1.2f, exitflag %d\n',t2-t1,exfl(2,iter));
+% t2 = toc;
+% fprintf('time %1.2f, exitflag %d\n',t2-t1,exfl(2,iter));
 
 
 function [result, lastAngle, lastPosition] = SaveResultPos(result, opt, Positions, minimizationOuput, state)
