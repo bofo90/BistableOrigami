@@ -21,7 +21,7 @@ if strcmp(opt.analysis,'result')
                 minHinge = opt.minHinges;
                 numHinges = size(hingeList, 1);
                 anglFold = (-pi*(opt.constAnglePerc-0.005));
-                for i = 1:numHinges
+                parfor i = 1:numHinges
                     row = hingeList(i, :);
                     hinges = row(0~=row);
                     if length(hinges) <= maxHinge && length(hinges) >= minHinge
