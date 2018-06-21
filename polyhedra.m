@@ -100,6 +100,11 @@ switch geom
         Polyhedron = createPrism(10, Polyhedron);
      case {'dodecagonal prism'}
         Polyhedron = createPrism(12, Polyhedron);
+     case {'rhombic dodecahedron'}
+        Polyhedron.node= [1,1,1;1,1,-1;1,-1,1;1,-1,-1;-1,1,1;-1,1,-1;-1,-1,1;-1,-1,-1;2,0,0;-2,0,0;0,2,0;0,-2,0;0,0,2;0,0,-2];
+        Polyhedron.node(:,1:3)=Polyhedron.node(:,1:3)/norm(Polyhedron.node(1,:)-Polyhedron.node(9,:)); 
+        Polyhedron.edge=[1,9;1,11;1,13;2,9;2,11;2,14;3,9;3,12;3,13;4,9;4,12;4,14;5,10;5,11;5,13;6,10;6,11;6,14;7,10;7,12;7,13;8,10;8,12;8,14];
+        Polyhedron.face={[1,9,2,11];[3,12,4,9];[7,10,8,12];[5,11,6,10];[1,11,5,13];[3,9,1,13];[7,12,3,13];[5,10,7,13];[2,14,6,11];[4,14,2,9];[8,14,4,12];[6,14,8,10]};
      otherwise
         error('Geometry does not excist\n')
 end
