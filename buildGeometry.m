@@ -342,7 +342,16 @@ switch opt.inputType
                 unitCell.perCon=[14 11; 9 8; 10 7];                
                 if strcmp(opt.template,'Fig4a')
                     unitCell.Polyhedron.solidify=[1,2,3,4,5,6,12,13];
-                end             
+                end    
+            case {'#6b'}
+                unitCell.Polyhedron(1)=polyhedra('tetrahedron');
+                unitCell.Polyhedron(2)=polyhedra('truncated tetrahedron');
+                unitCell.Polyhedron(3)=polyhedra('truncated tetrahedron');
+                unitCell.Polyhedron(4)=polyhedra('tetrahedron');
+                unitCell.expCon(1).dir=[4 1 1; 10 2 1; 2 4 1];
+                unitCell.expCon(2).dir=[4 7 2; 10 8 2; 5 3 2];
+                unitCell.expCon(3).dir=[3 8 3; 4 12 3; 2 11 3];
+                unitCell.perCon=[1 4 1 2; 2 1 1 2; 4 2 1 2];
         end
 end
 
@@ -710,6 +719,7 @@ for ne=1:length(unitCell.Polyhedron)
             extrudedUnitCell.edgeHinge([end+1],:)=[nodeNumNew(index(i)) nodeNum(index(i)) nodeNum(index(i+1)) nodeNumNew(index(i+1))]; 
         end
     end
+    nodes(ne) = size(extrudedUnitCell.node,1);
 end
 extrudedUnitCell.edgeHingeSorted=extrudedUnitCell.edgeHinge;
 extrudedUnitCell.edgeHingeSorted(:,1:2)=sort(extrudedUnitCell.edgeHinge(:,1:2),2);
@@ -769,12 +779,19 @@ end
 
 %Internal Hinges
 %added by Agustin Iniguez
+prevPolNodes = 0;
 i = 1;
-internalHinges = length(unitCell.Polyhedron.node);
-for hinge = 1: length(extrudedUnitCell.nodeHingeEx)
-    if (extrudedUnitCell.nodeHingeEx(hinge,1) <= internalHinges && ...
-            extrudedUnitCell.nodeHingeEx(hinge,2) <= internalHinges)
-        extrudedUnitCell.innerHinges(i) = hinge;
-        i = i+1;
+for ne=1:length(unitCell.Polyhedron)
+    internalHinges = length(unitCell.Polyhedron(ne).node)+prevPolNodes;
+    for hinge = 1: length(extrudedUnitCell.nodeHingeEx)
+        if (extrudedUnitCell.nodeHingeEx(hinge,1) <= internalHinges && ...
+                extrudedUnitCell.nodeHingeEx(hinge,2) <= internalHinges && ...
+                extrudedUnitCell.nodeHingeEx(hinge,1) > prevPolNodes &&...
+                extrudedUnitCell.nodeHingeEx(hinge,2) > prevPolNodes)
+            extrudedUnitCell.innerHinges(i) = hinge;
+            i = i+1;
+        end
     end
+    prevPolNodes = nodes(ne);
 end
+
