@@ -414,7 +414,7 @@ function latVec=detLatVec(perVec,opt)
     
 function refVec=detrefVec(unitCell,result,opt,ref)
     for nMode=1:length(result.deform)
-        for fram=0:size(result.deform(nMode).interV,2)
+        for fram=0:size(result.deform(nMode).interV,2)-1
             refVec(nMode).interV(fram+1).val=[];
             switch size(unitCell.l,1);
                 case 0
