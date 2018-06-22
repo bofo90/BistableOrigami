@@ -430,7 +430,7 @@ for i=1:size(extrudedUnitCell.nodeHingeEx,1)
     index(2:3:12)=3*extrudedUnitCell.nodeHingeEx(i,:)-1;
     index(3:3:12)=3*extrudedUnitCell.nodeHingeEx(i,:);
     [Jhinge(i,index),theta(i)]=JacobianHinge(extrudedUnitCell.node(extrudedUnitCell.nodeHingeEx(i,:),:));
-    if abs(thetaPrev(i)-theta(i)) > 0.50*2*pi
+    if abs(thetaPrev(i)-theta(i)) >= 0.50*2*pi
         theta(i) = theta(i)+sign(thetaPrev(i))*2*pi;
 %         fprintf('angle %d energy\n', i);
     end
