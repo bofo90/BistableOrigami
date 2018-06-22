@@ -12,7 +12,7 @@ clearvars -global
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-opt=initOpt('template','dodecahedron','analysis','result','readHingeFile','on',...
+opt=initOpt('template','octagonal prism','analysis','savedata','readHingeFile','on',...
             'createFig', 'off','saveFig','off','saveMovie', 'off',...
             'figDPI',200,'safeMovieAntiAlias', 0,...
             'folAlgor', 'sqp','relAlgor', 'sqp',...
@@ -23,9 +23,9 @@ opt=initOpt('template','dodecahedron','analysis','result','readHingeFile','on',.
             'maxHinges',inf,'minHinges',0);    %Only work when readHingeFile is 'on'
 
 opt.saveFile = strcat('/',date,'_AllHinges');
-% opt.saveFile = strcat('/','20-Jun-2018_AllHinges');
+% opt.saveFile = strcat('/','21-Jun-2018_AllHinges');
 
-hingeSet = [3 8 12];
+hingeSet = [1 9 19];
 opt.angleConstrFinal(1).val=[ hingeSet(:) , -(pi-pi*(opt.constAnglePerc-0.005)) *ones(length(hingeSet), 1)];
 
 tic;
