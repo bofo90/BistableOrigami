@@ -27,7 +27,7 @@ opt=initOpt('inputType', 'preDefined','template','#6b',...
 opt.saveFile = strcat('/',date,'_AllHinges');
 % opt.saveFile = strcat('/','21-Jun-2018_AllHinges');
 
-hingeSet = [1, 2];
+hingeSet = [1];
 opt.angleConstrFinal(1).val=[ hingeSet(:) , -(pi-pi*(opt.constAnglePerc-0.005)) *ones(length(hingeSet), 1)];
 
 tic;

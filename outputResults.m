@@ -131,9 +131,7 @@ if strcmp(opt.analysis,'info')
             set(hs{nc,i},'facealpha',0,'edgealpha',0);
         end
     end
-    
-    %PLOT POLYHEDRA TEMPLATE
-    [f1,hs,hie,his] = copyFigure(unitCell,extrudedUnitCell,opt,hs,hie,his);
+    %INTERNAL POLYHEDRA TESSELATION
     for nc=1:size(unitCell.Polyhedron(1).latVec,1)
         for ne=1:length(unitCell.Polyhedron)
             for i=3:10                  
@@ -142,10 +140,25 @@ if strcmp(opt.analysis,'info')
             end               
         end
     end
-    printHigRes(f1,opt,[opt.template,'_internalPolyhedra'],nameFolder); 
-    close(f)
-    %PLOT ALL INFORMATION
-    f=figure('Position', [0 0 800 800]);hold on;
+    printHigRes(f,opt,[opt.template,'_internalPolyhedra'],nameFolder); 
+    %EXTRUDED TESSELATION
+    for nc=1:size(extrudedUnitCell.latVec,1)
+        for i=3:10
+            set(hs{nc,i},'facealpha',1,'edgealpha',1)         
+        end
+    end
+    for ne=1:length(unitCell.Polyhedron)
+        for nc=1:size(unitCell.Polyhedron(1).latVec,1)
+            for i=3:10
+                set(hie{ne,nc,i},'facealpha',0,'edgealpha',0);
+                set(his{ne,nc,i},'facealpha',0,'edgealpha',0);
+            end
+        end
+    end
+    printHigRes(f,opt,[opt.template,'_extrudedMat'],nameFolder);
+    %PLOT ALL INFORMATION UNIT CELL
+    f=figure('Position', [0 0 800 800]);
+    hold on;
     for ne=1:length(unitCell.Polyhedron)
         for i=3:10
             patch('Faces',plotunitCell.Init(ne).polFace(i).nod(plotunitCell.Init(ne).polFace(i).indexe,:),'Vertices',plotunitCell.Init(ne).lat(1).coor,'facecolor','flat','facevertexCData',interp1([1,max(2,length(unitCell.Polyhedron))],colt([1,2],:),(ne)),'facealpha',opt.tranPol,'edgealpha',opt.tranPol);
@@ -174,48 +187,36 @@ if strcmp(opt.analysis,'info')
     hl2=plotOpt(opt); 
     axis tight
     printHigRes(f,opt,[opt.template,'_internalPolyhedraVertFaces'],nameFolder); 
-    %EXTRUDED STATE
-    [f4,hs,hie,his] = copyFigure(unitCell,extrudedUnitCell,opt,hs,hie,his);   
-    for nc=1:size(extrudedUnitCell.latVec,1)
-        for i=3:10
-            set(hs{nc,i},'facealpha',1,'edgealpha',1)         
-        end
+    %EXTRUDED STATE UNIT CELL
+    f4=figure('Position', [0 0 800 800]);
+    hold on;
+    for i=3:10
+        c=(plotextrudedUnitCell.polFace(i).normal*viewCoor')>0;
+        hsu{1,i} = patch('Faces',plotextrudedUnitCell.polFace(i).nod,'Vertices',plotextrudedUnitCell.lat(1).coor,'facecolor','flat','facevertexCData',c*colt(4,:)+abs(1-c)*colt(5,:),'facealpha',1,'edgealpha',1);
     end
-    for ne=1:length(unitCell.Polyhedron)
-        for nc=1:size(unitCell.Polyhedron(1).latVec,1)
-            for i=3:10
-                set(hie{ne,nc,i},'facealpha',0,'edgealpha',0);
-                set(his{ne,nc,i},'facealpha',0,'edgealpha',0);
-            end
-        end
-    end
-    set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);
+
+    hl2=plotOpt(opt); 
+    axis tight
     printHigRes(f4,opt,[opt.template,'_extrudedPolyhedra'],nameFolder); 
-    %EXTRUDED STATE 'INFO
-    [f5,hs,hie,his] = copyFigure(unitCell,extrudedUnitCell,opt,hs,hie,his); hold on 
-    for nc=1:size(extrudedUnitCell.latVec,1)
-        for i=3:10
-            set(hs{nc,i},'facealpha',0.75,'edgealpha',.75)         
-        end
+    %EXTRUDED STATE 'INFO' VERTEX NUMBERS
+    for i=3:10
+        set(hsu{1,i},'facealpha',0.75,'edgealpha',0.75)         
     end
     coorCenter=sum(extrudedUnitCell.node)/size(extrudedUnitCell.node,1);    
     for i=1:size(extrudedUnitCell.node,1)
             coor=extrudedUnitCell.node(i,:);
             coorText=[coor(1)*0.85+coorCenter(1)*0.15,coor(2)*0.85+coorCenter(2)*0.15,coor(3)*0.85+coorCenter(3)*0.15];
-            line([coor(1),coorText(1)],[coor(2),coorText(2)],[coor(3),coorText(3)],'color','k','linestyle',':')
-            plot3(coor(1),coor(2),coor(3),'*k')
-            text(coorText(1),coorText(2),coorText(3),num2str(i),'fontsize',20)
-        end
-    set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);
-    printHigRes(f5,opt,[opt.template,'_extrudedPolyhedraVert'],nameFolder); 
-    %EXTRUDED STATE 'INFO' ANGLE NUMBERS
-    [f6,hs,hie,his] = copyFigure(unitCell,extrudedUnitCell,opt,hs,hie,his); hold on 
-    for nc=1:size(extrudedUnitCell.latVec,1)
-        for i=3:10
-            set(hs{nc,i},'facealpha',0.75,'edgealpha',.75)         
-        end
+            hline{i} = line([coor(1),coorText(1)],[coor(2),coorText(2)],[coor(3),coorText(3)],'color','k','linestyle',':');
+            hmark{i} = plot3(coor(1),coor(2),coor(3),'*k');
+            htext{i} = text(coorText(1),coorText(2),coorText(3),num2str(i),'fontsize',20);
     end
-    coorCenter=sum(extrudedUnitCell.node)/size(extrudedUnitCell.node,1);    
+    printHigRes(f4,opt,[opt.template,'_extrudedPolyhedraVert'],nameFolder); 
+    %EXTRUDED STATE 'INFO' ANGLE NUMBERS
+    for i=1:size(extrudedUnitCell.node,1)
+        delete(hline{i});
+        delete(hmark{i});
+        delete(htext{i});
+    end
     for i=1:size(extrudedUnitCell.nodeHingeEx,1)
             coor1=extrudedUnitCell.node(extrudedUnitCell.nodeHingeEx(i,1),:);
             coor2=extrudedUnitCell.node(extrudedUnitCell.nodeHingeEx(i,2),:);
@@ -224,9 +225,10 @@ if strcmp(opt.analysis,'info')
             line([coor(1),coorText(1)],[coor(2),coorText(2)],[coor(3),coorText(3)],'color','k','linestyle',':')
             plot3(coor(1),coor(2),coor(3),'*k')
             text(coorText(1),coorText(2),coorText(3),num2str(i),'fontsize',20)
-        end
-    set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);
-    printHigRes(f6,opt,[opt.template,'_extrudedPolyhedraEdges'],nameFolder);
+    end
+    printHigRes(f4,opt,[opt.template,'_extrudedPolyhedraEdges'],nameFolder);
+
+
 end
 
 if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(opt.analysis,'plot')
@@ -546,5 +548,5 @@ function [f,hs,hie,his] = copyFigure(unitCell,extrudedUnitCell,opt,hs,hie,his)
             end
         end
     end
-    set(gca,'xlim',opt.xlim,'ylim',opt.ylim,'zlim',opt.zlim);
+%     set(gca,'xlim',opt.xlim,'ylim',opt.ylim,'zlim',opt.zlim);
     hl2=plotOpt(opt);
