@@ -7,7 +7,7 @@ if strcmp(opt.analysis,'result')
     switch opt.readHingeFile
         case 'off'
             metadataFile(opt, unitCell, extrudedUnitCell);
-            nonlinearFolding(unitCell,extrudedUnitCell,opt);
+            nonlinearFolding(unitCell,extrudedUnitCell,opt,opt.angleConstrFinal(1).val);
 %             
         case 'on'
             opt.angleConstrFinal = [];
@@ -21,7 +21,7 @@ if strcmp(opt.analysis,'result')
                 minHinge = opt.minHinges;
                 numHinges = size(hingeList, 1);
                 anglFold = (-pi*(opt.constAnglePerc-0.005));
-                parfor i = 1:numHinges
+                for i = 1:numHinges
                     row = hingeList(i, :);
                     hinges = row(0~=row);
                     if length(hinges) <= maxHinge && length(hinges) >= minHinge
