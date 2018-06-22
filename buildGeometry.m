@@ -3,6 +3,21 @@ function [unitCell,extrudedUnitCell,opt]=buildGeometry(opt)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %INITIALIZE EXTRUDED UNIT CELL
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%Get initial geometry
+[unitCell,opt]=selectUnitCell(opt);
+%Expand unit cell in case neccesary
+[unitCell]=expandUnitCell(unitCell,opt);
+%Create decoupled extruded faces
+[extrudedUnitCell,unitCell]=extrudeUnitCell(unitCell,opt);
+
+function [unitCell,opt]=selectUnitCell(opt)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%LOAD UNIT CELL
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 switch opt.inputType
     case {'user'}     
         %Initialize empty arrays
@@ -331,24 +346,11 @@ switch opt.inputType
         end
 end
 
-
-% %Get initial geometry
-% [unitCell,opt]=selectUnitCell(opt);
-% %Expand unit cell in case neccesary
-% [unitCell]=expandUnitCell(unitCell,opt);
-% %Create decoupled extruded faces
-% [extrudedUnitCell,unitCell]=extrudeUnitCell(unitCell,opt);
-
-function [unitCell,opt]=selectUnitCell(opt)
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%LOAD UNIT CELL
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Initialize empty array not used
-unitCell.perCon=[];
-unitCell.expCon=[];
-%Load polyhedron
-unitCell.Polyhedron(1)=polyhedra(opt.template);
+% %Initialize empty array not used
+% unitCell.perCon=[];
+% unitCell.expCon=[];
+% %Load polyhedron
+% unitCell.Polyhedron(1)=polyhedra(opt.template);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %INITIALIZE EMPTY ARRAYS THAT HAVE NOT BEEN DEFINED BEFORE
