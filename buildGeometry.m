@@ -351,7 +351,7 @@ switch opt.inputType
 %                 unitCell.expCon(1).dir=[4 1 1; 10 2 1; 2 4 1];
                 unitCell.expCon(1).dir=[4 7 2; 10 8 2; 5 3 2];
 %                 unitCell.expCon(3).dir=[3 8 3; 4 12 3; 2 11 3];
-                unitCell.perCon=[1 4 1 2; 2 1 1 2; 4 2 1 2];
+                unitCell.perCon=[8 6 1 2; 7 8 1 2; 6 5 1 2];
         end
 end
 
