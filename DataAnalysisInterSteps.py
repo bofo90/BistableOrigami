@@ -454,5 +454,5 @@ def ReadandAnalizeFile(folder_name, plot = False, normalize = False):
 #            hinges[np.size(row)] +=1
 #%%
 if __name__ == "__main__":
-    folder_name = "Results/octagonal prism/sqp/energy/22-Jun-2018_AllHinges\kh0.001_kta100.000_ke3.000_kf100.000"
+    folder_name = "Results/truncated cuboctahedron/sqp/energy/21-Jun-2018_AllHinges\kh0.001_kta100.000_ke3.000_kf100.000"
     ReadandAnalizeFile(folder_name, plot = True)
