@@ -344,14 +344,20 @@ switch opt.inputType
                     unitCell.Polyhedron.solidify=[1,2,3,4,5,6,12,13];
                 end    
             case {'#6b'}
-%                 unitCell.Polyhedron(1)=polyhedra('tetrahedron');
                 unitCell.Polyhedron(1)=polyhedra('truncated tetrahedron');
                 unitCell.Polyhedron(2)=polyhedra('truncated tetrahedron');
-%                 unitCell.Polyhedron(4)=polyhedra('tetrahedron');
-%                 unitCell.expCon(1).dir=[4 1 1; 10 2 1; 2 4 1];
                 unitCell.expCon(1).dir=[4 7 2; 10 8 2; 5 3 2];
-%                 unitCell.expCon(3).dir=[3 8 3; 4 12 3; 2 11 3];
                 unitCell.perCon=[8 6 1 2; 7 8 1 2; 6 5 1 2];
+            case {'#6b1D'}
+                unitCell.Polyhedron(1)=polyhedra('truncated tetrahedron');
+                unitCell.Polyhedron(2)=polyhedra('truncated tetrahedron');
+                unitCell.expCon(1).dir=[4 7 2; 10 8 2; 5 3 2];
+                unitCell.perCon=[8 6 1 2];
+            case {'#6b2D'}
+                unitCell.Polyhedron(1)=polyhedra('truncated tetrahedron');
+                unitCell.Polyhedron(2)=polyhedra('truncated tetrahedron');
+                unitCell.expCon(1).dir=[4 7 2; 10 8 2; 5 3 2];
+                unitCell.perCon=[8 6 1 2; 6 5 1 2];
         end
 end
 
