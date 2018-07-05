@@ -21,7 +21,7 @@ if strcmp(opt.analysis,'result')
                 minHinge = opt.minHinges;
                 numHinges = size(hingeList, 1);
                 anglFold = (-pi*(opt.constAnglePerc-0.005));
-                parfor i = 1:numHinges
+                for i = 1:numHinges
                     row = hingeList(i, :);
                     hinges = row(0~=row);
                     if length(hinges) <= maxHinge && length(hinges) >= minHinge
@@ -122,7 +122,7 @@ else
     fprintf(['Angle contrain:', mat2str(opt.angleConstrFinal(iter).val(:,1)') ,'\n']);
 end
 extrudedUnitCell.angleConstr=opt.angleConstrFinal(iter).val;
-fprintf('Folding:\t');
+% fprintf('Folding:\t');
 % t1 = toc;
 %Determine new equilibrium
 [V(:,2),~,exfl(2,iter),output]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);

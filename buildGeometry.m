@@ -358,6 +358,15 @@ switch opt.inputType
                 unitCell.Polyhedron(2)=polyhedra('truncated tetrahedron');
                 unitCell.expCon(1).dir=[4 7 2; 10 8 2; 5 3 2];
                 unitCell.perCon=[8 6 1 2; 6 5 1 2];
+            case {'#7b'}
+                unitCell.Polyhedron(1)=polyhedra('cuboctahedron');
+                unitCell.perCon=[4 6; 5 3; 1 2];
+            case {'#7b2D'}
+                unitCell.Polyhedron(1)=polyhedra('cuboctahedron');
+                unitCell.perCon=[5 3; 1 2];
+            case {'#7b1D'}
+                unitCell.Polyhedron(1)=polyhedra('cuboctahedron');
+                unitCell.perCon=[1 2];
         end
 end
 
