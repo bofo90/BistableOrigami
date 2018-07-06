@@ -367,6 +367,12 @@ switch opt.inputType
             case {'#7b1D'}
                 unitCell.Polyhedron(1)=polyhedra('cuboctahedron');
                 unitCell.perCon=[1 2];
+            case {'#22_1D'}
+                unitCell.Polyhedron=polyhedra('cube');
+                unitCell.perCon=[6 1];
+            case {'#22_2D'}
+                unitCell.Polyhedron=polyhedra('cube');
+                unitCell.perCon=[6 1; 5 2];
         end
 end
 
