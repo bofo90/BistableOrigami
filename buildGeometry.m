@@ -373,6 +373,18 @@ switch opt.inputType
             case {'#22_2D'}
                 unitCell.Polyhedron=polyhedra('cube');
                 unitCell.perCon=[6 1; 5 2];
+            case {'#26_1Da'}
+                unitCell.Polyhedron=polyhedra('hexagonal prism');
+                unitCell.perCon=[1 2];
+            case {'#26_1Db'}
+                unitCell.Polyhedron=polyhedra('hexagonal prism');
+                unitCell.perCon=[7 4];
+            case {'#26_2Da'}
+                unitCell.Polyhedron=polyhedra('hexagonal prism');
+                unitCell.perCon=[7 4; 6 3];
+            case {'#26_2Db'}
+                unitCell.Polyhedron=polyhedra('hexagonal prism');
+                unitCell.perCon=[7 4; 1 2];
         end
 end
 
