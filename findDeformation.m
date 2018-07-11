@@ -89,7 +89,7 @@ extrudedUnitCell.angleConstr=[];
 %change algorithm for releasing
 opt.options.Algorithm = opt.relAlgor;
 opt.angleConstrFinal(2).val = [];
-opt.KtargetAngle = 0
+opt.KtargetAngle = 0;
 
 initialiseGlobalx(u1, theta1);
 [V, exfl, output, E] = FoldStructure(u1, E, exfl, extrudedUnitCell, opt, 2, Aeq, Beq);
