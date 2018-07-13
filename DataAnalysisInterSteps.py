@@ -128,7 +128,7 @@ def ReadandAnalizeFile(folder_name, plot = False, normalize = False):
     eHinInt = dataEnergy[6,:]
     exfl = dataEnergy[7,:].astype(int)
     
-    eAllEdge = eEdge + eFace
+    eAllEdge = eEdge + eDiag
         
     hingeName = np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', unpack = True, usecols = [1], dtype=bytes).astype(str)    
         
@@ -294,7 +294,7 @@ def ReadandAnalizeFile(folder_name, plot = False, normalize = False):
 
 
     if np.size(SS) == 1:
-        print('Error: No additional stable states found.\n')
+        print('No additional stable states found.\n')
         if plot:
             fig5 = plt.figure(4,figsize=(cm2inch(35), cm2inch(20)))
             ax6 = plt.subplot(111)
@@ -406,7 +406,9 @@ def ReadandAnalizeFile(folder_name, plot = False, normalize = False):
 #                ax8.annotate(hingeName[hinge], xy=(eAllEdge[i], abs(max(MaxStr[i],MinStr[i], key=abs))), 
 #                              xytext=(10, 10), textcoords='offset points', ha='right', va='bottom',
 #                              arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
-                print(hingeName[differentEnergies[findit[0],0]], differentEnergies[findit[0],1])    
+                print(hingeName[differentEnergies[findit[0],0]], differentEnergies[findit[0],1],
+                      '\tStretch Energy: %.6f' %differentEnergiesEnergy[findit[0],1],
+                      '\tAll Energy: %.6f' %differentEnergiesEnergy[findit[0],1])    
                 
         cs1 = ax1.scatter(differentEnergiesEnergy[:,1], differentEnergiesEnergy[:,0], c = differentEnergies[:,1],
                           label = differentEnergiesName, cmap = cmap1, vmax = maxststs)
