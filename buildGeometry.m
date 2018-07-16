@@ -343,6 +343,9 @@ switch opt.inputType
                 if strcmp(opt.template,'Fig4a')
                     unitCell.Polyhedron.solidify=[1,2,3,4,5,6,12,13];
                 end    
+            case {'#29'}
+                unitCell.Polyhedron=polyhedra('rhombic dodecahedron');
+                unitCell.perCon=[2 4;3 1;9 7];
             case {'#6b'}
                 unitCell.Polyhedron(1)=polyhedra('truncated tetrahedron');
                 unitCell.Polyhedron(2)=polyhedra('truncated tetrahedron');
