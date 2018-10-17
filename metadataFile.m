@@ -20,6 +20,8 @@ if strcmp(opt.analysis,'result')
     metadata.extUnitCell.faces = size(extrudedUnitCell.face,2);
     metadata.extUnitCell.hinges = size(extrudedUnitCell.nodeHingeEx,1);
     metadata.extUnitCell.intHinges = size(extrudedUnitCell.innerHinges,2);
+    metadata.extUnitCell.maxStretch = extrudedUnitCell.maxStretch;
+    metadata.extUnitCell.maxHingeFold = extrudedUnitCell.maxHingeFold;
 
     if ~exist(filedir, 'file')
         mkdir(filedir);

@@ -831,3 +831,23 @@ for ne=1:length(unitCell.Polyhedron)
     prevPolNodes = nodes(ne);
 end
 
+%Max stretch possible
+if strcmp(opt.constrEdge,'off')
+    if ~isnan(opt.maxStretch)
+        extrudedUnitCell.maxStretch = sum(extrudedUnitCell.edgeL*opt.maxStretch.^2);
+    else
+        extrudedUnitCell.maxStretch = inf;
+    end
+else
+    extrudedUnitCell.maxStretch = 0;
+end
+
+%Max hinge folding possible
+if ~isnan(opt.constAnglePerc)
+    extrudedUnitCell.maxHingeFold = sum(max(abs(pi*opt.constAnglePerc+extrudedUnitCell.theta),...
+        abs(pi*opt.constAnglePerc-extrudedUnitCell.theta)).^2);
+else 
+    extrudedUnitCell.maxHingeFold = inf;
+end
+
+
