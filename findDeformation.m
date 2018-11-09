@@ -20,7 +20,7 @@ if strcmp(opt.analysis,'result')
                 maxHinge = opt.maxHinges;
                 minHinge = opt.minHinges;
                 numHinges = size(hingeList, 1);
-                anglFold = (-pi*(opt.constAnglePerc-0.005));
+                anglFold = -(pi-pi*(opt.constAnglePerc-0.005));
                 parfor i = 1:numHinges
                     row = hingeList(i, :);
                     hinges = row(0~=row);
@@ -100,7 +100,7 @@ opt.options.Algorithm = opt.folAlgor;
 result = SaveResultEnergy(result, E, exfl, opt);
 
 %Save the result in a file
-fileName = strcat(folderName,'/',mat2str(opt.angleConstrFinal(1).val(:,1)'),'.mat');
+fileName = strcat(folderName,'/',mat2str(opt.angleConstrFinal(1).val(:,1)'),'op.mat');
 save(fileName, 'result');
 
 
