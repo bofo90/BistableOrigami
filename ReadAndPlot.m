@@ -32,7 +32,7 @@ switch opt.analysis
 
                 % parse the file name to get back hinge set
                 resfilename = allFiles(ct).name;
-                hingeSet = getHingeSet(resfilename);
+                [hingeSet, ~] = getHingeSet(resfilename);
                 if strcmp(opt.readHingeFile,'off')
                     if ~isequal(hingeSet, opt.angleConstrFinal(end).val(:,1))
                         continue;
@@ -158,10 +158,20 @@ end
 fclose(fid) ;                                          % Closes file.
 
 
-function [hingeSet] = getHingeSet(fileName)
+function [hingeSet, opening] = getHingeSet(fileName)
 
 parsedName = strsplit(fileName(1:end-4), '_');
 hingeSetStr = parsedName{1};
+if length(hingeSetStr)>2
+    if strcmp(hingeSetStr(end-1:end),'op')
+        hingeSetStr = hingeSetStr(1:end-2);
+        opening = 1;
+    else
+        opening = 0;
+    end
+else
+    opening = 0;
+end
 hingeSetStr = strrep(hingeSetStr, '[', '');
 hingeSetStr = strrep(hingeSetStr, ']', '');
 hingeSetStr = strsplit(hingeSetStr(1:end), ' ');
