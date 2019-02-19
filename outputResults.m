@@ -52,7 +52,7 @@ plotextrudedUnitCell=prepEffPlot(extrudedUnitCell,viewCoor);
 %Plot solid face with 100% transparency
 f=figure('Position', [0 0 800 800]); hold on
 for nc=1:size(extrudedUnitCell.latVec,1)
-    for i=3:10
+    for i=3:15
         c=(plotextrudedUnitCell.polFace(i).normal*viewCoor')>0;
         hs{nc,i}=patch('Faces',plotextrudedUnitCell.polFace(i).nod,'Vertices',plotextrudedUnitCell.lat(nc).coor,'facecolor','flat','facevertexCData',c*colt(4,:)+abs(1-c)*colt(5,:),'facealpha',1.0,'edgealpha',1.0);
     end
@@ -61,7 +61,7 @@ end
 %Plot polyhedra with 100% transparency
 for ne=1:length(unitCell.Polyhedron)
     for nc=1:size(unitCell.Polyhedron(1).latVec,1)
-        for i=3:10
+        for i=3:15
             [c, plotunitCell.Init(ne).polFace(i).indexe, b1]=intersect(plotunitCell.Init(ne).polFace(i).index,unitCell.Polyhedron(ne).extrude);
             [c, plotunitCell.Init(ne).polFace(i).indexs, b1]=intersect(plotunitCell.Init(ne).polFace(i).index,unitCell.Polyhedron(ne).solidify);
             hie{ne,nc,i}=patch('Faces',plotunitCell.Init(ne).polFace(i).nod(plotunitCell.Init(ne).polFace(i).indexe,:),'Vertices',plotunitCell.Init(ne).lat(nc).coor,'facecolor','flat','facevertexCData',interp1([1,max(2,length(unitCell.Polyhedron))],colt([1,2],:),(ne)),'facealpha',0.0,'edgealpha',0.0);
@@ -105,7 +105,7 @@ if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(op
                     maxAxis(maxAxis<ma)=ma(maxAxis<ma);
                     minAxis(minAxis>mi)=mi(minAxis>mi);
                 end
-                for i=3:10
+                for i=3:15
                     plotextrudedUnitCell.mode(nMode).frame(fram).polFace(i).normal(1,:)=[0 0 0];
                     for j=1:size(plotextrudedUnitCell.polFace(i).nod,1)
                         n1a=plotextrudedUnitCell.mode(nMode).frame(fram).lat(1).coor(plotextrudedUnitCell.polFace(i).nod(j,2),1:3)-plotextrudedUnitCell.mode(nMode).frame(framMode+1).lat(1).coor(plotextrudedUnitCell.polFace(i).nod(j,1),1:3);
@@ -127,14 +127,14 @@ end
 if strcmp(opt.analysis,'info')
     %First make solid face with 100% transparency
     for nc=1:size(extrudedUnitCell.latVec,1)
-        for i=3:10
+        for i=3:15
             set(hs{nc,i},'facealpha',0,'edgealpha',0);
         end
     end
     %INTERNAL POLYHEDRA TESSELATION
     for nc=1:size(unitCell.Polyhedron(1).latVec,1)
         for ne=1:length(unitCell.Polyhedron)
-            for i=3:10                  
+            for i=3:15       
                 set(hie{ne,nc,i},'facealpha',opt.tranPol,'edgealpha',opt.tranPol);
                 set(his{ne,nc,i},'facealpha',opt.tranPol,'edgealpha',opt.tranPol);
             end               
@@ -143,13 +143,13 @@ if strcmp(opt.analysis,'info')
     printHigRes(f,opt,[opt.template,'_internalPolyhedra'],nameFolder); 
     %EXTRUDED TESSELATION
     for nc=1:size(extrudedUnitCell.latVec,1)
-        for i=3:10
+        for i=3:15
             set(hs{nc,i},'facealpha',1,'edgealpha',1)         
         end
     end
     for ne=1:length(unitCell.Polyhedron)
         for nc=1:size(unitCell.Polyhedron(1).latVec,1)
-            for i=3:10
+            for i=3:15
                 set(hie{ne,nc,i},'facealpha',0,'edgealpha',0);
                 set(his{ne,nc,i},'facealpha',0,'edgealpha',0);
             end
@@ -160,7 +160,7 @@ if strcmp(opt.analysis,'info')
     f=figure('Position', [0 0 800 800]);
     hold on;
     for ne=1:length(unitCell.Polyhedron)
-        for i=3:10
+        for i=3:15
             patch('Faces',plotunitCell.Init(ne).polFace(i).nod(plotunitCell.Init(ne).polFace(i).indexe,:),'Vertices',plotunitCell.Init(ne).lat(1).coor,'facecolor','flat','facevertexCData',interp1([1,max(2,length(unitCell.Polyhedron))],colt([1,2],:),(ne)),'facealpha',opt.tranPol,'edgealpha',opt.tranPol);
             patch('Faces',plotunitCell.Init(ne).polFace(i).nod(plotunitCell.Init(ne).polFace(i).indexs,:),'Vertices',plotunitCell.Init(ne).lat(1).coor,'facecolor','flat','facevertexCData',interp1([1,max(2,length(unitCell.Polyhedron))],colt([1,2],:),(ne)),'facealpha',opt.tranPol,'edgealpha',opt.tranPol);
         end
@@ -190,7 +190,7 @@ if strcmp(opt.analysis,'info')
     %EXTRUDED STATE UNIT CELL
     f4=figure('Position', [0 0 800 800]);
     hold on;
-    for i=3:10
+    for i=3:15
         c=(plotextrudedUnitCell.polFace(i).normal*viewCoor')>0;
         hsu{1,i} = patch('Faces',plotextrudedUnitCell.polFace(i).nod,'Vertices',plotextrudedUnitCell.lat(1).coor,'facecolor','flat','facevertexCData',c*colt(4,:)+abs(1-c)*colt(5,:),'facealpha',1,'edgealpha',1);
     end
@@ -199,7 +199,7 @@ if strcmp(opt.analysis,'info')
     axis tight
     printHigRes(f4,opt,[opt.template,'_extrudedPolyhedra'],nameFolder); 
     %EXTRUDED STATE 'INFO' VERTEX NUMBERS
-    for i=3:10
+    for i=3:15
         set(hsu{1,i},'facealpha',0.75,'edgealpha',0.75)         
     end
     coorCenter=sum(extrudedUnitCell.node)/size(extrudedUnitCell.node,1);    
@@ -234,7 +234,7 @@ end
 if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(opt.analysis,'plot')
         %First make solid face with 100% transparency
         for nc=1:size(extrudedUnitCell.latVec,1)
-            for i=3:10
+            for i=3:15
                 set(hs{nc,i},'facealpha',0,'edgealpha',0);
             end
         end
@@ -245,7 +245,7 @@ if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(op
         for nc=1:size(unitCell.Polyhedron(1).latVec,1)
             fram=fram+1;
             for ne=1:length(unitCell.Polyhedron)
-                for i=3:10
+                for i=3:15
                     set(hie{ne,nc,i},'facealpha',opt.tranPol,'edgealpha',opt.tranPol);
                     set(his{ne,nc,i},'facealpha',opt.tranPol,'edgealpha',opt.tranPol);
                 end
@@ -266,7 +266,7 @@ if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(op
                 plotunitCell.Init(ne).lat(nc).coorNew(:,2)=plotunitCell.InitNew(ne).lat(nc).coor(:,2)+extrudedUnitCell.latVec(nc,2)-unitCell.PolyhedronNew(ne).latVec(nc,2);
                 plotunitCell.Init(ne).lat(nc).coorNew(:,3)=plotunitCell.InitNew(ne).lat(nc).coor(:,3)+extrudedUnitCell.latVec(nc,3)-unitCell.PolyhedronNew(ne).latVec(nc,3);
                         %Update position
-                for i=3:10
+                for i=3:15
 %                             set(hie{ne,nc,i},'vertices',plotunitCell.Init(ne).lat(nc).coorNew);
 %                             set(his{ne,nc,i},'vertices',plotunitCell.Init(ne).lat(nc).coorNew);
                     set(hie{ne,nc,i},'vertices',plotunitCell.Init(ne).lat(nc).coorNew);
@@ -310,7 +310,7 @@ if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(op
 
         for nc=1:size(unitCell.Polyhedron(1).latVec,1)
             for ne=1:length(unitCell.Polyhedron)
-                for i=3:10
+                for i=3:15
                     if ~isempty(plotunitCell.Init(1).polFace(i).indexs)
                         c=(plotunitCell.Init(ne).polFace(i).normal(plotunitCell.Init(ne).polFace(i).indexs,:)*viewCoor')>0;
                         set(his{ne,nc,i},'facealpha',1,'edgealpha',1,'facevertexCData',(c*colt(4,:)+abs(1-c)*colt(5,:)));
@@ -325,7 +325,7 @@ if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(op
         %PLOT EXTRUSION
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         for nc=1:size(extrudedUnitCell.latVec,1)
-            for i=3:10
+            for i=3:15
                 set(hs{nc,i},'facealpha',1,'edgealpha',1)      
             end
         end
@@ -335,7 +335,7 @@ if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(op
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         for ne=1:length(unitCell.Polyhedron)
             for nc=1:size(unitCell.Polyhedron(1).latVec,1)
-                for i=3:10
+                for i=3:15
                     set(hie{ne,nc,i},'facealpha',0,'edgealpha',0);
                     set(his{ne,nc,i},'facealpha',0,'edgealpha',0);
                 end
@@ -354,7 +354,7 @@ if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(op
                 for framMode=1:length(plotextrudedUnitCell.mode(nMode).frame)
     %                 framMode = length(plotextrudedUnitCell.mode(nMode).frame);
                     for nc=1:size(extrudedUnitCell.latVec,1)
-                        for i=3:10     
+                        for i=3:15    
                             c=(plotextrudedUnitCell.mode(nMode).frame(framMode).polFace(i).normal*viewCoor'>0);
                             viewCoor=get(gca,'view');
                             viewCoor=[sind(viewCoor(1)) -cosd(viewCoor(1)) sind(viewCoor(2))];
@@ -369,7 +369,7 @@ if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(op
             else
                 framMode = length(plotextrudedUnitCell.mode(nMode).frame);
                 for nc=1:size(extrudedUnitCell.latVec,1)
-                    for i=3:10     
+                    for i=3:15     
                         c=(plotextrudedUnitCell.mode(nMode).frame(framMode).polFace(i).normal*viewCoor'>0);
                         viewCoor=get(gca,'view');
                         viewCoor=[sind(viewCoor(1)) -cosd(viewCoor(1)) sind(viewCoor(2))];
@@ -445,7 +445,7 @@ function refVec=detrefVec(unitCell,result,opt,ref)
     end
     
 function plotg=prepEffPlot(som,viewCoor)
-    for i=3:12
+    for i=3:20
         plotg.polFace(i).nod=[];
         plotg.polFace(i).index=[];
     end
@@ -462,7 +462,7 @@ function plotg=prepEffPlot(som,viewCoor)
             plotg.lat(nc).coorNew=som.nodeNew+ones(size(som.nodeNew,1),1)*(som.latVec(nc,:));
         end
     end
-    for i=3:12
+    for i=3:20
         plotg.polFace(i).normal(1,:)=[0,0,0];
         for j=1:size(plotg.polFace(i).nod,1)
             n1a=plotg.lat(nc).coor(plotg.polFace(i).nod(j,2),1:3)-plotg.lat(nc).coor(plotg.polFace(i).nod(j,1),1:3);
@@ -536,13 +536,13 @@ function [f,hs,hie,his] = copyFigure(unitCell,extrudedUnitCell,opt,hs,hie,his)
     f=figure('Position', [0 0 800 800]);
     ax = axes;
     for nc=1:size(extrudedUnitCell.latVec,1)
-        for i=3:10
+        for i=3:15
             hs{nc,i}=copyobj(hs{nc,i},ax);
         end
     end
     for nc=1:size(unitCell.Polyhedron(1).latVec,1)
         for ne=1:length(unitCell.Polyhedron)
-            for i=3:10
+            for i=3:15
                 hie{ne,nc,i}=copyobj(hie{ne,nc,i},ax);
                 his{ne,nc,i}=copyobj(his{ne,nc,i},ax);
             end
