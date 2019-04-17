@@ -1,4 +1,4 @@
-function metadataFile(opt, unitCell, extrudedUnitCell)
+function metadataFile(opt, extrudedUnitCell)
 
 extraName = sprintf('/kh%2.3f_kta%2.3f_ke%2.3f_kf%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
 filedir = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat', opt.saveFile,extraName, '/');
@@ -19,9 +19,9 @@ if strcmp(opt.analysis,'result')
     metadata.extUnitCell.diag = size(extrudedUnitCell.diagonals,2);
     metadata.extUnitCell.faces = size(extrudedUnitCell.face,2);
     metadata.extUnitCell.hinges = size(extrudedUnitCell.nodeHingeEx,1);
-    metadata.extUnitCell.intHinges = size(extrudedUnitCell.innerHinges,2);
-    metadata.extUnitCell.maxStretch = extrudedUnitCell.maxStretch;
-    metadata.extUnitCell.maxHingeFold = extrudedUnitCell.maxHingeFold;
+%     metadata.extUnitCell.intHinges = size(extrudedUnitCell.innerHinges,2);
+%     metadata.extUnitCell.maxStretch = extrudedUnitCell.maxStretch;
+%     metadata.extUnitCell.maxHingeFold = extrudedUnitCell.maxHingeFold;
 
     if ~exist(filedir, 'file')
         mkdir(filedir);
