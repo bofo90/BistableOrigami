@@ -1,9 +1,9 @@
-function ReadAndPlot(unitCell, extrudedUnitCell, opt)
+function ReadAndPlot(extrudedUnitCell, opt)
 
 switch opt.analysis
     case 'info'
         result = [];
-        outputResults(unitCell,extrudedUnitCell,result,opt);
+        outputResults(extrudedUnitCell,result,opt);
     case {'result', 'savedata', 'plot'}
         %get file of results
         extraName = sprintf('/kh%2.3f_kta%2.3f_ke%2.3f_kf%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
@@ -81,17 +81,21 @@ switch opt.analysis
                     for iter = 1:size(result.deform,2)
                         allangles = [allangles result.deform(iter).interV(:).theta];
                     end
-                    plot(allangles')
+                    p = plot(allangles', 'Color', 'k');
+                    for i = result.anglConstr(:,1)'
+                        set(p(i), 'color', rand(1,3), 'LineWidth', 2, 'DisplayName',num2str(i));
+                    end
                     x = 0;
                     for iter = 1:(size(result.deform,2)-1)
                         x = x + size(result.deform(iter).interV,2)+0.5;
                         line([x x],[-1.1*pi 1.1*pi], 'Color', [0 0 0])
                     end
+                    legend(p(result.anglConstr(:,1)'))
                     saveas(gcf, [nameFolderPlot, nameFilePlot]);
                     savefig([nameFolderPlot,'/',resfilename(1:end-4),'_AnglEv.fig'])
                     close 'all';                    
                     
-                    outputResults(unitCell,extrudedUnitCell,result,opt,resfilename(1:end-4));
+                    outputResults(extrudedUnitCell,result,opt,resfilename(1:end-4));
                 end
                 close all;
             end
