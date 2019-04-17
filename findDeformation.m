@@ -1,4 +1,4 @@
-function findDeformation(unitCell,extrudedUnitCell,opt)
+function findDeformation(extrudedUnitCell,opt)
 
 %Show details geometries (if requested)
 if strcmp(opt.analysis,'result')
@@ -6,8 +6,8 @@ if strcmp(opt.analysis,'result')
     fprintf('kH %f\tkTA %f\tkE %f\tkF %f\n', opt.Khinge, opt.KtargetAngle, opt.Kedge, opt.Kface);
     switch opt.readHingeFile
         case 'off'
-            metadataFile(opt, unitCell, extrudedUnitCell);
-            nonlinearFolding(unitCell,extrudedUnitCell,opt,opt.angleConstrFinal(1).val);
+            metadataFile(opt, extrudedUnitCell);
+            nonlinearFolding(extrudedUnitCell,opt,opt.angleConstrFinal(1).val);
 %             
         case 'on'
             opt.angleConstrFinal = [];
@@ -16,7 +16,7 @@ if strcmp(opt.analysis,'result')
                 fprintf('Hinge-selection file does not exist.\n');
             else
                 hingeList = dlmread(fileHinges);
-                metadataFile(opt, unitCell, extrudedUnitCell);
+                metadataFile(opt, extrudedUnitCell);
                 maxHinge = opt.maxHinges;
                 minHinge = opt.minHinges;
                 numHinges = size(hingeList, 1);
@@ -27,7 +27,7 @@ if strcmp(opt.analysis,'result')
                     if length(hinges) <= maxHinge && length(hinges) >= minHinge
                         angles = [hinges(:), anglFold * ones(length(hinges), 1)];
                         fprintf('Hinge selection number %d/%d.\n', i, numHinges);
-                        nonlinearFolding(unitCell,extrudedUnitCell,opt, angles);
+                        nonlinearFolding(extrudedUnitCell,opt, angles);
                     end
                 end
             end
@@ -40,10 +40,10 @@ end
 %NON-LINEAR ANALYSIS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function nonlinearFolding(unitCell,extrudedUnitCell,opt,angtemp)
+function nonlinearFolding(extrudedUnitCell,opt,angtemp)
 
 %INITIALIZE LINEAR CONSTRAINTS
-[Aeq, Beq]=linearConstr(unitCell,extrudedUnitCell,opt);
+[Aeq, Beq]=linearConstr(extrudedUnitCell,opt);
 
 %Save some variables
 opt.angleConstrFinal(1).val = angtemp;
@@ -288,7 +288,7 @@ DCeq=[DCeq1; DCeq2; DCeq3]';
 %LINEAR CONSTRAINTS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [Aeq, Beq]=linearConstr(unitCell,extrudedUnitCell,opt)
+function [Aeq, Beq]=linearConstr(extrudedUnitCell, opt)
 
 %FIX NODE CONSTRAINTS
 %IMPROVE FOLLOWING - AUTOMATIC DEPENDING ON NODES OF FACE 1
@@ -310,47 +310,47 @@ Aeq(5,3*nodeFix(1)-2:3*nodeFix(1))=e2;
 Aeq(6,3*nodeFix(3)-2:3*nodeFix(3))=e3;
 
 %MERGE NODES AT INITIALLY SAME LOCATION
-rep=size(Aeq,1);
-for i=1:size(unitCell.internalFacePairs,1)   
-    for j=1:length(unitCell.Polyhedron(unitCell.internalFacePairs(i,2)).faceNodeExtrude{unitCell.internalFacePairs(i,1)})
-        index1=unitCell.Polyhedron(unitCell.internalFacePairs(i,2)).faceNodeExtrude{unitCell.internalFacePairs(i,1)}(j);
-        for k=1:length(unitCell.Polyhedron(unitCell.internalFacePairs(i,4)).faceNodeExtrude{unitCell.internalFacePairs(i,3)})
-            index2=unitCell.Polyhedron(unitCell.internalFacePairs(i,4)).faceNodeExtrude{unitCell.internalFacePairs(i,3)}(k);
-            if norm(extrudedUnitCell.node(index2,:)'-extrudedUnitCell.node(index1,:)')<opt.Lextrude/1e6
-                rep=rep+1;
-                Aeq(3*rep-2:3*rep,:)=zeros(3,size(extrudedUnitCell.node,1)*3);
-                Aeq(3*rep-2:3*rep,3*index1-2:3*index1)=[1 0 0; 0 1 0; 0 0 1];
-                Aeq(3*rep-2:3*rep,3*index2-2:3*index2)=[-1 0 0; 0 -1 0; 0 0 -1];
-                Beq(3*rep-2:3*rep)=0;
-            end
-        end
-     end
-end
+% rep=size(Aeq,1);
+% for i=1:size(unitCell.internalFacePairs,1)   
+%     for j=1:length(unitCell.Polyhedron(unitCell.internalFacePairs(i,2)).faceNodeExtrude{unitCell.internalFacePairs(i,1)})
+%         index1=unitCell.Polyhedron(unitCell.internalFacePairs(i,2)).faceNodeExtrude{unitCell.internalFacePairs(i,1)}(j);
+%         for k=1:length(unitCell.Polyhedron(unitCell.internalFacePairs(i,4)).faceNodeExtrude{unitCell.internalFacePairs(i,3)})
+%             index2=unitCell.Polyhedron(unitCell.internalFacePairs(i,4)).faceNodeExtrude{unitCell.internalFacePairs(i,3)}(k);
+%             if norm(extrudedUnitCell.node(index2,:)'-extrudedUnitCell.node(index1,:)')<opt.Lextrude/1e6
+%                 rep=rep+1;
+%                 Aeq(3*rep-2:3*rep,:)=zeros(3,size(extrudedUnitCell.node,1)*3);
+%                 Aeq(3*rep-2:3*rep,3*index1-2:3*index1)=[1 0 0; 0 1 0; 0 0 1];
+%                 Aeq(3*rep-2:3*rep,3*index2-2:3*index2)=[-1 0 0; 0 -1 0; 0 0 -1];
+%                 Beq(3*rep-2:3*rep)=0;
+%             end
+%         end
+%      end
+% end
 
 %PERIODIC NODAL CONSTRAINTS
-if strcmp(opt.periodic,'on')
-    nref=length(extrudedUnitCell.ref);
-    rep=size(Aeq,1);
-    for i=1:size(unitCell.possibleAlpha,1)
-        for j=1:size(extrudedUnitCell.node,1)-nref
-            coor1=extrudedUnitCell.node(j,:)';
-            for k=1:size(extrudedUnitCell.node,1)-nref
-                coor2=extrudedUnitCell.node(k,:)';
-                if norm(coor2-coor1-unitCell.l'*unitCell.possibleAlpha(i,:)')<1e-6
-                    rep=rep+1;
-                    %sprintf('%d, node 1 = %d, node 2 =%d',[rep,j,k])
-                    Aeq(3*rep-2:3*rep,:)=zeros(3,size(extrudedUnitCell.node,1)*3);
-                    Aeq(3*rep-2:3*rep,3*j-2:3*j)=[1 0 0; 0 1 0; 0 0 1];
-                    Aeq(3*rep-2:3*rep,3*k-2:3*k)=[-1 0 0; 0 -1 0; 0 0 -1];
-                    for l=1:nref
-                        Aeq(3*rep-2:3*rep,3*extrudedUnitCell.ref(l)-2:3*extrudedUnitCell.ref(l))=unitCell.possibleAlpha(i,l)*[-1 0 0; 0 -1 0; 0 0 -1];
-                    end
-                    Beq(3*rep-2:3*rep)=0;
-                end
-            end
-        end
-    end
-end
+% if strcmp(opt.periodic,'on')
+%     nref=length(extrudedUnitCell.ref);
+%     rep=size(Aeq,1);
+%     for i=1:size(unitCell.possibleAlpha,1)
+%         for j=1:size(extrudedUnitCell.node,1)-nref
+%             coor1=extrudedUnitCell.node(j,:)';
+%             for k=1:size(extrudedUnitCell.node,1)-nref
+%                 coor2=extrudedUnitCell.node(k,:)';
+%                 if norm(coor2-coor1-unitCell.l'*unitCell.possibleAlpha(i,:)')<1e-6
+%                     rep=rep+1;
+%                     %sprintf('%d, node 1 = %d, node 2 =%d',[rep,j,k])
+%                     Aeq(3*rep-2:3*rep,:)=zeros(3,size(extrudedUnitCell.node,1)*3);
+%                     Aeq(3*rep-2:3*rep,3*j-2:3*j)=[1 0 0; 0 1 0; 0 0 1];
+%                     Aeq(3*rep-2:3*rep,3*k-2:3*k)=[-1 0 0; 0 -1 0; 0 0 -1];
+%                     for l=1:nref
+%                         Aeq(3*rep-2:3*rep,3*extrudedUnitCell.ref(l)-2:3*extrudedUnitCell.ref(l))=unitCell.possibleAlpha(i,l)*[-1 0 0; 0 -1 0; 0 0 -1];
+%                     end
+%                     Beq(3*rep-2:3*rep)=0;
+%                 end
+%             end
+%         end
+%     end
+% end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
