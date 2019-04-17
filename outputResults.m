@@ -1,4 +1,4 @@
-function outputResults(unitCell,extrudedUnitCell,result,opt,filename)
+function outputResults(extrudedUnitCell,result,opt,filename)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %PLOT INFO FOR IMPLEMENTATION OF NEW GEOMETRIES
@@ -31,26 +31,27 @@ if or(strcmp(opt.saveFig,'on'),strcmp(opt.saveMovie,'on'))
     end
 end
 
-nref=size(unitCell.l,1);
-if nref==0
-    extrudedUnitCell.ref=[];
-end
+% nref=size(unitCell.l,1);
+% if nref==0
+extrudedUnitCell.ref=[];
+% end
 
 %prepare lattice vectors for plotting periodic structures and lattice
-for ne=1:length(unitCell.Polyhedron)
-    unitCell.Polyhedron(ne).latVec=detLatVec(unitCell.lhat,opt);
-    unitCell.PolyhedronNew(ne)=unitCell.Polyhedron(ne);
-end
-extrudedUnitCell.latVec=detLatVec(unitCell.l,opt); 
+% for ne=1:length(unitCell.Polyhedron)
+%     unitCell.Polyhedron(ne).latVec=detLatVec(unitCell.lhat,opt);
+%     unitCell.PolyhedronNew(ne)=unitCell.Polyhedron(ne);
+% end
+extrudedUnitCell.latVec=[0,0,0]; %detLatVec(unitCell.l,opt); 
 %Prepare polyhdra and solid faces for efficient plotting
-for ne=1:length(unitCell.Polyhedron)
-    plotunitCell.Init(ne)=prepEffPlot(unitCell.Polyhedron(ne),viewCoor);
-    plotunitCell.InitNew(ne)=prepEffPlot(unitCell.PolyhedronNew(ne),viewCoor);
-end
+% for ne=1:length(unitCell.Polyhedron)
+%     plotunitCell.Init(ne)=prepEffPlot(unitCell.Polyhedron(ne),viewCoor);
+%     plotunitCell.InitNew(ne)=prepEffPlot(unitCell.PolyhedronNew(ne),viewCoor);
+% end
 plotextrudedUnitCell=prepEffPlot(extrudedUnitCell,viewCoor);
 
 %Plot solid face with 100% transparency
-f=figure('Position', [0 0 800 800]); hold on
+f=figure('Position', [0 0 800 800]);
+hold on;
 for nc=1:size(extrudedUnitCell.latVec,1)
     for i=3:15
         c=(plotextrudedUnitCell.polFace(i).normal*viewCoor')>0;
@@ -59,16 +60,16 @@ for nc=1:size(extrudedUnitCell.latVec,1)
 end
 
 %Plot polyhedra with 100% transparency
-for ne=1:length(unitCell.Polyhedron)
-    for nc=1:size(unitCell.Polyhedron(1).latVec,1)
-        for i=3:15
-            [c, plotunitCell.Init(ne).polFace(i).indexe, b1]=intersect(plotunitCell.Init(ne).polFace(i).index,unitCell.Polyhedron(ne).extrude);
-            [c, plotunitCell.Init(ne).polFace(i).indexs, b1]=intersect(plotunitCell.Init(ne).polFace(i).index,unitCell.Polyhedron(ne).solidify);
-            hie{ne,nc,i}=patch('Faces',plotunitCell.Init(ne).polFace(i).nod(plotunitCell.Init(ne).polFace(i).indexe,:),'Vertices',plotunitCell.Init(ne).lat(nc).coor,'facecolor','flat','facevertexCData',interp1([1,max(2,length(unitCell.Polyhedron))],colt([1,2],:),(ne)),'facealpha',0.0,'edgealpha',0.0);
-            his{ne,nc,i}=patch('Faces',plotunitCell.Init(ne).polFace(i).nod(plotunitCell.Init(ne).polFace(i).indexs,:),'Vertices',plotunitCell.Init(ne).lat(nc).coor,'facecolor','flat','facevertexCData',interp1([1,max(2,length(unitCell.Polyhedron))],colt([1,2],:),(ne)),'facealpha',0.0,'edgealpha',0.0);
-        end
-    end
-end
+% for ne=1:length(unitCell.Polyhedron)
+%     for nc=1:size(unitCell.Polyhedron(1).latVec,1)
+%         for i=3:15
+%             [c, plotunitCell.Init(ne).polFace(i).indexe, b1]=intersect(plotunitCell.Init(ne).polFace(i).index,unitCell.Polyhedron(ne).extrude);
+%             [c, plotunitCell.Init(ne).polFace(i).indexs, b1]=intersect(plotunitCell.Init(ne).polFace(i).index,unitCell.Polyhedron(ne).solidify);
+%             hie{ne,nc,i}=patch('Faces',plotunitCell.Init(ne).polFace(i).nod(plotunitCell.Init(ne).polFace(i).indexe,:),'Vertices',plotunitCell.Init(ne).lat(nc).coor,'facecolor','flat','facevertexCData',interp1([1,max(2,length(unitCell.Polyhedron))],colt([1,2],:),(ne)),'facealpha',0.0,'edgealpha',0.0);
+%             his{ne,nc,i}=patch('Faces',plotunitCell.Init(ne).polFace(i).nod(plotunitCell.Init(ne).polFace(i).indexs,:),'Vertices',plotunitCell.Init(ne).lat(nc).coor,'facecolor','flat','facevertexCData',interp1([1,max(2,length(unitCell.Polyhedron))],colt([1,2],:),(ne)),'facealpha',0.0,'edgealpha',0.0);
+%         end
+%     end
+% end
 %Set axis
 axis tight
 xlim=1.1*get(gca,'xlim');
@@ -86,7 +87,7 @@ if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(op
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if result.numMode>0
         %prepare reference vectors for plotting periodic structures  
-        refVec=detrefVec(unitCell,result,opt,extrudedUnitCell.ref);
+        refVec=detrefVec(result,opt,extrudedUnitCell.ref);
 
         %Determine node coordinates and orientation of faces for each step in
         %the mode
@@ -132,62 +133,63 @@ if strcmp(opt.analysis,'info')
         end
     end
     %INTERNAL POLYHEDRA TESSELATION
-    for nc=1:size(unitCell.Polyhedron(1).latVec,1)
-        for ne=1:length(unitCell.Polyhedron)
-            for i=3:15       
-                set(hie{ne,nc,i},'facealpha',opt.tranPol,'edgealpha',opt.tranPol);
-                set(his{ne,nc,i},'facealpha',opt.tranPol,'edgealpha',opt.tranPol);
-            end               
-        end
-    end
-    printHigRes(f,opt,[opt.template,'_internalPolyhedra'],nameFolder); 
+%     for nc=1:size(unitCell.Polyhedron(1).latVec,1)
+%         for ne=1:length(unitCell.Polyhedron)
+%             for i=3:15       
+%                 set(hie{ne,nc,i},'facealpha',opt.tranPol,'edgealpha',opt.tranPol);
+%                 set(his{ne,nc,i},'facealpha',opt.tranPol,'edgealpha',opt.tranPol);
+%             end               
+%         end
+%     end
+%     printHigRes(f,opt,[opt.template,'_internalPolyhedra'],nameFolder); 
     %EXTRUDED TESSELATION
-    for nc=1:size(extrudedUnitCell.latVec,1)
-        for i=3:15
-            set(hs{nc,i},'facealpha',1,'edgealpha',1)         
-        end
-    end
-    for ne=1:length(unitCell.Polyhedron)
-        for nc=1:size(unitCell.Polyhedron(1).latVec,1)
-            for i=3:15
-                set(hie{ne,nc,i},'facealpha',0,'edgealpha',0);
-                set(his{ne,nc,i},'facealpha',0,'edgealpha',0);
-            end
-        end
-    end
-    printHigRes(f,opt,[opt.template,'_extrudedMat'],nameFolder);
+%     for nc=1:size(extrudedUnitCell.latVec,1)
+%         for i=3:15
+%             set(hs{nc,i},'facealpha',1,'edgealpha',1)         
+%         end
+%     end
+%     for ne=1:length(unitCell.Polyhedron)
+%         for nc=1:size(unitCell.Polyhedron(1).latVec,1)
+%             for i=3:15
+%                 set(hie{ne,nc,i},'facealpha',0,'edgealpha',0);
+%                 set(his{ne,nc,i},'facealpha',0,'edgealpha',0);
+%             end
+%         end
+%     end
+%     printHigRes(f,opt,[opt.template,'_extrudedMat'],nameFolder);
     %PLOT ALL INFORMATION UNIT CELL
-    f=figure('Position', [0 0 800 800]);
-    hold on;
-    for ne=1:length(unitCell.Polyhedron)
-        for i=3:15
-            patch('Faces',plotunitCell.Init(ne).polFace(i).nod(plotunitCell.Init(ne).polFace(i).indexe,:),'Vertices',plotunitCell.Init(ne).lat(1).coor,'facecolor','flat','facevertexCData',interp1([1,max(2,length(unitCell.Polyhedron))],colt([1,2],:),(ne)),'facealpha',opt.tranPol,'edgealpha',opt.tranPol);
-            patch('Faces',plotunitCell.Init(ne).polFace(i).nod(plotunitCell.Init(ne).polFace(i).indexs,:),'Vertices',plotunitCell.Init(ne).lat(1).coor,'facecolor','flat','facevertexCData',interp1([1,max(2,length(unitCell.Polyhedron))],colt([1,2],:),(ne)),'facealpha',opt.tranPol,'edgealpha',opt.tranPol);
-        end
-    end
-     
-    for ne=1:length(unitCell.Polyhedron)
-        coorCenter=sum(unitCell.Polyhedron(ne).node)/size(unitCell.Polyhedron(ne).node,1);
-        text(coorCenter(1),coorCenter(2),coorCenter(3),num2str(ne),'fontsize',30,'color','g')
-        for i=1:size(unitCell.Polyhedron(ne).node,1)
-            coor=unitCell.Polyhedron(ne).node(i,:);
-            coorText=[coor(1)*0.85+coorCenter(1)*0.15,coor(2)*0.85+coorCenter(2)*0.15,coor(3)*0.85+coorCenter(3)*0.15];
-            line([coor(1),coorText(1)],[coor(2),coorText(2)],[coor(3),coorText(3)],'color','k','linestyle',':')
-            plot3(coor(1),coor(2),coor(3),'*k')
-            text(coorText(1),coorText(2),coorText(3),num2str(i),'fontsize',20)
-        end
-        for i=1:size(unitCell.Polyhedron(ne).face,1)
-            coor=sum(unitCell.Polyhedron(ne).node(unitCell.Polyhedron(ne).face{i},:))/length(unitCell.Polyhedron(ne).face{i});
-            coorText=[coor(1)*0.85+coorCenter(1)*0.15,coor(2)*0.85+coorCenter(2)*0.15,coor(3)*0.85+coorCenter(3)*0.15];
-            line([coor(1),coorText(1)],[coor(2),coorText(2)],[coor(3),coorText(3)],'color','k','linestyle',':')
-            plot3(coor(1),coor(2),coor(3),'*b')
-            text(coorText(1),coorText(2),coorText(3),num2str(i),'fontsize',20,'color','b')
-        end
-    end 
-    hl2=plotOpt(opt); 
-    axis tight
-    printHigRes(f,opt,[opt.template,'_internalPolyhedraVertFaces'],nameFolder); 
+%     f=figure('Position', [0 0 800 800]);
+%     hold on;
+%     for ne=1:length(unitCell.Polyhedron)
+%         for i=3:15
+%             patch('Faces',plotunitCell.Init(ne).polFace(i).nod(plotunitCell.Init(ne).polFace(i).indexe,:),'Vertices',plotunitCell.Init(ne).lat(1).coor,'facecolor','flat','facevertexCData',interp1([1,max(2,length(unitCell.Polyhedron))],colt([1,2],:),(ne)),'facealpha',opt.tranPol,'edgealpha',opt.tranPol);
+%             patch('Faces',plotunitCell.Init(ne).polFace(i).nod(plotunitCell.Init(ne).polFace(i).indexs,:),'Vertices',plotunitCell.Init(ne).lat(1).coor,'facecolor','flat','facevertexCData',interp1([1,max(2,length(unitCell.Polyhedron))],colt([1,2],:),(ne)),'facealpha',opt.tranPol,'edgealpha',opt.tranPol);
+%         end
+%     end
+%      
+%     for ne=1:length(unitCell.Polyhedron)
+%         coorCenter=sum(unitCell.Polyhedron(ne).node)/size(unitCell.Polyhedron(ne).node,1);
+%         text(coorCenter(1),coorCenter(2),coorCenter(3),num2str(ne),'fontsize',30,'color','g')
+%         for i=1:size(unitCell.Polyhedron(ne).node,1)
+%             coor=unitCell.Polyhedron(ne).node(i,:);
+%             coorText=[coor(1)*0.85+coorCenter(1)*0.15,coor(2)*0.85+coorCenter(2)*0.15,coor(3)*0.85+coorCenter(3)*0.15];
+%             line([coor(1),coorText(1)],[coor(2),coorText(2)],[coor(3),coorText(3)],'color','k','linestyle',':')
+%             plot3(coor(1),coor(2),coor(3),'*k')
+%             text(coorText(1),coorText(2),coorText(3),num2str(i),'fontsize',20)
+%         end
+%         for i=1:size(unitCell.Polyhedron(ne).face,1)
+%             coor=sum(unitCell.Polyhedron(ne).node(unitCell.Polyhedron(ne).face{i},:))/length(unitCell.Polyhedron(ne).face{i});
+%             coorText=[coor(1)*0.85+coorCenter(1)*0.15,coor(2)*0.85+coorCenter(2)*0.15,coor(3)*0.85+coorCenter(3)*0.15];
+%             line([coor(1),coorText(1)],[coor(2),coorText(2)],[coor(3),coorText(3)],'color','k','linestyle',':')
+%             plot3(coor(1),coor(2),coor(3),'*b')
+%             text(coorText(1),coorText(2),coorText(3),num2str(i),'fontsize',20,'color','b')
+%         end
+%     end 
+%     hl2=plotOpt(opt); 
+%     axis tight
+%     printHigRes(f,opt,[opt.template,'_internalPolyhedraVertFaces'],nameFolder); 
     %EXTRUDED STATE UNIT CELL
+    close all
     f4=figure('Position', [0 0 800 800]);
     hold on;
     for i=3:15
@@ -226,7 +228,7 @@ if strcmp(opt.analysis,'info')
             plot3(coor(1),coor(2),coor(3),'*k')
             text(coorText(1),coorText(2),coorText(3),num2str(i),'fontsize',20)
     end
-    printHigRes(f4,opt,[opt.template,'_extrudedPolyhedraEdges'],nameFolder);
+    printHigRes(f4,opt,[opt.template,'_extrudedPolyhedraHinges'],nameFolder);
 
 
 end
@@ -242,17 +244,17 @@ if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(op
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %PLOT SPACE-FILLING ASSEMBLY POLYHEDRA
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        for nc=1:size(unitCell.Polyhedron(1).latVec,1)
-            fram=fram+1;
-            for ne=1:length(unitCell.Polyhedron)
-                for i=3:15
-                    set(hie{ne,nc,i},'facealpha',opt.tranPol,'edgealpha',opt.tranPol);
-                    set(his{ne,nc,i},'facealpha',opt.tranPol,'edgealpha',opt.tranPol);
-                end
-                set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim); 
-            end
-        end
-        axis equal
+%         for nc=1:size(unitCell.Polyhedron(1).latVec,1)
+%             fram=fram+1;
+%             for ne=1:length(unitCell.Polyhedron)
+%                 for i=3:15
+%                     set(hie{ne,nc,i},'facealpha',opt.tranPol,'edgealpha',opt.tranPol);
+%                     set(his{ne,nc,i},'facealpha',opt.tranPol,'edgealpha',opt.tranPol);
+%                 end
+%                 set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim); 
+%             end
+%         end
+%         axis equal
 %         printHigRes(f,opt,'polyhedra',nameFolder)
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -260,21 +262,21 @@ if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(op
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %New coordinates
 
-        for ne=1:length(unitCell.Polyhedron)
-            for nc=1:size(unitCell.Polyhedron(ne).latVec,1)
-                plotunitCell.Init(ne).lat(nc).coorNew(:,1)=plotunitCell.InitNew(ne).lat(nc).coor(:,1)+extrudedUnitCell.latVec(nc,1)-unitCell.PolyhedronNew(ne).latVec(nc,1);
-                plotunitCell.Init(ne).lat(nc).coorNew(:,2)=plotunitCell.InitNew(ne).lat(nc).coor(:,2)+extrudedUnitCell.latVec(nc,2)-unitCell.PolyhedronNew(ne).latVec(nc,2);
-                plotunitCell.Init(ne).lat(nc).coorNew(:,3)=plotunitCell.InitNew(ne).lat(nc).coor(:,3)+extrudedUnitCell.latVec(nc,3)-unitCell.PolyhedronNew(ne).latVec(nc,3);
-                        %Update position
-                for i=3:15
-%                             set(hie{ne,nc,i},'vertices',plotunitCell.Init(ne).lat(nc).coorNew);
-%                             set(his{ne,nc,i},'vertices',plotunitCell.Init(ne).lat(nc).coorNew);
-                    set(hie{ne,nc,i},'vertices',plotunitCell.Init(ne).lat(nc).coorNew);
-                    set(his{ne,nc,i},'vertices',plotunitCell.Init(ne).lat(nc).coorNew);
-                end 
-            end
-        end
-        set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);
+%         for ne=1:length(unitCell.Polyhedron)
+%             for nc=1:size(unitCell.Polyhedron(ne).latVec,1)
+%                 plotunitCell.Init(ne).lat(nc).coorNew(:,1)=plotunitCell.InitNew(ne).lat(nc).coor(:,1)+extrudedUnitCell.latVec(nc,1)-unitCell.PolyhedronNew(ne).latVec(nc,1);
+%                 plotunitCell.Init(ne).lat(nc).coorNew(:,2)=plotunitCell.InitNew(ne).lat(nc).coor(:,2)+extrudedUnitCell.latVec(nc,2)-unitCell.PolyhedronNew(ne).latVec(nc,2);
+%                 plotunitCell.Init(ne).lat(nc).coorNew(:,3)=plotunitCell.InitNew(ne).lat(nc).coor(:,3)+extrudedUnitCell.latVec(nc,3)-unitCell.PolyhedronNew(ne).latVec(nc,3);
+%                         %Update position
+%                 for i=3:15
+% %                             set(hie{ne,nc,i},'vertices',plotunitCell.Init(ne).lat(nc).coorNew);
+% %                             set(his{ne,nc,i},'vertices',plotunitCell.Init(ne).lat(nc).coorNew);
+%                     set(hie{ne,nc,i},'vertices',plotunitCell.Init(ne).lat(nc).coorNew);
+%                     set(his{ne,nc,i},'vertices',plotunitCell.Init(ne).lat(nc).coorNew);
+%                 end 
+%             end
+%         end
+%         set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);
 %         printHigRes(f,opt,'Polyhedra_Packing_Expanded',nameFolder)
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -308,17 +310,17 @@ if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(op
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-        for nc=1:size(unitCell.Polyhedron(1).latVec,1)
-            for ne=1:length(unitCell.Polyhedron)
-                for i=3:15
-                    if ~isempty(plotunitCell.Init(1).polFace(i).indexs)
-                        c=(plotunitCell.Init(ne).polFace(i).normal(plotunitCell.Init(ne).polFace(i).indexs,:)*viewCoor')>0;
-                        set(his{ne,nc,i},'facealpha',1,'edgealpha',1,'facevertexCData',(c*colt(4,:)+abs(1-c)*colt(5,:)));
-                    end
-                end
-            end
-        end
-        set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);  
+%         for nc=1:size(unitCell.Polyhedron(1).latVec,1)
+%             for ne=1:length(unitCell.Polyhedron)
+%                 for i=3:15
+%                     if ~isempty(plotunitCell.Init(1).polFace(i).indexs)
+%                         c=(plotunitCell.Init(ne).polFace(i).normal(plotunitCell.Init(ne).polFace(i).indexs,:)*viewCoor')>0;
+%                         set(his{ne,nc,i},'facealpha',1,'edgealpha',1,'facevertexCData',(c*colt(4,:)+abs(1-c)*colt(5,:)));
+%                     end
+%                 end
+%             end
+%         end
+%         set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);  
 %         printHigRes(f,opt,'facetype',nameFolder)
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -333,15 +335,15 @@ if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(op
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %REMOVE POLYHEDRA
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        for ne=1:length(unitCell.Polyhedron)
-            for nc=1:size(unitCell.Polyhedron(1).latVec,1)
-                for i=3:15
-                    set(hie{ne,nc,i},'facealpha',0,'edgealpha',0);
-                    set(his{ne,nc,i},'facealpha',0,'edgealpha',0);
-                end
-            end
-        end
-        set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);
+%         for ne=1:length(unitCell.Polyhedron)
+%             for nc=1:size(unitCell.Polyhedron(1).latVec,1)
+%                 for i=3:15
+%                     set(hie{ne,nc,i},'facealpha',0,'edgealpha',0);
+%                     set(his{ne,nc,i},'facealpha',0,'edgealpha',0);
+%                 end
+%             end
+%         end
+%         set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);
 %         printHigRes(f,opt,[filename,'_0_undeformed'],nameFolder);     
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -414,32 +416,32 @@ function latVec=detLatVec(perVec,opt)
             end     
     end  
     
-function refVec=detrefVec(unitCell,result,opt,ref)
+function refVec=detrefVec(result,opt,ref)
     for nMode=1:length(result.deform)
         for fram=0:size(result.deform(nMode).interV,2)-1
             refVec(nMode).interV(fram+1).val=[];
-            switch size(unitCell.l,1);
-                case 0
+%             switch size(unitCell.l,1);
+%                 case 0
                     refVec(nMode).interV(fram+1).val=[0 0 0];                    
-                case 1
-                    for i=1:opt.plotPer
-                        refVec(nMode).interV(fram+1).val=[refVec(nMode).interV(fram+1).val; (i-1)*result.deform(nMode).interV(fram+1).V(ref(1),:)];
-                    end
-                case 2
-                    for j=1:opt.plotPer
-                        for i=1:opt.plotPer
-                            refVec(nMode).interV(fram+1).val=[refVec(nMode).interV(fram+1).val; (i-1)*result.deform(nMode).interV(fram+1).V(ref(1),:)+(j-1)*result.deform(nMode).interV(fram+1).V(ref(2),:)];
-                        end
-                    end
-                case 3
-                    for k=1:opt.plotPer
-                        for j=1:opt.plotPer
-                            for i=1:opt.plotPer
-                                refVec(nMode).interV(fram+1).val=[refVec(nMode).interV(fram+1).val; (i-1)*result.deform(nMode).interV(fram+1).V(ref(1),:)+(j-1)*result.deform(nMode).interV(fram+1).V(ref(2),:)+(k-1)*result.deform(nMode).interV(fram+1).V(ref(3),:)];
-                            end
-                        end
-                    end     
-            end 
+%                 case 1
+%                     for i=1:opt.plotPer
+%                         refVec(nMode).interV(fram+1).val=[refVec(nMode).interV(fram+1).val; (i-1)*result.deform(nMode).interV(fram+1).V(ref(1),:)];
+%                     end
+%                 case 2
+%                     for j=1:opt.plotPer
+%                         for i=1:opt.plotPer
+%                             refVec(nMode).interV(fram+1).val=[refVec(nMode).interV(fram+1).val; (i-1)*result.deform(nMode).interV(fram+1).V(ref(1),:)+(j-1)*result.deform(nMode).interV(fram+1).V(ref(2),:)];
+%                         end
+%                     end
+%                 case 3
+%                     for k=1:opt.plotPer
+%                         for j=1:opt.plotPer
+%                             for i=1:opt.plotPer
+%                                 refVec(nMode).interV(fram+1).val=[refVec(nMode).interV(fram+1).val; (i-1)*result.deform(nMode).interV(fram+1).V(ref(1),:)+(j-1)*result.deform(nMode).interV(fram+1).V(ref(2),:)+(k-1)*result.deform(nMode).interV(fram+1).V(ref(3),:)];
+%                             end
+%                         end
+%                     end     
+%             end 
         end
             
     end
