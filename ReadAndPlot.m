@@ -47,14 +47,11 @@ switch opt.analysis
                 fprintf('Plot of Hinges number %d/%d\n', succesfullFiles, length(allFiles)-directories);
                 
                 if strcmp(opt.analysis, 'savedata')
-                    [CM, Radios, Stdev, EhineInt, SumIntAngles, SumExtAngles, maxStrech, minStrech] =...
-                                                getData(extrudedUnitCell, opt, result);
+                    [lowerR, upperR] = getData(extrudedUnitCell, opt, result);
                     Energies = [ones(size(result.E,2),1)*(ct-directories), result.Eedge(2,:)',...
                         result.Ediag(2,:)', result.Eface(2,:)', result.Ehinge(2,:)',...
-                        result.EtargetAngle(2,:)', EhineInt(2,:)', result.exfl(2,:)'];
-                    PosStad = [ones(size(result.E,2),1,1)*(ct-directories),...
-                        reshape(CM(2,:)',[2,3]),Radios(2,:)', Stdev(2,:)',...
-                        maxStrech(2,:)', minStrech(2,:)', SumIntAngles(2,:)', SumExtAngles(2,:)'];
+                        result.EtargetAngle(2,:)', result.exfl(2,:)'];
+                    PosStad = [(ct-directories), lowerR, upperR];
                     Hinges = [num2str(ct-directories),',',mat2str(hingeSet'),',',...
                         mat2str(result.anglConstr(1,2),5)];
                     AllAngles = [extrudedUnitCell.theta];
@@ -115,7 +112,7 @@ if exist(fileEnergy, 'file')
     delete(fileEnergy) % always start with new file
 end
 headersEnergy = {'Hinge Number'; 'EdgeEnergy';'DiagonalEnergy'; 'FaceEnergy'; ...
-    'HingeEnergy'; 'TargetAngleEnergy'; 'InternalHingeEnergy'; 'Flags'};
+    'HingeEnergy'; 'TargetAngleEnergy'; 'Flags'};
 writeHeader(fileEnergy, headersEnergy);
 
 fileHinge = strcat(folderEnergy, '/','Hinges.csv');
@@ -129,10 +126,7 @@ fileMassDist = strcat(folderEnergy, '/','PosStad.csv');
 if exist(fileMassDist, 'file')
     delete(fileMassDist) % always start with new file
 end
-headersMassDist = {'Hinge Number';'CenterMassXFol';'CenterMassXRel';'CenterMassYFol';'CenterMassYRel';...
-    'CenterMassZFol';'CenterMassZRel'; 'MeanDistanceCMFol';'MeanDistanceCMRel'; 'StdDevDistanceCMFol';...
-    'StdDevDistanceCMRel';'MaxEdgeStrechFol';'MaxEdgeStrechRel';'MinEdgeStrechFol';'MinEdgeStrechRel';...
-    'SumIntAnglesFol';'SumIntAnglesRel';'SumExtAnglesFol';'SumExtAnglesRel' };
+headersMassDist = {'Hinge Number';'LowerRadius';'UpperRadius'};
 writeHeader(fileMassDist, headersMassDist);
 
 fileAngles = strcat(folderEnergy, '/','Angles.csv');
@@ -182,37 +176,16 @@ hingeSetStr = strsplit(hingeSetStr(1:end), ' ');
 hingeSet = str2double(hingeSetStr)';
 
 
-function [CM, Radios, Stdev, EhingeInt, SumIntAngles, SumExtAngles, maxStrech, minStrech] =...
-    getData(extrudedUnitCell, opt, result)
-CM = zeros(2,2,3);
-Radios = zeros(2,2);
-Stdev = zeros(2,2);
-EhingeInt = zeros(2,2);
-SumIntAngles = zeros(2,2);
-SumExtAngles = zeros(2,2);
-maxStrech = zeros(2,2);
-minStrech = zeros(2,2);
+function [lowerR, upperR] = getData(extrudedUnitCell, opt, result)
 
-foldingIterations = length(result.deform)-2;
-for iter = 1:2
-    currIter = foldingIterations+iter;
-    startPos = extrudedUnitCell.node + result.deform(currIter).interV(1).V;
-    endPos = extrudedUnitCell.node + result.deform(currIter).interV(end).V;
-    CM(:,iter,:) = [mean(startPos); mean(endPos)]; %CM(inter, iter,:)
-    startAllRad = sqrt(sum(abs(startPos-CM(1,iter)).^2,2));
-    endAllRad = sqrt(sum(abs(endPos-CM(2,iter)).^2,2));
-    Radios(:,iter) = [mean(startAllRad);mean(endAllRad)];
-    Stdev(:,iter) = [std(startAllRad);std(endAllRad)];
-    [EhingeInt(1,iter),SumIntAngles(1,iter), SumExtAngles(1,iter)] =...
-        getIntEnergy(result.deform(currIter).interV(1), opt, extrudedUnitCell);
-    [EhingeInt(2,iter),SumIntAngles(2,iter), SumExtAngles(2,iter)] =...
-        getIntEnergy(result.deform(currIter).interV(end), opt, extrudedUnitCell);
-    [maxStrech(1,iter), minStrech(1,iter)] = ...
-        getExtremeStreching(result.deform(currIter).interV(1).Ve, opt, extrudedUnitCell);
-    [maxStrech(2,iter), minStrech(2,iter)] = ...
-        getExtremeStreching(result.deform(currIter).interV(end).Ve, opt, extrudedUnitCell);
-%     end
-end
+currIter = length(result.deform);
+startPos = extrudedUnitCell.node + result.deform(currIter).interV(1).V;
+endPos = extrudedUnitCell.node + result.deform(currIter).interV(end).V;
+upperNodes = cellfun(@(v)v(1),extrudedUnitCell.face([extrudedUnitCell.upperFace]));
+lowerNodes = cellfun(@(v)v(1),extrudedUnitCell.face([extrudedUnitCell.lowerFace]));
+[~,upperR] = sphereFit(startPos(upperNodes,:));
+[~,lowerR] = sphereFit(startPos(lowerNodes,:));
+
 
 function [EhingeIntSum, suminttheta, sumexttheta] = getIntEnergy(result, opt, extrudedUnitCell)
 theta=result.theta;
@@ -261,3 +234,34 @@ if sum(isinf(normal))
     normal = prevnormal;
 end
 
+function [Center,Radius] = sphereFit(X)
+% this fits a sphere to a collection of data using a closed form for the
+% solution (opposed to using an array the size of the data set). 
+% Minimizes Sum((x-xc)^2+(y-yc)^2+(z-zc)^2-r^2)^2
+% x,y,z are the data, xc,yc,zc are the sphere's center, and r is the radius
+% Assumes that points are not in a singular configuration, real numbers, ...
+% if you have coplanar data, use a circle fit with svd for determining the
+% plane, recommended Circle Fit (Pratt method), by Nikolai Chernov
+% http://www.mathworks.com/matlabcentral/fileexchange/22643
+% Input:
+% X: n x 3 matrix of cartesian data
+% Outputs:
+% Center: Center of sphere 
+% Radius: Radius of sphere
+% Author:
+% Alan Jennings, University of Dayton
+A=[mean(X(:,1).*(X(:,1)-mean(X(:,1)))), ...
+    2*mean(X(:,1).*(X(:,2)-mean(X(:,2)))), ...
+    2*mean(X(:,1).*(X(:,3)-mean(X(:,3)))); ...
+    0, ...
+    mean(X(:,2).*(X(:,2)-mean(X(:,2)))), ...
+    2*mean(X(:,2).*(X(:,3)-mean(X(:,3)))); ...
+    0, ...
+    0, ...
+    mean(X(:,3).*(X(:,3)-mean(X(:,3))))];
+A=A+A.';
+B=[mean((X(:,1).^2+X(:,2).^2+X(:,3).^2).*(X(:,1)-mean(X(:,1))));...
+    mean((X(:,1).^2+X(:,2).^2+X(:,3).^2).*(X(:,2)-mean(X(:,2))));...
+    mean((X(:,1).^2+X(:,2).^2+X(:,3).^2).*(X(:,3)-mean(X(:,3))))];
+Center=(A\B).';
+Radius=sqrt(mean(sum([X(:,1)-Center(1),X(:,2)-Center(2),X(:,3)-Center(3)].^2,2)));
