@@ -125,19 +125,24 @@ switch opt.template
         %add all the nodes together
         extrudedUnitCell.node = [square_node; flap_node];
         
-        %create faces at each square and endges at each flap
+        %create faces at each square and edges at each flap
         nodenum = 1;
         for i = 1:size(square_node,1)/4
             or.square(i) = createPolygon([nodenum nodenum+1 nodenum+2 nodenum+3]);
             nodenum = nodenum+4;
         end
+        upperFace = matrix_squares(:,:,1);
+        lowerFace = matrix_squares(:,:,end);
+        extrudedUnitCell.upperFace = upperFace(level_squares);
+        extrudedUnitCell.lowerFace = lowerFace(level_squares);
+        
         for i = 1:size(flap_node,1)/2
             or.line(i) = createLine([nodenum nodenum+1]);
             nodenum = nodenum+2;
         end
 %         or.link = [];
 
-        %connect squares ate the edges with their correspondonig flap
+        %connect squares at the edges with their correspondonig flap
         matrix_squares = permute(matrix_squares,[2 1 3]);
         lineW = 1;
         lineN = 1;
@@ -248,10 +253,13 @@ function extrudedUnitCell = addDiagonals(extrudedUnitCell)
 extrudedUnitCell.diagonals = [];
 
 for i = 1:length(extrudedUnitCell.face)
-    if length(extrudedUnitCell.face{i})>3
-        extrudedUnitCell.edge = [extrudedUnitCell.edge; ...
-            extrudedUnitCell.face{i}(1) extrudedUnitCell.face{i}(1+round(length(extrudedUnitCell.face{i})/2))];
-        extrudedUnitCell.diagonals = [extrudedUnitCell.diagonals, size(extrudedUnitCell.edge,1)];
+    s = length(extrudedUnitCell.face{i});
+    if s>3
+        for j = 1:round(s/2)
+            extrudedUnitCell.edge = [extrudedUnitCell.edge; ...
+                extrudedUnitCell.face{i}(j) extrudedUnitCell.face{i}(j+round(length(extrudedUnitCell.face{i})/2))];
+            extrudedUnitCell.diagonals = [extrudedUnitCell.diagonals, size(extrudedUnitCell.edge,1)];
+        end
     end
 end
    
