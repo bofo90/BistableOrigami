@@ -181,9 +181,10 @@ switch opt.template
 
         %connect squares between each other (only the higher ones to all its neighbors
         link_size = size(or.link,2);
-        for i = 1:dimensions
-            for j = 1:dimensions
-                for k = 1:layers
+        init_SShinge = size(or.line,2)+2*link_size;
+        for k = 1:layers
+            for i = 1:dimensions
+                for j = 1:dimensions
                     if level_squares(i,j)
                         if (i+1) <= dimensions
                             link_size = link_size+1;
@@ -213,9 +214,12 @@ switch opt.template
                 end
             end
         end
-        
+       
         %combine all edges, hinges and faces together
         extrudedUnitCell = combineAll(extrudedUnitCell, or);
+        end_SShinge = size(extrudedUnitCell.nodeHingeEx,1);
+        extrudedUnitCell.beta = [init_SShinge+2:4:(end_SShinge-init_SShinge)/opt.layers+init_SShinge];
+        extrudedUnitCell.alpha = [end_SShinge:-4:end_SShinge-(end_SShinge-init_SShinge)/opt.layers+1];
         %create diagonals at every face
         extrudedUnitCell = addDiagonals(extrudedUnitCell);
         %Determine initial edge length
