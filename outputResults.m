@@ -219,6 +219,23 @@ if strcmp(opt.analysis,'info')
         delete(hmark{i});
         delete(htext{i});
     end
+    
+    for i=1:size(extrudedUnitCell.face,2)
+        coor=sum(extrudedUnitCell.node(extrudedUnitCell.face{i},:))/length(extrudedUnitCell.face{i});
+        coorText=[coor(1)*0.85+coorCenter(1)*0.15,coor(2)*0.85+coorCenter(2)*0.15,coor(3)*0.85+coorCenter(3)*0.15];
+        hline{i} = line([coor(1),coorText(1)],[coor(2),coorText(2)],[coor(3),coorText(3)],'color','k','linestyle','-');
+        hmark{i} = plot3(coor(1),coor(2),coor(3),'*b');
+        htext{i} = text(coorText(1),coorText(2),coorText(3),num2str(i),'fontsize',20);
+    end
+    set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim)
+    printHigRes(f4,opt,[opt.template,'_extrudedPolyhedraFace'],nameFolder)
+    
+    for i=1:size(extrudedUnitCell.face,2)
+        delete(hline{i});
+        delete(hmark{i});
+        delete(htext{i});
+    end
+    
     for i=1:size(extrudedUnitCell.nodeHingeEx,1)
             coor1=extrudedUnitCell.node(extrudedUnitCell.nodeHingeEx(i,1),:);
             coor2=extrudedUnitCell.node(extrudedUnitCell.nodeHingeEx(i,2),:);
