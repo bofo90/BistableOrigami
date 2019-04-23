@@ -53,7 +53,7 @@ switch opt.analysis
                         result.EtargetAngle(2,:)', result.exfl(2,:)'];
                     PosStad = [(ct-directories), lowerR, upperR];
                     Hinges = [num2str(ct-directories),',',mat2str(hingeSet'),',',...
-                        mat2str(result.anglConstr(1,2),5)];
+                        mat2str(result.anglConstr(1,2),5),',',mat2str(result.anglConstr(end,2),5)];
                     AllAngles = [extrudedUnitCell.theta];
                     for iter = 1:size(result.deform,2)
                         AllAngles = [AllAngles result.deform(iter).theta];
@@ -119,7 +119,7 @@ fileHinge = strcat(folderEnergy, '/','Hinges.csv');
 if exist(fileHinge, 'file')
     delete(fileHinge) % always start with new file
 end
-headersHinge = {'HingeNumber'; 'ActuatedHinges'; 'Theta1'};
+headersHinge = {'HingeNumber'; 'ActuatedHinges'; 'Alpha'; 'Beta'};
 writeHeader(fileHinge, headersHinge);
 
 fileMassDist = strcat(folderEnergy, '/','PosStad.csv');
