@@ -45,15 +45,6 @@ function nonlinearFolding(extrudedUnitCell,opt,angtemp)
 %INITIALIZE LINEAR CONSTRAINTS
 [Aeq, Beq]=linearConstr(extrudedUnitCell,opt);
 
-%Save some variables
-opt.angleConstrFinal(1).val = angtemp;
-extrudedUnitCell.angleConstr=[];
-result = [];
-E=[];
-exfl= [];
-u0=zeros(3*size(extrudedUnitCell.node,1),1);
-theta0=extrudedUnitCell.theta;
-
 %Create file for saving the results
 extraName = sprintf('/kh%2.3f_kta%2.3f_ke%2.3f_kf%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
 folderName = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat', opt.saveFile, extraName);
@@ -63,50 +54,88 @@ end
     
 %%%%%% Folding part %%%%%%
 %Run the Folding of the structure
-initialiseGlobalx(u0, theta0);
-angles = theta0(opt.angleConstrFinal(1).val(:,1)) + linspace(0,1,opt.steps+1).*(opt.angleConstrFinal(1).val(:,2) - theta0(opt.angleConstrFinal(1).val(:,1)));
-V(:,1)=u0;
-[E.E(1,1),~,E.Eedge(1,1),E.Ediag(1,1),E.Eface(1,1),E.Ehinge(1,1),E.EtargetAngle(1,1), ~]=Energy(u0,extrudedUnitCell,opt);
-exfl(1,1) = 1;
-exfl(2,1) = 1;
-Etemp = [];
-for anglestep = 2:opt.steps+1
-    exfltemp = [];
-    opt.angleConstrFinal(1).val(:,2) = angles(:,anglestep);
-    [Vtemp, exfltemp, output, ~] = FoldStructure(u0, Etemp, exfltemp, extrudedUnitCell, opt, 1, Aeq, Beq);
-    u0 = Vtemp(:,2);
-    if exfltemp(2,1) ~= 1
-        exfl(2,1) = exfltemp(2,1);
-    end
-end
-V(:,2)=u0;
-extrudedUnitCell.angleConstr=opt.angleConstrFinal(1).val;
-[E.E(2,1),~,E.Eedge(2,1),E.Ediag(2,1),E.Eface(2,1),E.Ehinge(2,1),E.EtargetAngle(2,1), ~]=Energy(u0,extrudedUnitCell,opt);
+
+foldAngl = 4;
+angles1_1 = extrudedUnitCell.theta(extrudedUnitCell.alpha(1)):(-foldAngl*pi/180):0.06;
+angles1_2 = extrudedUnitCell.theta(extrudedUnitCell.alpha(1)):(foldAngl*pi/180):1.5;
+angles2_1 = extrudedUnitCell.theta(extrudedUnitCell.beta(1)):(-foldAngl*pi/180):-1.5;
+angles2_2 = extrudedUnitCell.theta(extrudedUnitCell.beta(1)):(foldAngl*pi/180):-0.06;
+angles1 = [angles1_1 angles1_2(2:end)];
+angles2 = [angles2_1 angles2_2(2:end)];
+
+%Save some variables
 extrudedUnitCell.angleConstr=[];
-[result, theta1,u1] = SaveResultPos(result, opt, V, output, 1);
+result = [];
+E=[];
+exfl= [];
+opt.angleConstrFinal = [];
 
-%%%%%% Releasing part %%%%%%
-%change algorithm for releasing
-opt.options.Algorithm = opt.relAlgor;
-opt.angleConstrFinal(2).val = [];
-opt.KtargetAngle = 0;
+u0=zeros(3*size(extrudedUnitCell.node,1),1);
+theta0=extrudedUnitCell.theta;
+flag1=false;
 
-initialiseGlobalx(u1, theta1);
-[V, exfl, output, E] = FoldStructure(u1, E, exfl, extrudedUnitCell, opt, 2, Aeq, Beq);
-[result, ~,~] = SaveResultPos(result, opt, V, output, 2);
+for ang1 = 1:size(angles1,2)
+    
+    if angles1(ang1)>extrudedUnitCell.theta(extrudedUnitCell.alpha(1)) && ~flag1
+        u0 = zeros(3*size(extrudedUnitCell.node,1),1);
+        theta0 = extrudedUnitCell.theta;
+        result.deform(1) = [];
+        flag1 = true;
+    end   
+    
+    opt.angleConstrFinal(1).val = [[extrudedUnitCell.alpha extrudedUnitCell.beta]',...
+        [ones(1,size(extrudedUnitCell.alpha,2))*angles1(ang1) ones(1,size(extrudedUnitCell.beta,2))*angles2(1)]'];
+    initialiseGlobalx(u0, theta0);
+    [V, exfl, output, E] = FoldStructure(u0, E, exfl, extrudedUnitCell, opt, 1, Aeq, Beq);
+    [result, theta1, u1] = SaveResultPos(result, opt, V, output, 1);
+    
+    u0 = u1;
+    theta0 = theta1;  
+    flag2=false;
+    
+    for ang2 = 1:size(angles2,2)
+        
+        if angles2(ang2)>extrudedUnitCell.theta(extrudedUnitCell.beta(1)) && ~flag2
+            u1 = u0;
+            theta1 = theta0;
+            result.deform(2) = [];
+            flag2 = true;
+        end
+        
+        fprintf('Hinge angle %d %d.\n', angles1(ang1), angles2(ang2));
+        
+        %%%%%% Folding part %%%%%%       
+        opt.angleConstrFinal(2).val = [[extrudedUnitCell.alpha extrudedUnitCell.beta]',...
+        [ones(1,size(extrudedUnitCell.alpha,2))*angles1(ang1) ones(1,size(extrudedUnitCell.beta,2))*angles2(ang2)]'];
+        initialiseGlobalx(u1, theta1);
+        [V, exfl, output, E] = FoldStructure(u1, E, exfl, extrudedUnitCell, opt, 2, Aeq, Beq);
+        [result, theta1, u1] = SaveResultPos(result, opt, V, output, 2);
+    
+        %%%%%% Releasing part %%%%%%
+        opt.angleConstrFinal(3).val = [];
+        initialiseGlobalx(u1, theta1);
+        [V, exfl, output, E] = FoldStructure(u1, E, exfl, extrudedUnitCell, opt, 3, Aeq, Beq);
+        [result, ~, ~] = SaveResultPos(result, opt, V, output, 3);
+        
+        %Save energy data in the result variable
+        result = SaveResultEnergy(result, E, exfl, opt);
+        result.angNum = [ang1 ang2];
 
-%Return to original options
-opt.options.Algorithm = opt.folAlgor;
-result = SaveResultEnergy(result, E, exfl, opt);
+        %Save the result in a file
+        fileName = strcat(folderName,'/',...
+            '_Ang1_',int2str(ang1),'_Angl2_',int2str(ang2),'.mat');
+        save(fileName, 'result');
+        result.deform(3) = [];
 
-%Save the result in a file
-fileName = strcat(folderName,'/',mat2str(opt.angleConstrFinal(1).val(:,1)'),'op.mat');
-save(fileName, 'result');
-
+        fclose('all');
+    end
+    
+    result.deform(2) = [];
+    
+end
 
 %Clear variables for next fold
 clearvars result E exfl output;
-fclose('all');
 
 function [V, exfl, output, E] = FoldStructure(u0, E, exfl, extrudedUnitCell, opt, iter, Aeq, Beq)
 
@@ -117,11 +146,11 @@ exfl(1,iter) = 1;
 
 
 %Run the Folding of the structure
-if isempty(opt.angleConstrFinal(iter).val)
-    fprintf('Angle contrain: None\n');
-else
-    fprintf(['Angle contrain:', mat2str(opt.angleConstrFinal(iter).val(:,1)') ,'\n']);
-end
+% if isempty(opt.angleConstrFinal(iter).val)
+%     fprintf('Angle contrain: None\n');
+% else
+%     fprintf(['Angle contrain:', mat2str(opt.angleConstrFinal(iter).val(:,1)') ,'\n']);
+% end
 extrudedUnitCell.angleConstr=opt.angleConstrFinal(iter).val;
 % fprintf('Folding:\t');
 % t1 = toc;
@@ -174,7 +203,7 @@ result.Ehinge=E.Ehinge;
 result.EtargetAngle=E.EtargetAngle;    
 result.exfl = exfl;
 result.numMode=length(result.deform);
-result.anglConstr = opt.angleConstrFinal(1).val;
+result.anglConstr = opt.angleConstrFinal(2).val;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
