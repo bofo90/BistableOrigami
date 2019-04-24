@@ -19,6 +19,8 @@ if strcmp(opt.analysis,'result')
     metadata.extUnitCell.diag = size(extrudedUnitCell.diagonals,2);
     metadata.extUnitCell.faces = size(extrudedUnitCell.face,2);
     metadata.extUnitCell.hinges = size(extrudedUnitCell.nodeHingeEx,1);
+    metadata.extUnitVell.alpha = extrudedUnitCell.alpha;
+    metadata.extUnitVell.beta = extrudedUnitCell.beta;
 %     metadata.extUnitCell.intHinges = size(extrudedUnitCell.innerHinges,2);
 %     metadata.extUnitCell.maxStretch = extrudedUnitCell.maxStretch;
 %     metadata.extUnitCell.maxHingeFold = extrudedUnitCell.maxHingeFold;
