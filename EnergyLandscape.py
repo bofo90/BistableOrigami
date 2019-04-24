@@ -170,7 +170,7 @@ totEnergysort = totEnergysort[sortAngl[::-1]]
 if inverted:
     totEnergyMat = totEnergysort.reshape((divitheta1,divitheta2))
 else:
-    totEnergyMat = totEnergysort.reshape((divitheta1,divitheta2)).T
+    totEnergyMat = np.rot90(np.rot90(totEnergysort.reshape((divitheta1,divitheta2)).T))
 
 sep1 = (closingAngl1[-1]-closingAngl1[0])/(divitheta1-1)/2
 sep2 = (closingAngl2[-1]-closingAngl2[0])/(divitheta2-1)/2
@@ -259,7 +259,7 @@ inverse = np.ma.masked_array(inverse, mask=flagmask[sortAngl[::-1]])
 if inverted:
     stableStateMat = inverse.reshape((divitheta1,divitheta2))
 else:
-    stableStateMat = inverse.reshape((divitheta1,divitheta2)).T
+    stableStateMat = np.rot90(np.rot90(inverse.reshape((divitheta1,divitheta2)).T))
 
 fig2 = plt.figure(2,figsize=(cm2inch(8.7), cm2inch(7)))
 fig2.subplots_adjust(top=0.99,
@@ -327,6 +327,61 @@ cbar3.ax.tick_params(colors='0.2', width=0.4)
 cbar3.outline.set_edgecolor('0.2')
 cbar3.outline.set_linewidth(0.4)
 
+################################################################################
+
+lowerRadius[np.isnan(lowerRadius)]=10**10
+lowerRadius = np.array(lowerRadius[sortAngl[::-1]])
+upperRadius[np.isnan(upperRadius)]=10**10
+upperRadius = np.array(upperRadius[sortAngl[::-1]])
+maxRadius = 0
+minRadius = -2
+
+if inverted:
+    RadiusMat = upperRadius.reshape((divitheta1,divitheta2))
+else:
+    RadiusMat = np.rot90(np.rot90(lowerRadius.reshape((divitheta1,divitheta2)).T))
+
+CurvatureMat = 1/RadiusMat
+
+fig4 = plt.figure(5,figsize=(cm2inch(8.7), cm2inch(7)))
+fig4.subplots_adjust(top=0.970,
+bottom=0.115,
+left=0.130,
+right=0.875)
+ax4 = plt.subplot(111)
+#ax5 = plt.subplot(122)
+NiceGraph2D(ax4, r'$\alpha$', r'$\beta$',
+            mincoord = [0,-0.5], maxcoord = [0.5,0],divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
+
+#cmap4, norm4 = from_levels_and_colors(np.linspace(minRadius,maxRadius,1000), cm.rainbow_r(np.linspace(0, 1, 1000)), extend = 'min')
+
+#cs4 = ax4.scatter(realtheta1, realtheta2, c = np.log10(upperRadius), cmap = cmap4, vmax = maxRadius, vmin = minRadius, s = 50, marker = 's') #150 #360
+cs4 = ax4.imshow(np.log10(CurvatureMat), extent=[theta2[0,0]-sep2,theta2[0,-1]+sep2,theta1[0,0]-sep1,theta1[-1,0]+sep1], 
+                     cmap = cm.jet, aspect = 'auto',vmax = maxRadius, vmin = minRadius, origin = 'lower') #nipy_spectral
+
+
+
+ax4.set_xticklabels(["$0$", "", "", "", r"$\pi/2$"])
+ax4.set_yticklabels([r"-$\pi/2$", "", "", "", "$0$"])
+
+cbar4 = plt.colorbar(cs4, ax = ax4, fraction=0.05, pad=0.01, extend = 'min', format=r"$10^{%.1f}$")
+cbar4.set_ticks(np.linspace(minRadius,maxRadius,5))
+cbar4.set_label('Energy', fontsize = 11, color = '0.2')
+cbar4.ax.tick_params(colors='0.2', width=0.4)
+cbar4.outline.set_edgecolor('0.2')
+cbar4.outline.set_linewidth(0.4)
+
+
+
+
+
+
+
+
+
+
+
+
 #############################################################################
 fig1.show()
 fig1.savefig(folder_name + '/EnergyLand.pdf', transparent = True, pad_inches=0, dpi=300)
@@ -344,3 +399,7 @@ fig2.savefig(folder_name + '/StableStates.png', transparent = True, pad_inches=0
 fig3.show()
 fig3.savefig(folder_name + '/RealAngles-EnergyTA.pdf', transparent = True, pad_inches=0, dpi=300)
 fig3.savefig(folder_name + '/RealAngles-EnergyTA.png', transparent = True, pad_inches=0, dpi=300)
+
+fig4.show()
+fig4.savefig(folder_name + '/Curvature.pdf', transparent = True, pad_inches=0, dpi=300)
+fig4.savefig(folder_name + '/Curvature.png', transparent = True, pad_inches=0, dpi=300)
