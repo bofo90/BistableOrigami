@@ -132,7 +132,7 @@ switch opt.template
             nodenum = nodenum+4;
         end
         upperFace = matrix_squares(:,:,1);
-        lowerFace = matrix_squares(:,:,end);
+        lowerFace = matrix_squares(:,:,end)+1;
         extrudedUnitCell.upperFace = upperFace(level_squares);
         extrudedUnitCell.lowerFace = lowerFace(level_squares);
         
