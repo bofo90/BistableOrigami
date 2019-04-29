@@ -68,7 +68,7 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     
     return
 
-folder_name = "D:/Documents/Git Programs/nonlinear-bas/Results/SquareTiling/sqp/energy/23-Apr-2019_OneLayer/kh0.001_kta100.000_ke10.000_kf100.000"
+folder_name = "D:/Documents/Git Programs/nonlinear-bas/Results/SquareTiling/sqp/energy/23-Apr-2019_TwoLayer/kh0.001_kta100.000_ke10.000_kf100.000"
 inverted = False
 plt.close('all')
 #%%
@@ -185,7 +185,7 @@ ax1 = plt.subplot(111)
 NiceGraph2D(ax1, r'$\alpha$', r'$\beta$', 
             mincoord = [0,-0.5], maxcoord = [0.5,0],divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
 
-maxEnergy = np.max(totEnergyMat)
+maxEnergy = 0.5 #np.max(totEnergyMat) #2.4 #16
 cs1 = ax1.imshow(totEnergyMat, extent=[theta2[0,0]-sep2,theta2[0,-1]+sep2,theta1[0,0]-sep1,theta1[-1,0]+sep1], 
                      cmap = cm.nipy_spectral, aspect = 'auto',vmax = maxEnergy, origin = 'lower') #nipy_spectral
 
@@ -304,6 +304,8 @@ totEnergysort = eTAngle[IterPerSimulEnergy-2::IterPerSimulEnergy]
 totEnergysort = np.ma.masked_array(totEnergysort, mask=flagmask)
 totEnergysort = totEnergysort[sortAngl[::-1]]
 
+maxTA = 0.12 #np.max(totEnergysort)
+
 fig3 = plt.figure(4,figsize=(cm2inch(8.7), cm2inch(7)))
 fig3.subplots_adjust(top=0.99,
 bottom=0.115,
@@ -313,15 +315,15 @@ ax3 = plt.subplot(111)
 NiceGraph2D(ax3, r'$\alpha$', r'$\beta$',
             mincoord = [0,-0.5], maxcoord = [0.5,0],divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
 
-cmap3, norm3 = from_levels_and_colors(np.linspace(0,maxEnergy,1000), cm.rainbow(np.linspace(0, 1, 1000)), extend = 'max')
+cmap3, norm3 = from_levels_and_colors(np.linspace(0,maxTA,1000), cm.rainbow(np.linspace(0, 1, 1000)), extend = 'max')
 
-cs3 = ax3.scatter(realtheta1, realtheta2, c = totEnergysort, cmap = cmap3, vmax = np.max(totEnergysort), s = 20, marker = 's') #150 #360
+cs3 = ax3.scatter(realtheta1, realtheta2, c = totEnergysort, cmap = cmap3, vmax = maxTA, s = 20, marker = 's') #150 #360
 
 ax3.set_xticklabels(["$0$", "", "", "", r"$\pi/2$"])
 ax3.set_yticklabels([r"-$\pi/2$", "", "", "", "$0$"])
 
 cbar3 = plt.colorbar(cs3, ax = ax3, fraction=0.05, pad=0.01, extend = 'max', format="%.2f")
-cbar3.set_ticks(np.linspace(0, np.max(totEnergysort), 5))
+cbar3.set_ticks(np.linspace(0, maxTA, 5))
 cbar3.set_label('Energy', fontsize = 11, color = '0.2')
 cbar3.ax.tick_params(colors='0.2', width=0.4)
 cbar3.outline.set_edgecolor('0.2')
@@ -329,9 +331,9 @@ cbar3.outline.set_linewidth(0.4)
 
 ################################################################################
 
-lowerRadius[np.isnan(lowerRadius)]=10**10
+#lowerRadius[np.isnan(lowerRadius)]=10**10
 lowerRadius = np.array(lowerRadius[sortAngl[::-1]])
-upperRadius[np.isnan(upperRadius)]=10**10
+#upperRadius[np.isnan(upperRadius)]=10**10
 upperRadius = np.array(upperRadius[sortAngl[::-1]])
 maxRadius = 0
 minRadius = -2
@@ -371,8 +373,9 @@ cbar4.ax.tick_params(colors='0.2', width=0.4)
 cbar4.outline.set_edgecolor('0.2')
 cbar4.outline.set_linewidth(0.4)
 
-
-
+angleMat = np.zeros((divitheta1,divitheta2,2))
+angleMat[:,:,0] = np.rot90(np.rot90(angleNum[:,0].reshape((divitheta1,divitheta2)).T))
+angleMat[:,:,1] = np.rot90(np.rot90(angleNum[:,1].reshape((divitheta1,divitheta2)).T))
 
 
 
