@@ -31,16 +31,16 @@ switch opt.analysis
                 end
 
                 % parse the file name to get back hinge set
-%                 resfilename = allFiles(ct).name;
-%                 [hingeSet, ~] = getHingeSet(resfilename);
-%                 if strcmp(opt.readHingeFile,'off')
-%                     if ~isequal(hingeSet, opt.angleConstrFinal(end).val(:,1))
+                resfilename = allFiles(ct).name;
+                hingeSet = getHingeSet(resfilename);
+                if strcmp(opt.readHingeFile,'off')
+                    if ~isequal(hingeSet, opt.plotAngles)
+                        continue;
+%                     elseif ~strcmp(resfilename(1:end-4), '[8 3]_Ang1_18_Angl2_27')
 %                         continue;
-% %                     elseif ~strcmp(resfilename(1:end-4), '[8 3]_Ang1_18_Angl2_27')
-% %                         continue;
-%                     end
-%                 end
-%                 extrudedUnitCell.angleConstr = [hingeSet(:), -pi*opt.constAnglePerc*ones(length(hingeSet), 1)];
+                    end
+                end
+                extrudedUnitCell.angleConstr = [hingeSet(:), -pi*opt.constAnglePerc*ones(length(hingeSet), 1)];
                 % load results from file
                 load(strcat(folderResults,'/', allFiles(ct).name), 'result');
                 succesfullFiles = succesfullFiles + 1;
@@ -157,24 +157,25 @@ end
 fclose(fid) ;                                          % Closes file.
 
 
-function [hingeSet, opening] = getHingeSet(fileName)
+function hingeSet = getHingeSet(fileName)
 
 parsedName = strsplit(fileName(1:end-4), '_');
-hingeSetStr = parsedName{1};
-if length(hingeSetStr)>2
-    if strcmp(hingeSetStr(end-1:end),'op')
-        hingeSetStr = hingeSetStr(1:end-2);
-        opening = 1;
-    else
-        opening = 0;
-    end
-else
-    opening = 0;
-end
-hingeSetStr = strrep(hingeSetStr, '[', '');
-hingeSetStr = strrep(hingeSetStr, ']', '');
-hingeSetStr = strsplit(hingeSetStr(1:end), ' ');
-hingeSet = str2double(hingeSetStr)';
+% hingeSetStr = parsedName{1};
+% if length(hingeSetStr)>2
+%     if strcmp(hingeSetStr(end-1:end),'op')
+%         hingeSetStr = hingeSetStr(1:end-2);
+%         opening = 1;
+%     else
+%         opening = 0;
+%     end
+% else
+%     opening = 0;
+% end
+% hingeSetStr = strrep(hingeSetStr, '[', '');
+% hingeSetStr = strrep(hingeSetStr, ']', '');
+% hingeSetStr = strsplit(hingeSetStr(1:end), ' ');
+% hingeSet = str2double(hingeSetStr)';
+hingeSet = [str2num(parsedName{3}) str2num(parsedName{5})];
 
 
 function [lowerR, upperR] = getData(extrudedUnitCell, opt, result)
