@@ -215,86 +215,86 @@ ax1b.plot_surface(theta1, theta2, totEnergyMat)
 ######################################################################
 #Analysis for stable states
 
-finalAngles = np.empty((0,np.size(dataAngles,1)))
-for hinge in sortAngl[::-1]:
-    sortAllAngIndex = np.lexsort((dataAngles[IterPerSimul*(hinge+1)-1,:],dataAngles[IterPerSimul*hinge,:]))
-    finalAngles = np.append(finalAngles, [dataAngles[IterPerSimul*(hinge+1)-1,sortAllAngIndex]], axis = 0)
-
-eStretch = eEdge + eDiag
-totEStretchsort = eStretch[IterPerSimulEnergy-1::IterPerSimulEnergy]
-totEStretchsort = totEStretchsort[sortAngl[::-1]]
-
-Z = hierarch.linkage(finalAngles[flagmask_n,:], 'centroid')
-inverse_masked = hierarch.fcluster(Z, 1, criterion='distance')
-c = hierarch.cophenet(Z, pdist(finalAngles[flagmask_n,:]))
-print('this is the cophenet of the hierarchical linkage', c[0])
-
-#    plt.figure(figsize=(25, 10))
-#    plt.title('Hierarchical Clustering Dendrogram')
-#    plt.xlabel('sample index')
-#    plt.ylabel('distance')
-#    hierarch.dendrogram(
-#        Z,
-#        truncate_mode='lastp',  # show only the last p merged clusters
-#        p=50,  # show only the last p merged clusters
-#        leaf_rotation=90.,  # rotates the x axis labels
-#        leaf_font_size=8.,  # font size for the x axis labels
-#        show_contracted=True,
-#    )
-#    plt.show()
-
-AllSimul = np.arange(TotSimul)
-AllSimul = AllSimul[flagmask_n]
-SS, SSpos = np.unique(inverse_masked, return_index = True)
-SSpos = AllSimul[SSpos]
+#finalAngles = np.empty((0,np.size(dataAngles,1)))
+#for hinge in sortAngl[::-1]:
+#    sortAllAngIndex = np.lexsort((dataAngles[IterPerSimul*(hinge+1)-1,:],dataAngles[IterPerSimul*hinge,:]))
+#    finalAngles = np.append(finalAngles, [dataAngles[IterPerSimul*(hinge+1)-1,sortAllAngIndex]], axis = 0)
+#
+#eStretch = eEdge + eDiag
+#totEStretchsort = eStretch[IterPerSimulEnergy-shift::IterPerSimulEnergy]
+#totEStretchsort = totEStretchsort[sortAngl[::-1]]
+#
+#Z = hierarch.linkage(finalAngles[flagmask_n,:], 'centroid')
+#inverse_masked = hierarch.fcluster(Z, 1, criterion='distance')
+#c = hierarch.cophenet(Z, pdist(finalAngles[flagmask_n,:]))
+#print('this is the cophenet of the hierarchical linkage', c[0])
+#
+##    plt.figure(figsize=(25, 10))
+##    plt.title('Hierarchical Clustering Dendrogram')
+##    plt.xlabel('sample index')
+##    plt.ylabel('distance')
+##    hierarch.dendrogram(
+##        Z,
+##        truncate_mode='lastp',  # show only the last p merged clusters
+##        p=50,  # show only the last p merged clusters
+##        leaf_rotation=90.,  # rotates the x axis labels
+##        leaf_font_size=8.,  # font size for the x axis labels
+##        show_contracted=True,
+##    )
+##    plt.show()
+#
+#AllSimul = np.arange(TotSimul)
+#AllSimul = AllSimul[flagmask_n]
+#SS, SSpos = np.unique(inverse_masked, return_index = True)
+#SSpos = AllSimul[SSpos]
 
 ######################################################################################################
 
 
-angleNum = angleNum[sortAngl[::-1],:]
-for i in SSpos:
-    print('Angles: ', angleNum[i,:], '\tStretching Energy: ', totEStretchsort[i], '\tTotal Energy: ', totEnergysort[i])
 
-Simul = sortAngl[::-1]
-Simul = Simul[flagmask_n]
-inverse = np.zeros(TotSimul)
-inverse[Simul] = inverse_masked
-inverse = inverse[sortAngl[::-1]]
-inverse = np.ma.masked_array(inverse, mask=flagmask[sortAngl[::-1]])
-
-if inverted:
-    stableStateMat = inverse.reshape((divitheta1,divitheta2))
-else:
-    stableStateMat = np.rot90(np.rot90(inverse.reshape((divitheta1,divitheta2)).T))
-
-fig2 = plt.figure(2,figsize=(cm2inch(8.7), cm2inch(7)))
-fig2.subplots_adjust(top=0.99,
-bottom=0.115,
-left=0.130,
-right=0.89)
-ax2 = plt.subplot(111)
-
-NiceGraph2D(ax2, r'$\alpha$', r'$\beta$', 
-            mincoord = [0,-0.5], maxcoord = [0.5,0],divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
-
-cmap2, norm2 = from_levels_and_colors(np.linspace(0,12,13),#np.int(np.max(inverse)),np.int(np.max(inverse)+1)),
-                                      cm.Set3(np.linspace(0, 1,12)))# np.int(np.max(inverse))))) #gist_rainbow #Set3
-
-cs2 = ax2.imshow(stableStateMat, extent=[theta2[0,0]-sep2,theta2[0,-1]+sep2,theta1[0,0]-sep1,theta1[-1,0]+sep1], 
-                     cmap = cmap2, aspect = 'auto', origin = 'lower', vmax=12)
-
-ax2.scatter(SStheta1[SSpos], SStheta2[SSpos], c = inverse[SSpos], cmap = cmap2, s = 100, marker = '*', edgecolor = 'k', lw = 0.2, vmax = 12)              
-
-
-ax2.set_xticklabels(["$0$", "", "", "", r"$\pi/2$"])
-ax2.set_yticklabels([r"-$\pi/2$", "", "", "", "$0$"])
-
-
-cbar2 = plt.colorbar(cs2,  ax = ax2, fraction=0.05)#, extend = 'max'
-cbar2.set_ticks([])
-cbar2.ax.tick_params(colors='0.2', pad=0)
-cbar2.outline.set_edgecolor('0.2')
-cbar2.outline.set_linewidth(0.4)
+#for i in SSpos:
+#    print('Angles: ', angleNum[i,:], '\tStretching Energy: ', totEStretchsort[i], '\tTotal Energy: ', totEnergysort[i])
+#
+#Simul = sortAngl[::-1]
+#Simul = Simul[flagmask_n]
+#inverse = np.zeros(TotSimul)
+#inverse[Simul] = inverse_masked
+#inverse = inverse[sortAngl[::-1]]
+#inverse = np.ma.masked_array(inverse, mask=flagmask[sortAngl[::-1]])
+#
+#if inverted:
+#    stableStateMat = inverse.reshape((divitheta1,divitheta2))
+#else:
+#    stableStateMat = np.rot90(np.rot90(inverse.reshape((divitheta1,divitheta2)).T))
+#
+#fig2 = plt.figure(2,figsize=(cm2inch(8.7), cm2inch(7)))
+#fig2.subplots_adjust(top=0.99,
+#bottom=0.115,
+#left=0.130,
+#right=0.89)
+#ax2 = plt.subplot(111)
+#
+#NiceGraph2D(ax2, r'$\alpha$', r'$\beta$', 
+#            mincoord = [0,0], maxcoord = [0.5,0.5],divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
+#
+#cmap2, norm2 = from_levels_and_colors(np.linspace(0,12,13),#np.int(np.max(inverse)),np.int(np.max(inverse)+1)),
+#                                      cm.Set3(np.linspace(0, 1,12)))# np.int(np.max(inverse))))) #gist_rainbow #Set3
+#
+#cs2 = ax2.imshow(stableStateMat, extent=[theta2[0,0]-sep2,theta2[0,-1]+sep2,theta1[0,0]-sep1,theta1[-1,0]+sep1], 
+#                     cmap = cmap2, aspect = 'auto', origin = 'lower', vmax=12)
+#
+#ax2.scatter(SStheta1[SSpos], SStheta2[SSpos], c = inverse[SSpos], cmap = cmap2, s = 100, marker = '*', edgecolor = 'k', lw = 0.2, vmax = 12)              
+#
+#
+#ax2.set_xticklabels(["$0$", "", "", "", r"$\pi/2$"])
+#ax2.set_yticklabels(["$0$", "", "", "", r"$\pi/2$"])
+#
+#
+#cbar2 = plt.colorbar(cs2,  ax = ax2, fraction=0.05)#, extend = 'max'
+#cbar2.set_ticks([])
+#cbar2.ax.tick_params(colors='0.2', pad=0)
+#cbar2.outline.set_edgecolor('0.2')
+#cbar2.outline.set_linewidth(0.4)
 
 #############################################################################
 #Plot of real angles
