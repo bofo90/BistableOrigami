@@ -68,8 +68,9 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     
     return
 
-folder_name = "D:/Documents/Git Programs/nonlinear-bas/Results/SquareTiling/sqp/energy/06-May-2019_OneLayer_SmallAngles2/kh0.000_kta100.000_ke10.000_kf100.000"
-inverted = False
+folder_name = "D:/Documents/Git Programs/nonlinear-bas/Results/SquareTiling/sqp/energy/23-Apr-2019_OneLayer/kh0.001_kta100.000_ke10.000_kf100.000"
+#inverted = False
+release = True
 plt.close('all')
 #%%
 #######################################################################################################################
@@ -90,7 +91,7 @@ eHinge = dataEnergy[4,:]
 eTAngle = dataEnergy[5,:]
 exfl = dataEnergy[6,:].astype(int)
 
-closingAngl1 = np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', unpack = True, usecols = [1])/np.pi
+closingAngl1 = -np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', unpack = True, usecols = [1])/np.pi
 closingAngl2 = np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', unpack = True, usecols = [2])/np.pi
 angleNum = np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', usecols = [3,4])
 
@@ -133,6 +134,11 @@ else:
 eTotal= eEdge + eDiag + eHinge
 #eTotal = eTotal/totMaxEnergy*100
 
+if release:
+    shift = 2
+else:
+    shift = 1
+
 #%%
 ###Check if a folding pattern didnt converge
 exfl = exfl.reshape(TotSimul,IterPerSimulEnergy)
@@ -153,24 +159,26 @@ flagmask_n = np.logical_not(flagmask[sortAngl[::-1]])
 closingAngl1 = -closingAngl1[sortAngl[::-1]]
 closingAngl2 = -closingAngl2[sortAngl[::-1]]
 
+angleNum = angleNum[sortAngl[::-1],:]
+initial_pos = np.logical_and(angleNum[:,0] == 1,angleNum[:,1] == 1)
 
 theta1 = closingAngl1.reshape((divitheta1,divitheta2))
 theta2 = closingAngl2.reshape((divitheta1,divitheta2))
 
-totEnergysort = eTotal[IterPerSimulEnergy-1::IterPerSimulEnergy]
-#totEnergysort = eDiag[IterPerSimulEnergy-2::IterPerSimulEnergy]+eEdge[IterPerSimulEnergy-2::IterPerSimulEnergy]
-#totEnergysort = eEdge[IterPerSimulEnergy-2::IterPerSimulEnergy]
-#totEnergysort = eDiag[IterPerSimulEnergy-2::IterPerSimulEnergy]
-#totEnergysort = eHinge[IterPerSimulEnergy-2::IterPerSimulEnergy]
-#totEnergysort = eTAngle[IterPerSimulEnergy-2::IterPerSimulEnergy]
+totEnergysort = eTotal[IterPerSimulEnergy-shift::IterPerSimulEnergy]
+#totEnergysort = eDiag[IterPerSimulEnergy-shift::IterPerSimulEnergy]+eEdge[IterPerSimulEnergy-shift::IterPerSimulEnergy]
+#totEnergysort = eEdge[IterPerSimulEnergy-shift::IterPerSimulEnergy]
+#totEnergysort = eDiag[IterPerSimulEnergy-shift::IterPerSimulEnergy]
+#totEnergysort = eHinge[IterPerSimulEnergy-shift::IterPerSimulEnergy]
+#totEnergysort = eTAngle[IterPerSimulEnergy-shift::IterPerSimulEnergy]
 
 #totEnergysort_n = totEnergysort
 totEnergysort = np.ma.masked_array(totEnergysort, mask=flagmask)
 totEnergysort = totEnergysort[sortAngl[::-1]]
-if inverted:
-    totEnergyMat = totEnergysort.reshape((divitheta1,divitheta2))
-else:
-    totEnergyMat = np.rot90(np.rot90(totEnergysort.reshape((divitheta1,divitheta2)).T))
+totEnergysort[totEnergysort == 0] = np.nan
+
+totEnergyMat = totEnergysort.reshape((divitheta1,divitheta2))
+
 
 sep1 = (closingAngl1[-1]-closingAngl1[0])/(divitheta1-1)/2
 sep2 = (closingAngl2[-1]-closingAngl2[0])/(divitheta2-1)/2
@@ -183,21 +191,21 @@ right=0.89)
 ax1 = plt.subplot(111)
 
 NiceGraph2D(ax1, r'$\alpha$', r'$\beta$', 
-            mincoord = [0,-0.5], maxcoord = [0.5,0],divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
+            mincoord = [0,0], maxcoord = [0.5,0.5],divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
 
-maxEnergy = 0.05 #np.max(totEnergyMat) #2.4 #16
+maxEnergy = 0.12#05 #np.max(totEnergyMat) #2.4 #16
 cs1 = ax1.imshow(totEnergyMat, extent=[theta2[0,0]-sep2,theta2[0,-1]+sep2,theta1[0,0]-sep1,theta1[-1,0]+sep1], 
                      cmap = cm.nipy_spectral, aspect = 'auto',vmax = maxEnergy, origin = 'lower') #nipy_spectral
 
-SStheta1 = dataAngles[2::IterPerSimul,alpha-1]/np.pi
+SStheta1 = -dataAngles[1+shift::IterPerSimul,beta-1]/np.pi
 SStheta1 = np.mean(SStheta1,axis = 1)
 SStheta1 = SStheta1[sortAngl[::-1]]
-SStheta2 = dataAngles[2::IterPerSimul,beta-1]/np.pi
+SStheta2 = dataAngles[1+shift::IterPerSimul,alpha-1]/np.pi
 SStheta2 = np.mean(SStheta2,axis = 1)
 SStheta2 = SStheta2[sortAngl[::-1]]
 
 ax1.set_xticklabels(["$0$", "", "", "", r"$\pi/2$"])
-ax1.set_yticklabels([r"-$\pi/2$", "", "", "", "$0$"])
+ax1.set_yticklabels(["$0$", "", "", "", r"$\pi/2$"])
 
 cbar = plt.colorbar(cs1,  ax = ax1, fraction=0.05, pad=0.01, extend = 'max', format="%.1f") 
 cbar.set_ticks(np.linspace(0, maxEnergy, 4))
@@ -209,8 +217,8 @@ cbar.outline.set_linewidth(0.4)
 fig1b = plt.figure(1,figsize=(cm2inch(8.7), cm2inch(7)))
 ax1b = fig1b.add_subplot(111, projection='3d')
 
-ax1b.set_zlim(0, 0.000005)
-ax1b.plot_surface(theta1, theta2, totEnergyMat)
+#ax1b.set_zlim(0, 0.000005)
+ax1b.plot_surface(theta1, theta2, np.log10(totEnergyMat), rstride=1, cstride=1)
 
 ######################################################################
 #Analysis for stable states
@@ -302,11 +310,11 @@ ax1b.plot_surface(theta1, theta2, totEnergyMat)
 realtheta1 = dataAngles[2::IterPerSimul,alpha-1]/np.pi
 realtheta1 = np.mean(realtheta1,axis = 1)
 realtheta1 = realtheta1[sortAngl[::-1]]
-realtheta2 = dataAngles[2::IterPerSimul,beta-1]/np.pi
+realtheta2 = -dataAngles[2::IterPerSimul,beta-1]/np.pi
 realtheta2 = np.mean(realtheta2,axis = 1)
 realtheta2 = realtheta2[sortAngl[::-1]]
 
-totEnergysort = eTAngle[IterPerSimulEnergy-1::IterPerSimulEnergy]
+totEnergysort = eTAngle[IterPerSimulEnergy-shift::IterPerSimulEnergy]
 totEnergysort = np.ma.masked_array(totEnergysort, mask=flagmask)
 totEnergysort = totEnergysort[sortAngl[::-1]]
 
@@ -319,14 +327,14 @@ left=0.130,
 right=0.89)
 ax3 = plt.subplot(111)
 NiceGraph2D(ax3, r'$\alpha$', r'$\beta$',
-            mincoord = [0,-0.5], maxcoord = [0.5,0],divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
+            mincoord = [0,0], maxcoord = [0.5,0.5],divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
 
 cmap3, norm3 = from_levels_and_colors(np.linspace(0,maxTA,1000), cm.rainbow(np.linspace(0, 1, 1000)), extend = 'max')
 
 cs3 = ax3.scatter(realtheta1, realtheta2, c = totEnergysort, cmap = cmap3, vmax = maxTA, s = 20, marker = 's') #150 #360
 
 ax3.set_xticklabels(["$0$", "", "", "", r"$\pi/2$"])
-ax3.set_yticklabels([r"-$\pi/2$", "", "", "", "$0$"])
+ax3.set_yticklabels(["$0$", "", "", "", r"$\pi/2$"])
 
 cbar3 = plt.colorbar(cs3, ax = ax3, fraction=0.05, pad=0.01, extend = 'max', format="%.2f")
 cbar3.set_ticks(np.linspace(0, maxTA, 5))
@@ -344,10 +352,10 @@ upperRadius = np.array(upperRadius[sortAngl[::-1]])
 maxRadius = 0
 minRadius = -2
 
-if inverted:
-    RadiusMat = upperRadius.reshape((divitheta1,divitheta2))
-else:
-    RadiusMat = np.rot90(np.rot90(lowerRadius.reshape((divitheta1,divitheta2)).T))
+#if inverted:
+RadiusMat = upperRadius.reshape((divitheta1,divitheta2))
+#else:
+#    RadiusMat = np.rot90(np.rot90(lowerRadius.reshape((divitheta1,divitheta2)).T))
 
 CurvatureMat = 1/RadiusMat
 
@@ -359,7 +367,7 @@ right=0.875)
 ax4 = plt.subplot(111)
 #ax5 = plt.subplot(122)
 NiceGraph2D(ax4, r'$\alpha$', r'$\beta$',
-            mincoord = [0,-0.5], maxcoord = [0.5,0],divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
+            mincoord = [0,0], maxcoord = [0.5,0.5],divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
 
 #cmap4, norm4 = from_levels_and_colors(np.linspace(minRadius,maxRadius,1000), cm.rainbow_r(np.linspace(0, 1, 1000)), extend = 'min')
 
@@ -370,7 +378,7 @@ cs4 = ax4.imshow(np.log10(CurvatureMat), extent=[theta2[0,0]-sep2,theta2[0,-1]+s
 
 
 ax4.set_xticklabels(["$0$", "", "", "", r"$\pi/2$"])
-ax4.set_yticklabels([r"-$\pi/2$", "", "", "", "$0$"])
+ax4.set_yticklabels(["$0$", "", "", "", r"$\pi/2$"])
 
 cbar4 = plt.colorbar(cs4, ax = ax4, fraction=0.05, pad=0.01, extend = 'min', format=r"$10^{%.1f}$")
 cbar4.set_ticks(np.linspace(minRadius,maxRadius,5))
@@ -380,8 +388,10 @@ cbar4.outline.set_edgecolor('0.2')
 cbar4.outline.set_linewidth(0.4)
 
 angleMat = np.zeros((divitheta1,divitheta2,2))
-angleMat[:,:,0] = np.rot90(np.rot90(angleNum[:,0].reshape((divitheta1,divitheta2)).T))
-angleMat[:,:,1] = np.rot90(np.rot90(angleNum[:,1].reshape((divitheta1,divitheta2)).T))
+angleMat[:,:,0] = angleNum[:,0].reshape((divitheta1,divitheta2))
+angleMat[:,:,1] = angleNum[:,1].reshape((divitheta1,divitheta2))
+#angleMat[:,:,0] = np.rot90(np.rot90(angleNum[:,0].reshape((divitheta1,divitheta2)).T))
+#angleMat[:,:,1] = np.rot90(np.rot90(angleNum[:,1].reshape((divitheta1,divitheta2)).T))
 
 
 
@@ -393,22 +403,22 @@ angleMat[:,:,1] = np.rot90(np.rot90(angleNum[:,1].reshape((divitheta1,divitheta2
 
 #############################################################################
 fig1.show()
-fig1.savefig(folder_name + '/EnergyLand.pdf', transparent = True, pad_inches=0, dpi=300)
-fig1.savefig(folder_name + '/EnergyLand.png', transparent = True, pad_inches=0, dpi=300)
+#fig1.savefig(folder_name + '/EnergyLand.pdf', transparent = True, pad_inches=0, dpi=300)
+#fig1.savefig(folder_name + '/EnergyLand.png', transparent = True, pad_inches=0, dpi=300)
 #fig1.savefig(folder_name + '/EnergyAllEdges.png', transparent = True)
 #fig1.savefig(folder_name + '/EnergyEdge.png', transparent = True)
 #fig1.savefig(folder_name + '/EnergyDiag.png', transparent = True)
 #fig1.savefig(folder_name + '/EnergyHinge.png', transparent = True)
 #fig1.savefig(folder_name + '/EnergyTA.png', transparent = True)
 
-fig2.show()
-fig2.savefig(folder_name + '/StableStates.pdf', transparent = True, pad_inches=0, dpi=300)
-fig2.savefig(folder_name + '/StableStates.png', transparent = True, pad_inches=0, dpi=300)
+#fig2.show()
+#fig2.savefig(folder_name + '/StableStates.pdf', transparent = True, pad_inches=0, dpi=300)
+#fig2.savefig(folder_name + '/StableStates.png', transparent = True, pad_inches=0, dpi=300)
 
 fig3.show()
-fig3.savefig(folder_name + '/RealAngles-EnergyTA.pdf', transparent = True, pad_inches=0, dpi=300)
-fig3.savefig(folder_name + '/RealAngles-EnergyTA.png', transparent = True, pad_inches=0, dpi=300)
+#fig3.savefig(folder_name + '/RealAngles-EnergyTA.pdf', transparent = True, pad_inches=0, dpi=300)
+#fig3.savefig(folder_name + '/RealAngles-EnergyTA.png', transparent = True, pad_inches=0, dpi=300)
 
 fig4.show()
-fig4.savefig(folder_name + '/Curvature.pdf', transparent = True, pad_inches=0, dpi=300)
-fig4.savefig(folder_name + '/Curvature.png', transparent = True, pad_inches=0, dpi=300)
+#fig4.savefig(folder_name + '/Curvature.pdf', transparent = True, pad_inches=0, dpi=300)
+#fig4.savefig(folder_name + '/Curvature.png', transparent = True, pad_inches=0, dpi=300)
