@@ -55,11 +55,11 @@ end
 %%%%%% Folding part %%%%%%
 %Run the Folding of the structure
 
-foldAngl = 4;
-angles1_1 = extrudedUnitCell.theta(extrudedUnitCell.alpha(1)):(-foldAngl*pi/180):0.06;
-angles1_2 = extrudedUnitCell.theta(extrudedUnitCell.alpha(1)):(foldAngl*pi/180):1.5;
-angles2_1 = extrudedUnitCell.theta(extrudedUnitCell.beta(1)):(-foldAngl*pi/180):-1.5;
-angles2_2 = extrudedUnitCell.theta(extrudedUnitCell.beta(1)):(foldAngl*pi/180):-0.06;
+foldAngl = 1;
+angles1_1 = extrudedUnitCell.theta(extrudedUnitCell.alpha(1)):(-foldAngl*pi/180):35*pi/180;
+angles1_2 = extrudedUnitCell.theta(extrudedUnitCell.alpha(1)):(foldAngl*pi/180):55*pi/180;
+angles2_1 = extrudedUnitCell.theta(extrudedUnitCell.beta(1)):(-foldAngl*pi/180):-55*pi/180;
+angles2_2 = extrudedUnitCell.theta(extrudedUnitCell.beta(1)):(foldAngl*pi/180):-35*pi/180;
 angles1 = [angles1_1 angles1_2(2:end)];
 angles2 = [angles2_1 angles2_2(2:end)];
 
