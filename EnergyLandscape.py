@@ -68,7 +68,7 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     
     return
 
-folder_name = "D:/Documents/Git Programs/nonlinear-bas/Results/SquareTiling/sqp/energy/06-May-2019_OneLayer_SmallAngles/kh0.000_kta100.000_ke10.000_kf100.000"
+folder_name = "D:/Documents/Git Programs/nonlinear-bas/Results/SquareTiling/sqp/energy/06-May-2019_OneLayer_SmallAngles2/kh0.000_kta100.000_ke10.000_kf100.000"
 inverted = False
 plt.close('all')
 #%%
@@ -157,7 +157,7 @@ closingAngl2 = -closingAngl2[sortAngl[::-1]]
 theta1 = closingAngl1.reshape((divitheta1,divitheta2))
 theta2 = closingAngl2.reshape((divitheta1,divitheta2))
 
-totEnergysort = eTotal[IterPerSimulEnergy-2::IterPerSimulEnergy]
+totEnergysort = eTotal[IterPerSimulEnergy-1::IterPerSimulEnergy]
 #totEnergysort = eDiag[IterPerSimulEnergy-2::IterPerSimulEnergy]+eEdge[IterPerSimulEnergy-2::IterPerSimulEnergy]
 #totEnergysort = eEdge[IterPerSimulEnergy-2::IterPerSimulEnergy]
 #totEnergysort = eDiag[IterPerSimulEnergy-2::IterPerSimulEnergy]
@@ -189,10 +189,10 @@ maxEnergy = 0.05 #np.max(totEnergyMat) #2.4 #16
 cs1 = ax1.imshow(totEnergyMat, extent=[theta2[0,0]-sep2,theta2[0,-1]+sep2,theta1[0,0]-sep1,theta1[-1,0]+sep1], 
                      cmap = cm.nipy_spectral, aspect = 'auto',vmax = maxEnergy, origin = 'lower') #nipy_spectral
 
-SStheta1 = dataAngles[3::IterPerSimul,alpha-1]/np.pi
+SStheta1 = dataAngles[2::IterPerSimul,alpha-1]/np.pi
 SStheta1 = np.mean(SStheta1,axis = 1)
 SStheta1 = SStheta1[sortAngl[::-1]]
-SStheta2 = dataAngles[3::IterPerSimul,beta-1]/np.pi
+SStheta2 = dataAngles[2::IterPerSimul,beta-1]/np.pi
 SStheta2 = np.mean(SStheta2,axis = 1)
 SStheta2 = SStheta2[sortAngl[::-1]]
 
@@ -209,6 +209,7 @@ cbar.outline.set_linewidth(0.4)
 fig1b = plt.figure(1,figsize=(cm2inch(8.7), cm2inch(7)))
 ax1b = fig1b.add_subplot(111, projection='3d')
 
+ax1b.set_zlim(0, 0.000005)
 ax1b.plot_surface(theta1, theta2, totEnergyMat)
 
 ######################################################################
@@ -220,7 +221,7 @@ for hinge in sortAngl[::-1]:
     finalAngles = np.append(finalAngles, [dataAngles[IterPerSimul*(hinge+1)-1,sortAllAngIndex]], axis = 0)
 
 eStretch = eEdge + eDiag
-totEStretchsort = eStretch[IterPerSimulEnergy-2::IterPerSimulEnergy]
+totEStretchsort = eStretch[IterPerSimulEnergy-1::IterPerSimulEnergy]
 totEStretchsort = totEStretchsort[sortAngl[::-1]]
 
 Z = hierarch.linkage(finalAngles[flagmask_n,:], 'centroid')
@@ -305,7 +306,7 @@ realtheta2 = dataAngles[2::IterPerSimul,beta-1]/np.pi
 realtheta2 = np.mean(realtheta2,axis = 1)
 realtheta2 = realtheta2[sortAngl[::-1]]
 
-totEnergysort = eTAngle[IterPerSimulEnergy-2::IterPerSimulEnergy]
+totEnergysort = eTAngle[IterPerSimulEnergy-1::IterPerSimulEnergy]
 totEnergysort = np.ma.masked_array(totEnergysort, mask=flagmask)
 totEnergysort = totEnergysort[sortAngl[::-1]]
 

@@ -112,10 +112,10 @@ for ang1 = 1:size(angles1,2)
         [result, theta1, u1] = SaveResultPos(result, opt, V, output, 2);
     
         %%%%%% Releasing part %%%%%%
-        opt.angleConstrFinal(3).val = [];
-        initialiseGlobalx(u1, theta1);
-        [V, exfl, output, E] = FoldStructure(u1, E, exfl, extrudedUnitCell, opt, 3, Aeq, Beq);
-        [result, ~, ~] = SaveResultPos(result, opt, V, output, 3);
+%         opt.angleConstrFinal(3).val = [];
+%         initialiseGlobalx(u1, theta1);
+%         [V, exfl, output, E] = FoldStructure(u1, E, exfl, extrudedUnitCell, opt, 3, Aeq, Beq);
+%         [result, ~, ~] = SaveResultPos(result, opt, V, output, 3);
         
         %Save energy data in the result variable
         result = SaveResultEnergy(result, E, exfl, opt);
@@ -125,7 +125,7 @@ for ang1 = 1:size(angles1,2)
         fileName = strcat(folderName,'/',...
             '_Ang1_',int2str(ang1),'_Angl2_',int2str(ang2),'.mat');
         save(fileName, 'result');
-        result.deform(3) = [];
+%         result.deform(3) = [];
 
         fclose('all');
     end

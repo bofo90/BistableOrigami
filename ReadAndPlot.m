@@ -185,8 +185,8 @@ startPos = extrudedUnitCell.node + result.deform(currIter).interV(1).V;
 endPos = extrudedUnitCell.node + result.deform(currIter).interV(end).V;
 upperNodes = cellfun(@(v)v(1),extrudedUnitCell.face([extrudedUnitCell.upperFace]));
 lowerNodes = cellfun(@(v)v(1),extrudedUnitCell.face([extrudedUnitCell.lowerFace]));
-[~,upperR] = sphereFit(startPos(upperNodes,:));
-[~,lowerR] = sphereFit(startPos(lowerNodes,:));
+[~,upperR] = sphereFit(endPos(upperNodes,:));
+[~,lowerR] = sphereFit(endPos(lowerNodes,:));
 
 
 function [EhingeIntSum, suminttheta, sumexttheta] = getIntEnergy(result, opt, extrudedUnitCell)
