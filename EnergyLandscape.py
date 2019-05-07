@@ -68,7 +68,7 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     
     return
 
-folder_name = "D:/Documents/Git Programs/nonlinear-bas/Results/SquareTiling/sqp/energy/23-Apr-2019_TwoLayer/kh0.001_kta100.000_ke10.000_kf100.000"
+folder_name = "D:/Documents/Git Programs/nonlinear-bas/Results/SquareTiling/sqp/energy/06-May-2019_OneLayer_SmallAngles/kh0.000_kta100.000_ke10.000_kf100.000"
 inverted = False
 plt.close('all')
 #%%
@@ -185,7 +185,7 @@ ax1 = plt.subplot(111)
 NiceGraph2D(ax1, r'$\alpha$', r'$\beta$', 
             mincoord = [0,-0.5], maxcoord = [0.5,0],divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
 
-maxEnergy = 0.5 #np.max(totEnergyMat) #2.4 #16
+maxEnergy = 0.05 #np.max(totEnergyMat) #2.4 #16
 cs1 = ax1.imshow(totEnergyMat, extent=[theta2[0,0]-sep2,theta2[0,-1]+sep2,theta1[0,0]-sep1,theta1[-1,0]+sep1], 
                      cmap = cm.nipy_spectral, aspect = 'auto',vmax = maxEnergy, origin = 'lower') #nipy_spectral
 
@@ -205,6 +205,11 @@ cbar.set_label('Energy', fontsize = 9, color = '0.2',labelpad = 0)
 cbar.ax.tick_params(colors='0.2', pad=2, width=0.4)
 cbar.outline.set_edgecolor('0.2')
 cbar.outline.set_linewidth(0.4)
+
+fig1b = plt.figure(1,figsize=(cm2inch(8.7), cm2inch(7)))
+ax1b = fig1b.add_subplot(111, projection='3d')
+
+ax1b.plot_surface(theta1, theta2, totEnergyMat)
 
 ######################################################################
 #Analysis for stable states
