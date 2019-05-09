@@ -9,6 +9,7 @@ import os.path
 import scipy.cluster.hierarchy as hierarch
 from scipy.spatial.distance import pdist
 import copy
+import matplotlib.animation as animation
 matl.rcParams['pdf.fonttype'] = 42
 matl.rcParams['ps.fonttype'] = 42
 matl.rcParams['font.family'] = 'sans-serif'
@@ -51,7 +52,7 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
             if ~np.isnan(divisions[1]):
                 axes.set_yticks(np.linspace(mincoord[1],maxcoord[1],divisions[1]))
     axes.set_ylabel(nameY)
-    axes.yaxis.labelpad = -5
+    axes.yaxis.labelpad = -15
    
     axes.xaxis.label.set_color(gray)
     axes.tick_params(axis='x',colors=gray, width=0.4)
@@ -68,9 +69,49 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     
     return
 
-folder_name = "D:/Documents/Git Programs/nonlinear-bas/Results/SquareTiling/sqp/energy/23-Apr-2019_OneLayer/kh0.001_kta100.000_ke10.000_kf100.000"
+def NiceGraph3D(axes, nameX, nameY, nameZ, mincoord = [np.NaN, np.NaN, np.NaN], maxcoord = [np.NaN, np.NaN, np.NaN],
+                divisions = [np.NaN, np.NaN, np.NaN], buffer = [0.0, 0.0, 0.0]):
+    gray = '0.2'
+    matl.rcParams.update({'font.size': 9})
+
+    if ~np.isnan(mincoord[0]) and ~np.isnan(maxcoord[0]):
+        axes.set_xlim3d([mincoord[0]-buffer[0], maxcoord[0]+buffer[0]])
+        if ~np.isnan(divisions[0]):
+            axes.set_xticks(np.linspace(mincoord[0],maxcoord[0],divisions[0]))
+    axes.set_xlabel(nameX)
+#    axes.xaxis.labelpad = 20
+    if ~np.isnan(mincoord[1]) and ~np.isnan(maxcoord[1]):
+        axes.set_ylim3d([mincoord[1]-buffer[1], maxcoord[1]+buffer[1]])
+        if ~np.isnan(divisions[1]):
+            axes.set_yticks(np.linspace(mincoord[1],maxcoord[1],divisions[1]))
+    axes.set_ylabel(nameY)
+#    axes.yaxis.labelpad = 20
+    if ~np.isnan(mincoord[2]) and ~np.isnan(maxcoord[2]):
+        axes.set_zlim3d([mincoord[2]-buffer[2], maxcoord[2]+buffer[2]])
+        if ~np.isnan(divisions[2]):
+            axes.set_zticks(np.linspace(mincoord[2],maxcoord[2],divisions[2]))
+    axes.set_zlabel(nameZ)
+#    axes.zaxis.labelpad = 15
+    
+    axes.w_xaxis.set_pane_color((0,0,0,0))
+    axes.w_yaxis.set_pane_color((0,0,0,0))
+    axes.w_zaxis.set_pane_color((0,0,0,0))
+    
+    axes.w_xaxis.line.set_color(gray)
+    axes.w_yaxis.line.set_color(gray)
+    axes.w_zaxis.line.set_color(gray)
+    
+    axes.w_xaxis.label.set_color(gray)
+    axes.tick_params(axis='x',colors=gray, width=0.4)
+    axes.w_yaxis.label.set_color(gray)
+    axes.tick_params(axis='y', colors=gray, width=0.4)
+    axes.w_zaxis.label.set_color(gray)
+    axes.tick_params(axis='z', colors=gray, width=0.4)    
+    return
+
+folder_name = "D:/Documents/Git Programs/nonlinear-bas/Results/SquareTiling/sqp/energy/06-May-2019_ThreeLayer_SmallAngles2/kh0.000_kta100.000_ke10.000_kf100.000"
 #inverted = False
-release = True
+release = False
 plt.close('all')
 #%%
 #######################################################################################################################
@@ -216,9 +257,22 @@ cbar.outline.set_linewidth(0.4)
 
 fig1b = plt.figure(1,figsize=(cm2inch(8.7), cm2inch(7)))
 ax1b = fig1b.add_subplot(111, projection='3d')
+NiceGraph3D(ax1b, r'$\alpha$', r'$\beta$', 'log(Energy)',
+            mincoord = [theta2[0,0],theta1[0,0],np.nan], maxcoord = [theta2[0,-1],theta1[-1,0],np.nan],
+            divisions = [tickstheta1, tickstheta2, np.nan], buffer = [sep1, sep2, np.nan])
 
 #ax1b.set_zlim(0, 0.000005)
-ax1b.plot_surface(theta1, theta2, np.log10(totEnergyMat), rstride=1, cstride=1)
+ax1b.plot_wireframe(theta1, theta2, np.log10(totEnergyMat), rstride=1, cstride=1)
+ax1b.set_xticklabels(["$%.2f\pi$" %theta2[0,0], "", "", "", r"$%.2f\pi$" %theta2[0,-1]])
+ax1b.set_yticklabels(["$%.2f\pi$" %theta1[0,0], "", "", "", r"$%.2f\pi$" %theta1[-1,0]])
+    
+def update_lines(num):
+    ax1b.view_init(30, num)
+    return fig1b,
+
+line_ani = animation.FuncAnimation(fig1b, update_lines, 360, interval=10, blit=True)
+
+line_ani.save(folder_name + '/EnergyLand.mp4', fps=20, extra_args=['-vcodec', 'libx264'], bitrate = -1, dpi = 300)
 
 ######################################################################
 #Analysis for stable states
