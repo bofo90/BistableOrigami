@@ -232,9 +232,10 @@ right=0.89)
 ax1 = plt.subplot(111)
 
 NiceGraph2D(ax1, r'$\alpha$', r'$\beta$', 
-            mincoord = [0,0], maxcoord = [0.5,0.5],divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
+            mincoord = [theta2[0,0],theta1[0,0]], maxcoord = [theta2[0,-1],theta1[-1,0]],
+            divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
 
-maxEnergy = 0.12#05 #np.max(totEnergyMat) #2.4 #16
+maxEnergy = 0.001#2.4  #np.max(totEnergyMat) #0.05#16
 cs1 = ax1.imshow(totEnergyMat, extent=[theta2[0,0]-sep2,theta2[0,-1]+sep2,theta1[0,0]-sep1,theta1[-1,0]+sep1], 
                      cmap = cm.nipy_spectral, aspect = 'auto',vmax = maxEnergy, origin = 'lower') #nipy_spectral
 
@@ -245,8 +246,8 @@ SStheta2 = dataAngles[1+shift::IterPerSimul,alpha-1]/np.pi
 SStheta2 = np.mean(SStheta2,axis = 1)
 SStheta2 = SStheta2[sortAngl[::-1]]
 
-ax1.set_xticklabels(["$0$", "", "", "", r"$\pi/2$"])
-ax1.set_yticklabels(["$0$", "", "", "", r"$\pi/2$"])
+ax1.set_xticklabels(["$%.2f\pi$" %theta2[0,0], "", "", "", r"$%.2f\pi$" %theta2[0,-1]])
+ax1.set_yticklabels(["$%.2f\pi$" %theta1[0,0], "", "", "", r"$%.2f\pi$" %theta1[-1,0]])
 
 cbar = plt.colorbar(cs1,  ax = ax1, fraction=0.05, pad=0.01, extend = 'max', format="%.1f") 
 cbar.set_ticks(np.linspace(0, maxEnergy, 4))
@@ -381,14 +382,15 @@ left=0.130,
 right=0.89)
 ax3 = plt.subplot(111)
 NiceGraph2D(ax3, r'$\alpha$', r'$\beta$',
-            mincoord = [0,0], maxcoord = [0.5,0.5],divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
+            mincoord = [theta2[0,0],theta1[0,0]], maxcoord = [theta2[0,-1],theta1[-1,0]],
+            divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
 
 cmap3, norm3 = from_levels_and_colors(np.linspace(0,maxTA,1000), cm.rainbow(np.linspace(0, 1, 1000)), extend = 'max')
 
 cs3 = ax3.scatter(realtheta1, realtheta2, c = totEnergysort, cmap = cmap3, vmax = maxTA, s = 20, marker = 's') #150 #360
 
-ax3.set_xticklabels(["$0$", "", "", "", r"$\pi/2$"])
-ax3.set_yticklabels(["$0$", "", "", "", r"$\pi/2$"])
+ax3.set_xticklabels(["$%.2f\pi$" %theta2[0,0], "", "", "", r"$%.2f\pi$" %theta2[0,-1]])
+ax3.set_yticklabels(["$%.2f\pi$" %theta1[0,0], "", "", "", r"$%.2f\pi$" %theta1[-1,0]])
 
 cbar3 = plt.colorbar(cs3, ax = ax3, fraction=0.05, pad=0.01, extend = 'max', format="%.2f")
 cbar3.set_ticks(np.linspace(0, maxTA, 5))
@@ -421,7 +423,8 @@ right=0.875)
 ax4 = plt.subplot(111)
 #ax5 = plt.subplot(122)
 NiceGraph2D(ax4, r'$\alpha$', r'$\beta$',
-            mincoord = [0,0], maxcoord = [0.5,0.5],divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
+            mincoord = [theta2[0,0],theta1[0,0]], maxcoord = [theta2[0,-1],theta1[-1,0]],
+            divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
 
 #cmap4, norm4 = from_levels_and_colors(np.linspace(minRadius,maxRadius,1000), cm.rainbow_r(np.linspace(0, 1, 1000)), extend = 'min')
 
@@ -431,8 +434,8 @@ cs4 = ax4.imshow(np.log10(CurvatureMat), extent=[theta2[0,0]-sep2,theta2[0,-1]+s
 
 
 
-ax4.set_xticklabels(["$0$", "", "", "", r"$\pi/2$"])
-ax4.set_yticklabels(["$0$", "", "", "", r"$\pi/2$"])
+ax4.set_xticklabels(["$%.2f\pi$" %theta2[0,0], "", "", "", r"$%.2f\pi$" %theta2[0,-1]])
+ax4.set_yticklabels(["$%.2f\pi$" %theta1[0,0], "", "", "", r"$%.2f\pi$" %theta1[-1,0]])
 
 cbar4 = plt.colorbar(cs4, ax = ax4, fraction=0.05, pad=0.01, extend = 'min', format=r"$10^{%.1f}$")
 cbar4.set_ticks(np.linspace(minRadius,maxRadius,5))
@@ -457,8 +460,8 @@ angleMat[:,:,1] = angleNum[:,1].reshape((divitheta1,divitheta2))
 
 #############################################################################
 fig1.show()
-#fig1.savefig(folder_name + '/EnergyLand.pdf', transparent = True, pad_inches=0, dpi=300)
-#fig1.savefig(folder_name + '/EnergyLand.png', transparent = True, pad_inches=0, dpi=300)
+fig1.savefig(folder_name + '/EnergyLand.pdf', transparent = True, pad_inches=0, dpi=300)
+fig1.savefig(folder_name + '/EnergyLand.png', transparent = True, pad_inches=0, dpi=300)
 #fig1.savefig(folder_name + '/EnergyAllEdges.png', transparent = True)
 #fig1.savefig(folder_name + '/EnergyEdge.png', transparent = True)
 #fig1.savefig(folder_name + '/EnergyDiag.png', transparent = True)
@@ -470,9 +473,9 @@ fig1.show()
 #fig2.savefig(folder_name + '/StableStates.png', transparent = True, pad_inches=0, dpi=300)
 
 fig3.show()
-#fig3.savefig(folder_name + '/RealAngles-EnergyTA.pdf', transparent = True, pad_inches=0, dpi=300)
-#fig3.savefig(folder_name + '/RealAngles-EnergyTA.png', transparent = True, pad_inches=0, dpi=300)
+fig3.savefig(folder_name + '/RealAngles-EnergyTA.pdf', transparent = True, pad_inches=0, dpi=300)
+fig3.savefig(folder_name + '/RealAngles-EnergyTA.png', transparent = True, pad_inches=0, dpi=300)
 
 fig4.show()
-#fig4.savefig(folder_name + '/Curvature.pdf', transparent = True, pad_inches=0, dpi=300)
-#fig4.savefig(folder_name + '/Curvature.png', transparent = True, pad_inches=0, dpi=300)
+fig4.savefig(folder_name + '/Curvature.pdf', transparent = True, pad_inches=0, dpi=300)
+fig4.savefig(folder_name + '/Curvature.png', transparent = True, pad_inches=0, dpi=300)
