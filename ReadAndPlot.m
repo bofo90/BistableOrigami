@@ -32,17 +32,18 @@ switch opt.analysis
 
                 % parse the file name to get back hinge set
                 resfilename = allFiles(ct).name;
-                hingeSet = getHingeSet(resfilename);
-                if strcmp(opt.readHingeFile,'off')
-                    if ~isequal(hingeSet, opt.plotAngles)
-                        continue;
-%                     elseif ~strcmp(resfilename(1:end-4), '[8 3]_Ang1_18_Angl2_27')
+%                 hingeSet = getHingeSet(resfilename);
+%                 if strcmp(opt.readHingeFile,'off')
+%                     if ~isequal(hingeSet, opt.plotAngles)
 %                         continue;
-                    end
-                end
-                extrudedUnitCell.angleConstr = [hingeSet(:), -pi*opt.constAnglePerc*ones(length(hingeSet), 1)];
+% %                     elseif ~strcmp(resfilename(1:end-4), '[8 3]_Ang1_18_Angl2_27')
+% %                         continue;
+%                     end
+%                 end
+%                 extrudedUnitCell.angleConstr = [hingeSet(:), -pi*opt.constAnglePerc*ones(length(hingeSet), 1)];
                 % load results from file
                 load(strcat(folderResults,'/', allFiles(ct).name), 'result');
+                extrudedUnitCell = result.exUnitCell;
                 succesfullFiles = succesfullFiles + 1;
                 fprintf('Plot of Hinges number %d/%d\n', succesfullFiles, length(allFiles)-directories);
                 
@@ -54,7 +55,7 @@ switch opt.analysis
                     PosStad = [(ct-directories), lowerR, upperR];
                     Hinges = [num2str(ct-directories),',',...
                         mat2str(result.anglConstr(1,2),5),',',mat2str(result.anglConstr(end,2),5),...
-                        ',',mat2str(result.angNum(1)),',',mat2str(result.angNum(2))];
+                        ',',mat2str(result.layers),',',mat2str(result.UC)];
                     AllAngles = [extrudedUnitCell.theta];
                     for iter = 1:size(result.deform,2)
                         AllAngles = [AllAngles result.deform(iter).theta];
