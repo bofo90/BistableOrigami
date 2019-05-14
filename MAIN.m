@@ -21,18 +21,18 @@ opt=initOpt('inputType', 'origami','template','SquareTiling',...
             'gethistory', 'off',...
             'constrEdge','off','constrFace','on','constAnglePerc',0.99,... 
             'Khinge',0,'Kedge',10,'Kdiag',10,'Kface',100,'KtargetAngle',100,...
-            'maxStretch', 0.3,'steps',1,...
+            'maxStretch', 0.3,'steps',2,...
             'maxHinges',3,'minHinges',0,... %Only work when readHingeFile is 'on'
             'periodic', 'on');    
 
-opt.saveFile = strcat('/',date,'_LayersUC_Analysis');
-% opt.saveFile = strcat('/','06-May-2019_ThreeLayer_SmallAngles2');
+% opt.saveFile = strcat('/',date,'_LayersUC_Analysis');
+opt.saveFile = strcat('/','09-May-2019_LayersUC_Analysis1');
 tic;
 
-for i = 1:5
+for i = 4:4
     opt2 = opt;
     opt2.layers = i;
-    for j = 2:4
+    for j = 6:6
         opt2.numUnitCell = j;
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %BUILD
@@ -72,11 +72,11 @@ end
 %OUTPUT AND PLOT GEOMETRY
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% if (strcmp(opt.analysis, 'result') && strcmp(opt.createFig, 'off'))
-%     fprintf('Not ploting any results.\n');
-% else
-%     ReadAndPlot( extrudedUnitCell, opt);
-% end
+if (strcmp(opt.analysis, 'result') && strcmp(opt.createFig, 'off'))
+    fprintf('Not ploting any results.\n');
+else
+    ReadAndPlot( extrudedUnitCell, opt);
+end
 
 t = toc;
 fprintf('The whole program lasted %.2f seconds\n', t);
