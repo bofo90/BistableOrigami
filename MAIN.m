@@ -29,7 +29,7 @@ opt=initOpt('inputType', 'origami','template','SquareTiling',...
 opt.saveFile = strcat('/','09-May-2019_LayersUC_Analysis1');
 tic;
 
-for i = 4:4
+for i = 1:1
     opt2 = opt;
     opt2.layers = i;
     for j = 6:6

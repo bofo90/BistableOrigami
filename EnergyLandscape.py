@@ -405,8 +405,8 @@ ax1b.set_yticklabels(["$%d$" %theta1[0,0], "", "", "", r"$%d$" %theta1[-1,0]])
 lowerRadius = np.array(lowerRadius[sortAngl])
 #upperRadius[np.isnan(upperRadius)]=10**10
 upperRadius = np.array(upperRadius[sortAngl])
-maxRadius = 0
-minRadius = -2
+maxRadius = 0.7
+minRadius = 0.1
 
 #if inverted:
 RadiusMat = upperRadius.reshape((divitheta1,divitheta2))
@@ -418,8 +418,8 @@ CurvatureMat = 1/RadiusMat
 fig4 = plt.figure(5,figsize=(cm2inch(8.7), cm2inch(7)))
 fig4.subplots_adjust(top=0.970,
 bottom=0.115,
-left=0.130,
-right=0.875)
+left=0.080,
+right=0.825)
 ax4 = plt.subplot(111)
 #ax5 = plt.subplot(122)
 NiceGraph2D(ax4, r'$Unit Cells$', r'$Layers$', 
@@ -429,7 +429,7 @@ NiceGraph2D(ax4, r'$Unit Cells$', r'$Layers$',
 #cmap4, norm4 = from_levels_and_colors(np.linspace(minRadius,maxRadius,1000), cm.rainbow_r(np.linspace(0, 1, 1000)), extend = 'min')
 
 #cs4 = ax4.scatter(realtheta1, realtheta2, c = np.log10(upperRadius), cmap = cmap4, vmax = maxRadius, vmin = minRadius, s = 50, marker = 's') #150 #360
-cs4 = ax4.imshow(np.log10(CurvatureMat), extent=[theta2[0,0]-sep2,theta2[0,-1]+sep2,theta1[0,0]-sep1,theta1[-1,0]+sep1], 
+cs4 = ax4.imshow(CurvatureMat, extent=[theta2[0,0]-sep2,theta2[0,-1]+sep2,theta1[0,0]-sep1,theta1[-1,0]+sep1], 
                      cmap = cm.jet, aspect = 'auto',vmax = maxRadius, vmin = minRadius, origin = 'lower') #nipy_spectral
 
 
@@ -437,9 +437,9 @@ cs4 = ax4.imshow(np.log10(CurvatureMat), extent=[theta2[0,0]-sep2,theta2[0,-1]+s
 ax4.set_xticklabels(["$%d$" %theta2[0,0], "", "", r"$%d$" %theta2[0,-1]])
 ax4.set_yticklabels(["$%d$" %theta1[0,0], "", "", "", r"$%d$" %theta1[-1,0]])
 
-cbar4 = plt.colorbar(cs4, ax = ax4, fraction=0.05, pad=0.01, extend = 'min', format=r"$10^{%.1f}$")
+cbar4 = plt.colorbar(cs4, ax = ax4, fraction=0.05, pad=0.01, extend = 'min', format=r"$%.2f$")
 cbar4.set_ticks(np.linspace(minRadius,maxRadius,5))
-cbar4.set_label('Energy', fontsize = 11, color = '0.2')
+cbar4.set_label(r'$Curvature$', fontsize = 11, color = '0.2')
 cbar4.ax.tick_params(colors='0.2', width=0.4)
 cbar4.outline.set_edgecolor('0.2')
 cbar4.outline.set_linewidth(0.4)
@@ -450,6 +450,16 @@ cbar4.outline.set_linewidth(0.4)
 #angleMat[:,:,0] = np.rot90(np.rot90(angleNum[:,0].reshape((divitheta1,divitheta2)).T))
 #angleMat[:,:,1] = np.rot90(np.rot90(angleNum[:,1].reshape((divitheta1,divitheta2)).T))
 
+fig4b = plt.figure(6,figsize=(cm2inch(8.7), cm2inch(7)))
+ax4b = fig4b.add_subplot(111, projection='3d')
+NiceGraph3D(ax4b, r'$Unit Cells$', r'$Layers$', r'$Curvature$',
+            mincoord = [theta2[0,0],theta1[0,0],np.nan], maxcoord = [theta2[0,-1],theta1[-1,0],np.nan],
+            divisions = [tickstheta1, tickstheta2, np.nan], buffer = [sep1, sep2, np.nan])
+
+#ax1b.set_zlim(0, 0.000005)
+ax4b.plot_wireframe(theta2, theta1, np.log10(CurvatureMat), rstride=1, cstride=1)
+ax4b.set_xticklabels(["$%d$" %theta2[0,0], "", "", r"$%d$" %theta2[0,-1]])
+ax4b.set_yticklabels(["$%d$" %theta1[0,0], "", "", "", r"$%d$" %theta1[-1,0]])
 
 
 
