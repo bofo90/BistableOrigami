@@ -235,7 +235,7 @@ NiceGraph2D(ax1, r'$Unit Cells$', r'$Layers$',
             mincoord = [theta2[0,0],theta1[0,0]], maxcoord = [theta2[0,-1],theta1[-1,0]],
             divisions = [tickstheta1, tickstheta2], buffer = [sep1, sep2])
 
-maxEnergy = 116#2.4  #np.max(totEnergyMat) #0.05#16
+maxEnergy = 63#2.4  #np.max(totEnergyMat) #0.05#16
 cs1 = ax1.imshow(totEnergyMat, extent=[theta2[0,0]-sep2,theta2[0,-1]+sep2,theta1[0,0]-sep1,theta1[-1,0]+sep1], 
                      cmap = cm.nipy_spectral, aspect = 'auto',vmax = maxEnergy, origin = 'lower') #nipy_spectral
 
@@ -409,6 +409,9 @@ maxRadius = 0.7
 minRadius = 0.1
 
 #if inverted:
+upperRadius[flagmask]=np.nan
+lowerRadius[flagmask]=np.nan
+
 RadiusMat = upperRadius.reshape((divitheta1,divitheta2))
 #else:
 #    RadiusMat = np.rot90(np.rot90(lowerRadius.reshape((divitheta1,divitheta2)).T))
@@ -437,7 +440,7 @@ cs4 = ax4.imshow(CurvatureMat, extent=[theta2[0,0]-sep2,theta2[0,-1]+sep2,theta1
 ax4.set_xticklabels(["$%d$" %theta2[0,0], "", "", r"$%d$" %theta2[0,-1]])
 ax4.set_yticklabels(["$%d$" %theta1[0,0], "", "", "", r"$%d$" %theta1[-1,0]])
 
-cbar4 = plt.colorbar(cs4, ax = ax4, fraction=0.05, pad=0.01, extend = 'min', format=r"$%.2f$")
+cbar4 = plt.colorbar(cs4, ax = ax4, fraction=0.05, pad=0.01, format=r"$%.2f$")
 cbar4.set_ticks(np.linspace(minRadius,maxRadius,5))
 cbar4.set_label(r'$Curvature$', fontsize = 11, color = '0.2')
 cbar4.ax.tick_params(colors='0.2', width=0.4)
@@ -452,7 +455,7 @@ cbar4.outline.set_linewidth(0.4)
 
 fig4b = plt.figure(6,figsize=(cm2inch(8.7), cm2inch(7)))
 ax4b = fig4b.add_subplot(111, projection='3d')
-NiceGraph3D(ax4b, r'$Unit Cells$', r'$Layers$', r'$Curvature$',
+NiceGraph3D(ax4b, r'$Unit Cells$', r'$Layers$', r'log($Curvature$)',
             mincoord = [theta2[0,0],theta1[0,0],np.nan], maxcoord = [theta2[0,-1],theta1[-1,0],np.nan],
             divisions = [tickstheta1, tickstheta2, np.nan], buffer = [sep1, sep2, np.nan])
 
