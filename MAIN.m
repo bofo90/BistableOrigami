@@ -12,9 +12,9 @@ clearvars -global
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-opt=initOpt('inputType', 'origami','template','SquareTiling',...
-            'numUnitCell', 3,'ratio', 2,'layers', 1,...
-            'analysis','result','readHingeFile','off',...
+opt=initOpt('inputType', 'origami','template','SingleVertex',...
+            'restang', pi/4, 'numVert', 3,...
+            'analysis','info','readHingeFile','off',...
             'createFig', 'on','saveFig','on','saveMovie', 'on',...
             'figDPI',200,'safeMovieAntiAlias', 0,...
             'folAlgor', 'sqp','relAlgor', 'sqp',...
@@ -25,23 +25,18 @@ opt=initOpt('inputType', 'origami','template','SquareTiling',...
             'maxHinges',3,'minHinges',0,... %Only work when readHingeFile is 'on'
             'periodic', 'on');    
 
-opt.saveFile = strcat('/',date,'_temp2.0');
+opt.saveFile = strcat('/',date,'_temp');
 % opt.saveFile = strcat('/','20-Jul-2018_AllHinges');
 tic;
+
+
+hingeSet = [1 2];
+opt.angleConstrFinal(1).val=[ hingeSet(:) , [ones(1,size(hingeSet,2))*pi*0.985]'];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %BUILD
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 [extrudedUnitCell,opt]=buildGeometry(opt);
-
-% beta = 14+12*(round(opt.numUnitCell/2)-1)+12*opt.numUnitCell*(opt.layers-1);
-% alpha = beta + 2 + 8*(opt.layers-1);
-
-hingeSet = [extrudedUnitCell.alpha extrudedUnitCell.beta];
-alpha_value = 0;
-beta_value = -pi/2;%-pi/2*0.985
-opt.angleConstrFinal(1).val=[ hingeSet(:) , [ones(1,size(extrudedUnitCell.alpha,2))*alpha_value...
-                                             ones(1,size(extrudedUnitCell.beta,2))*beta_value]'];
 
 %SOLVER OPTIONS
 opt.options=optimoptions('fmincon','GradConstr','on','GradObj','on',...
