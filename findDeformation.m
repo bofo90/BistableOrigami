@@ -56,7 +56,7 @@ theta0=extrudedUnitCell.theta;
 
 %Create file for saving the results
 extraName = sprintf('/kh%2.3f_kta%2.3f_ke%2.3f_kf%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
-folderName = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat', opt.saveFile, extraName);
+folderName = strcat(pwd, '/Results/', opt.template,num2str(opt.numVert),'/',opt.relAlgor,'/mat', opt.saveFile, extraName);
 if ~exist(folderName, 'dir')
     mkdir(folderName);
 end

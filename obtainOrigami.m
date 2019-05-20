@@ -13,6 +13,28 @@ switch opt.template
         extrudedUnitCell.nodeHingeEx = [1 2 3 5;1 3 4 2; 1 4 5 3;1 5 2 4];
         extrudedUnitCell.face = {[1 2 3] [1 3 4] [1 4 5] [1 5 2]};
         
+    case{'SingleVertex'}
+        
+        
+        diameter = opt.Lextrude/sin(pi/opt.numVert);
+        anglerotation = (opt.numVert-2)*pi/(2*opt.numVert);
+        extrudedUnitCell.node = [0,0,0];
+        for phi = 0:(2*pi/opt.numVert):2*pi*0.99999
+            extrudedUnitCell.node = [extrudedUnitCell.node; ...
+                diameter/2*cos(phi-anglerotation),diameter/2*sin(phi-anglerotation),0];
+        end
+        
+        perimNodes = (1:opt.numVert)+1;
+        extrudedUnitCell.edge = [ones(1,opt.numVert);perimNodes]';
+        extrudedUnitCell.edge = [extrudedUnitCell.edge; [perimNodes;circshift(perimNodes,-1)]'];
+        extrudedUnitCell.face = num2cell([ones(1,opt.numVert);perimNodes;circshift(perimNodes,-1)]',2)';
+        
+        extrudedUnitCell.nodeHingeEx = [ones(1,opt.numVert);perimNodes;circshift(perimNodes,-1);circshift(perimNodes,1)]';
+        extrudedUnitCell.diagonals = [];
+        
+        extrudedUnitCell = calculateLength(extrudedUnitCell);
+        extrudedUnitCell.theta = ones(size(extrudedUnitCell.nodeHingeEx,1),1)*opt.restang;
+        
     case{'TriangularTiling'}
         tri_node = [-0.5,0,0;0.5,0,0;0,sqrt(3)/2,0];
         extrudedUnitCell.node = [tri_node];
@@ -228,12 +250,7 @@ switch opt.template
         %create diagonals at every face
         extrudedUnitCell = addDiagonals(extrudedUnitCell);
         %Determine initial edge length
-        for i=1:size(extrudedUnitCell.edge,1)
-            coor1=extrudedUnitCell.node(extrudedUnitCell.edge(i,1),:);
-            coor2=extrudedUnitCell.node(extrudedUnitCell.edge(i,2),:);
-            dx=coor2-coor1;
-            extrudedUnitCell.edgeL(i)=sqrt(dx*dx');
-        end
+        extrudedUnitCell = calculateLength(extrudedUnitCell);
         %Determine initial angles
         extrudedUnitCell.theta=zeros(size(extrudedUnitCell.nodeHingeEx,1),1);
         for i=1:size(extrudedUnitCell.nodeHingeEx,1)
@@ -246,6 +263,18 @@ switch opt.template
     otherwise
         error('Origami not defined\n')
 end
+
+function extrudedUnitCell = calculateLength(extrudedUnitCell)
+
+extrudedUnitCell.edgeL = [];
+
+for i=1:size(extrudedUnitCell.edge,1)
+    coor1=extrudedUnitCell.node(extrudedUnitCell.edge(i,1),:);
+    coor2=extrudedUnitCell.node(extrudedUnitCell.edge(i,2),:);
+    dx=coor2-coor1;
+    extrudedUnitCell.edgeL(i)=sqrt(dx*dx');
+end
+
 
 
 function extrudedUnitCell = addDiagonals(extrudedUnitCell)

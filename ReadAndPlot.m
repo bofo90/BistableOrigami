@@ -7,7 +7,7 @@ switch opt.analysis
     case {'result', 'savedata', 'plot'}
         %get file of results
         extraName = sprintf('/kh%2.3f_kta%2.3f_ke%2.3f_kf%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
-        folderResults = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/mat', opt.saveFile, extraName);
+        folderResults = strcat(pwd, '/Results/', opt.template,num2str(opt.numVert),'/',opt.relAlgor,'/mat', opt.saveFile, extraName);
         if ~exist(folderResults, 'dir')
             fprintf(['No folder with results:',folderResults,'\n']);
         else
