@@ -120,7 +120,7 @@ if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(op
         %Update axis
         xlim=[minAxis(1),maxAxis(1)];
         ylim=[minAxis(2),maxAxis(2)];
-        zlim=[minAxis(3),maxAxis(3)];
+        zlim=[minAxis(3)-0.00001,maxAxis(3)+0.00001];
         set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);
     end
 end
