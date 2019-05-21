@@ -67,7 +67,7 @@ switch opt.analysis
                 
                 if strcmp(opt.createFig, 'on') || strcmp(opt.analysis, 'plot')
                     
-                    nameFolderPlot=[pwd,'/Results/',opt.template,'/',opt.relAlgor,'/images',...
+                    nameFolderPlot=[pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.relAlgor,'/images',...
                         opt.saveFile,extraName];
                     nameFilePlot = ['/',resfilename(1:end-4),'_AnglEv.png'];
                     
