@@ -192,19 +192,19 @@ EtargetAngle=0;
 
 %APPLY DEFORMATION NODES
 extrudedUnitCellPrev = extrudedUnitCell;
-extrudedUnitCell.node=extrudedUnitCell.node+[u(1:3:end) u(2:3:end) u(3:3:end)];
+extrudedUnitCell.node = extrudedUnitCell.node+[u(1:3:end) u(2:3:end) u(3:3:end)];
 
 %ENERGY ASSOCIATED TO EDGE STRETCHING
 if strcmp(opt.constrEdge,'off')
     [dEdge, Jedge]=getEdge(extrudedUnitCell);
-    %shearing energy
-    Ediag=1/2*opt.Kdiag*sum(dEdge(extrudedUnitCell.diagonals).^2);
-    dE=dE+opt.Kdiag*Jedge(extrudedUnitCell.diagonals,:)'*dEdge(extrudedUnitCell.diagonals);
-    %streching energy
-    notdiagonal = 1:size(extrudedUnitCell.edge,1);
-    notdiagonal(extrudedUnitCell.diagonals) = [];
-    Eedge=1/2*opt.Kedge*sum(dEdge(notdiagonal).^2);
-    dE=dE+opt.Kedge*Jedge(notdiagonal,:)'*dEdge(notdiagonal);
+%     %shearing energy
+%     Ediag=1/2*opt.Kdiag*sum(dEdge(extrudedUnitCell.diagonals).^2);
+%     dE=dE+opt.Kdiag*Jedge(extrudedUnitCell.diagonals,:)'*dEdge(extrudedUnitCell.diagonals);
+%     %streching energy
+%     notdiagonal = 1:size(extrudedUnitCell.edge,1);
+%     notdiagonal(extrudedUnitCell.diagonals) = [];
+    Eedge=1/2*opt.Kedge*sum(dEdge.^2);
+    dE=dE+opt.Kedge*(Jedge'*dEdge);
 end
 
 %ENERGY ASSOCIATED TO FACE BENDING
@@ -216,8 +216,13 @@ end
 
 %ENERGY ASSOCIATED TO HINGE BENDING
 [theta, Jhinge]=getHinge(extrudedUnitCell, extrudedUnitCellPrev);
-Ehinge=1/2*opt.Khinge*sum((theta-extrudedUnitCell.theta).^2);
-dE=dE+opt.Khinge*(Jhinge'*(theta-extrudedUnitCell.theta));
+ThetaVar = theta-extrudedUnitCell.theta;
+Ehinge=opt.Khinge*sum(0.25*ThetaVar.^4+...
+    ThetaVar.^3.*extrudedUnitCell.theta+...
+    ThetaVar.^2.*extrudedUnitCell.theta.^2);
+dE=dE+opt.Khinge*(Jhinge'*(ThetaVar.^3+...
+    3*ThetaVar.^2.*extrudedUnitCell.theta+...
+    2*ThetaVar.*extrudedUnitCell.theta.^2));
 
 %ENERGY ASSOCIATED TO TARGET HINGE ANGLES
 if size(extrudedUnitCell.angleConstr,1)==0
