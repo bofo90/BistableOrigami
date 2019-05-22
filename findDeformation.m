@@ -52,10 +52,10 @@ if ~exist(folderName, 'dir')
     mkdir(folderName);
 end
 
-foldAngl = 20;
+foldAngl = 1;
 angles1_1 = 0:(foldAngl*pi/180):pi*0.985;
 angles1 = [angles1_1 -angles1_1(2:end)];
-kappas = logspace(-4,0,5);
+kappas = logspace(-4,0,25);
     
 %%%%%% Folding part %%%%%%
 %Run the Folding of the structure
@@ -99,6 +99,7 @@ for kappa = 1:size(kappas,2)
 
         result = SaveResultEnergy(result, E, exfl, opt);
         result.angNum = [ang1 kappa];
+        result.kappa = opt.Khinge;
 
         %Save the result in a file
         fileName = strcat(folderName,'/','_Ang_',int2str(ang1),'_kappa_',int2str(kappa),'op.mat');
