@@ -14,7 +14,7 @@ switch opt.analysis
             
             %create folder of data with files
             if strcmp(opt.analysis,'savedata')
-                folderEnergy = strcat(pwd, '/Results/', opt.template,'/',opt.relAlgor,'/energy', opt.saveFile, extraName);
+                folderEnergy = strcat(pwd, '/Results/', opt.template,num2str(opt.numVert),'/',opt.relAlgor,'/energy', opt.saveFile, extraName);
                 [fMassDist, fHinge, fEnergy, fAngles] = makeFileswHeaders(folderEnergy, folderResults);
                 
             end
@@ -31,35 +31,36 @@ switch opt.analysis
                 end
 
                 % parse the file name to get back hinge set
-                resfilename = allFiles(ct).name;
-                [hingeSet, ~] = getHingeSet(resfilename);
-                if strcmp(opt.readHingeFile,'off')
-                    if ~isequal(hingeSet, opt.angleConstrFinal(end).val(:,1))
-                        continue;
-%                     elseif ~strcmp(resfilename(1:end-4), '[8 3]_Ang1_18_Angl2_27')
+%                 resfilename = allFiles(ct).name;
+%                 [hingeSet, ~] = getHingeSet(resfilename);
+%                 if strcmp(opt.readHingeFile,'off')
+%                     if ~isequal(hingeSet, opt.angleConstrFinal(end).val(:,1))
 %                         continue;
-                    end
-                end
-                extrudedUnitCell.angleConstr = [hingeSet(:), -pi*opt.constAnglePerc*ones(length(hingeSet), 1)];
+% %                     elseif ~strcmp(resfilename(1:end-4), '[8 3]_Ang1_18_Angl2_27')
+% %                         continue;
+%                     end
+%                 end
+%                 extrudedUnitCell.angleConstr = [hingeSet(:), -pi*opt.constAnglePerc*ones(length(hingeSet), 1)];
                 % load results from file
                 load(strcat(folderResults,'/', allFiles(ct).name), 'result');
                 succesfullFiles = succesfullFiles + 1;
                 fprintf('Plot of Hinges number %d/%d\n', succesfullFiles, length(allFiles)-directories);
                 
                 if strcmp(opt.analysis, 'savedata')
-                    [lowerR, upperR] = getData(extrudedUnitCell, opt, result);
+%                     [lowerR, upperR] = getData(extrudedUnitCell, opt, result);
                     Energies = [ones(size(result.E,2),1)*(ct-directories), result.Eedge(2,:)',...
                         result.Ediag(2,:)', result.Eface(2,:)', result.Ehinge(2,:)',...
                         result.EtargetAngle(2,:)', result.exfl(2,:)'];
-                    PosStad = [(ct-directories), lowerR, upperR];
-                    Hinges = [num2str(ct-directories),',',mat2str(hingeSet'),',',...
-                        mat2str(result.anglConstr(1,2),5)];
-                    AllAngles = [extrudedUnitCell.theta];
+%                     PosStad = [(ct-directories), lowerR, upperR];
+                    Hinges = [num2str(ct-directories),',',mat2str(result.kappa,5),',',...
+                        mat2str(result.anglConstr(1,2),5),',', int2str(result.angNum(1)),',',...
+                        int2str(result.angNum(2))];
+                    AllAngles = zeros(size(extrudedUnitCell.theta));
                     for iter = 1:size(result.deform,2)
                         AllAngles = [AllAngles result.deform(iter).theta];
                     end
                     AllAngles = [ones(size(AllAngles,2),1)*(ct-directories) AllAngles'];
-                    dlmwrite(fMassDist, PosStad, 'delimiter', ',', '-append','precision',7);
+%                     dlmwrite(fMassDist, PosStad, 'delimiter', ',', '-append','precision',7);
                     dlmwrite(fHinge, Hinges, 'delimiter', '', '-append');
                     dlmwrite(fEnergy, Energies, 'delimiter', ',', '-append','precision',7);
                     dlmwrite(fAngles, AllAngles, 'delimiter', ',', '-append','precision',7);
@@ -119,7 +120,7 @@ fileHinge = strcat(folderEnergy, '/','Hinges.csv');
 if exist(fileHinge, 'file')
     delete(fileHinge) % always start with new file
 end
-headersHinge = {'HingeNumber'; 'ActuatedHinges'; 'Theta1'};
+headersHinge = {'HingeNumber'; 'Kappa'; 'TargetAngle'; 'NumAngle'; 'NumKappa'};
 writeHeader(fileHinge, headersHinge);
 
 fileMassDist = strcat(folderEnergy, '/','PosStad.csv');
