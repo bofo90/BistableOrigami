@@ -102,12 +102,13 @@ for kappa = 1:size(kappas,2)
         result.kappa = opt.Khinge;
 
         %Save the result in a file
-        fileName = strcat(folderName,'/','_Ang_',int2str(ang1),'_kappa_',int2str(kappa),'op.mat');
+        fileName = strcat(folderName,'/','_Ang_',int2str(ang1),'_kappa_',int2str(kappa),'.mat');
         save(fileName, 'result');
-
+        
+        result.deform(2) = [];
         fclose('all');
     end
-    result.deform(2) = [];
+    
 end
 
 function [V, exfl, output, E] = FoldStructure(u0, E, exfl, extrudedUnitCell, opt, iter, Aeq, Beq)
