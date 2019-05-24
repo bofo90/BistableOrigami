@@ -16,7 +16,7 @@ import os.path
 def cm2inch(value):
     return value/2.54
 
-def countStableStates(angles, steps, simulations):
+def countStableStates(angles, steps, simulations, plot = False):
     
     import scipy.cluster.hierarchy as hierarch
     from scipy.spatial.distance import pdist
@@ -27,9 +27,26 @@ def countStableStates(angles, steps, simulations):
         finalAngles = np.append(finalAngles, [dataAngles[steps*(hinge+1)-1,sortAllAngIndex]], axis = 0)
                                                          
     Z = hierarch.linkage(finalAngles, 'centroid')
-    inverse = hierarch.fcluster(Z, 1, criterion='distance')
+    inverse = hierarch.fcluster(Z, 1.5, criterion='distance')
     c = hierarch.cophenet(Z, pdist(finalAngles))
     print('this is the cophenet of the hierarchical linkage', c[0])
+
+    if plot:
+        plt.figure(0, figsize=(25, 10))
+        plt.figure(figsize=(25, 10))
+        plt.title('Hierarchical Clustering Dendrogram')
+        plt.xlabel('sample index')
+        plt.ylabel('distance')
+        hierarch.dendrogram(
+            Z,
+            truncate_mode='lastp',  # show only the last p merged clusters
+            p=50,  # show only the last p merged clusters
+            leaf_rotation=90.,  # rotates the x axis labels
+            leaf_font_size=8.,  # font size for the x axis labels
+            show_contracted=True,
+        )
+        plt.show()
+
     
     return inverse
 
@@ -49,7 +66,7 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
                             
     axes.set_xlabel(nameX)
     if ~np.isnan(mincoord[1]) and ~np.isnan(maxcoord[1]):
-        axes.set_ylim([mincoord[1]-buffer[1], maxcoord[1]+buffer[1]])
+        axes.set_ylim([mincoord[1]*(-buffer[1]), maxcoord[1]*(buffer[1])])
         if isinstance(divisions[1], (list, tuple, np.ndarray)):
             if ~np.isnan(divisions[1]).any():
                 axes.set_yticks(divisions[1])
@@ -68,7 +85,7 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.spines['right'].set_color(gray)
     return
 
-folder_name = "Results/SingleVertex3/active-set/energy/21-May-2019_temp/kh0.000_kta100.000_ke1.000_kf100.000"
+folder_name = "Results/SingleVertex3/sqp/energy/23-May-2019_angle_kappa/kh0.000_kta100.000_ke1.000_kf100.000"
 
 file_name1 = "/EnergyData.csv" 
 file_name2 = "/Hinges.csv"
@@ -89,13 +106,15 @@ IterPerSimulAngles = np.int(dataAngles.shape[0]/TotSimul)
 
 print(dataEnergy['Flags'].value_counts())
 exfl = dataEnergy.Flags.values.reshape(TotSimul,IterPerSimulEnergy)
-flagmask = (exfl !=1) & (exfl !=5) & (exfl !=5)
+flagmask = (exfl !=1) & (exfl !=2)
 flagmask = ~flagmask.any(axis= 1)
 
 dataVar['Mask'] = flagmask
 dataVar['StableStates'] = countStableStates(dataAngles, IterPerSimulAngles, TotSimul)
+dataVar['TargetAngle'] = dataVar['TargetAngle']/np.pi
 
 dataVar = dataVar.join(dataEnergy[['Hinge Number','TotalEnergy']][IterPerSimulEnergy-2::IterPerSimulEnergy].set_index('Hinge Number'), on = 'HingeNumber')
+dataVar['TotalEnergy'] = np.log10(dataVar['TotalEnergy'])
 dataVar.set_index(['Kappa','TargetAngle'], inplace = True)
 dataVar.sort_index(inplace=True)
 
@@ -104,13 +123,13 @@ data = dataVar.to_xarray()
 fig1 = plt.figure(0,figsize=(cm2inch(24.1), cm2inch(20)))
 ax1 = plt.subplot(111)
 
-data['TotalEnergy'].plot(axes = ax1, cmap = matl.cm.nipy_spectral, cbar_kwargs={'ticks': np.linspace(0, data['TotalEnergy'].max(), 5),
-    'pad': 0.01})
+data['TotalEnergy'].where(data.Mask).plot(axes = ax1, cmap = matl.cm.nipy_spectral, 
+    cbar_kwargs={'ticks': np.linspace(data['TotalEnergy'].min(), data['TotalEnergy'].max(), 5),
+    'pad': 0.01, 'format':r"$10^{%.2f}$"})
     
-NiceGraph2D(ax1, 'a', 'b')
-
-ax1.xaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g'))
-ax1.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2g'))
+NiceGraph2D(ax1, 'Target Angle', 'Kappa', mincoord = [-1,0.0001], maxcoord = [1,1],
+            divisions = [5, 5], buffer = [0.1, 10**(0.5)])
+ax1.set_yscale('log')
 
 #cbar = plt.colorbar(cs1,  ax = ax1, fraction=0.05, pad=0.01, extend = 'max')#format="%d", 
 #cbar.set_ticks(np.linspace(0, maxEnergy, 5))
