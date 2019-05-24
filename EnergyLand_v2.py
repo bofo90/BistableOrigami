@@ -53,7 +53,7 @@ def countStableStates(angles, steps, simulations, plot = False):
 def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.NaN, np.NaN], divisions = [np.NaN, np.NaN],
                 buffer = [0.0, 0.0, 0.0]):
     gray = '0.2'
-    matl.rcParams.update({'font.size': 11})
+    matl.rcParams.update({'font.size': 9})
 
     if ~np.isnan(mincoord[0]) and ~np.isnan(maxcoord[0]):
         axes.set_xlim([mincoord[0]-buffer[0], maxcoord[0]+buffer[0]])
@@ -83,12 +83,17 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.tick_params(axis='y', colors=gray)
     axes.spines['left'].set_color(gray)
     axes.spines['right'].set_color(gray)
+    axes.tick_params(pad = 2)
+    
+    for axis in ['top','bottom','left','right']:
+        axes.spines[axis].set_linewidth(0.4)
+        
     return
 
 def NiceGraph2Dlog(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.NaN, np.NaN], divisions = [np.NaN, np.NaN],
                 buffer = [0.0, 0.0, 0.0]):
     gray = '0.2'
-    matl.rcParams.update({'font.size': 11})
+    matl.rcParams.update({'font.size': 9})
 
     if ~np.isnan(mincoord[0]) and ~np.isnan(maxcoord[0]):
         axes.set_xlim([mincoord[0]-buffer[0], maxcoord[0]+buffer[0]])
@@ -118,6 +123,11 @@ def NiceGraph2Dlog(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [
     axes.tick_params(axis='y', colors=gray)
     axes.spines['left'].set_color(gray)
     axes.spines['right'].set_color(gray)
+    axes.tick_params(pad = 2)
+    
+    for axis in ['top','bottom','left','right']:
+        axes.spines[axis].set_linewidth(0.4)
+        
     return
 
 plt.close('all')
@@ -151,39 +161,65 @@ dataVar['StableStates'] = countStableStates(dataAngles, IterPerSimulAngles, TotS
 dataVar['TargetAngle'] = dataVar['TargetAngle']/np.pi
 
 dataVar = dataVar.join(dataEnergy[['Hinge Number','TotalEnergy']][IterPerSimulEnergy-2::IterPerSimulEnergy].set_index('Hinge Number'), on = 'HingeNumber')
-dataVar['TotalEnergy'] = np.log10(dataVar['TotalEnergy'])
+dataVar['TotalEnergy'] = dataVar['TotalEnergy']
 dataVar.set_index(['Kappa','TargetAngle'], inplace = True)
 dataVar.sort_index(inplace=True)
 
 data = dataVar.to_xarray()
 
-fig1 = plt.figure(0,figsize=(cm2inch(24.1), cm2inch(20)))
+fig1 = plt.figure(0,figsize=(cm2inch(17.8), cm2inch(15)))
 ax1 = plt.subplot(111)
-fig1.subplots_adjust(top=0.99,
-bottom=0.115,
-left=0.130,
-right=0.89)
+fig1.subplots_adjust(top=0.98,
+bottom=0.07,
+left=0.085,
+right=0.91)
 
 norm = matl.colors.LogNorm(vmin = data.Kappa.min(),vmax = data.Kappa.max())
-cmap = matl.cm.ScalarMappable(norm = norm, cmap=matl.cm.nipy_spectral)
+cmap = matl.cm.ScalarMappable(norm = norm, cmap=matl.cm.summer)
 cmap.set_array([])
 
 for i in np.arange(np.size(data.Kappa.data)):
-    cs1 = data['TotalEnergy'].where(data.Mask)[data.Kappa == data.Kappa.data[i]].plot(axes = ax1, c = cmap.to_rgba(data.Kappa.data[i]))
-    #, cmap = matl.cm.nipy_spectral, 
-    #    cbar_kwargs={'ticks': np.linspace(data['TotalEnergy'].min(), data['TotalEnergy'].max(), 5),
-    #    'pad': 0.01, 'format':r"$10^{%.2f}$"})
-    
+    cs1 = data['TotalEnergy'].where(data.Mask)[data.Kappa == data.Kappa.data[i]].plot(axes = ax1, 
+              c = cmap.to_rgba(data.Kappa.data[i]))
+
 plt.title('')
 
-NiceGraph2D(ax1, 'Target Angle', 'log(Energy)', mincoord = [-1,-5], maxcoord = [1,2],
-            divisions = [5, 8], buffer = [0.01, 0.1])
-
-
+ax1.set_yscale('log')
+NiceGraph2Dlog(ax1, 'Target Angle', 'Energy', mincoord = [-1,10**(-5)], maxcoord = [1,100],
+            divisions = [5, 8], buffer = [0.01, 10**(0.1)])
 
 cbar = fig1.colorbar(cmap, ticks = np.logspace(-4,0,5), fraction=0.05, pad=0.01) 
-#cbar.set_ticks(np.linspace(-3, 0, 5))
-#cbar.set_label('Kappa', fontsize = 11, color = '0.2')
-#cbar.ax.tick_params(axis='y',colors='0.2')
-#cbar.ax.tick_params(axis='x',colors='0.2')
-#cbar.outline.set_edgecolor('0.2')
+cbar.set_label('Kappa', fontsize = 9, color = '0.2')
+cbar.ax.tick_params(axis='y',colors='0.2')
+cbar.ax.tick_params(axis='x',colors='0.2')
+cbar.outline.set_edgecolor('0.2')
+
+fig2 = plt.figure(1,figsize=(cm2inch(17.8), cm2inch(15)))
+ax2 = plt.subplot(111)
+fig2.subplots_adjust(top=0.98,
+bottom=0.07,
+left=0.085,
+right=0.91)
+
+norm2 = matl.colors.LogNorm(vmin = data.TotalEnergy.min(),vmax = data.TotalEnergy.max())
+cmap2 = matl.cm.ScalarMappable(norm = norm2, cmap=matl.cm.nipy_spectral)
+cmap2.set_array([])
+
+np.log10(data['TotalEnergy'].where(data.Mask)).plot(axes = ax2, cmap=matl.cm.nipy_spectral,add_colorbar=False,
+    levels = np.linspace(np.log10(data.TotalEnergy.min()),np.log10(data.TotalEnergy.max()),100))
+#    cbar_kwargs={'ticks': np.linspace(-5,2,8)})
+
+ax2.set_yscale('log')
+NiceGraph2Dlog(ax2, 'Target Angle', 'Kappa', mincoord = [-1,0.0001], maxcoord = [1,1],
+            divisions = [5, 5], buffer = [0.01, 10**(0.1)])
+
+cbar2 = fig2.colorbar(cmap2, ticks = np.logspace(-6,3,10), fraction=0.05, pad=0.01) 
+cbar2.set_label('Energy', fontsize = 9, color = '0.2')
+cbar2.ax.tick_params(axis='y',colors='0.2')
+cbar2.ax.tick_params(axis='x',colors='0.2')
+cbar2.outline.set_edgecolor('0.2')
+
+fig1.show()
+fig1.savefig(folder_name + '/Energy_Kappas.pdf', transparent = True)
+fig2.show()
+fig2.savefig(folder_name + '/Landscape_Kappas.png', transparent = True)
