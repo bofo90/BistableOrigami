@@ -32,15 +32,14 @@ def countStableStates(finalAngles, plot = False):
     from scipy.spatial.distance import pdist
                                        
     Z = hierarch.linkage(finalAngles, 'centroid')
-    inverse = hierarch.fcluster(Z, 1.5, criterion='distance')
+    inverse = hierarch.fcluster(Z, 1, criterion='distance')
     c = hierarch.cophenet(Z, pdist(finalAngles))
 
     if plot:
         
         print('this is the cophenet of the hierarchical linkage', c[0])
         
-        plt.figure(0, figsize=(25, 10))
-        plt.figure(figsize=(25, 10))
+        plt.figure(0,figsize=(25, 10))
         plt.title('Hierarchical Clustering Dendrogram')
         plt.xlabel('sample index')
         plt.ylabel('distance')
@@ -139,7 +138,7 @@ def NiceGraph2Dlog(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [
 
 plt.close('all')
 
-folder_name = "Results/SingleVertex3/sqp/energy/24-May-2019_angle_kappa_0.05maxStretch/kh0.000_kta100.000_ke1.000_kf100.000"
+folder_name = "Results/SingleVertex3/sqp/energy/24-May-2019_angle_kappa_0.05maxStretch_allHing/kh0.000_kta100.000_ke1.000_kf100.000"
 
 file_name1 = "/EnergyData.csv" 
 file_name2 = "/Hinges.csv"
@@ -183,7 +182,7 @@ data = dataVar.to_xarray()
 
 
 #%%
-fig1 = plt.figure(0,figsize=(cm2inch(17.8), cm2inch(15)))
+fig1 = plt.figure(1,figsize=(cm2inch(17.8), cm2inch(15)))
 ax1 = plt.subplot(111)
 fig1.subplots_adjust(top=0.98,
 bottom=0.07,
@@ -211,7 +210,7 @@ cbar.ax.tick_params(axis='x',colors='0.2')
 cbar.outline.set_edgecolor('0.2')
 
 #%%
-fig2 = plt.figure(1,figsize=(cm2inch(17.8), cm2inch(15)))
+fig2 = plt.figure(2,figsize=(cm2inch(17.8), cm2inch(15)))
 ax2 = plt.subplot(111)
 fig2.subplots_adjust(top=0.98,
 bottom=0.07,
@@ -222,9 +221,8 @@ norm2 = matl.colors.LogNorm(vmin = data.TotalEnergy.min(),vmax = data.TotalEnerg
 cmap2 = matl.cm.ScalarMappable(norm = norm2, cmap=matl.cm.nipy_spectral)
 cmap2.set_array([])
 
-np.log10(data['TotalEnergy'].where(data.Mask)).plot(axes = ax2, cmap=matl.cm.nipy_spectral,add_colorbar=False,
+np.log10(data['TotalEnergy'].where(data.Mask)).plot(axes = ax2, cmap=matl.cm.nipy_spectral ,add_colorbar=False,
     levels = np.linspace(np.log10(data.TotalEnergy.min()),np.log10(data.TotalEnergy.max()),100))
-#    cbar_kwargs={'ticks': np.linspace(-5,2,8)})
 
 ax2.set_yscale('log')
 NiceGraph2Dlog(ax2, 'Target Angle', 'Kappa', mincoord = [-1,0.0001], maxcoord = [1,1],
@@ -237,7 +235,7 @@ cbar2.ax.tick_params(axis='x',colors='0.2')
 cbar2.outline.set_edgecolor('0.2')
 
 #%%
-fig3 = plt.figure(2,figsize=(cm2inch(17.8), cm2inch(15)))
+fig3 = plt.figure(3,figsize=(cm2inch(17.8), cm2inch(15)))
 ax3 = plt.subplot(111)
 fig3.subplots_adjust(top=0.98,
 bottom=0.07,
