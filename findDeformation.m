@@ -247,7 +247,7 @@ E=Eedge+Ediag+Eface+Ehinge+EtargetAngle;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [C,Ceq,DC,DCeq]=nonlinearConstr(u,extrudedUnitCell,opt)
 
-C1=[]; C2=[];
+C1=[]; C2=[]; C3=[];
 DC1=[]; DC2=[];
 Ceq1=[]; Ceq2=[]; Ceq3=[];
 DCeq1=[]; DCeq2=[]; DCeq3=[];
@@ -271,7 +271,13 @@ if strcmp(opt.constrEdge,'off') && ~isnan(opt.maxStretch)
     C2 = [-normStrech-opt.maxStretch; normStrech-opt.maxStretch];
     DC2 = [-DnormStrech; DnormStrech];
 end
-C = [C1; C2];
+
+if ~isnan(opt.maxArea)
+    dFace = getFace2(extrudedUnitCell);
+    C3 = [opt.maxArea-dFace];
+end
+
+C = [C1; C2; C3];
 DC = [DC1; DC2]';
 
 
@@ -423,6 +429,16 @@ for i=1:length(extrudedUnitCell.face)
     end
 end
 
+function dFace=getFace2(extrudedUnitCell)
+
+dFace=zeros(length(extrudedUnitCell.face),1);
+for i=1:length(extrudedUnitCell.face)
+    coor1=extrudedUnitCell.node(extrudedUnitCell.face{i}(1),:);
+    coor2=extrudedUnitCell.node(extrudedUnitCell.face{i}(2),:);
+    coor3=extrudedUnitCell.node(extrudedUnitCell.face{i}(3),:);
+    a=cross(coor2-coor1,coor3-coor1);
+    dFace(i) = 1/2*sqrt(a*a');
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

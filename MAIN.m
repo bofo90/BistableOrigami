@@ -21,23 +21,23 @@ opt=initOpt('inputType', 'origami','template','SingleVertex',...
             'gethistory', 'off',...
             'constrEdge','off','constrFace','on','constAnglePerc',0.99,... 
             'Khinge',0.0001,'Kedge',1,'Kdiag',1,'Kface',100,'KtargetAngle',100,...
-            'maxStretch', 0.05,'steps',3,...
-            'maxHinges',3,'minHinges',0,... %Only work when readHingeFile is 'on'
+            'maxStretch', nan,'steps',3,...
+            'maxArea', 0.1,...
             'periodic', 'off');    
 
 
-% opt.saveFile = strcat('/','24-May-2019_angle_kappa_0.05maxStretch');
+opt.saveFile = strcat('/',date,'_norm_Areaconstr');
 tic;
 
 
 hingeSet = [1 2 3];
 opt.angleConstrFinal(1).val=[ hingeSet(:) , [ones(1,size(hingeSet,2))*pi/2]'];
 
-opt.iter = 0;
-for i = 0:pi/20:pi*0.985
-    opt.restang = i;
-    opt.iter = opt.iter + 1;
-    opt.saveFile = strcat('/',date,'_angle_kappa_', num2str(opt.iter));
+% opt.iter = 19;
+% for i = 19*pi/20:pi/20:pi*0.985
+%     opt.restang = i;
+%     opt.iter = opt.iter + 1;
+%     opt.saveFile = strcat('/','24-May-2019_angle_kappa_', num2str(opt.iter));
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %BUILD
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -64,14 +64,14 @@ findDeformation(extrudedUnitCell,opt);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %OUTPUT AND PLOT GEOMETRY
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-end
+
 
 if (strcmp(opt.analysis, 'result') && strcmp(opt.createFig, 'off'))
     fprintf('Not ploting any results.\n');
 else
     ReadAndPlot( extrudedUnitCell, opt);
 end
-
+% end
 t = toc;
 fprintf('The whole program lasted %.2f seconds\n', t);
 
