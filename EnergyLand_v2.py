@@ -138,7 +138,7 @@ def NiceGraph2Dlog(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [
 
 plt.close('all')
 
-folder_name = "Results/SingleVertex3/sqp/energy/24-May-2019_angle_kappa_0.05maxStretch_allHing/kh0.000_kta100.000_ke1.000_kf100.000"
+folder_name = "Results/SingleVertex3/sqp/energy/27-May-2019_norm_Areaconstr/kh0.000_kta100.000_ke1.000_kf100.000"
 
 file_name1 = "/EnergyData.csv" 
 file_name2 = "/Hinges.csv"
@@ -170,7 +170,7 @@ dataVar['StableStates'] = np.zeros(np.size(dataVar['Mask']))
 dataVar['StableStates'] =  countStableStates(dataAnglesOrd)
 
 dataVar = dataVar.join(dataEnergy[['Hinge Number','TotalEnergy']][IterPerSimulEnergy-2::IterPerSimulEnergy].set_index('Hinge Number'), on = 'HingeNumber')
-dataVar['TotalEnergy'] = dataVar['TotalEnergy']
+dataVar = dataVar.join(dataEnergy[['Hinge Number','TargetAngleEnergy']][IterPerSimulEnergy-2::IterPerSimulEnergy].set_index('Hinge Number'), on = 'HingeNumber')
 dataVar.set_index(['Kappa','TargetAngle'], inplace = True)
 dataVar.sort_index(inplace=True)
 
