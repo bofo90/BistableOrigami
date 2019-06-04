@@ -32,15 +32,14 @@ switch opt.analysis
 
                 % parse the file name to get back hinge set
                 resfilename = allFiles(ct).name;
-%                 [hingeSet, ~] = getHingeSet(resfilename);
-%                 if strcmp(opt.readHingeFile,'off')
-%                     if ~isequal(hingeSet(2)', opt.angleConstrFinal(end).val(2,1))
+                [hingeSet, ~] = getHingeSet(resfilename);
+                if strcmp(opt.analysisType,'single')
+                    if ~isequal(hingeSet(:,1), opt.angleConstrFinal(end).val(:,1))
+                        continue;
+%                     elseif ~strcmp(resfilename(1:end-4), '[8 3]_Ang1_18_Angl2_27')
 %                         continue;
-% %                     elseif ~strcmp(resfilename(1:end-4), '[8 3]_Ang1_18_Angl2_27')
-% %                         continue;
-%                     end
-%                 end
-%                 extrudedUnitCell.angleConstr = [hingeSet(:), -pi*opt.constAnglePerc*ones(length(hingeSet), 1)];
+                    end
+                end
                 % load results from file
                 load(strcat(folderResults,'/', allFiles(ct).name), 'result');
                 succesfullFiles = succesfullFiles + 1;
@@ -160,7 +159,7 @@ fclose(fid) ;                                          % Closes file.
 function [hingeSet, opening] = getHingeSet(fileName)
 
 parsedName = strsplit(fileName(1:end-4), '_');
-hingeSetStr = parsedName{3};
+hingeSetStr = parsedName{1};
 % if length(hingeSetStr)>2
 %     if strcmp(hingeSetStr(end-1:end),'op')
 %         hingeSetStr = hingeSetStr(1:end-2);
@@ -171,10 +170,11 @@ hingeSetStr = parsedName{3};
 % else
 %     opening = 0;
 % end
-% hingeSetStr = strrep(hingeSetStr, '[', '');
-% hingeSetStr = strrep(hingeSetStr, ']', '');
-% hingeSetStr = strsplit(hingeSetStr(1:end), ' ');
-hingeSet = [str2double(hingeSetStr)' str2double(parsedName{5})];
+hingeSetStr = strrep(hingeSetStr, '[', '');
+hingeSetStr = strrep(hingeSetStr, ']', '');
+hingeSetStr = strsplit(hingeSetStr(1:end), ' ');
+hinges = str2double(hingeSetStr);
+hingeSet = [hinges' zeros(size(hinges))'];
 
 function [lowerR, upperR] = getData(extrudedUnitCell, opt, result)
 
