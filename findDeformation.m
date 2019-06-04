@@ -2,8 +2,7 @@ function findDeformation(extrudedUnitCell,opt)
 
 %Show details geometries (if requested)
 if strcmp(opt.analysis,'result')
-    fprintf('Maximum stretching %1.2f.\n', opt.maxStretch);
-    fprintf('kH %f\tkTA %f\tkE %f\tkF %f\n', opt.Khinge, opt.KtargetAngle, opt.Kedge, opt.Kface);
+    fprintf('Start folding...\n');
     switch opt.analysisType
         case 'single'
             metadataFile(opt, extrudedUnitCell);
