@@ -4,33 +4,14 @@ function findDeformation(extrudedUnitCell,opt)
 if strcmp(opt.analysis,'result')
     fprintf('Maximum stretching %1.2f.\n', opt.maxStretch);
     fprintf('kH %f\tkTA %f\tkE %f\tkF %f\n', opt.Khinge, opt.KtargetAngle, opt.Kedge, opt.Kface);
-    switch opt.readHingeFile
-        case 'off'
+    switch opt.analysisType
+        case 'single'
             metadataFile(opt, extrudedUnitCell);
-            nonlinearFolding(extrudedUnitCell,opt,opt.angleConstrFinal(1).val);
+            nonlinearFoldingOne(extrudedUnitCell,opt,opt.angleConstrFinal(1).val);
 %             
-        case 'on'
-            opt.angleConstrFinal = [];
-            fileHinges = strcat(pwd, '/Results/hingeList_reduced/', opt.template, '.csv');
-            if ~exist(fileHinges, 'file')
-                fprintf('Hinge-selection file does not exist.\n');
-            else
-                hingeList = dlmread(fileHinges);
-                metadataFile(opt, extrudedUnitCell);
-                maxHinge = opt.maxHinges;
-                minHinge = opt.minHinges;
-                numHinges = size(hingeList, 1);
-                anglFold = -(pi-pi*(opt.constAnglePerc-0.005));
-                parfor i = 1:numHinges
-                    row = hingeList(i, :);
-                    hinges = row(0~=row);
-                    if length(hinges) <= maxHinge && length(hinges) >= minHinge
-                        angles = [hinges(:), anglFold * ones(length(hinges), 1)];
-                        fprintf('Hinge selection number %d/%d.\n', i, numHinges);
-                        nonlinearFolding(extrudedUnitCell,opt, angles);
-                    end
-                end
-            end
+        case 'multiple'
+            metadataFile(opt, extrudedUnitCell);
+            nonlinearFoldingMulti(extrudedUnitCell,opt, angles);
     end
 end
 
@@ -40,7 +21,7 @@ end
 %NON-LINEAR ANALYSIS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function nonlinearFolding(extrudedUnitCell,opt,angtemp)
+function nonlinearFoldingMulti(extrudedUnitCell,opt,angtemp)
 
 %INITIALIZE LINEAR CONSTRAINTS
 [Aeq, Beq]=linearConstr(extrudedUnitCell,opt);
