@@ -32,15 +32,15 @@ switch opt.analysis
 
                 % parse the file name to get back hinge set
                 resfilename = allFiles(ct).name;
-                [hingeSet, ~] = getHingeSet(resfilename);
-                if strcmp(opt.readHingeFile,'off')
-                    if ~isequal(hingeSet(2)', opt.angleConstrFinal(end).val(2,1))
-                        continue;
-%                     elseif ~strcmp(resfilename(1:end-4), '[8 3]_Ang1_18_Angl2_27')
+%                 [hingeSet, ~] = getHingeSet(resfilename);
+%                 if strcmp(opt.readHingeFile,'off')
+%                     if ~isequal(hingeSet(2)', opt.angleConstrFinal(end).val(2,1))
 %                         continue;
-                    end
-                end
-                extrudedUnitCell.angleConstr = [hingeSet(:), -pi*opt.constAnglePerc*ones(length(hingeSet), 1)];
+% %                     elseif ~strcmp(resfilename(1:end-4), '[8 3]_Ang1_18_Angl2_27')
+% %                         continue;
+%                     end
+%                 end
+%                 extrudedUnitCell.angleConstr = [hingeSet(:), -pi*opt.constAnglePerc*ones(length(hingeSet), 1)];
                 % load results from file
                 load(strcat(folderResults,'/', allFiles(ct).name), 'result');
                 succesfullFiles = succesfullFiles + 1;
