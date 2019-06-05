@@ -6,11 +6,11 @@ if strcmp(opt.analysis,'result')
     switch opt.analysisType
         case 'single'
             metadataFile(opt, extrudedUnitCell);
-            nonlinearFoldingOne(extrudedUnitCell,opt,opt.angleConstrFinal(1).val);
+            nonlinearFoldingOne(extrudedUnitCell, opt, opt.angleConstrFinal(1).val);
 %             
         case 'multiple'
             metadataFile(opt, extrudedUnitCell);
-            nonlinearFoldingMulti(extrudedUnitCell,opt, angles);
+            nonlinearFoldingMulti(extrudedUnitCell, opt, opt.angleConstrFinal(1).val);
     end
 end
 
@@ -25,17 +25,11 @@ function nonlinearFoldingMulti(extrudedUnitCell,opt,angtemp)
 %INITIALIZE LINEAR CONSTRAINTS
 [Aeq, Beq]=linearConstr(extrudedUnitCell,opt);
 
-%Create file for saving the results
-extraName = sprintf('/kh%2.3f_kta%2.3f_ke%2.3f_kf%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
-folderName = strcat(pwd, '/Results/', opt.template,num2str(opt.numVert),'/',opt.relAlgor,'/mat', opt.saveFile, extraName);
-if ~exist(folderName, 'dir')
-    mkdir(folderName);
-end
-
-foldAngl = 1;
-angles1_1 = 0:(foldAngl*pi/180):pi*0.985;
-angles1 = [angles1_1 -angles1_1(2:end)];
-kappas = logspace(-4,0,25);
+foldAngl = 6;
+angles1_1 = 0:(foldAngl*pi/180):(0.985*pi);
+angles1_2 = -angles1_1;
+angles1 = [angles1_1 angles1_2(2:end)];
+kappas = logspace(-4,0,9);
     
 %%%%%% Folding part %%%%%%
 %Run the Folding of the structure
@@ -51,44 +45,77 @@ for kappa = 1:size(kappas,2)
     flag1 = false;
     
     opt.Khinge = kappas(kappa);
+    %Create file for saving the results
+    extraName = sprintf('/kh%2.5f_kta%2.2f_ke%2.2f_kf%2.2f', opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
+    folderName = strcat(pwd, '/Results/', opt.template,num2str(opt.numVert),'/',opt.relAlgor,'/mat', opt.saveFile, extraName);
+    if ~exist(folderName, 'dir')
+        mkdir(folderName);
+    end
+    
+    opt.angleConstrFinal(1).val = [angtemp;[2 0; 4 0]];
+    initialiseGlobalx(u0, theta0);
+    [V, exfl, output, E] = FoldStructure(u0, E, exfl, extrudedUnitCell, opt, 1, 1, Aeq, Beq);
+    [result, thetainit, uinit] = SaveResultPos(result, opt, V, output, 1);
+    
+    u0 = uinit;
+    theta0 = thetainit;
     
     for ang1 = 1:size(angles1,2)
 
         if angles1(ang1) < 0 && ~flag1
-            u0 = zeros(3*size(extrudedUnitCell.node,1),1);
-            theta0 = zeros(size(extrudedUnitCell.theta));
-            result.deform(1) = [];
+            u0 = uinit;
+            theta0 = thetainit;
+            result.deform(2) = [];
             flag1 = true;
         end 
-        opt.angleConstrFinal(1).val = [angtemp(:,1), [ones(1,size(angtemp,1))*angles1(ang1)]'];
-
-        initialiseGlobalx(u0, theta0);
-        [V, exfl, output, E] = FoldStructure(u0, E, exfl, extrudedUnitCell, opt, 1, 1, Aeq, Beq);
-        [result, theta1, u1] = SaveResultPos(result, opt, V, output, 1);
-
-        u0 = u1;
-        theta0 = theta1;  
-
-        %%%%%% Releasing part %%%%%%
-        %change algorithm for releasing
-        opt.angleConstrFinal(2).val = [];
-
-        initialiseGlobalx(u1, theta1);
-        [V, exfl, output, E] = FoldStructure(u1, E, exfl, extrudedUnitCell, opt, 2, 1, Aeq, Beq);
-        [result, ~, ~] = SaveResultPos(result, opt, V, output, 2);
-
-        result = SaveResultEnergy(result, E, exfl, opt);
-        result.angNum = [ang1 kappa];
-        result.kappa = opt.Khinge;
-
-        %Save the result in a file
-        fileName = strcat(folderName,'/','_Ang_',int2str(ang1),'_kappa_',int2str(kappa),'.mat');
-        save(fileName, 'result');
         
-        result.deform(2) = [];
-        fclose('all');
+        opt.angleConstrFinal(2).val = [angtemp; [2 angles1(ang1); 4 0]];
+        initialiseGlobalx(u0, theta0);
+        [V, exfl, output, E] = FoldStructure(u0, E, exfl, extrudedUnitCell, opt, 2, 1, Aeq, Beq);
+        [result, theta0, u0] = SaveResultPos(result, opt, V, output, 2);
+
+        u1 = u0;
+        theta1 = theta0;  
+        flag2 = false;
+        
+        for ang2 = 1:size(angles1,2)
+
+            if angles1(ang2) < 0 && ~flag1
+                u1 = u0;
+                theta1 = theta0;
+                result.deform(3) = [];
+                flag2 = true;
+            end 
+
+            opt.angleConstrFinal(3).val = [angtemp; [2 angles1(ang1); 4 angles1(ang2)]];
+            initialiseGlobalx(u1, theta1);
+            [V, exfl, output, E] = FoldStructure(u1, E, exfl, extrudedUnitCell, opt, 3, 1, Aeq, Beq);
+            [result, theta1, u1] = SaveResultPos(result, opt, V, output, 3);
+
+            %%%%%% Releasing part %%%%%%
+            %change algorithm for releasing
+            opt.angleConstrFinal(4).val = [];
+            initialiseGlobalx(u1, theta1);
+            [V, exfl, output, E] = FoldStructure(u1, E, exfl, extrudedUnitCell, opt, 4, 1, Aeq, Beq);
+            [result, ~, ~] = SaveResultPos(result, opt, V, output, 4);
+
+            result = SaveResultEnergy(result, E, exfl, opt);
+            result.angNum = [kappa ang1 ang2];
+            result.angVal = [angles1(ang1) angles1(ang2)];
+            result.kappa = opt.Khinge;
+
+            %Save the result in a file
+            fileName = strcat(folderName,'/','_Ang1_',int2str(ang1),'_Ang2_',int2str(ang2),'.mat');
+            save(fileName, 'result');
+
+            result.deform(4) = [];
+            fclose('all');
+        end
+        
+        result.deform(3) = [];
     end
     
+    result.deform(2) = [];
 end
 
 function nonlinearFoldingOne(extrudedUnitCell,opt,angtemp)

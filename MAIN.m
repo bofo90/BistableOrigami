@@ -14,7 +14,7 @@ clearvars -global
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 opt=initOpt('inputType', 'origami','template','SingleVertex',...
             'restang', pi/4, 'numVert', 4,...
-            'analysis','plot','analysisType','singele',...
+            'analysis','result','analysisType','multiple',...
             'createFig', 'off','saveFig','on','saveMovie', 'off',...
             'figDPI',200,'safeMovieAntiAlias', 0,...
             'folAlgor', 'sqp','relAlgor', 'sqp',...
@@ -26,28 +26,12 @@ opt=initOpt('inputType', 'origami','template','SingleVertex',...
             'periodic', 'off');    
 
 
-opt.saveFile = strcat('/',date,'_temp2.3');
+opt.saveFile = strcat('/',date,'_kappas_analysis');
 tic;
 
 
-hingeSet = [1 2 3 4];
-hingeSign = [[1 1 1 1];
-             [-1 -1 -1 -1];
-             [-1 1 1 1];
-             [1 -1 1 1];
-             [1 1 -1 1];
-             [1 1 1 -1];
-             [1 -1 -1 -1];
-             [-1 1 -1 -1];
-             [-1 -1 1 -1];
-             [-1 -1 -1 1];
-             [-1 -1 1 1];
-             [1 -1 -1 1];
-             [1 1 -1 -1];
-             [-1 1 1 -1];
-             [-1 1 -1 1];
-             [1 -1 1 -1]];
-
+hingeSet = [1 3];
+opt.angleConstrFinal(1).val=[ hingeSet(:) , [ones(1,size(hingeSet,2))*opt.restang]'];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %BUILD
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -69,13 +53,7 @@ opt.options=optimoptions('fmincon','GradConstr','off','GradObj','off',...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %ANALYSIS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-for i = 1:size(hingeSign,1)
-    
-    opt.angleConstrFinal(1).val=[ hingeSet(:) , [ones(1,size(hingeSet,2)).*hingeSign(i,:)*opt.restang]'];
-    findDeformation(extrudedUnitCell,opt);
-    
-end
+findDeformation(extrudedUnitCell,opt);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %OUTPUT AND PLOT GEOMETRY
