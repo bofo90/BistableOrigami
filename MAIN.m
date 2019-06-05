@@ -14,30 +14,40 @@ clearvars -global
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 opt=initOpt('inputType', 'origami','template','SingleVertex',...
             'restang', pi/4, 'numVert', 4,...
-            'analysis','result','analysisType','single',...
+            'analysis','plot','analysisType','singele',...
             'createFig', 'off','saveFig','on','saveMovie', 'off',...
             'figDPI',200,'safeMovieAntiAlias', 0,...
             'folAlgor', 'sqp','relAlgor', 'sqp',...
             'gethistory', 'off',...
             'constrEdge','off','constrFace','on','constAnglePerc',0.99,... 
-            'Khinge',0.0001,'Kedge',1,'Kdiag',1,'Kface',100,'KtargetAngle',100,...
+            'Khinge',0.001,'Kedge',1,'Kdiag',0.1,'Kface',100,'KtargetAngle',100,...
             'maxStretch', nan,'steps',3,...
             'maxArea', 0.1,...
             'periodic', 'off');    
 
 
-opt.saveFile = strcat('/',date,'_temp');
+opt.saveFile = strcat('/',date,'_temp2.3');
 tic;
 
 
 hingeSet = [1 2 3 4];
-opt.angleConstrFinal(1).val=[ hingeSet(:) , [ones(1,size(hingeSet,2))*pi/4]'];
+hingeSign = [[1 1 1 1];
+             [-1 -1 -1 -1];
+             [-1 1 1 1];
+             [1 -1 1 1];
+             [1 1 -1 1];
+             [1 1 1 -1];
+             [1 -1 -1 -1];
+             [-1 1 -1 -1];
+             [-1 -1 1 -1];
+             [-1 -1 -1 1];
+             [-1 -1 1 1];
+             [1 -1 -1 1];
+             [1 1 -1 -1];
+             [-1 1 1 -1];
+             [-1 1 -1 1];
+             [1 -1 1 -1]];
 
-% opt.iter = 19;
-% for i = 19*pi/20:pi/20:pi*0.985
-%     opt.restang = i;
-%     opt.iter = opt.iter + 1;
-%     opt.saveFile = strcat('/','24-May-2019_angle_kappa_', num2str(opt.iter));
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %BUILD
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -59,7 +69,13 @@ opt.options=optimoptions('fmincon','GradConstr','off','GradObj','off',...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %ANALYSIS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-findDeformation(extrudedUnitCell,opt);
+
+for i = 1:size(hingeSign,1)
+    
+    opt.angleConstrFinal(1).val=[ hingeSet(:) , [ones(1,size(hingeSet,2)).*hingeSign(i,:)*opt.restang]'];
+    findDeformation(extrudedUnitCell,opt);
+    
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %OUTPUT AND PLOT GEOMETRY

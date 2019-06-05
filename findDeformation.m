@@ -133,7 +133,7 @@ opt.options.Algorithm = opt.folAlgor;
 result = SaveResultEnergy(result, E, exfl, opt);
 
 %Save the result in a file
-fileName = strcat(folderName,'/',mat2str(opt.angleConstrFinal(1).val(:,1)'),'.mat');
+fileName = strcat(folderName,'/',mat2str(sign(opt.angleConstrFinal(1).val(:,2))'),'.mat');
 save(fileName, 'result');
 
 
