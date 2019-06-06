@@ -32,7 +32,7 @@ switch opt.analysis
 
                 % parse the file name to get back hinge set
                 resfilename = allFiles(ct).name;
-                [hingeSet, ~] = getHingeSet(resfilename);
+                [hingeSet] = getHingeSet(resfilename);
                 if strcmp(opt.analysisType,'single')
                     if ~isequal(hingeSet(:,1), opt.angleConstrFinal(end).val(:,1))
                         continue;
@@ -157,24 +157,12 @@ end
 fclose(fid) ;                                          % Closes file.
 
 
-function [hingeSet, opening] = getHingeSet(fileName)
+function [hingeSet] = getHingeSet(fileName)
 
 parsedName = strsplit(fileName(1:end-4), '_');
-hingeSetStr = parsedName{1};
-% if length(hingeSetStr)>2
-%     if strcmp(hingeSetStr(end-1:end),'op')
-%         hingeSetStr = hingeSetStr(1:end-2);
-        opening = 1;
-%     else
-%         opening = 0;
-%     end
-% else
-%     opening = 0;
-% end
-hingeSetStr = strrep(hingeSetStr, '[', '');
-hingeSetStr = strrep(hingeSetStr, ']', '');
-hingeSetStr = strsplit(hingeSetStr(1:end), ' ');
-hinges = str2double(hingeSetStr);
+Angl1 = parsedName{3};
+Angl2 = parsedName{5};
+hinges = [str2double(Angl1) str2double(Angl2)];
 hingeSet = [hinges' zeros(size(hinges))'];
 
 function [lowerR, upperR] = getData(extrudedUnitCell, opt, result)
