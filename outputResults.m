@@ -23,7 +23,7 @@ opt.tranPol=0.5;
 %PREPARE PLOTTING UNDEFORMED CONFIGURATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Check if output folder is required, and create it if it doesn't exist
-extraName = sprintf('/kh%2.3f_kta%2.3f_ke%2.3f_kf%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
+extraName = sprintf('/kh%2.5f_kta%2.2f_ke%2.2f_kf%2.2f', opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
 nameFolder=[pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.relAlgor,'/images',opt.saveFile,extraName];
 if or(strcmp(opt.saveFig,'on'),strcmp(opt.saveMovie,'on'))
     if exist(nameFolder, 'dir')==0

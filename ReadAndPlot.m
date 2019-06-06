@@ -6,7 +6,7 @@ switch opt.analysis
         outputResults(extrudedUnitCell,result,opt);
     case {'result', 'savedata', 'plot'}
         %get file of results
-        extraName = sprintf('/kh%2.3f_kta%2.3f_ke%2.3f_kf%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
+        extraName = sprintf('/kh%2.5f_kta%2.2f_ke%2.2f_kf%2.2f', opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
         folderResults = strcat(pwd, '/Results/', opt.template,num2str(opt.numVert),'/',opt.relAlgor,'/mat', opt.saveFile, extraName);
         if ~exist(folderResults, 'dir')
             fprintf(['No folder with results:',folderResults,'\n']);
@@ -52,8 +52,9 @@ switch opt.analysis
                         result.EtargetAngle(2,:)', result.exfl(2,:)'];
 %                     PosStad = [(ct-directories), lowerR, upperR];
                     Hinges = [num2str(ct-directories),',',mat2str(result.kappa,5),',',...
-                        mat2str(result.anglConstr(1,2),5),',', int2str(result.angNum(1)),',',...
-                        int2str(result.angNum(2))];
+                        mat2str(result.angVal(1),5),',', mat2str(result.angVal(2),5),',',...
+                        int2str(result.angNum(1)),',', int2str(result.angNum(2)),',',...
+                        int2str(result.angNum(3))];
                     AllAngles = zeros(size(extrudedUnitCell.theta));
                     for iter = 1:size(result.deform,2)
                         AllAngles = [AllAngles result.deform(iter).theta];
@@ -119,7 +120,7 @@ fileHinge = strcat(folderEnergy, '/','Hinges.csv');
 if exist(fileHinge, 'file')
     delete(fileHinge) % always start with new file
 end
-headersHinge = {'HingeNumber'; 'Kappa'; 'TargetAngle'; 'NumAngle'; 'NumKappa'};
+headersHinge = {'HingeNumber'; 'Kappa'; 'TargetAngle1'; 'TargetAngle2';  'NumKappa'; 'NumAngle1'; 'NumAngle2'};
 writeHeader(fileHinge, headersHinge);
 
 fileMassDist = strcat(folderEnergy, '/','PosStad.csv');
