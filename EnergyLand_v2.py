@@ -18,21 +18,23 @@ def cm2inch(value):
 
 def orderAngles(angles, steps, simulations):
     
-    finalAngles = np.empty((0,np.size(dataAngles,1)))
+    finalAngles = np.empty((0,np.size(angles,1)))
     for hinge in np.arange(simulations):
+        if np.sum(np.sign(np.around(angles[steps*(hinge+1)-1,:], decimals = 4))) < 0:
+            angles[steps*(hinge+1)-1,:] = angles[steps*(hinge+1)-1,:]*(-1)        
         sortAllAngIndex = np.lexsort((angles[steps*(hinge+1)-1,:],angles[steps*hinge,:]))
-        finalAngles = np.append(finalAngles, [dataAngles[steps*(hinge+1)-1,sortAllAngIndex]], axis = 0)
+        finalAngles = np.append(finalAngles, [angles[steps*(hinge+1)-1,sortAllAngIndex]], axis = 0)
         
     return finalAngles
         
         
-def countStableStates(finalAngles, plot = False):
+def countStableStates(finalAngles, distance, plot = False):
     
     import scipy.cluster.hierarchy as hierarch
     from scipy.spatial.distance import pdist
                                        
     Z = hierarch.linkage(finalAngles, 'centroid')
-    inverse = hierarch.fcluster(Z, 1, criterion='distance')
+    inverse = hierarch.fcluster(Z, distance, criterion='distance')
     c = hierarch.cophenet(Z, pdist(finalAngles))
 
     if plot:
@@ -136,127 +138,143 @@ def NiceGraph2Dlog(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [
         
     return
 
-plt.close('all')
-
-folder_name = "Results/SingleVertex3/sqp/energy/27-May-2019_norm_Areaconstr/kh0.000_kta100.000_ke1.000_kf100.000"
-
-file_name1 = "/EnergyData.csv" 
-file_name2 = "/Hinges.csv"
-file_name3 = "/PosStad.csv"
-file_name4 = "/Angles.csv"
-
-dataEnergy = pd.read_csv(folder_name+file_name1)
-dataEnergy['TotalEnergy'] = dataEnergy['EdgeEnergy']+dataEnergy['DiagonalEnergy']+dataEnergy['HingeEnergy']
-
-dataVar = pd.read_csv(folder_name+file_name2)
-
-dataAngles = np.loadtxt(folder_name+file_name4,skiprows=1, delimiter = ',', dtype = np.float64)
-dataAngles = np.delete(dataAngles, 0, 1)
-
-TotSimul = dataVar.shape[0]
-IterPerSimulEnergy = np.int(dataEnergy.shape[0]/TotSimul)
-IterPerSimulAngles = np.int(dataAngles.shape[0]/TotSimul)
-
-print(dataEnergy['Flags'].value_counts())
-exfl = dataEnergy.Flags.values.reshape(TotSimul,IterPerSimulEnergy)
-flagmask = (exfl !=1) & (exfl !=2)
-flagmask = ~flagmask.any(axis= 1)
-
-dataAnglesOrd = orderAngles(dataAngles, IterPerSimulAngles, TotSimul)
-
-dataVar['Mask'] = flagmask
-dataVar['TargetAngle'] = dataVar['TargetAngle']/np.pi
-dataVar['StableStates'] = np.zeros(np.size(dataVar['Mask']))
-dataVar['StableStates'] =  countStableStates(dataAnglesOrd)
-
-dataVar = dataVar.join(dataEnergy[['Hinge Number','TotalEnergy']][IterPerSimulEnergy-2::IterPerSimulEnergy].set_index('Hinge Number'), on = 'HingeNumber')
-dataVar = dataVar.join(dataEnergy[['Hinge Number','TargetAngleEnergy']][IterPerSimulEnergy-2::IterPerSimulEnergy].set_index('Hinge Number'), on = 'HingeNumber')
-dataVar.set_index(['Kappa','TargetAngle'], inplace = True)
-dataVar.sort_index(inplace=True)
-
-data = dataVar.to_xarray()
-
-#for i in data.Kappa.data:
-#    data['StableStates'][data.Kappa == i] = countStableStates(dataAnglesOrd[data['HingeNumber'][data.Kappa == i].data[0]-1,:], plot = False)
-#dataVar['StableStates'] = data.StableStates.data.flatten()
+kappas = np.unique(np.concatenate((np.logspace(-4,0,9), np.logspace(-4,0,9)*10**0.25)))
 
 
-#%%
-fig1 = plt.figure(1,figsize=(cm2inch(17.8), cm2inch(15)))
-ax1 = plt.subplot(111)
-fig1.subplots_adjust(top=0.98,
-bottom=0.07,
-left=0.085,
-right=0.91)
-
-norm = matl.colors.LogNorm(vmin = data.Kappa.min(),vmax = data.Kappa.max())
-cmap = matl.cm.ScalarMappable(norm = norm, cmap=matl.cm.summer)
-cmap.set_array([])
-
-for i in np.arange(np.size(data.Kappa.data)):
-    cs1 = data['TotalEnergy'].where(data.Mask)[data.Kappa == data.Kappa.data[i]].plot(axes = ax1, 
-              c = cmap.to_rgba(data.Kappa.data[i]))
-
-plt.title('')
-
-ax1.set_yscale('log')
-NiceGraph2Dlog(ax1, 'Target Angle', 'Energy', mincoord = [-1,10**(-5)], maxcoord = [1,100],
-            divisions = [5, 8], buffer = [0.01, 10**(0.1)])
-
-cbar = fig1.colorbar(cmap, ticks = np.logspace(-4,0,5), fraction=0.05, pad=0.01) 
-cbar.set_label('Kappa', fontsize = 9, color = '0.2')
-cbar.ax.tick_params(axis='y',colors='0.2')
-cbar.ax.tick_params(axis='x',colors='0.2')
-cbar.outline.set_edgecolor('0.2')
-
-#%%
-fig2 = plt.figure(2,figsize=(cm2inch(17.8), cm2inch(15)))
-ax2 = plt.subplot(111)
-fig2.subplots_adjust(top=0.98,
-bottom=0.07,
-left=0.085,
-right=0.91)
-
-norm2 = matl.colors.LogNorm(vmin = data.TotalEnergy.min(),vmax = data.TotalEnergy.max())
-cmap2 = matl.cm.ScalarMappable(norm = norm2, cmap=matl.cm.nipy_spectral)
-cmap2.set_array([])
-
-np.log10(data['TotalEnergy'].where(data.Mask)).plot(axes = ax2, cmap=matl.cm.nipy_spectral ,add_colorbar=False,
-    levels = np.linspace(np.log10(data.TotalEnergy.min()),np.log10(data.TotalEnergy.max()),100))
-
-ax2.set_yscale('log')
-NiceGraph2Dlog(ax2, 'Target Angle', 'Kappa', mincoord = [-1,0.0001], maxcoord = [1,1],
-            divisions = [5, 5], buffer = [0.01, 10**(0.1)])
-
-cbar2 = fig2.colorbar(cmap2, ticks = np.logspace(-6,3,10), fraction=0.05, pad=0.01) 
-cbar2.set_label('Energy', fontsize = 9, color = '0.2')
-cbar2.ax.tick_params(axis='y',colors='0.2')
-cbar2.ax.tick_params(axis='x',colors='0.2')
-cbar2.outline.set_edgecolor('0.2')
-
-#%%
-fig3 = plt.figure(3,figsize=(cm2inch(17.8), cm2inch(15)))
-ax3 = plt.subplot(111)
-fig3.subplots_adjust(top=0.98,
-bottom=0.07,
-left=0.085,
-right=0.91)
-
-data['StableStates'].where(data.Mask).plot(axes = ax3, cmap=matl.cm.Set2, add_colorbar=True,
-    levels = np.linspace(data.StableStates.min()-0.5,data.StableStates.max()+0.5,int(data.StableStates.max())+1), robust = True,
-    cbar_kwargs={'ticks': np.linspace(data.StableStates.min(),data.StableStates.max(),int(data.StableStates.max()))})
-
-ax3.set_yscale('log')
-NiceGraph2Dlog(ax3, 'Target Angle', 'Kappa', mincoord = [-1,0.0001], maxcoord = [1,1],
-            divisions = [5, 5], buffer = [0.01, 10**(0.1)])
-
-#%%
-fig1.show()
-fig1.savefig(folder_name + '/Energy_Kappas.pdf', transparent = True)
-fig1.savefig(folder_name + '/Energy_Kappas.png', transparent = True)
-fig2.show()
-fig2.savefig(folder_name + '/Landscape_Kappas.pdf', transparent = True)
-fig2.savefig(folder_name + '/Landscape_Kappas.png', transparent = True)
-fig3.show()
-fig3.savefig(folder_name + '/StableStates_Kappas.pdf', transparent = True)
-fig3.savefig(folder_name + '/StableStates_Kappas.png', transparent = True)
+for k in kappas:
+    plt.close('all')
+    
+    folder_name = "Results/SingleVertex4/sqp/energy/05-Jun-2019_kappas_analysis/kh%.5f_kta100.00_ke1.00_kf100.00" %k
+    
+    file_name1 = "/EnergyData.csv" 
+    file_name2 = "/Hinges.csv"
+    file_name3 = "/PosStad.csv"
+    file_name4 = "/Angles.csv"
+    
+    dataEnergy = pd.read_csv(folder_name+file_name1)
+    dataEnergy['TotalEnergy'] = dataEnergy['EdgeEnergy']+dataEnergy['DiagonalEnergy']+dataEnergy['HingeEnergy']
+    
+    dataVar = pd.read_csv(folder_name+file_name2)
+    
+    dataAngles = np.loadtxt(folder_name+file_name4,skiprows=1, delimiter = ',', dtype = np.float64)
+    dataAngles = np.delete(dataAngles, 0, 1)
+    
+    TotSimul = dataVar.shape[0]
+    IterPerSimulEnergy = np.int(dataEnergy.shape[0]/TotSimul)
+    IterPerSimulAngles = np.int(dataAngles.shape[0]/TotSimul)
+    
+    print(dataEnergy['Flags'].value_counts())
+    exfl = dataEnergy.Flags.values.reshape(TotSimul,IterPerSimulEnergy)
+    flagmask = (exfl !=1) & (exfl !=2)
+    flagmask = ~flagmask.any(axis= 1)
+    
+    dataAnglesOrd = orderAngles(dataAngles, IterPerSimulAngles, TotSimul)
+    
+    dataVar['Mask'] = flagmask
+    dataVar['TargetAngle1'] = dataVar['TargetAngle1']/np.pi
+    dataVar['TargetAngle2'] = dataVar['TargetAngle2']/np.pi
+    dataVar['StableStates'] = np.zeros(np.size(dataVar['Mask']))
+    dataVar['StableStates'] =  countStableStates(dataAnglesOrd, 1, True)
+    
+    np.random.seed(0)
+    print(dataVar.groupby('StableStates')[['NumAngle1','NumAngle2']].apply(lambda x: x.sample(1,random_state = 0)))
+    
+    dataVar = dataVar.join(dataEnergy[['Hinge Number','TotalEnergy']][IterPerSimulEnergy-2::IterPerSimulEnergy].set_index('Hinge Number'), on = 'HingeNumber')
+    dataVar = dataVar.join(dataEnergy[['Hinge Number','TargetAngleEnergy']][IterPerSimulEnergy-2::IterPerSimulEnergy].set_index('Hinge Number'), on = 'HingeNumber')
+    dataVar.set_index(['TargetAngle1','TargetAngle2'], inplace = True)
+    dataVar.sort_index(inplace=True)
+    
+    data = dataVar.to_xarray()
+    
+    #for i in data.Kappa.data:
+    #    data['StableStates'][data.Kappa == i] = countStableStates(dataAnglesOrd[data['HingeNumber'][data.Kappa == i].data[0]-1,:], plot = False)
+    #dataVar['StableStates'] = data.StableStates.data.flatten()
+    
+    
+    #%%
+    fig1 = plt.figure(1,figsize=(cm2inch(17.8), cm2inch(15)))
+    ax1 = plt.subplot(111)
+    fig1.subplots_adjust(top=0.995,
+    bottom=0.07,
+    left=0.1,
+    right=0.915)
+    
+    minEnTA = np.float(data.TargetAngleEnergy.where(data.Mask).min())
+    aveEnTA = np.float(data.TargetAngleEnergy.where(data.Mask).mean())
+    stdEnTA = np.float(data.TargetAngleEnergy.where(data.Mask).std())
+    
+    energiesTA = np.linspace(minEnTA, aveEnTA + stdEnTA*2, 100)
+    
+    norm = matl.colors.LogNorm(10**energiesTA[0], 10**energiesTA[-1])
+    cmap = matl.cm.ScalarMappable(norm = norm, cmap=matl.cm.summer)
+    cmap.set_array([])
+    
+    data['TargetAngleEnergy'].where(data.Mask).plot(axes = ax1, cmap = matl.cm.summer, add_colorbar=True,
+        levels = energiesTA)
+    
+    plt.title('')
+    
+    NiceGraph2D(ax1, 'Target Angle1', 'Target Angle2', mincoord = [-1,-1], maxcoord = [1,1],
+                divisions = [5, 5], buffer = [0.01, 0.01])
+    
+    #cbar = fig1.colorbar(cmap, ticks = np.logspace(-4,0,5), fraction=0.05, pad=0.01) 
+    #cbar.set_label('Kappa', fontsize = 9, color = '0.2')
+    #cbar.ax.tick_params(axis='y',colors='0.2')
+    #cbar.ax.tick_params(axis='x',colors='0.2')
+    #cbar.outline.set_edgecolor('0.2')
+    
+    #%%
+    fig2 = plt.figure(2,figsize=(cm2inch(17.8), cm2inch(15)))
+    ax2 = plt.subplot(111)
+    fig2.subplots_adjust(top=0.995,
+    bottom=0.07,
+    left=0.1,
+    right=0.915)
+    
+    minEn = np.float(data.TotalEnergy.where(data.Mask).where(data.TargetAngleEnergy<0.5).min())
+    aveEn = np.float(data.TotalEnergy.where(data.Mask).where(data.TargetAngleEnergy<0.5).mean())
+    stdEn = np.float(data.TotalEnergy.where(data.Mask).where(data.TargetAngleEnergy<0.5).std())
+    
+    energies = np.log10(np.linspace(minEn,aveEn+stdEn*2,100))
+    
+    norm2 = matl.colors.LogNorm(10**energies[0], 10**energies[-1])
+    cmap2 = matl.cm.ScalarMappable(norm = norm2, cmap=matl.cm.nipy_spectral)
+    cmap2.set_array([])
+    
+    np.log10(data['TotalEnergy'].where(data.Mask)).where(data.TargetAngleEnergy<0.5).plot(axes = ax2, 
+            cmap=matl.cm.nipy_spectral ,add_colorbar=False, levels = energies)
+    
+    NiceGraph2D(ax2, 'Target Angle1', 'Target Angle2', mincoord = [-1,-1], maxcoord = [1,1],
+                divisions = [5, 5], buffer = [0.01, 0.01])
+    
+    cbar2 = fig2.colorbar(cmap2,  fraction=0.05, pad=0.01, extend = 'both')# ticks = np.logspace(-1,2,10),
+    cbar2.set_label('Energy', fontsize = 9, color = '0.2')
+    cbar2.ax.tick_params(axis='y',colors='0.2')
+    cbar2.ax.tick_params(axis='x',colors='0.2')
+    cbar2.outline.set_edgecolor('0.2')
+    
+    #%%
+    fig3 = plt.figure(3,figsize=(cm2inch(17.8), cm2inch(15)))
+    ax3 = plt.subplot(111)
+    fig3.subplots_adjust(top=0.98,
+    bottom=0.07,
+    left=0.085,
+    right=0.91)
+    
+    data['StableStates'].where(data.Mask).where(data.TargetAngleEnergy<0.5).plot(axes = ax3, cmap=matl.cm.Set2, add_colorbar=True,
+        levels = np.linspace(data.StableStates.min()-0.5,data.StableStates.max()+0.5,int(data.StableStates.max())+1), robust = True,
+        cbar_kwargs={'ticks': np.linspace(data.StableStates.min(),data.StableStates.max(),int(data.StableStates.max()))})
+    
+    NiceGraph2D(ax3, 'Target Angle1', 'Target Angle2', mincoord = [-1,-1], maxcoord = [1,1],
+                divisions = [5, 5], buffer = [0.01, 0.01])
+    
+    #%%
+    fig1.show()
+    fig1.savefig(folder_name + '/Energy_Kappas.pdf', transparent = True)
+    fig1.savefig(folder_name + '/Energy_Kappas.png', transparent = True)
+    fig2.show()
+    fig2.savefig(folder_name + '/Landscape_Kappas.pdf', transparent = True)
+    fig2.savefig(folder_name + '/Landscape_Kappas.png', transparent = True)
+    fig3.show()
+    fig3.savefig(folder_name + '/StableStates_Kappas.pdf', transparent = True)
+    fig3.savefig(folder_name + '/StableStates_Kappas.png', transparent = True)
