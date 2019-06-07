@@ -139,9 +139,11 @@ def NiceGraph2Dlog(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [
     return
 
 kappas = np.unique(np.concatenate((np.logspace(-4,0,9), np.logspace(-4,0,9)*10**0.25)))
+kappas = np.logspace(-2.5,0.25,23)#23
 
-
+#kappas = [1]
 for k in kappas:
+    
     plt.close('all')
     
     folder_name = "Results/SingleVertex4/sqp/energy/05-Jun-2019_kappas_analysis/kh%.5f_kta100.00_ke1.00_kf100.00" %k
@@ -153,6 +155,7 @@ for k in kappas:
     
     dataEnergy = pd.read_csv(folder_name+file_name1)
     dataEnergy['TotalEnergy'] = dataEnergy['EdgeEnergy']+dataEnergy['DiagonalEnergy']+dataEnergy['HingeEnergy']
+    dataEnergy['HingeEnergy'] = dataEnergy['HingeEnergy']/k
     
     dataVar = pd.read_csv(folder_name+file_name2)
     
@@ -174,18 +177,28 @@ for k in kappas:
     dataVar['TargetAngle1'] = dataVar['TargetAngle1']/np.pi
     dataVar['TargetAngle2'] = dataVar['TargetAngle2']/np.pi
     dataVar['StableStates'] = np.zeros(np.size(dataVar['Mask']))
-    dataVar['StableStates'] =  countStableStates(dataAnglesOrd, 1, True)
+    dataVar['StableStates'] =  countStableStates(dataAnglesOrd, 1)
     
     np.random.seed(0)
     print(dataVar.groupby('StableStates')[['NumAngle1','NumAngle2']].apply(lambda x: x.sample(1,random_state = 0)))
     
-    dataVar = dataVar.join(dataEnergy[['Hinge Number','TotalEnergy']][IterPerSimulEnergy-2::IterPerSimulEnergy].set_index('Hinge Number'), on = 'HingeNumber')
     dataVar = dataVar.join(dataEnergy[['Hinge Number','TargetAngleEnergy']][IterPerSimulEnergy-2::IterPerSimulEnergy].set_index('Hinge Number'), on = 'HingeNumber')
+    dataVar = dataVar.join(dataEnergy[['Hinge Number','TotalEnergy']][IterPerSimulEnergy-2::IterPerSimulEnergy].set_index('Hinge Number'), on = 'HingeNumber')
+    minEn = np.float(dataVar.TotalEnergy.where(dataVar.Mask).where(dataVar.TargetAngleEnergy<0.5).min())#.where(data.TargetAngleEnergy<0.5)
+    aveEn = np.float(dataVar.TotalEnergy.where(dataVar.Mask).where(dataVar.TargetAngleEnergy<0.5).mean())
+    stdEn = np.float(dataVar.TotalEnergy.where(dataVar.Mask).where(dataVar.TargetAngleEnergy<0.5).std())
+    dataVar.TotalEnergy = (dataVar.TotalEnergy-minEn)/(aveEn+stdEn*2-minEn)
+    
+    dataVar['theta1Real'] = dataAngles[IterPerSimulAngles-2::IterPerSimulAngles,0]/np.pi-0.25
+    dataVar['theta2Real'] = dataAngles[IterPerSimulAngles-2::IterPerSimulAngles,2]/np.pi-0.25
+    
+    dataVar = dataVar.join(dataEnergy[['Hinge Number','HingeEnergy']][IterPerSimulEnergy-2::IterPerSimulEnergy].set_index('Hinge Number'), on = 'HingeNumber')
+    dataVar = dataVar.join(dataEnergy[['Hinge Number','EdgeEnergy']][IterPerSimulEnergy-2::IterPerSimulEnergy].set_index('Hinge Number'), on = 'HingeNumber')    
     dataVar.set_index(['TargetAngle1','TargetAngle2'], inplace = True)
     dataVar.sort_index(inplace=True)
     
     data = dataVar.to_xarray()
-    
+    maskAngles = (np.abs(data.where(data.Mask).theta1Real)<0.08) & (np.abs(data.where(data.Mask).theta2Real)<0.08)
     #for i in data.Kappa.data:
     #    data['StableStates'][data.Kappa == i] = countStableStates(dataAnglesOrd[data['HingeNumber'][data.Kappa == i].data[0]-1,:], plot = False)
     #dataVar['StableStates'] = data.StableStates.data.flatten()
@@ -199,17 +212,17 @@ for k in kappas:
     left=0.1,
     right=0.915)
     
-    minEnTA = np.float(data.TargetAngleEnergy.where(data.Mask).min())
-    aveEnTA = np.float(data.TargetAngleEnergy.where(data.Mask).mean())
-    stdEnTA = np.float(data.TargetAngleEnergy.where(data.Mask).std())
+    minEnTA = np.float(data.HingeEnergy.where(data.Mask).where(maskAngles).min())
+    aveEnTA = np.float(data.HingeEnergy.where(data.Mask).where(maskAngles).mean())
+    stdEnTA = np.float(data.HingeEnergy.where(data.Mask).where(maskAngles).std())
     
-    energiesTA = np.linspace(minEnTA, aveEnTA + stdEnTA*2, 100)
+    energiesTA = np.logspace(np.log10(minEnTA), np.log10(aveEnTA + stdEnTA*2), 100, base = 10)
     
-    norm = matl.colors.LogNorm(10**energiesTA[0], 10**energiesTA[-1])
+    norm = matl.colors.LogNorm(energiesTA[0], energiesTA[-1])
     cmap = matl.cm.ScalarMappable(norm = norm, cmap=matl.cm.summer)
     cmap.set_array([])
     
-    data['TargetAngleEnergy'].where(data.Mask).plot(axes = ax1, cmap = matl.cm.summer, add_colorbar=True,
+    data['HingeEnergy'].where(data.Mask).where(maskAngles).plot(axes = ax1, cmap = matl.cm.summer, add_colorbar=False,
         levels = energiesTA)
     
     plt.title('')
@@ -217,11 +230,43 @@ for k in kappas:
     NiceGraph2D(ax1, 'Target Angle1', 'Target Angle2', mincoord = [-1,-1], maxcoord = [1,1],
                 divisions = [5, 5], buffer = [0.01, 0.01])
     
-    #cbar = fig1.colorbar(cmap, ticks = np.logspace(-4,0,5), fraction=0.05, pad=0.01) 
-    #cbar.set_label('Kappa', fontsize = 9, color = '0.2')
-    #cbar.ax.tick_params(axis='y',colors='0.2')
-    #cbar.ax.tick_params(axis='x',colors='0.2')
-    #cbar.outline.set_edgecolor('0.2')
+    cbar = fig1.colorbar(cmap, fraction=0.05, pad=0.01) 
+    cbar.set_label('Kappa', fontsize = 9, color = '0.2')
+    cbar.ax.tick_params(axis='y',colors='0.2')
+    cbar.ax.tick_params(axis='x',colors='0.2')
+    cbar.outline.set_edgecolor('0.2')
+    
+    #%%
+    fig1b = plt.figure(10,figsize=(cm2inch(17.8), cm2inch(15)))
+    ax1b = plt.subplot(111)
+    fig1b.subplots_adjust(top=0.995,
+    bottom=0.07,
+    left=0.1,
+    right=0.915)
+    
+    minEnTA = np.float(data.EdgeEnergy.where(data.Mask).where(maskAngles).min())
+    aveEnTA = np.float(data.EdgeEnergy.where(data.Mask).where(maskAngles).mean())
+    stdEnTA = np.float(data.EdgeEnergy.where(data.Mask).where(maskAngles).std())
+    
+    energiesTA = np.logspace(np.log10(minEnTA), np.log10(aveEnTA + stdEnTA*2), 100, base = 10)
+    
+    norm = matl.colors.LogNorm(energiesTA[0], energiesTA[-1])
+    cmap = matl.cm.ScalarMappable(norm = norm, cmap=matl.cm.summer)
+    cmap.set_array([])
+    
+    data['EdgeEnergy'].where(data.Mask).where(maskAngles).plot(axes = ax1b, cmap = matl.cm.summer, add_colorbar=False,
+        levels = energiesTA)
+    
+    plt.title('')
+    
+    NiceGraph2D(ax1b, 'Target Angle1', 'Target Angle2', mincoord = [-1,-1], maxcoord = [1,1],
+                divisions = [5, 5], buffer = [0.01, 0.01])
+    
+    cbar = fig1b.colorbar(cmap,  fraction=0.05, pad=0.01) #ticks = np.logspace(-4,0,5),
+    cbar.set_label('Energy', fontsize = 9, color = '0.2')
+    cbar.ax.tick_params(axis='y',colors='0.2')
+    cbar.ax.tick_params(axis='x',colors='0.2')
+    cbar.outline.set_edgecolor('0.2')
     
     #%%
     fig2 = plt.figure(2,figsize=(cm2inch(17.8), cm2inch(15)))
@@ -231,18 +276,19 @@ for k in kappas:
     left=0.1,
     right=0.915)
     
-    minEn = np.float(data.TotalEnergy.where(data.Mask).where(data.TargetAngleEnergy<0.5).min())
-    aveEn = np.float(data.TotalEnergy.where(data.Mask).where(data.TargetAngleEnergy<0.5).mean())
-    stdEn = np.float(data.TotalEnergy.where(data.Mask).where(data.TargetAngleEnergy<0.5).std())
+    #    minEn = np.float(data.TotalEnergy.where(data.Mask).min())#.where(data.TargetAngleEnergy<0.5)
+    #    aveEn = np.float(data.TotalEnergy.where(data.Mask).mean())
+    #    stdEn = np.float(data.TotalEnergy.where(data.Mask).std())
     
-    energies = np.log10(np.linspace(minEn,aveEn+stdEn*2,100))
+    #    energies = np.log10(np.linspace(minEn,aveEn+stdEn*2,100))
+    energies = np.logspace(-4,0.5,150)
     
-    norm2 = matl.colors.LogNorm(10**energies[0], 10**energies[-1])
+    norm2 = matl.colors.LogNorm(energies[0], energies[-1])
     cmap2 = matl.cm.ScalarMappable(norm = norm2, cmap=matl.cm.nipy_spectral)
     cmap2.set_array([])
     
-    np.log10(data['TotalEnergy'].where(data.Mask)).where(data.TargetAngleEnergy<0.5).plot(axes = ax2, 
-            cmap=matl.cm.nipy_spectral ,add_colorbar=False, levels = energies)
+    np.log10(data['TotalEnergy'].where(data.Mask)).where(maskAngles).plot(axes = ax2, 
+            cmap=matl.cm.nipy_spectral ,add_colorbar=False, levels = np.log10(energies))
     
     NiceGraph2D(ax2, 'Target Angle1', 'Target Angle2', mincoord = [-1,-1], maxcoord = [1,1],
                 divisions = [5, 5], buffer = [0.01, 0.01])
@@ -261,7 +307,7 @@ for k in kappas:
     left=0.085,
     right=0.91)
     
-    data['StableStates'].where(data.Mask).where(data.TargetAngleEnergy<0.5).plot(axes = ax3, cmap=matl.cm.Set2, add_colorbar=True,
+    data['StableStates'].where(data.Mask).where(maskAngles).plot(axes = ax3, cmap=matl.cm.Set2, add_colorbar=True,
         levels = np.linspace(data.StableStates.min()-0.5,data.StableStates.max()+0.5,int(data.StableStates.max())+1), robust = True,
         cbar_kwargs={'ticks': np.linspace(data.StableStates.min(),data.StableStates.max(),int(data.StableStates.max()))})
     
@@ -270,11 +316,14 @@ for k in kappas:
     
     #%%
     fig1.show()
-    fig1.savefig(folder_name + '/Energy_Kappas.pdf', transparent = True)
-    fig1.savefig(folder_name + '/Energy_Kappas.png', transparent = True)
+    fig1.savefig(folder_name + '/Energy_%.5fHinge.pdf' %k, transparent = True)
+    fig1.savefig(folder_name + '/Energy_%.5fHinge.png' %k, transparent = True)
+    fig1b.show()
+    fig1b.savefig(folder_name + '/Energy_%.5fStretch.pdf' %k, transparent = True)
+    fig1b.savefig(folder_name + '/Energy_%.5fStretch.png' %k, transparent = True)
     fig2.show()
-    fig2.savefig(folder_name + '/Landscape_Kappas.pdf', transparent = True)
-    fig2.savefig(folder_name + '/Landscape_Kappas.png', transparent = True)
+    fig2.savefig(folder_name + '/Landscape_%.5fKappa.pdf' %k, transparent = True)
+    fig2.savefig(folder_name + '/Landscape_%.5fKappa.png' %k, transparent = True)
     fig3.show()
-    fig3.savefig(folder_name + '/StableStates_Kappas.pdf', transparent = True)
-    fig3.savefig(folder_name + '/StableStates_Kappas.png', transparent = True)
+    fig3.savefig(folder_name + '/StableStates_%.5fKappa.pdf' %k, transparent = True)
+    fig3.savefig(folder_name + '/StableStates_%.5fKappa.png' %k, transparent = True)
