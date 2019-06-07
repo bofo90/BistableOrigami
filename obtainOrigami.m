@@ -35,6 +35,8 @@ switch opt.template
         extrudedUnitCell = calculateLength(extrudedUnitCell);
         extrudedUnitCell.theta = ones(size(extrudedUnitCell.nodeHingeEx,1),1)*opt.restang;
         
+%         extrudedUnitCell.node = extrudedUnitCell.node+rand(size(extrudedUnitCell.node))*0.01;
+        
     case{'TriangularTiling'}
         tri_node = [-0.5,0,0;0.5,0,0;0,sqrt(3)/2,0];
         extrudedUnitCell.node = [tri_node];
