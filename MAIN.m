@@ -27,7 +27,7 @@ opt=initOpt('inputType', 'origami','template','SingleVertex',...
 
 
 % opt.saveFile = strcat('/',date,'_kappas_analysis3');
-opt.saveFile = strcat('/07-Jun-2019_kappas_analysis2');
+opt.saveFile = strcat('/07-Jun-2019_kappas_analysis3');
 tic;
 
 
@@ -59,7 +59,7 @@ findDeformation(extrudedUnitCell,opt);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %OUTPUT AND PLOT GEOMETRY
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-kappas = logspace(-3,-1.375,14);
+kappas = logspace(-4,0.5,37);
 close all
 for i = kappas
     opt.Khinge = i;
