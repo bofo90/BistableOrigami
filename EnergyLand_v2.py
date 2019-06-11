@@ -139,14 +139,14 @@ def NiceGraph2Dlog(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [
     return
 
 kappas = np.unique(np.concatenate((np.logspace(-4,0,9), np.logspace(-4,0,9)*10**0.25)))
-kappas = np.logspace(-2.5,0.25,23)#23
+kappas = np.logspace(-4,0.5,37)#23
 
 #kappas = [1]
 for k in kappas:
     
     plt.close('all')
     
-    folder_name = "Results/SingleVertex4/sqp/energy/05-Jun-2019_kappas_analysis/kh%.5f_kta100.00_ke1.00_kf100.00" %k
+    folder_name = "Results/SingleVertex4/sqp/energy/07-Jun-2019_kappas_analysis3/kh%.5f_kta1000.00_ke1.00_kf100.00" %k
     
     file_name1 = "/EnergyData.csv" 
     file_name2 = "/Hinges.csv"
