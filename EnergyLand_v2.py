@@ -190,15 +190,22 @@ for k in kappas:
     dataVar.TotalEnergy = (dataVar.TotalEnergy-minEn)/(aveEn+stdEn*2-minEn)
     
     dataVar['theta1Real'] = dataAngles[IterPerSimulAngles-2::IterPerSimulAngles,0]/np.pi-0.25
-    dataVar['theta2Real'] = dataAngles[IterPerSimulAngles-2::IterPerSimulAngles,2]/np.pi-0.25
+    dataVar['theta2Real'] = dataAngles[IterPerSimulAngles-2::IterPerSimulAngles,1]/np.pi
+    dataVar['theta3Real'] = dataAngles[IterPerSimulAngles-2::IterPerSimulAngles,2]/np.pi-0.25
+    dataVar['theta4Real'] = dataAngles[IterPerSimulAngles-2::IterPerSimulAngles,3]/np.pi    
     
     dataVar = dataVar.join(dataEnergy[['Hinge Number','HingeEnergy']][IterPerSimulEnergy-2::IterPerSimulEnergy].set_index('Hinge Number'), on = 'HingeNumber')
     dataVar = dataVar.join(dataEnergy[['Hinge Number','EdgeEnergy']][IterPerSimulEnergy-2::IterPerSimulEnergy].set_index('Hinge Number'), on = 'HingeNumber')    
+    
+    maxPosAngle = 0.17
+    dataVar['maskAngles'] = (np.abs(dataVar.theta1Real)<maxPosAngle) & (np.abs(dataVar.theta3Real)<maxPosAngle) &\
+                    (np.abs(dataVar.theta2Real-dataVar.TargetAngle1)<maxPosAngle) & \
+                    (np.abs(dataVar.theta4Real-dataVar.TargetAngle2)<maxPosAngle)
+    
     dataVar.set_index(['TargetAngle1','TargetAngle2'], inplace = True)
     dataVar.sort_index(inplace=True)
     
     data = dataVar.to_xarray()
-    maskAngles = (np.abs(data.where(data.Mask).theta1Real)<0.08) & (np.abs(data.where(data.Mask).theta2Real)<0.08)
     #for i in data.Kappa.data:
     #    data['StableStates'][data.Kappa == i] = countStableStates(dataAnglesOrd[data['HingeNumber'][data.Kappa == i].data[0]-1,:], plot = False)
     #dataVar['StableStates'] = data.StableStates.data.flatten()
@@ -212,9 +219,9 @@ for k in kappas:
     left=0.1,
     right=0.915)
     
-    minEnTA = np.float(data.HingeEnergy.where(data.Mask).where(maskAngles).min())
-    aveEnTA = np.float(data.HingeEnergy.where(data.Mask).where(maskAngles).mean())
-    stdEnTA = np.float(data.HingeEnergy.where(data.Mask).where(maskAngles).std())
+    minEnTA = np.float(data.HingeEnergy.where(data.Mask).where(data.maskAngles).min())
+    aveEnTA = np.float(data.HingeEnergy.where(data.Mask).where(data.maskAngles).mean())
+    stdEnTA = np.float(data.HingeEnergy.where(data.Mask).where(data.maskAngles).std())
     
     energiesTA = np.logspace(np.log10(minEnTA), np.log10(aveEnTA + stdEnTA*2), 100, base = 10)
     
@@ -222,7 +229,7 @@ for k in kappas:
     cmap = matl.cm.ScalarMappable(norm = norm, cmap=matl.cm.summer)
     cmap.set_array([])
     
-    data['HingeEnergy'].where(data.Mask).where(maskAngles).plot(axes = ax1, cmap = matl.cm.summer, add_colorbar=False,
+    data['HingeEnergy'].where(data.Mask).where(data.maskAngles).plot(axes = ax1, cmap = matl.cm.summer, add_colorbar=False,
         levels = energiesTA)
     
     plt.title('')
@@ -244,9 +251,9 @@ for k in kappas:
     left=0.1,
     right=0.915)
     
-    minEnTA = np.float(data.EdgeEnergy.where(data.Mask).where(maskAngles).min())
-    aveEnTA = np.float(data.EdgeEnergy.where(data.Mask).where(maskAngles).mean())
-    stdEnTA = np.float(data.EdgeEnergy.where(data.Mask).where(maskAngles).std())
+    minEnTA = np.float(data.EdgeEnergy.where(data.Mask).where(data.maskAngles).min())
+    aveEnTA = np.float(data.EdgeEnergy.where(data.Mask).where(data.maskAngles).mean())
+    stdEnTA = np.float(data.EdgeEnergy.where(data.Mask).where(data.maskAngles).std())
     
     energiesTA = np.logspace(np.log10(minEnTA), np.log10(aveEnTA + stdEnTA*2), 100, base = 10)
     
@@ -254,7 +261,7 @@ for k in kappas:
     cmap = matl.cm.ScalarMappable(norm = norm, cmap=matl.cm.summer)
     cmap.set_array([])
     
-    data['EdgeEnergy'].where(data.Mask).where(maskAngles).plot(axes = ax1b, cmap = matl.cm.summer, add_colorbar=False,
+    data['EdgeEnergy'].where(data.Mask).where(data.maskAngles).plot(axes = ax1b, cmap = matl.cm.summer, add_colorbar=False,
         levels = energiesTA)
     
     plt.title('')
@@ -287,7 +294,7 @@ for k in kappas:
     cmap2 = matl.cm.ScalarMappable(norm = norm2, cmap=matl.cm.nipy_spectral)
     cmap2.set_array([])
     
-    np.log10(data['TotalEnergy'].where(data.Mask)).where(maskAngles).plot(axes = ax2, 
+    np.log10(data['TotalEnergy'].where(data.Mask)).where(data.maskAngles).plot(axes = ax2, 
             cmap=matl.cm.nipy_spectral ,add_colorbar=False, levels = np.log10(energies))
     
     NiceGraph2D(ax2, 'Target Angle1', 'Target Angle2', mincoord = [-1,-1], maxcoord = [1,1],
@@ -307,7 +314,7 @@ for k in kappas:
     left=0.085,
     right=0.91)
     
-    data['StableStates'].where(data.Mask).where(maskAngles).plot(axes = ax3, cmap=matl.cm.Set2, add_colorbar=True,
+    data['StableStates'].where(data.Mask).where(data.maskAngles).plot(axes = ax3, cmap=matl.cm.Set2, add_colorbar=True,
         levels = np.linspace(data.StableStates.min()-0.5,data.StableStates.max()+0.5,int(data.StableStates.max())+1), robust = True,
         cbar_kwargs={'ticks': np.linspace(data.StableStates.min(),data.StableStates.max(),int(data.StableStates.max()))})
     
