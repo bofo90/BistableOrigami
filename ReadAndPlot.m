@@ -22,6 +22,9 @@ switch opt.analysis
             allFiles = dir(folderResults);
             directories = 0;
             succesfullFiles = 0;
+            Energies = [];
+            Hinges = [];
+            AllAngles = [];
             
             for ct = 1:length(allFiles)
                 if allFiles(ct).isdir || strcmp(allFiles(ct).name(1:end-4), 'metadata')
@@ -41,29 +44,25 @@ switch opt.analysis
                     end
                 end
                 % load results from file
-                load(strcat(folderResults,'/', allFiles(ct).name), 'result');
+                lofile = load(strcat(folderResults,'/', allFiles(ct).name));
                 succesfullFiles = succesfullFiles + 1;
                 fprintf('Plot of Hinges number %d/%d\n', succesfullFiles, length(allFiles)-directories);
                 
                 if strcmp(opt.analysis, 'savedata')
 %                     [lowerR, upperR] = getData(extrudedUnitCell, opt, result);
-                    Energies = [ones(size(result.E,2),1)*(ct-directories), result.Eedge(2,:)',...
-                        result.Ediag(2,:)', result.Eface(2,:)', result.Ehinge(2,:)',...
-                        result.EtargetAngle(2,:)', result.exfl(2,:)'];
+                    Energies = [Energies; [ones(size(lofile.result.E,2),1)*(ct-directories), lofile.result.Eedge(2,:)',...
+                        lofile.result.Ediag(2,:)', lofile.result.Eface(2,:)', lofile.result.Ehinge(2,:)',...
+                        lofile.result.EtargetAngle(2,:)', lofile.result.exfl(2,:)']];
 %                     PosStad = [(ct-directories), lowerR, upperR];
-                    Hinges = [num2str(ct-directories),',',mat2str(result.kappa,5),',',...
-                        mat2str(result.angVal(1),5),',', mat2str(result.angVal(2),5),',',...
-                        int2str(result.angNum(1)),',', int2str(result.angNum(2)),',',...
-                        int2str(result.angNum(3))];
-                    AllAngles = zeros(size(extrudedUnitCell.theta));
-                    for iter = 1:size(result.deform,2)
-                        AllAngles = [AllAngles result.deform(iter).theta];
+                    Hinges = [Hinges; [ct-directories,lofile.result.kappa,...
+                        lofile.result.angVal(1), lofile.result.angVal(2),...
+                        lofile.result.angNum(1), lofile.result.angNum(2),...
+                        lofile.result.angNum(3)]];
+                    AllAnglesTemp = zeros(size(extrudedUnitCell.theta));
+                    for iter = 1:size(lofile.result.deform,2)
+                        AllAnglesTemp = [AllAnglesTemp lofile.result.deform(iter).theta];
                     end
-                    AllAngles = [ones(size(AllAngles,2),1)*(ct-directories) AllAngles'];
-%                     dlmwrite(fMassDist, PosStad, 'delimiter', ',', '-append','precision',7);
-                    dlmwrite(fHinge, Hinges, 'delimiter', '', '-append');
-                    dlmwrite(fEnergy, Energies, 'delimiter', ',', '-append','precision',7);
-                    dlmwrite(fAngles, AllAngles, 'delimiter', ',', '-append','precision',7);
+                    AllAngles = [AllAngles; [ones(size(AllAnglesTemp,2),1)*(ct-directories) AllAnglesTemp']];
                 end
                 
                 if strcmp(opt.createFig, 'on') || strcmp(opt.analysis, 'plot')
@@ -96,7 +95,12 @@ switch opt.analysis
                     outputResults(extrudedUnitCell,result,opt,resfilename(1:end-4));
                 end
                 close all;
+                clear lofile;
             end
+%           dlmwrite(fMassDist, PosStad, 'delimiter', ',', '-append','precision',7);
+            dlmwrite(fHinge, Hinges, 'delimiter', ',', '-append','precision',7);
+            dlmwrite(fEnergy, Energies, 'delimiter', ',', '-append','precision',7);
+            dlmwrite(fAngles, AllAngles, 'delimiter', ',', '-append','precision',7);
         end
         fclose('all');
         
