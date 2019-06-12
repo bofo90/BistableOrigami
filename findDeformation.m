@@ -11,6 +11,10 @@ if strcmp(opt.analysis,'result')
         case 'multiple'
             metadataFile(opt, extrudedUnitCell);
             nonlinearFoldingMulti(extrudedUnitCell, opt, opt.angleConstrFinal(1).val);
+            
+        case 'randomPert'
+            metadataFile(opt, extrudedUnitCell);
+            nonlinearFoldingRand(extrudedUnitCell, opt, opt.angleConstrFinal(1).val);
     end
 end
 
@@ -168,6 +172,53 @@ save(fileName, 'result');
 clearvars result E exfl output;
 fclose('all');
 
+function nonlinearFoldingRand(extrudedUnitCell,opt,angtemp)
+
+%INITIALIZE LINEAR CONSTRAINTS
+[Aeq, Beq]=linearConstr(extrudedUnitCell,opt);
+
+%Save some variables
+opt.angleConstrFinal(1).val = [];
+extrudedUnitCell.angleConstr=[];
+rng('shuffle');
+
+%Create file for saving the results
+extraName = sprintf('/kh%2.5f_kta%2.2f_ke%2.2f_kf%2.2f', opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
+folderName = strcat(pwd, '/Results/', opt.template,num2str(opt.numVert),'/',opt.relAlgor,'/mat', opt.saveFile, extraName);
+if ~exist(folderName, 'dir')
+    mkdir(folderName);
+end
+    
+opt.KtargetAngle = 0;
+for i = 1:opt.numIterations
+    
+    %%%%%% Folding part %%%%%%
+    %Perturb the structure
+    result = [];
+    E=[];
+    exfl= [];
+    stdev = 0.1;
+    u0 = rand(3*size(extrudedUnitCell.node,1),1)*stdev^2;
+    theta0 = getSimpleAngle(u0, extrudedUnitCell);
+    
+    %%%%%% Releasing part %%%%%%
+    %change algorithm for releasing
+    initialiseGlobalx(u0, theta0);
+    [V, exfl, output, E] = FoldStructure(u0, E, exfl, extrudedUnitCell, opt, 1, 1, Aeq, Beq);
+    [result, ~, ~] = SaveResultPos(result, opt, V, output, 1);
+
+    %Return to original options
+    result = SaveResultEnergy(result, E, exfl, opt);
+
+    %Save the result in a file
+    fileName = strcat(folderName,'/iter_',mat2str(i),'.mat');
+    save(fileName, 'result');
+
+end
+%Clear variables for next fold
+clearvars result E exfl output;
+fclose('all');
+
 function [V, exfl, output, E] = FoldStructure(u0, E, exfl, extrudedUnitCell, opt, iter, steps, Aeq, Beq)
 
 V = [];
@@ -175,19 +226,21 @@ V(:,1)=u0;
 [E.E(1,iter),~,E.Eedge(1,iter),E.Ediag(1,iter),E.Eface(1,iter),E.Ehinge(1,iter),E.EtargetAngle(1,iter), theta0]=Energy(u0,extrudedUnitCell,opt);
 exfl(1,iter) = 1;
 
-angles = theta0(opt.angleConstrFinal(1).val(:,1)) + linspace(0,1,steps+1).*(opt.angleConstrFinal(1).val(:,2) - theta0(opt.angleConstrFinal(1).val(:,1)));
-
 exfl(2,iter) = 1;
 
 %Run the Folding of the structure
 if isempty(opt.angleConstrFinal(iter).val)
     fprintf('Angle contrain: None\n');
+    steps = 1;
 else
     fprintf(['Angle contrain:', mat2str(opt.angleConstrFinal(iter).val(:,1)') ,'\n']);
+    angles = theta0(opt.angleConstrFinal(iter).val(:,1)) + linspace(0,1,steps+1).*(opt.angleConstrFinal(iter).val(:,2) - theta0(opt.angleConstrFinal(1).val(:,1)));
 end
 
 for anglestep = 2:steps+1
-    opt.angleConstrFinal(1).val(:,2) = angles(:,anglestep);
+    if ~isempty(opt.angleConstrFinal(iter).val)
+        opt.angleConstrFinal(iter).val(:,2) = angles(:,anglestep);
+    end
     extrudedUnitCell.angleConstr=opt.angleConstrFinal(iter).val;
     % fprintf('Folding:\t');
     % t1 = toc;
@@ -527,6 +580,17 @@ for i=1:size(extrudedUnitCell.nodeHingeEx,1)
         theta(i) = theta(i)+sign(thetaPrev(i))*2*pi;
 %         fprintf('angle %d energy\n', i);
     end
+end
+
+function theta = getSimpleAngle(u, extrudedUnitCell)
+theta=zeros(size(extrudedUnitCell.nodeHingeEx,1),1);
+extrudedUnitCell.node = extrudedUnitCell.node+[u(1:3:end) u(2:3:end) u(3:3:end)];
+for i=1:size(extrudedUnitCell.nodeHingeEx,1)
+    extrudedUnitCell.node(extrudedUnitCell.nodeHingeEx(i,:),:);
+    index(1:3:12)=3*extrudedUnitCell.nodeHingeEx(i,:)-2;
+    index(2:3:12)=3*extrudedUnitCell.nodeHingeEx(i,:)-1;
+    index(3:3:12)=3*extrudedUnitCell.nodeHingeEx(i,:);
+    [~,theta(i)]=JacobianHinge(extrudedUnitCell.node(extrudedUnitCell.nodeHingeEx(i,:),:));
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
