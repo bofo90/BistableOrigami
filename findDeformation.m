@@ -29,7 +29,7 @@ foldAngl = 6;
 angles1_1 = 0:(foldAngl*pi/180):(0.985*pi);
 angles1_2 = -angles1_1;
 angles1 = [angles1_1 angles1_2(2:end)];
-kappas = logspace(-4,0.5,37);
+kappas = [logspace(-3.875,-2.625,6) logspace(0.375,0.5,2)];
     
 %%%%%% Folding part %%%%%%
 %Run the Folding of the structure
