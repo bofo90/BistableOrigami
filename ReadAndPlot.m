@@ -35,14 +35,14 @@ switch opt.analysis
 
                 % parse the file name to get back hinge set
                 resfilename = allFiles(ct).name;
-                [hingeSet] = getHingeSet(resfilename);
-                if strcmp(opt.analysisType,'single')
-                    if ~isequal(hingeSet(:,1), opt.angleConstrFinal(end).val(:,1))
-                        continue;
-%                     elseif ~strcmp(resfilename(1:end-4), '[8 3]_Ang1_18_Angl2_27')
+%                 [hingeSet] = getHingeSet(resfilename);
+%                 if strcmp(opt.analysisType,'single')
+%                     if ~isequal(hingeSet(:,1), opt.angleConstrFinal(end).val(:,1))
 %                         continue;
-                    end
-                end
+% %                     elseif ~strcmp(resfilename(1:end-4), '[8 3]_Ang1_18_Angl2_27')
+% %                         continue;
+%                     end
+%                 end
                 % load results from file
                 lofile = load(strcat(folderResults,'/', allFiles(ct).name));
                 succesfullFiles = succesfullFiles + 1;
