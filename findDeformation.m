@@ -13,8 +13,14 @@ if strcmp(opt.analysis,'result')
             nonlinearFoldingMulti(extrudedUnitCell, opt, opt.angleConstrFinal(1).val);
             
         case 'randomPert'
-            metadataFile(opt, extrudedUnitCell);
-            nonlinearFoldingRand(extrudedUnitCell, opt, opt.angleConstrFinal(1).val);
+            kappas = logspace(-4,0.5,37);
+            stDev = 0.1;
+            parfor kappa = 1:size(kappas,2)
+                optpar = opt;
+                optpar.Khinge = kappas(kappa);
+                metadataFile(optpar, extrudedUnitCell);
+                nonlinearFoldingRand(extrudedUnitCell, opt, stDev);
+            end
     end
 end
 
@@ -172,7 +178,7 @@ save(fileName, 'result');
 clearvars result E exfl output;
 fclose('all');
 
-function nonlinearFoldingRand(extrudedUnitCell,opt,angtemp)
+function nonlinearFoldingRand(extrudedUnitCell,opt,stdev)
 
 %INITIALIZE LINEAR CONSTRAINTS
 [Aeq, Beq]=linearConstr(extrudedUnitCell,opt);
@@ -197,7 +203,6 @@ for i = 1:opt.numIterations
     result = [];
     E=[];
     exfl= [];
-    stdev = 0.1;
     u0 = rand(3*size(extrudedUnitCell.node,1),1)*stdev^2;
     theta0 = getSimpleAngle(u0, extrudedUnitCell);
     
