@@ -26,7 +26,7 @@ opt=initOpt('inputType', 'origami','template','SingleVertex',...
             'periodic', 'off');    
 
 
-opt.saveFile = strcat('/',date,'_temp');
+opt.saveFile = strcat('/',date,'_temp2');
 % opt.saveFile = strcat('/07-Jun-2019_kappas_analysis3');
 tic;
 
