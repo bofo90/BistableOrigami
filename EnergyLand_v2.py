@@ -138,6 +138,19 @@ def NiceGraph2Dlog(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [
         
     return
 
+def ReadMetadata(file):
+    
+    if os.path.isfile(file):
+        metadata = configparser.RawConfigParser()
+        metadata.read(file)
+    
+        restang = float(metadata.get('options','restang'))
+    else:
+        raise FileNotFoundError('No metafile found at the given directory. Changes to the script to put manually the variables are needed\n') 
+
+    return restang
+
+
 kappas = np.unique(np.concatenate((np.logspace(-4,0,9), np.logspace(-4,0,9)*10**0.25)))
 kappas = np.logspace(-4,0.5,37)#23
 
@@ -146,7 +159,8 @@ for k in kappas:
     
     plt.close('all')
     
-    folder_name = "Results/SingleVertex4/sqp/energy/07-Jun-2019_kappas_analysis3/kh%.5f_kta1000.00_ke1.00_kf100.00" %k
+    prevFolder_name = "Results/SingleVertex4/sqp/energy/05-Jun-2019_kappas_analysis"
+    folder_name = prevFolder_name + "/kh%.5f_kta1000.00_ke1.00_kf100.00" %k
     
     file_name1 = "/EnergyData.csv" 
     file_name2 = "/Hinges.csv"
@@ -171,6 +185,8 @@ for k in kappas:
     flagmask = (exfl !=1) & (exfl !=2)
     flagmask = ~flagmask.any(axis= 1)
     
+    restang = ReadMetadata(folder_name+'/metadata.txt')/np.pi
+    
     dataAnglesOrd = orderAngles(dataAngles, IterPerSimulAngles, TotSimul)
     
     dataVar['Mask'] = flagmask
@@ -189,18 +205,22 @@ for k in kappas:
     stdEn = np.float(dataVar.TotalEnergy.where(dataVar.Mask).where(dataVar.TargetAngleEnergy<0.5).std())
     dataVar.TotalEnergy = (dataVar.TotalEnergy-minEn)/(aveEn+stdEn*2-minEn)
     
-    dataVar['theta1Real'] = dataAngles[IterPerSimulAngles-2::IterPerSimulAngles,0]/np.pi-0.25
+    dataVar['theta1Real'] = dataAngles[IterPerSimulAngles-2::IterPerSimulAngles,0]/np.pi
+    dataVar['theta1Real'] = (dataVar['theta1Real']-restang)
     dataVar['theta2Real'] = dataAngles[IterPerSimulAngles-2::IterPerSimulAngles,1]/np.pi
-    dataVar['theta3Real'] = dataAngles[IterPerSimulAngles-2::IterPerSimulAngles,2]/np.pi-0.25
-    dataVar['theta4Real'] = dataAngles[IterPerSimulAngles-2::IterPerSimulAngles,3]/np.pi    
+    dataVar['theta2Real'] = (dataVar['theta2Real']-dataVar['TargetAngle1'])
+    dataVar['theta3Real'] = dataAngles[IterPerSimulAngles-2::IterPerSimulAngles,2]/np.pi
+    dataVar['theta3Real'] = (dataVar['theta3Real']-restang)
+    dataVar['theta4Real'] = dataAngles[IterPerSimulAngles-2::IterPerSimulAngles,3]/np.pi
+    dataVar['theta4Real'] = (dataVar['theta4Real']-dataVar['TargetAngle2'])  
     
     dataVar = dataVar.join(dataEnergy[['Hinge Number','HingeEnergy']][IterPerSimulEnergy-2::IterPerSimulEnergy].set_index('Hinge Number'), on = 'HingeNumber')
     dataVar = dataVar.join(dataEnergy[['Hinge Number','EdgeEnergy']][IterPerSimulEnergy-2::IterPerSimulEnergy].set_index('Hinge Number'), on = 'HingeNumber')    
     
-    maxPosAngle = 0.17
+    maxPosAngle = 1
+    maxPosAngle = maxPosAngle/180
     dataVar['maskAngles'] = (np.abs(dataVar.theta1Real)<maxPosAngle) & (np.abs(dataVar.theta3Real)<maxPosAngle) &\
-                    (np.abs(dataVar.theta2Real-dataVar.TargetAngle1)<maxPosAngle) & \
-                    (np.abs(dataVar.theta4Real-dataVar.TargetAngle2)<maxPosAngle)
+                    (np.abs(dataVar.theta2Real)<maxPosAngle) & (np.abs(dataVar.theta4Real)<maxPosAngle)
     
     dataVar.set_index(['TargetAngle1','TargetAngle2'], inplace = True)
     dataVar.sort_index(inplace=True)
@@ -323,14 +343,14 @@ for k in kappas:
     
     #%%
     fig1.show()
-    fig1.savefig(folder_name + '/Energy_%.5fHinge.pdf' %k, transparent = True)
-    fig1.savefig(folder_name + '/Energy_%.5fHinge.png' %k, transparent = True)
+    fig1.savefig(prevFolder_name + '/Energy_%.5fHinge.pdf' %k, transparent = True)
+    fig1.savefig(prevFolder_name + '/Energy_%.5fHinge.png' %k, transparent = True)
     fig1b.show()
-    fig1b.savefig(folder_name + '/Energy_%.5fStretch.pdf' %k, transparent = True)
-    fig1b.savefig(folder_name + '/Energy_%.5fStretch.png' %k, transparent = True)
+    fig1b.savefig(prevFolder_name + '/Energy_%.5fStretch.pdf' %k, transparent = True)
+    fig1b.savefig(prevFolder_name + '/Energy_%.5fStretch.png' %k, transparent = True)
     fig2.show()
-    fig2.savefig(folder_name + '/Landscape_%.5fKappa.pdf' %k, transparent = True)
-    fig2.savefig(folder_name + '/Landscape_%.5fKappa.png' %k, transparent = True)
+    fig2.savefig(prevFolder_name + '/Landscape_%.5fKappa.pdf' %k, transparent = True)
+    fig2.savefig(prevFolder_name + '/Landscape_%.5fKappa.png' %k, transparent = True)
     fig3.show()
-    fig3.savefig(folder_name + '/StableStates_%.5fKappa.pdf' %k, transparent = True)
-    fig3.savefig(folder_name + '/StableStates_%.5fKappa.png' %k, transparent = True)
+    fig3.savefig(prevFolder_name + '/StableStates_%.5fKappa.pdf' %k, transparent = True)
+    fig3.savefig(prevFolder_name + '/StableStates_%.5fKappa.png' %k, transparent = True)
