@@ -13,7 +13,7 @@ clearvars -global
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 opt=initOpt('inputType', 'origami','template','SingleVertex',...
-            'restang', pi/4, 'numVert', 4, 'numIterations', 1000,...
+            'restang', pi/4, 'numVert', 4, 'numIterations', 10000,...
             'analysis','result','analysisType','randomPert',...
             'createFig', 'off','saveFig','on','saveMovie', 'off',...
             'figDPI',200,'safeMovieAntiAlias', 0,...
@@ -26,7 +26,7 @@ opt=initOpt('inputType', 'origami','template','SingleVertex',...
             'periodic', 'off');    
 
 
-opt.saveFile = strcat('/',date,'_temp2');
+opt.saveFile = strcat('/',date,'_RandPert');
 % opt.saveFile = strcat('/07-Jun-2019_kappas_analysis3');
 tic;
 
@@ -59,16 +59,16 @@ findDeformation(extrudedUnitCell,opt);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %OUTPUT AND PLOT GEOMETRY
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% kappas = logspace(-4,0.5,37);
-% close all
-% for i = kappas
-%     opt.Khinge = i;
+kappas = logspace(-4,0.5,37);
+close all
+for i = kappas
+    opt.Khinge = i;
     if (strcmp(opt.analysis, 'result') && strcmp(opt.createFig, 'off'))
         fprintf('Not ploting any results.\n');
     else
         ReadAndPlot( extrudedUnitCell, opt);
     end
-% end
+end
 t = toc;
 fprintf('The whole program lasted %.2f seconds\n', t);
 

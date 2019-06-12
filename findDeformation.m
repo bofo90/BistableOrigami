@@ -19,7 +19,7 @@ if strcmp(opt.analysis,'result')
                 optpar = opt;
                 optpar.Khinge = kappas(kappa);
                 metadataFile(optpar, extrudedUnitCell);
-                nonlinearFoldingRand(extrudedUnitCell, opt, stDev);
+                nonlinearFoldingRand(extrudedUnitCell, optpar, stDev);
             end
     end
 end
