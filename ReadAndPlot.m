@@ -75,32 +75,35 @@ switch opt.analysis
                         mkdir(nameFolderPlot);
                     end
                     allangles = [];
-                    for iter = 1:size(result.deform,2)
-                        allangles = [allangles result.deform(iter).interV(:).theta];
+                    for iter = 1:size(lofile.result.deform,2)
+                        allangles = [allangles lofile.result.deform(iter).interV(:).theta];
                     end
                     p = plot(allangles', 'Color', 'k');
-                    for i = result.anglConstr(:,1)'
-                        set(p(i), 'color', rand(1,3), 'LineWidth', 2, 'DisplayName',num2str(i));
-                    end
+%                     for i = lofile.result.anglConstr(:,1)'
+%                         set(p(i), 'color', rand(1,3), 'LineWidth', 2, 'DisplayName',num2str(i));
+%                     end
                     x = 0;
-                    for iter = 1:(size(result.deform,2)-1)
-                        x = x + size(result.deform(iter).interV,2)+0.5;
+                    for iter = 1:(size(lofile.result.deform,2)-1)
+                        x = x + size(lofile.result.deform(iter).interV,2)+0.5;
                         line([x x],[-1.1*pi 1.1*pi], 'Color', [0 0 0])
                     end
-                    legend(p(result.anglConstr(:,1)'))
+%                     legend(p(lofile.result.anglConstr(:,1)'))
                     saveas(gcf, [nameFolderPlot, nameFilePlot]);
                     savefig([nameFolderPlot,'/',resfilename(1:end-4),'_AnglEv.fig'])
                     close 'all';                    
                     
-                    outputResults(extrudedUnitCell,result,opt,resfilename(1:end-4));
+                    outputResults(extrudedUnitCell,lofile.result,opt,resfilename(1:end-4));
                 end
                 close all;
                 clear lofile;
             end
-%           dlmwrite(fMassDist, PosStad, 'delimiter', ',', '-append','precision',7);
-            dlmwrite(fHinge, Hinges, 'delimiter', ',', '-append','precision',7);
-            dlmwrite(fEnergy, Energies, 'delimiter', ',', '-append','precision',7);
-            dlmwrite(fAngles, AllAngles, 'delimiter', ',', '-append','precision',7);
+            
+            if strcmp(opt.analysis,'savedata')
+    %           dlmwrite(fMassDist, PosStad, 'delimiter', ',', '-append','precision',7);
+                dlmwrite(fHinge, Hinges, 'delimiter', ',', '-append','precision',7);
+                dlmwrite(fEnergy, Energies, 'delimiter', ',', '-append','precision',7);
+                dlmwrite(fAngles, AllAngles, 'delimiter', ',', '-append','precision',7);
+            end
         end
         fclose('all');
         
