@@ -35,9 +35,9 @@ switch opt.analysis
 
                 % parse the file name to get back hinge set
                 resfilename = allFiles(ct).name;
-                [hingeSet] = getHingeSet(resfilename);
+                hingeSet = getHingeSet(resfilename);
                 if strcmp(opt.analysisType,'single')
-                    if ~isequal(hingeSet(:,1), opt.angleConstrFinal(end).val(:,1))
+                    if ~ismember(hingeSet, opt.angleConstrFinal(1).val(:,1))
                         continue;
 %                     elseif ~strcmp(resfilename(1:end-4), '[8 3]_Ang1_18_Angl2_27')
 %                         continue;
@@ -50,16 +50,16 @@ switch opt.analysis
                 
                 if strcmp(opt.analysis, 'savedata')
 %                     [lowerR, upperR] = getData(extrudedUnitCell, opt, result);
-                    Energies = [Energies; [ones(size(lofile.result.E,2),1)*(ct-directories), lofile.result.Eedge(2,:)',...
+                    Energies = [Energies; [ones(size(lofile.result.E,2),1)*(hingeSet), lofile.result.Eedge(2,:)',...
                         lofile.result.Ediag(2,:)', lofile.result.Eface(2,:)', lofile.result.Ehinge(2,:)',...
                         lofile.result.EtargetAngle(2,:)', lofile.result.exfl(2,:)']];
 %                     PosStad = [(ct-directories), lowerR, upperR];
-                    Hinges = [Hinges; [ct-directories, hingeSet(1)]];
+                    Hinges = [Hinges; [hingeSet, hingeSet(1)]];
                     AllAnglesTemp = zeros(size(extrudedUnitCell.theta));
                     for iter = 1:size(lofile.result.deform,2)
                         AllAnglesTemp = [AllAnglesTemp lofile.result.deform(iter).theta];
                     end
-                    AllAngles = [AllAngles; [ones(size(AllAnglesTemp,2),1)*(ct-directories) AllAnglesTemp']];
+                    AllAngles = [AllAngles; [ones(size(AllAnglesTemp,2),1)*(hingeSet) AllAnglesTemp']];
                 end
                 
                 if strcmp(opt.createFig, 'on') || strcmp(opt.analysis, 'plot')
@@ -161,13 +161,13 @@ end
 fclose(fid) ;                                          % Closes file.
 
 
-function [hingeSet] = getHingeSet(fileName)
+function hingeSet = getHingeSet(fileName)
 
 parsedName = strsplit(fileName(1:end-4), '_');
 Angl1 = parsedName{2};
 % Angl2 = parsedName{5};
-hinges = [str2double(Angl1)];
-hingeSet = [hinges' zeros(size(hinges))'];
+hingeSet = str2double(Angl1);
+% hingeSet = [hinges' zeros(size(hinges))'];
 
 function [lowerR, upperR] = getData(extrudedUnitCell, opt, result)
 
