@@ -228,12 +228,18 @@ right=0.995,
 hspace=0.25,
 wspace=0.295)
 
-ax1.set_xscale('log')
-scatt = ax1.scatter(data.kappa, data.TotalEnergy,c = data.StableState, cmap="Set2")#
-ax2.set_xscale('log')
-ax2.scatter(data.kappa, data.HingeEnergy,c = data.StableState, cmap="Set2")
-ax3.set_xscale('log')
-ax3.scatter(data.kappa, data.EdgeEnergy,c = data.StableState, cmap="Set2")
+stst = np.unique(data.StableState)
+
+cmap = matl.cm.get_cmap('Set2',np.size(stst))
+
+for i, j, k  in zip(stst, cmap(np.linspace(0,1,np.size(stst))), [3, 5, 2, 1, 4]):
+    onstst = np.array(data.StableState == i)
+    ax1.set_xscale('log')
+    ax1.scatter(data.kappa[onstst], data.TotalEnergy[onstst], c = [j], label = i, zorder = k)#
+    ax2.set_xscale('log')
+    ax2.scatter(data.kappa[onstst], data.HingeEnergy[onstst], c = [j], zorder = k)
+    ax3.set_xscale('log')
+    ax3.scatter(data.kappa[onstst], data.EdgeEnergy[onstst], c = [j], zorder = k)
 
 
 NiceGraph2D(ax1, 'Kappa', 'Total Energy')
@@ -241,8 +247,8 @@ NiceGraph2D(ax2, 'Kappa', 'Normalized Hinge Energy')
 NiceGraph2D(ax3, 'Kappa', 'Normalized Edge Energy')
 
 
-leg = ax1.legend(handles = [scatt],loc = 2, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False, 
-           borderpad = 0.3, labelspacing = 0.1, handlelength = 0.4, handletextpad = 0.4)
+leg = ax1.legend(loc = 2, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False) 
+#           borderpad = 0.3, labelspacing = 0.1, handlelength = 0.4, handletextpad = 0.4)
 plt.setp(leg.get_texts(), color='0.2')
 leg.get_frame().set_linewidth(0.4)
 
