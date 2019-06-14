@@ -13,25 +13,25 @@ clearvars -global
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 opt=initOpt('inputType', 'origami','template','SingleVertex',...
-            'restang', pi/4, 'numVert', 4, 'numIterations', 10000,...
+            'restang', 3*pi/4, 'numVert', 4, 'numIterations', 1000,...
             'analysis','result','analysisType','randomPert',...
             'createFig', 'off','saveFig','on','saveMovie', 'off',...
             'figDPI',200,'safeMovieAntiAlias', 0,...
             'folAlgor', 'sqp','relAlgor', 'sqp',...
             'gethistory', 'off',...
             'constrEdge','off','constrFace','on','constAnglePerc',0.99,... 
-            'Khinge',1,'Kedge',1,'Kdiag',0.1,'Kface',100,'KtargetAngle',1000,...
+            'Khinge',10^-0.75,'Kedge',1,'Kdiag',0.1,'Kface',100,'KtargetAngle',1000,...
             'maxStretch', nan,'steps',3,...
             'maxArea', 0.1,...
             'periodic', 'off');    
 
 
-opt.saveFile = strcat('/',date,'_RandPert');
-% opt.saveFile = strcat('/07-Jun-2019_kappas_analysis3');
+opt.saveFile = strcat('/',date,'_RandPert2');
+% opt.saveFile = strcat('/13-Jun-2019_RandPert2');
 tic;
 
 
-hingeSet = [1 3];
+hingeSet = [630 653];
 opt.angleConstrFinal(1).val=[ hingeSet(:) , [ones(1,size(hingeSet,2))*opt.restang]'];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %BUILD
@@ -59,16 +59,16 @@ findDeformation(extrudedUnitCell,opt);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %OUTPUT AND PLOT GEOMETRY
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-kappas = logspace(-4,0.5,37);
-close all
-for i = kappas
-    opt.Khinge = i;
+% kappas = logspace(-3,1,33);
+% close all
+% for i = kappas
+%     opt.Khinge = i;
     if (strcmp(opt.analysis, 'result') && strcmp(opt.createFig, 'off'))
         fprintf('Not ploting any results.\n');
     else
         ReadAndPlot( extrudedUnitCell, opt);
     end
-end
+% end
 t = toc;
 fprintf('The whole program lasted %.2f seconds\n', t);
 

@@ -13,9 +13,9 @@ if strcmp(opt.analysis,'result')
             nonlinearFoldingMulti(extrudedUnitCell, opt, opt.angleConstrFinal(1).val);
             
         case 'randomPert'
-            kappas = logspace(-4,0.5,37);
+            kappas = logspace(-3,1,33);
             stDev = 0.1;
-            parfor kappa = 1:size(kappas,2)
+            for kappa = 1:size(kappas,2)
                 optpar = opt;
                 optpar.Khinge = kappas(kappa);
                 metadataFile(optpar, extrudedUnitCell);
@@ -203,7 +203,7 @@ for i = 1:opt.numIterations
     result = [];
     E=[];
     exfl= [];
-    u0 = rand(3*size(extrudedUnitCell.node,1),1)*stdev^2;
+    u0 = randn(3*size(extrudedUnitCell.node,1),1)*stdev^2;
     theta0 = getSimpleAngle(u0, extrudedUnitCell);
     
     %%%%%% Releasing part %%%%%%
