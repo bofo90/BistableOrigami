@@ -325,7 +325,7 @@ extrudedUnitCell.node = extrudedUnitCell.node+[u(1:3:end) u(2:3:end) u(3:3:end)]
 
 %ENERGY ASSOCIATED TO EDGE STRETCHING
 if strcmp(opt.constrEdge,'off')
-    [dEdge, Jedge]=getEdge(extrudedUnitCell);
+    [dEdge, Jedge]=getEdgeNorm(extrudedUnitCell);
 %     %shearing energy
 %     Ediag=1/2*opt.Kdiag*sum(dEdge(extrudedUnitCell.diagonals).^2);
 %     dE=dE+opt.Kdiag*Jedge(extrudedUnitCell.diagonals,:)'*dEdge(extrudedUnitCell.diagonals);
