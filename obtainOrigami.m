@@ -19,7 +19,8 @@ switch opt.template
         diameter = opt.Lextrude/sin(pi/opt.numVert);
         anglerotation = (opt.numVert-2)*pi/(2*opt.numVert);
         extrudedUnitCell.node = [0,0,0];
-        for phi = 0:(2*pi/opt.numVert):2*pi*0.99999
+%         for phi = 0:(2*pi/opt.numVert):2*pi*0.99999
+        for phi = opt.angDesign
             extrudedUnitCell.node = [extrudedUnitCell.node; ...
                 diameter/2*cos(phi-anglerotation),diameter/2*sin(phi-anglerotation),0];
         end
