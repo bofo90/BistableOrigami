@@ -154,15 +154,15 @@ plt.close('all')
 
 kappas = np.logspace(-3,1,33)#23
 
-prevFolder_name = "Results/SingleVertex3/sqp/energy/20-Jun-2019_RandPert"
+prevFolder_name = "Results/SingleVertex4/sqp/energy/25-Jun-2019_vertexDesign2"
 file_name1 = "/EnergyData.csv" 
 file_name2 = "/Hinges.csv"
 file_name3 = "/PosStad.csv"
 file_name4 = "/Angles.csv"
     
 allData = pd.DataFrame()
-#allAngles = np.empty((0,4))
-allAngles = np.empty((0,3))
+allAngles = np.empty((0,4))
+#allAngles = np.empty((0,3))
 allStSt = pd.DataFrame()
 
 for k in kappas:
@@ -180,11 +180,11 @@ for k in kappas:
     dataAnglesOrd = orderAngles(dataAngles, 2, simLen)
     dataEnergy['StableStates'] = np.zeros((simLen,1))
     dataEnergy['StableStates'] = countStableStates(dataAnglesOrd, 1)
-#    dataEnergy[['ang1','ang2','ang3','ang4']] = pd.DataFrame(dataAnglesOrd)
-    dataEnergy[['ang1','ang2','ang3']] = pd.DataFrame(dataAnglesOrd)
+    dataEnergy[['ang1','ang2','ang3','ang4']] = pd.DataFrame(dataAnglesOrd)
+#    dataEnergy[['ang1','ang2','ang3']] = pd.DataFrame(dataAnglesOrd)
     
-#    allStSt  = allStSt.append(dataEnergy.groupby('StableStates')[['ang1','ang2','ang3','ang4']].mean(), ignore_index = True)
-    allStSt  = allStSt.append(dataEnergy.groupby('StableStates')[['ang1','ang2','ang3']].mean(), ignore_index = True)
+    allStSt  = allStSt.append(dataEnergy.groupby('StableStates')[['ang1','ang2','ang3','ang4']].mean(), ignore_index = True)
+#    allStSt  = allStSt.append(dataEnergy.groupby('StableStates')[['ang1','ang2','ang3']].mean(), ignore_index = True)
     allAngles = np.append(allAngles, dataAngles, axis = 0)
     allData = allData.append(dataEnergy)
     
@@ -204,8 +204,8 @@ allData.sort_index(inplace=True)
 kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['EdgeEnergy', 'HingeEnergy', 'TotalEnergy']].mean())
 kappasStSt = kappasStSt.reset_index(level=0)
 kappasStSt = kappasStSt.reset_index(level=0, drop=True)
-#kappasStSt['StableState'] = countStableStates(allStSt[['ang1','ang2','ang3','ang4']],1)
-kappasStSt['StableState'] = countStableStates(allStSt[['ang1','ang2','ang3']],1.1)
+kappasStSt['StableState'] = countStableStates(allStSt[['ang1','ang2','ang3','ang4']],1)
+#kappasStSt['StableState'] = countStableStates(allStSt[['ang1','ang2','ang3']],1.1)
 
 
 selection = allData.groupby('kappa', as_index=False).apply(lambda _df: _df.groupby('StableStates').apply(lambda _df2: _df2.sample(1, random_state = 0)))
@@ -228,7 +228,7 @@ ax3 = plt.subplot(133)
 fig1.subplots_adjust(top=0.99,
 bottom=0.17,
 left=0.07,
-right=0.995,
+right=0.98,
 hspace=0.25,
 wspace=0.295)
 
@@ -238,18 +238,18 @@ cmap = matl.cm.get_cmap('Set2',np.size(stst))
 
 for i, j in zip(stst, cmap(np.linspace(0,1,np.size(stst)))):
     onstst = np.array(data.StableState == i)
-    ax1.set_xscale('log')
     ax1.scatter(data.kappa[onstst], data.TotalEnergy[onstst], c = [j], label = i)#
-    ax2.set_xscale('log')
     ax2.scatter(data.kappa[onstst], data.HingeEnergy[onstst], c = [j])
-    ax3.set_xscale('log')
     ax3.scatter(data.kappa[onstst], data.EdgeEnergy[onstst], c = [j])
 
 
-NiceGraph2D(ax1, 'Kappa', 'Total Energy')
-NiceGraph2D(ax2, 'Kappa', 'Normalized Hinge Energy')
-NiceGraph2D(ax3, 'Kappa', 'Normalized Edge Energy')
+NiceGraph2D(ax1, 'Kappa', 'Total Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],0.2], divisions=[np.nan, 3], buffer=[0, 0.01])
+NiceGraph2D(ax2, 'Kappa', 'Normalized Hinge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],0.8], buffer=[0, 0.05])
+NiceGraph2D(ax3, 'Kappa', 'Normalized Edge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],0.2], divisions=[np.nan, 3], buffer=[0, 0.01])
 
+ax1.set_xscale('log')
+ax2.set_xscale('log')
+ax3.set_xscale('log')
 
 leg = ax1.legend(loc = 2, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False) 
 #           borderpad = 0.3, labelspacing = 0.1, handlelength = 0.4, handletextpad = 0.4)
