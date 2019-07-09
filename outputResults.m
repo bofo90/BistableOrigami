@@ -9,11 +9,13 @@ colt(1:2,:)=colt(1:2,:)+(1-colt(1:2,:))*0.3;
 colt(3:4,:)=colt(3:4,:)+(1-colt(3:4,:))*0.1;
 colt=[colt; col(2,:)+(1-col(2,:))*0.85];
 
-% colt(4,:)=[0,153,255]/255;
+colt(5,:)=[215,188,74]/255;
 colt(4,:)=[54,100,139]/255;
-% colt(5,:)=[225,225,225]/255;
-colt(5,:)=[54,100,139]/255;
+%colt(5,:)=[0 191 255]/255;
+% a=0.1; %Higher a (value between 0 and 1) makes structure lighter
+% colt(5,:)=[255, 255, 255]/255*a+(1-a)*colt(5,:);
 
+% colt(4,:)=[0 0 0]/255+colt(5,:)*0.3;
 %col=hsv(32);
 %col=col+(1-col)*0;
 %colt=col([32,31,8,13],:)
@@ -54,9 +56,19 @@ plotextrudedUnitCell=prepEffPlot(extrudedUnitCell,viewCoor);
 %Plot solid face with 100% transparency
 f=figure('Position', [0 0 800 800]);
 hold on;
+cp=campos;
 for nc=1:size(extrudedUnitCell.latVec,1)
     for i=3:15
         c=(plotextrudedUnitCell.polFace(i).normal*viewCoor')>0;
+        if ~isempty(plotextrudedUnitCell.polFace(i).nod)
+            nodl=plotextrudedUnitCell.polFace(i).nod(:,1);
+            coorf=plotextrudedUnitCell.lat(nc).coor(nodl,:)-cp;
+            r=coorf(:,3);
+            %r=sqrt(coorf(:,1).^2+coorf(:,2).^2+coorf(:,3).^2);
+            rmin=min(r);
+            rmax=max(r);
+            c=1-(r-rmin)/(rmax-rmin);
+        end
         hs{nc,i}=patch('Faces',plotextrudedUnitCell.polFace(i).nod,'Vertices',plotextrudedUnitCell.lat(nc).coor,'facecolor','flat','facevertexCData',c*colt(4,:)+abs(1-c)*colt(5,:),'facealpha',1.0,'edgealpha',1.0);
     end
 end
@@ -362,8 +374,8 @@ if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(op
 %                 end
 %             end
 %         end
-%         set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);
-%         printHigRes(f,opt,[filename,'_0_undeformed'],nameFolder);     
+        set(gca,'xlim',xlim,'ylim',ylim,'zlim',zlim);
+        printHigRes(f,opt,[filename,'_0_undeformed'],nameFolder);     
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %PLOT MODES INDIVIDUALLY
@@ -374,11 +386,23 @@ if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(op
             if strcmp(opt.saveMovie,'on')
                 for framMode=1:length(plotextrudedUnitCell.mode(nMode).frame)
     %                 framMode = length(plotextrudedUnitCell.mode(nMode).frame);
+                    cp=campos;
                     for nc=1:size(extrudedUnitCell.latVec,1)
                         for i=3:15    
                             c=(plotextrudedUnitCell.mode(nMode).frame(framMode).polFace(i).normal*viewCoor'>0);
                             viewCoor=get(gca,'view');
                             viewCoor=[sind(viewCoor(1)) -cosd(viewCoor(1)) sind(viewCoor(2))];
+                            if length( plotextrudedUnitCell.polFace(i).nod)>0
+                                nodl=plotextrudedUnitCell.polFace(i).nod(:,1);
+                                %coorf=plotextrudedUnitCell.mode(nMode).frame(framMode).lat(nc).coor(nodl,:)-cp;
+                                coorf=plotextrudedUnitCell.lat(nc).coor(nodl,:)-cp;
+                                r=coorf(:,3);
+                                %r=sqrt(coorf(:,1).^2+coorf(:,2).^2+coorf(:,3).^2);
+                                rmin=min(r);
+                                rmax=max(r);
+                                c=(r-rmin)/(rmax-rmin);
+                            
+                            end
                             set(hs{nc,i},'Vertices',plotextrudedUnitCell.mode(nMode).frame(framMode).lat(nc).coor,'facecolor','flat','facevertexCData',c*colt(4,:)+abs(1-c)*colt(5,:),'facealpha',1.0);
                         end
                     end
@@ -389,11 +413,23 @@ if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(op
                 end
             else
                 framMode = length(plotextrudedUnitCell.mode(nMode).frame);
+                cp=campos;
                 for nc=1:size(extrudedUnitCell.latVec,1)
                     for i=3:15     
                         c=(plotextrudedUnitCell.mode(nMode).frame(framMode).polFace(i).normal*viewCoor'>0);
                         viewCoor=get(gca,'view');
                         viewCoor=[sind(viewCoor(1)) -cosd(viewCoor(1)) sind(viewCoor(2))];
+                        if length( plotextrudedUnitCell.polFace(i).nod)>0
+                            nodl=plotextrudedUnitCell.polFace(i).nod(:,1);
+                            %coorf=plotextrudedUnitCell.mode(nMode).frame(framMode).lat(nc).coor(nodl,:)-cp;
+                            coorf=plotextrudedUnitCell.lat(nc).coor(nodl,:)-cp;
+                            r=coorf(:,3);
+                            %r=sqrt(coorf(:,1).^2+coorf(:,2).^2+coorf(:,3).^2);
+                            rmin=min(r);
+                            rmax=max(r);
+                            c=1-(r-rmin)/(rmax-rmin);
+                            
+                        end
                         set(hs{nc,i},'Vertices',plotextrudedUnitCell.mode(nMode).frame(framMode).lat(nc).coor,'facecolor','flat','facevertexCData',c*colt(4,:)+abs(1-c)*colt(5,:),'facealpha',1.0);
                     end
                 end
