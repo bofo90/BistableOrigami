@@ -63,27 +63,14 @@ end
     
 %%%%%% Folding part %%%%%%
 %Run the Folding of the structure
-initialiseGlobalx(u0, theta0);
+
 angles = theta0(opt.angleConstrFinal(1).val(:,1)) + linspace(0,1,opt.steps+1).*(opt.angleConstrFinal(1).val(:,2) - theta0(opt.angleConstrFinal(1).val(:,1)));
-V(:,1)=u0;
-[E.E(1,1),~,E.Eedge(1,1),E.Ediag(1,1),E.Eface(1,1),E.Ehinge(1,1),E.EtargetAngle(1,1), ~]=Energy(u0,extrudedUnitCell,opt);
-exfl(1,1) = 1;
-exfl(2,1) = 1;
-Etemp = [];
 for anglestep = 2:opt.steps+1
-    exfltemp = [];
-    opt.angleConstrFinal(1).val(:,2) = angles(:,anglestep);
-    [Vtemp, exfltemp, output, ~] = FoldStructure(u0, Etemp, exfltemp, extrudedUnitCell, opt, 1, Aeq, Beq);
-    u0 = Vtemp(:,2);
-    if exfltemp(2,1) ~= 1
-        exfl(2,1) = exfltemp(2,1);
-    end
+    initialiseGlobalx(u0, theta0);
+    opt.angleConstrFinal(anglestep-1).val = [opt.angleConstrFinal(1).val(:,1) angles(:,anglestep)];
+    [V, exfl, output, E] = FoldStructure(u0, E, exfl, extrudedUnitCell, opt, anglestep-1, Aeq, Beq);
+    [result, theta0, u0] = SaveResultPos(result, opt, V, output, anglestep-1);
 end
-V(:,2)=u0;
-extrudedUnitCell.angleConstr=opt.angleConstrFinal(1).val;
-[E.E(2,1),~,E.Eedge(2,1),E.Ediag(2,1),E.Eface(2,1),E.Ehinge(2,1),E.EtargetAngle(2,1), ~]=Energy(u0,extrudedUnitCell,opt);
-extrudedUnitCell.angleConstr=[];
-[result, ~, ~] = SaveResultPos(result, opt, V, output, 1);
 
 % %%%%%% Releasing part %%%%%%
 % %change algorithm for releasing
@@ -96,7 +83,6 @@ extrudedUnitCell.angleConstr=[];
 % [result, ~,~] = SaveResultPos(result, opt, V, output, 2);
 
 %Return to original options
-opt.options.Algorithm = opt.folAlgor;
 result = SaveResultEnergy(result, E, exfl, opt);
 result.exUnitCell = extrudedUnitCell;
 result.layers = opt.layers;
