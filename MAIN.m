@@ -13,63 +13,74 @@ clearvars -global
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 opt=initOpt('inputType', 'origami','template','SingleVertex',...
-            'angDesign', [0 60*pi/180 150*pi/180 270*pi/180],...
-            'restang', pi/4, 'numVert', 4, 'numIterations', 1000,...
-            'analysis','savedata','analysisType','randomPert',...
+            'angDesign', [0 120*pi/180 240*pi/180],...
+            'restang', pi/4, 'numVert', 3, 'numIterations', 1000,'RandstDev', 0.2,...
+            'analysis','result','analysisType','randomPert',...
             'createFig', 'off','saveFig','on','saveMovie', 'off',...
             'figDPI',200,'safeMovieAntiAlias', 0,...
             'folAlgor', 'sqp','relAlgor', 'sqp',...
             'gethistory', 'off',...
             'constrEdge','off','constrFace','on','constAnglePerc',0.99,... 
-            'Khinge',10^-2.875,'Kedge',1,'Kdiag',0.1,'Kface',100,'KtargetAngle',1000,...
+            'Khinge',10^-2.875,'Kedge',1,'Kdiag',1,'Kface',100,'KtargetAngle',1000,...
             'maxStretch', nan,'steps',3,...
             'maxArea', 0.1,...
             'periodic', 'off');    
 
 
-opt.saveFile = strcat('/',date,'_vertexDesign2');
+opt.saveFile = strcat('/',date,'_temp');
 % opt.saveFile = strcat('/24-Jun-2019_vertexDesign2');
 tic;
 
 
 hingeSet = [757 306];
 opt.angleConstrFinal(1).val=[ hingeSet(:) , [ones(1,size(hingeSet,2))*opt.restang]'];
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%BUILD
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-[extrudedUnitCell,opt]=buildGeometry(opt);
+for i = 15:5:120
+    for j = 120:5:165
+    
+    if (360-i-j)>165
+        continue;
+    end
+    opt.angDesign = [0, i, i+j];
+    opt.saveFile = strcat('/',date,'DesignAnalysis/Angles_',num2str(i),'_',num2str(j));
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %BUILD
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    [extrudedUnitCell,opt]=buildGeometry(opt);
 
-%SOLVER OPTIONS
-opt.options=optimoptions('fmincon','GradConstr','off','GradObj','off',...
-                         'tolfun',1e-6,'tolx',1e-9, 'tolcon',1e-9,...
-                         'Display','off','DerivativeCheck','off',...
-                         'maxfunevals',30000, 'MaxIterations', 2000,...
-                         'Algorithm', opt.folAlgor, 'OutputFcn',@outfun,...               
-                         'RelLineSrchBnd', 0.01, 'RelLineSrchBndDuration', 5000);
+    %SOLVER OPTIONS
+    opt.options=optimoptions('fmincon','GradConstr','off','GradObj','off',...
+                             'tolfun',1e-6,'tolx',1e-9, 'tolcon',1e-9,...
+                             'Display','off','DerivativeCheck','off',...
+                             'maxfunevals',30000, 'MaxIterations', 2000,...
+                             'Algorithm', opt.folAlgor, 'OutputFcn',@outfun,...               
+                             'RelLineSrchBnd', 0.01, 'RelLineSrchBndDuration', 5000);
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%SELECT HINGES
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% selectHinges(unitCell, extrudedUnitCell, opt);
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %SELECT HINGES
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % selectHinges(unitCell, extrudedUnitCell, opt);
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%ANALYSIS
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-findDeformation(extrudedUnitCell,opt);
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %ANALYSIS
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    findDeformation(extrudedUnitCell,opt);
+    
+    end
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %OUTPUT AND PLOT GEOMETRY
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-kappas = logspace(-3,1,33);
-close all
-for i = kappas
-    opt.Khinge = i;
+% kappas = logspace(-3,1,33);
+% close all
+% for i = kappas
+%     opt.Khinge = i;
     if (strcmp(opt.analysis, 'result') && strcmp(opt.createFig, 'off'))
         fprintf('Not ploting any results.\n');
     else
         ReadAndPlot( extrudedUnitCell, opt);
     end
-end
+% end
 t = toc;
 fprintf('The whole program lasted %.2f seconds\n', t);
 
