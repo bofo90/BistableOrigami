@@ -16,8 +16,8 @@ switch opt.template
     case{'SingleVertex'}
         
         
-        diameter = opt.Lextrude/sin(pi/opt.numVert);
-        anglerotation = (opt.numVert-2)*pi/(2*opt.numVert);
+        diameter = 2*opt.Lextrude;%/sin(pi/opt.numVert);
+        anglerotation = 0;%(opt.numVert-2)*pi/(2*opt.numVert);
         extrudedUnitCell.node = [0,0,0];
 %         for phi = 0:(2*pi/opt.numVert):2*pi*0.99999
         for phi = opt.angDesign
