@@ -14,12 +14,11 @@ if strcmp(opt.analysis,'result')
             
         case 'randomPert'
             kappas = logspace(-3,1,33);
-            stDev = 0.1;
             for kappa = 1:size(kappas,2)
                 optpar = opt;
                 optpar.Khinge = kappas(kappa);
                 metadataFile(optpar, extrudedUnitCell);
-                nonlinearFoldingRand(extrudedUnitCell, optpar, stDev);
+                nonlinearFoldingRand(extrudedUnitCell, optpar, opt.RandstDev);
             end
     end
 end
@@ -397,7 +396,7 @@ if strcmp(opt.constrEdge,'off') && ~isnan(opt.maxStretch)
     C2 = [-normStrech-opt.maxStretch; normStrech-opt.maxStretch];
     DC2 = [-DnormStrech; DnormStrech];
 end
-
+%MINIMUM FACE AREA
 if ~isnan(opt.maxArea)
     dFace = getFace2(extrudedUnitCell);
     C3 = [opt.maxArea-dFace];
