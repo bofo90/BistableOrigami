@@ -13,7 +13,7 @@ if strcmp(opt.analysis,'result')
             nonlinearFoldingMulti(extrudedUnitCell, opt, opt.angleConstrFinal(1).val);
             
         case 'randomPert'
-            kappas = logspace(-3,1,33);
+            kappas = logspace(-3,1,5);
             for kappa = 1:size(kappas,2)
                 optpar = opt;
                 optpar.Khinge = kappas(kappa);
