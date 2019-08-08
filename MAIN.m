@@ -14,7 +14,7 @@ clearvars -global
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 opt=initOpt('inputType', 'origami','template','SingleVertex',...
             'angDesign', [0 120*pi/180 240*pi/180],...
-            'restang', pi/4, 'numVert', 3, 'numIterations', 1000,'RandstDev', 0.2,...
+            'restang', pi/4, 'numVert', 4, 'numIterations', 1000,'RandstDev', 0.2,...
             'analysis','result','analysisType','randomPert',...
             'createFig', 'off','saveFig','on','saveMovie', 'off',...
             'figDPI',200,'safeMovieAntiAlias', 0,...
@@ -34,36 +34,36 @@ tic;
 
 hingeSet = [757 306];
 opt.angleConstrFinal(1).val=[ hingeSet(:) , [ones(1,size(hingeSet,2))*opt.restang]'];
-for i = 50:5:120
-    for j = 120:5:165
+for i = 15:5:90
+    for j = 15:5:165
     
-    if (360-i-j)>165
-        continue;
-    end
-    opt.angDesign = [0, i, i+j];
-    opt.saveFile = strcat('/01-Aug-2019DesignAnalysis/Angles_',num2str(i),'_',num2str(j));
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %BUILD
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    [extrudedUnitCell,opt]=buildGeometry(opt);
+        if (i+j)<180 || (i+j)>=195
+            continue;
+        end
+        opt.angDesign = [0, i, 180, 360-j];
+        opt.saveFile = strcat('/01-Aug-2019DesignAnalysis/Angles_',num2str(i),'_',num2str(j));
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %BUILD
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        [extrudedUnitCell,opt]=buildGeometry(opt);
 
-    %SOLVER OPTIONS
-    opt.options=optimoptions('fmincon','GradConstr','off','GradObj','off',...
-                             'tolfun',1e-6,'tolx',1e-9, 'tolcon',1e-9,...
-                             'Display','off','DerivativeCheck','off',...
-                             'maxfunevals',30000, 'MaxIterations', 2000,...
-                             'Algorithm', opt.folAlgor, 'OutputFcn',@outfun,...               
-                             'RelLineSrchBnd', 0.01, 'RelLineSrchBndDuration', 5000);
+        %SOLVER OPTIONS
+        opt.options=optimoptions('fmincon','GradConstr','off','GradObj','off',...
+                                 'tolfun',1e-6,'tolx',1e-9, 'tolcon',1e-9,...
+                                 'Display','off','DerivativeCheck','off',...
+                                 'maxfunevals',30000, 'MaxIterations', 2000,...
+                                 'Algorithm', opt.folAlgor, 'OutputFcn',@outfun,...               
+                                 'RelLineSrchBnd', 0.01, 'RelLineSrchBndDuration', 5000);
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %SELECT HINGES
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % selectHinges(unitCell, extrudedUnitCell, opt);
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %SELECT HINGES
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % selectHinges(unitCell, extrudedUnitCell, opt);
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %ANALYSIS
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    findDeformation(extrudedUnitCell,opt);
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %ANALYSIS
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        findDeformation(extrudedUnitCell,opt);
     
     end
 end
