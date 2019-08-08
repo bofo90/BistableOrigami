@@ -34,12 +34,12 @@ tic;
 
 hingeSet = [757 306];
 opt.angleConstrFinal(1).val=[ hingeSet(:) , [ones(1,size(hingeSet,2))*opt.restang]'];
-for i = 15:5:90
-    for j = 15:5:165
+for i = 95:5:165
+    for j = i:5:165
     
-        if (i+j)<180 || (i+j)>=195
-            continue;
-        end
+%         if (i+j)<180 || (i+j)>=195
+%             continue;
+%         end
         opt.angDesign = [0, i, 180, 360-j];
         opt.saveFile = strcat('/01-Aug-2019DesignAnalysis/Angles_',num2str(i),'_',num2str(j));
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
