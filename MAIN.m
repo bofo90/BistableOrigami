@@ -81,7 +81,7 @@ else
         opt.angDesign = getAngles(allFiles(j).name);
         [extrudedUnitCell,opt]=buildGeometry(opt);
         opt.saveFile = strcat(saveFile, '\', allFiles(j).name);
-        kappas = logspace(-3,1,33);
+        kappas = logspace(-3,1,5);
         close all
         for i = kappas
             opt.Khinge = i;
