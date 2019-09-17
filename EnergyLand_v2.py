@@ -12,6 +12,7 @@ import matplotlib as matl
 import xarray as xr
 import configparser
 import os.path
+import ternary
 
 def cm2inch(value):
     return value/2.54
@@ -138,6 +139,32 @@ def NiceGraph2Dlog(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [
         
     return
 
+#%%
+def NiceTerciaryGraph(ax, scale, divisions):
+    
+    ax.axis('off')
+    tax = ternary.TernaryAxesSubplot(ax=ax, scale = scale)
+    
+    fontsize = 9
+    matl.rcParams.update({'font.size': 9})
+    gray = '0.2'
+    linewidth = 0.4
+    mult = scale/divisions
+    
+    tax.boundary(linewidth=linewidth)
+    tax.gridlines(color=gray, multiple=mult)
+    
+    tax.left_axis_label("Angle1", fontsize=fontsize, color = gray, offset = 0.3)
+    tax.right_axis_label("Angle2", fontsize=fontsize, color = gray, offset = 0.3)
+    tax.bottom_axis_label("Angle3", fontsize=fontsize, color = gray, offset = 0.3)
+    
+    tax.ticks(axis='lbr', linewidth=linewidth, axes_colors = {'l': gray, 'r':gray, 'b': gray},fontsize = fontsize,
+              ticks = [180,150,120,90,60,30,0], clockwise = True, offset = 0.05)
+    tax.clear_matplotlib_ticks()
+    
+    return tax
+
+#%%
 def ReadMetadata(file):
     
     if os.path.isfile(file):
@@ -158,6 +185,8 @@ file_name1 = "/EnergyData.csv"
 file_name2 = "/Hinges.csv"
 file_name3 = "/PosStad.csv"
 file_name4 = "/Angles.csv"
+
+allDesigns = pd.DataFrame()
 
 for subdir in os.listdir(Folder_name):
     
@@ -222,49 +251,86 @@ for subdir in os.listdir(Folder_name):
     kappasStSt = kappasStSt.join(selection['Hinge Number'])
     kappasStSt['LogKappas'] = np.log10(kappasStSt.kappa)
     
+    kappasStSt['desang1'] = np.ones(np.shape(kappasStSt)[0])*designang[1]
+    kappasStSt['desang2'] = np.ones(np.shape(kappasStSt)[0])*(designang[2]-designang[1])
     
     data = kappasStSt.to_xarray()
     
-    
-    
-    #%%
-    fig1 = plt.figure(1,figsize=(cm2inch(17.8), cm2inch(7)))
-    ax1 = plt.subplot(131)
-    ax2 = plt.subplot(132)
-    ax3 = plt.subplot(133)
-    fig1.subplots_adjust(top=0.99,
-    bottom=0.17,
-    left=0.07,
-    right=0.98,
-    hspace=0.25,
-    wspace=0.295)
-    
-    stst = np.unique(data.StableState)
-    
-    cmap = matl.cm.get_cmap('Set2',np.size(stst))
-    
-    for i, j in zip(stst, cmap(np.linspace(0,1,np.size(stst)))):
-        onstst = np.array(data.StableState == i)
-        ax1.scatter(data.kappa[onstst], data.TotalEnergy[onstst], c = [j], label = i)#
-        ax2.scatter(data.kappa[onstst], data.HingeEnergy[onstst], c = [j])
-        ax3.scatter(data.kappa[onstst], data.EdgeEnergy[onstst], c = [j])
-    
-    
-    NiceGraph2D(ax1, 'Kappa', 'Total Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],0.6], divisions=[np.nan, 3], buffer=[0, 0.01])
-    NiceGraph2D(ax2, 'Kappa', 'Normalized Hinge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],40], buffer=[0, 0.05])
-    NiceGraph2D(ax3, 'Kappa', 'Normalized Edge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],0.6], divisions=[np.nan, 3], buffer=[0, 0.01])
-    
-    ax1.set_xscale('log')
-    ax2.set_xscale('log')
-    ax3.set_xscale('log')
-    
-    leg = ax1.legend(loc = 2, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False) 
-    #           borderpad = 0.3, labelspacing = 0.1, handlelength = 0.4, handletextpad = 0.4)
-    plt.setp(leg.get_texts(), color='0.2')
-    leg.get_frame().set_linewidth(0.4)
-    
+    allDesigns = allDesigns.append(kappasStSt)    
     
     #%%
-    fig1.show()
-    fig1.savefig(Folder_name + '/Images/' + subdir[7:] + '.pdf', transparent = True)
-    fig1.savefig(Folder_name + '/Images/' + subdir[7:] + '.png', transparent = True)
+#    fig1 = plt.figure(1,figsize=(cm2inch(17.8), cm2inch(7)))
+#    ax1 = plt.subplot(131)
+#    ax2 = plt.subplot(132)
+#    ax3 = plt.subplot(133)
+#    fig1.subplots_adjust(top=0.99,
+#    bottom=0.17,
+#    left=0.07,
+#    right=0.98,
+#    hspace=0.25,
+#    wspace=0.295)
+#    
+#    stst = np.unique(data.StableState)
+#    
+#    cmap = matl.cm.get_cmap('Set2',np.size(stst))
+#    
+#    for i, j in zip(stst, cmap(np.linspace(0,1,np.size(stst)))):
+#        onstst = np.array(data.StableState == i)
+#        ax1.scatter(data.kappa[onstst], data.TotalEnergy[onstst], c = [j], label = i)#
+#        ax2.scatter(data.kappa[onstst], data.HingeEnergy[onstst], c = [j])
+#        ax3.scatter(data.kappa[onstst], data.EdgeEnergy[onstst], c = [j])
+#    
+#    
+#    NiceGraph2D(ax1, 'Kappa', 'Total Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],1], divisions=[np.nan, 3], buffer=[0, 0.01])
+#    NiceGraph2D(ax2, 'Kappa', 'Normalized Hinge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],1], buffer=[0, 0.05])
+#    NiceGraph2D(ax3, 'Kappa', 'Normalized Edge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],1], divisions=[np.nan, 3], buffer=[0, 0.01])
+#    
+#    ax1.set_xscale('log')
+#    ax2.set_xscale('log')
+#    ax3.set_xscale('log')
+#    
+#    leg = ax1.legend(loc = 2, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False) 
+#    #           borderpad = 0.3, labelspacing = 0.1, handlelength = 0.4, handletextpad = 0.4)
+#    plt.setp(leg.get_texts(), color='0.2')
+#    leg.get_frame().set_linewidth(0.4)
+#    
+#    
+#    #%%
+#    fig1.show()
+#    fig1.savefig(Folder_name + '/Images/' + subdir[7:] + '.pdf', transparent = True)
+#    fig1.savefig(Folder_name + '/Images/' + subdir[7:] + '.png', transparent = True)
+    
+#%%
+allDesigns['desang3'] = 360-allDesigns['desang1']-allDesigns['desang2']
+allDesigns = allDesigns.reset_index(level=0, drop =True)
+allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3']],1, True)
+stst = np.unique(allDesigns['StableStateAll'])
+cmap2 = matl.cm.get_cmap('Set2',np.size(stst))
+colors = cmap2(np.linspace(0,1,np.size(stst)))
+
+#%%
+fig2, axes = plt.subplots(2,3, figsize=(cm2inch(15.8), cm2inch(10)))
+fig2.subplots_adjust(top=0.945,
+bottom=0.065,
+left=0.035,
+right=0.97,
+hspace=0.295,
+wspace=0.26)
+
+for i, ax in enumerate(axes.flat):
+    if i >= np.size(kappas):
+        ax.axis('off')
+        continue
+    thiskappa = allDesigns[allDesigns['kappa'] == kappas[i]]
+    
+    tax = NiceTerciaryGraph(ax, 180, 6)
+    
+    tax.scatter(-thiskappa[['desang1','desang2','desang3']].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
+    tax.scatter(-thiskappa[['desang2','desang3','desang1']].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
+    tax.scatter(-thiskappa[['desang3','desang1','desang2']].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
+
+fig2.show()
+fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceMirror.pdf', transparent = True)
+fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceMirror.png', transparent = True)
+
+
