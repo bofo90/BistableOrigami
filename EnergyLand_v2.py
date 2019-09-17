@@ -150,114 +150,117 @@ def ReadMetadata(file):
 
     return restang
 
-plt.close('all')
+kappas = np.logspace(-3,1,5)#23
 
-kappas = np.logspace(-3,1,33)#23
-
-prevFolder_name = "Results/SingleVertex4/sqp/energy/25-Jun-2019_vertexDesign2"
+Folder_name = "Results/SingleVertex3/sqp/energy/01-Aug-2019DesignAnalysis"
 file_name1 = "/EnergyData.csv" 
 file_name2 = "/Hinges.csv"
 file_name3 = "/PosStad.csv"
 file_name4 = "/Angles.csv"
+
+for subdir in os.listdir(Folder_name):
     
-allData = pd.DataFrame()
-allAngles = np.empty((0,4))
-#allAngles = np.empty((0,3))
-allStSt = pd.DataFrame()
-
-for k in kappas:
-    folder_name = prevFolder_name + "/kh%.5f_kta1000.00_ke1.00_kf100.00" %k
-
-    dataEnergy = pd.read_csv(folder_name+file_name1)
-    simLen = np.size(dataEnergy['Hinge Number'])
+    plt.close('all')
+    prevFolder_name = Folder_name + '/' + subdir
     
-    dataEnergy['TotalEnergy'] = dataEnergy['EdgeEnergy']+dataEnergy['DiagonalEnergy']+dataEnergy['HingeEnergy']
-    dataEnergy['HingeEnergy'] = dataEnergy['HingeEnergy']/k
-    dataEnergy['kappa'] = np.ones(simLen)*k
-
-    dataAngles = np.loadtxt(folder_name+file_name4,skiprows=1, delimiter = ',', dtype = np.float64)
-    dataAngles = np.delete(dataAngles, 0, 1)
-    dataAnglesOrd = orderAngles(dataAngles, 2, simLen)
-    dataEnergy['StableStates'] = np.zeros((simLen,1))
-    dataEnergy['StableStates'] = countStableStates(dataAnglesOrd, 1)
-    dataEnergy[['ang1','ang2','ang3','ang4']] = pd.DataFrame(dataAnglesOrd)
-#    dataEnergy[['ang1','ang2','ang3']] = pd.DataFrame(dataAnglesOrd)
+    allData = pd.DataFrame()
+#    allAngles = np.empty((0,4))
+    allAngles = np.empty((0,3))
+    allStSt = pd.DataFrame()
     
-    allStSt  = allStSt.append(dataEnergy.groupby('StableStates')[['ang1','ang2','ang3','ang4']].mean(), ignore_index = True)
-#    allStSt  = allStSt.append(dataEnergy.groupby('StableStates')[['ang1','ang2','ang3']].mean(), ignore_index = True)
-    allAngles = np.append(allAngles, dataAngles, axis = 0)
-    allData = allData.append(dataEnergy)
+    for k in kappas:
+        folder_name = prevFolder_name + "/kh%.5f_kta1000.00_ke1.00_kf100.00" %k
     
-restang = ReadMetadata(folder_name+'/metadata.txt')/np.pi   
- 
-TotSimul = allData.shape[0]
-
-print(allData['Flags'].value_counts())
-exfl = allData.Flags.values.reshape(TotSimul,1)
-flagmask = (exfl !=1) & (exfl !=2)
-flagmask = ~flagmask.any(axis= 1)
-allData['Mask'] = flagmask
-
-allData.set_index(['kappa','Hinge Number'], inplace = True)
-allData.sort_index(inplace=True)
-
-kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['EdgeEnergy', 'HingeEnergy', 'TotalEnergy']].mean())
-kappasStSt = kappasStSt.reset_index(level=0)
-kappasStSt = kappasStSt.reset_index(level=0, drop=True)
-kappasStSt['StableState'] = countStableStates(allStSt[['ang1','ang2','ang3','ang4']],1)
-#kappasStSt['StableState'] = countStableStates(allStSt[['ang1','ang2','ang3']],1.1)
-
-
-selection = allData.groupby('kappa', as_index=False).apply(lambda _df: _df.groupby('StableStates').apply(lambda _df2: _df2.sample(1, random_state = 0)))
-selection = selection.reset_index(level = [0,1], drop = True)
-selection = selection.reset_index(level = [0,1])
-
-kappasStSt = kappasStSt.join(selection['Hinge Number'])
-kappasStSt['LogKappas'] = np.log10(kappasStSt.kappa)
-
-
-data = kappasStSt.to_xarray()
-
-
-
-#%%
-fig1 = plt.figure(1,figsize=(cm2inch(17.8), cm2inch(7)))
-ax1 = plt.subplot(131)
-ax2 = plt.subplot(132)
-ax3 = plt.subplot(133)
-fig1.subplots_adjust(top=0.99,
-bottom=0.17,
-left=0.07,
-right=0.98,
-hspace=0.25,
-wspace=0.295)
-
-stst = np.unique(data.StableState)
-
-cmap = matl.cm.get_cmap('Set2',np.size(stst))
-
-for i, j in zip(stst, cmap(np.linspace(0,1,np.size(stst)))):
-    onstst = np.array(data.StableState == i)
-    ax1.scatter(data.kappa[onstst], data.TotalEnergy[onstst], c = [j], label = i)#
-    ax2.scatter(data.kappa[onstst], data.HingeEnergy[onstst], c = [j])
-    ax3.scatter(data.kappa[onstst], data.EdgeEnergy[onstst], c = [j])
-
-
-NiceGraph2D(ax1, 'Kappa', 'Total Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],0.2], divisions=[np.nan, 3], buffer=[0, 0.01])
-NiceGraph2D(ax2, 'Kappa', 'Normalized Hinge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],0.8], buffer=[0, 0.05])
-NiceGraph2D(ax3, 'Kappa', 'Normalized Edge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],0.2], divisions=[np.nan, 3], buffer=[0, 0.01])
-
-ax1.set_xscale('log')
-ax2.set_xscale('log')
-ax3.set_xscale('log')
-
-leg = ax1.legend(loc = 2, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False) 
-#           borderpad = 0.3, labelspacing = 0.1, handlelength = 0.4, handletextpad = 0.4)
-plt.setp(leg.get_texts(), color='0.2')
-leg.get_frame().set_linewidth(0.4)
-
-
-#%%
-fig1.show()
-fig1.savefig(prevFolder_name + '/Energy.pdf', transparent = True)
-fig1.savefig(prevFolder_name + '/Energy.png', transparent = True)
+        dataEnergy = pd.read_csv(folder_name+file_name1)
+        simLen = np.size(dataEnergy['Hinge Number'])
+        
+        dataEnergy['TotalEnergy'] = dataEnergy['EdgeEnergy']+dataEnergy['DiagonalEnergy']+dataEnergy['HingeEnergy']
+        dataEnergy['HingeEnergy'] = dataEnergy['HingeEnergy']/k
+        dataEnergy['kappa'] = np.ones(simLen)*k
+    
+        dataAngles = np.loadtxt(folder_name+file_name4,skiprows=1, delimiter = ',', dtype = np.float64)
+        dataAngles = np.delete(dataAngles, 0, 1)
+        dataAnglesOrd = orderAngles(dataAngles, 2, simLen)
+        dataEnergy['StableStates'] = np.zeros((simLen,1))
+        dataEnergy['StableStates'] = countStableStates(dataAnglesOrd, 1)
+#        dataEnergy[['ang1','ang2','ang3','ang4']] = pd.DataFrame(dataAnglesOrd)
+        dataEnergy[['ang1','ang2','ang3']] = pd.DataFrame(dataAnglesOrd)
+        
+#        allStSt  = allStSt.append(dataEnergy.groupby('StableStates')[['ang1','ang2','ang3','ang4']].mean(), ignore_index = True)
+        allStSt  = allStSt.append(dataEnergy.groupby('StableStates')[['ang1','ang2','ang3']].mean(), ignore_index = True)
+        allAngles = np.append(allAngles, dataAngles, axis = 0)
+        allData = allData.append(dataEnergy)
+        
+    restang = ReadMetadata(folder_name+'/metadata.txt')/np.pi   
+     
+    TotSimul = allData.shape[0]
+    
+    print(allData['Flags'].value_counts())
+    exfl = allData.Flags.values.reshape(TotSimul,1)
+    flagmask = (exfl !=1) & (exfl !=2)
+    flagmask = ~flagmask.any(axis= 1)
+    allData['Mask'] = flagmask
+    
+    allData.set_index(['kappa','Hinge Number'], inplace = True)
+    allData.sort_index(inplace=True)
+    
+    kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['EdgeEnergy', 'HingeEnergy', 'TotalEnergy']].mean())
+    kappasStSt = kappasStSt.reset_index(level=0)
+    kappasStSt = kappasStSt.reset_index(level=0, drop=True)
+#    kappasStSt['StableState'] = countStableStates(allStSt[['ang1','ang2','ang3','ang4']],1)
+    kappasStSt['StableState'] = countStableStates(allStSt[['ang1','ang2','ang3']],1.1)
+    
+    
+    selection = allData.groupby('kappa', as_index=False).apply(lambda _df: _df.groupby('StableStates').apply(lambda _df2: _df2.sample(1, random_state = 0)))
+    selection = selection.reset_index(level = [0,1], drop = True)
+    selection = selection.reset_index(level = [0,1])
+    
+    kappasStSt = kappasStSt.join(selection['Hinge Number'])
+    kappasStSt['LogKappas'] = np.log10(kappasStSt.kappa)
+    
+    
+    data = kappasStSt.to_xarray()
+    
+    
+    
+    #%%
+    fig1 = plt.figure(1,figsize=(cm2inch(17.8), cm2inch(7)))
+    ax1 = plt.subplot(131)
+    ax2 = plt.subplot(132)
+    ax3 = plt.subplot(133)
+    fig1.subplots_adjust(top=0.99,
+    bottom=0.17,
+    left=0.07,
+    right=0.98,
+    hspace=0.25,
+    wspace=0.295)
+    
+    stst = np.unique(data.StableState)
+    
+    cmap = matl.cm.get_cmap('Set2',np.size(stst))
+    
+    for i, j in zip(stst, cmap(np.linspace(0,1,np.size(stst)))):
+        onstst = np.array(data.StableState == i)
+        ax1.scatter(data.kappa[onstst], data.TotalEnergy[onstst], c = [j], label = i)#
+        ax2.scatter(data.kappa[onstst], data.HingeEnergy[onstst], c = [j])
+        ax3.scatter(data.kappa[onstst], data.EdgeEnergy[onstst], c = [j])
+    
+    
+    NiceGraph2D(ax1, 'Kappa', 'Total Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],0.6], divisions=[np.nan, 3], buffer=[0, 0.01])
+    NiceGraph2D(ax2, 'Kappa', 'Normalized Hinge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],40], buffer=[0, 0.05])
+    NiceGraph2D(ax3, 'Kappa', 'Normalized Edge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],0.6], divisions=[np.nan, 3], buffer=[0, 0.01])
+    
+    ax1.set_xscale('log')
+    ax2.set_xscale('log')
+    ax3.set_xscale('log')
+    
+    leg = ax1.legend(loc = 2, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False) 
+    #           borderpad = 0.3, labelspacing = 0.1, handlelength = 0.4, handletextpad = 0.4)
+    plt.setp(leg.get_texts(), color='0.2')
+    leg.get_frame().set_linewidth(0.4)
+    
+    
+    #%%
+    fig1.show()
+    fig1.savefig(prevFolder_name + '/Energy.pdf', transparent = True)
+    fig1.savefig(prevFolder_name + '/Energy.png', transparent = True)
