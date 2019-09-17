@@ -205,6 +205,10 @@ for subdir in os.listdir(Folder_name):
     allData.sort_index(inplace=True)
     
     kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['EdgeEnergy', 'HingeEnergy', 'TotalEnergy']].mean())
+    ####Only select stable states that have more than 10% appearance in each simulation
+    kappasStSt['amountStSt'] = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['DiagonalEnergy']].count())
+    kappasStSt = kappasStSt[kappasStSt['amountStSt']>simLen*0.1]
+    
     kappasStSt = kappasStSt.reset_index(level=0)
     kappasStSt = kappasStSt.reset_index(level=0, drop=True)
 #    kappasStSt['StableState'] = countStableStates(allStSt[['ang1','ang2','ang3','ang4']],1)
