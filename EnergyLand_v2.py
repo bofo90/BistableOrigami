@@ -166,7 +166,6 @@ for subdir in os.listdir(Folder_name):
     allData = pd.DataFrame()
 #    allAngles = np.empty((0,4))
     allAngles = np.empty((0,3))
-    allStSt = pd.DataFrame()
     
     for k in kappas:
         folder_name = prevFolder_name + "/kh%.5f_kta1000.00_ke1.00_kf100.00" %k
@@ -186,8 +185,6 @@ for subdir in os.listdir(Folder_name):
 #        dataEnergy[['ang1','ang2','ang3','ang4']] = pd.DataFrame(dataAnglesOrd)
         dataEnergy[['ang1','ang2','ang3']] = pd.DataFrame(dataAnglesOrd)
         
-#        allStSt  = allStSt.append(dataEnergy.groupby('StableStates')[['ang1','ang2','ang3','ang4']].mean(), ignore_index = True)
-        allStSt  = allStSt.append(dataEnergy.groupby('StableStates')[['ang1','ang2','ang3']].mean(), ignore_index = True)
         allAngles = np.append(allAngles, dataAngles, axis = 0)
         allData = allData.append(dataEnergy)
         
@@ -204,16 +201,15 @@ for subdir in os.listdir(Folder_name):
     allData.set_index(['kappa','Hinge Number'], inplace = True)
     allData.sort_index(inplace=True)
     
-    kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['EdgeEnergy', 'HingeEnergy', 'TotalEnergy']].mean())
+    kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['EdgeEnergy', 'HingeEnergy', 'TotalEnergy','ang1','ang2','ang3']].mean())
     ####Only select stable states that have more than 10% appearance in each simulation
     kappasStSt['amountStSt'] = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['DiagonalEnergy']].count())
     kappasStSt = kappasStSt[kappasStSt['amountStSt']>simLen*0.1]
     
     kappasStSt = kappasStSt.reset_index(level=0)
     kappasStSt = kappasStSt.reset_index(level=0, drop=True)
-#    kappasStSt['StableState'] = countStableStates(allStSt[['ang1','ang2','ang3','ang4']],1)
-    kappasStSt['StableState'] = countStableStates(allStSt[['ang1','ang2','ang3']],1.1)
-    
+#    kappasStSt['StableState'] = countStableStates(kappasStSt[['ang1','ang2','ang3','ang4']],1)
+    kappasStSt['StableState'] = countStableStates(kappasStSt[['ang1','ang2','ang3']],0.4)
     
     selection = allData.groupby('kappa', as_index=False).apply(lambda _df: _df.groupby('StableStates').apply(lambda _df2: _df2.sample(1, random_state = 0)))
     selection = selection.reset_index(level = [0,1], drop = True)
