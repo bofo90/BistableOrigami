@@ -145,10 +145,11 @@ def ReadMetadata(file):
         metadata.read(file)
     
         restang = float(metadata.get('options','restang'))
+        designang = np.array(metadata.get('options','angDesign').split(),dtype = int)
     else:
         raise FileNotFoundError('No metafile found at the given directory. Changes to the script to put manually the variables are needed\n') 
 
-    return restang
+    return restang/np.pi, designang
 
 kappas = np.logspace(-3,1,5)#23
 
@@ -159,6 +160,9 @@ file_name3 = "/PosStad.csv"
 file_name4 = "/Angles.csv"
 
 for subdir in os.listdir(Folder_name):
+    
+    if subdir == 'Images':
+        continue
     
     plt.close('all')
     prevFolder_name = Folder_name + '/' + subdir
@@ -174,21 +178,21 @@ for subdir in os.listdir(Folder_name):
         simLen = np.size(dataEnergy['Hinge Number'])
         
         dataEnergy['TotalEnergy'] = dataEnergy['EdgeEnergy']+dataEnergy['DiagonalEnergy']+dataEnergy['HingeEnergy']
-        dataEnergy['HingeEnergy'] = dataEnergy['HingeEnergy']/k
+        dataEnergy['HingeEnergy'] = dataEnergy['HingeEnergy']
         dataEnergy['kappa'] = np.ones(simLen)*k
     
         dataAngles = np.loadtxt(folder_name+file_name4,skiprows=1, delimiter = ',', dtype = np.float64)
         dataAngles = np.delete(dataAngles, 0, 1)
         dataAnglesOrd = orderAngles(dataAngles, 2, simLen)
         dataEnergy['StableStates'] = np.zeros((simLen,1))
-        dataEnergy['StableStates'] = countStableStates(dataAnglesOrd, 1)
+        dataEnergy['StableStates'] = countStableStates(dataAnglesOrd, 0.4)
 #        dataEnergy[['ang1','ang2','ang3','ang4']] = pd.DataFrame(dataAnglesOrd)
         dataEnergy[['ang1','ang2','ang3']] = pd.DataFrame(dataAnglesOrd)
         
         allAngles = np.append(allAngles, dataAngles, axis = 0)
         allData = allData.append(dataEnergy)
         
-    restang = ReadMetadata(folder_name+'/metadata.txt')/np.pi   
+    restang, designang = ReadMetadata(folder_name+'/metadata.txt') 
      
     TotSimul = allData.shape[0]
     
@@ -262,5 +266,5 @@ for subdir in os.listdir(Folder_name):
     
     #%%
     fig1.show()
-    fig1.savefig(prevFolder_name + '/Energy.pdf', transparent = True)
-    fig1.savefig(prevFolder_name + '/Energy.png', transparent = True)
+    fig1.savefig(Folder_name + '/Images/' + subdir[7:] + '.pdf', transparent = True)
+    fig1.savefig(Folder_name + '/Images/' + subdir[7:] + '.png', transparent = True)
