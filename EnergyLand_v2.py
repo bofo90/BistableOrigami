@@ -307,7 +307,7 @@ allDesigns['desang3'] = 360-allDesigns['desang1']-allDesigns['desang2']
 allDesigns = allDesigns.reset_index(level=0, drop =True)
 
 #%%
-allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3']], 4, 'ward')
+allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3']], 1.1, 'centroid', True)
 stst = np.unique(allDesigns['StableStateAll'])
 cmap2 = matl.cm.get_cmap('Set2',np.size(stst))
 colors = cmap2(np.linspace(0,1,np.size(stst)))
@@ -335,8 +335,8 @@ for state in stst:
         
         if not thiskappa.empty:
             tax.scatter(-thiskappa[['desang1','desang2','desang3']].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
-#            tax.scatter(-thiskappa[['desang2','desang3','desang1']].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
-#            tax.scatter(-thiskappa[['desang3','desang1','desang2']].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
+            tax.scatter(-thiskappa[['desang2','desang3','desang1']].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
+            tax.scatter(-thiskappa[['desang3','desang1','desang2']].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
     
     fig2.show()
     fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStSt' + str(state) + '.pdf', transparent = True)
@@ -346,6 +346,6 @@ fig3 = plt.figure(3,figsize=(cm2inch(17.8), cm2inch(7)))
 ax3 = plt.subplot(111,projection='3d')
 for state in stst:
     thisstate = allDesigns[allDesigns['StableStateAll'] == state]
-    ax3.scatter(thisstate['ang1'].values/np.pi,thisstate['ang2'].values/np.pi,thisstate['ang3'].values/np.pi, c = colors[thisstate['StableStateAll']-1])
+    ax3.scatter(thisstate['ang1'].values,thisstate['ang2'].values,thisstate['ang3'].values, c = colors[thisstate['StableStateAll']-1])
 
 allDesigns[['kappa','Hinge Number','desang1','desang2','desang3', 'StableStateAll']].to_csv(Folder_name + '/Images/InfoforImages.csv', index = False)
