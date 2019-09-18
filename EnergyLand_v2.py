@@ -13,7 +13,7 @@ from mpl_toolkits import mplot3d
 import xarray as xr
 import configparser
 import os.path
-import ternary
+import ternary #from https://github.com/marcharper/python-ternary
 
 def cm2inch(value):
     return value/2.54
@@ -335,8 +335,8 @@ for state in stst:
         
         if not thiskappa.empty:
             tax.scatter(-thiskappa[['desang1','desang2','desang3']].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
-            tax.scatter(-thiskappa[['desang2','desang3','desang1']].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
-            tax.scatter(-thiskappa[['desang3','desang1','desang2']].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
+#            tax.scatter(-thiskappa[['desang2','desang3','desang1']].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
+#            tax.scatter(-thiskappa[['desang3','desang1','desang2']].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
     
     fig2.show()
     fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStSt' + str(state) + '.pdf', transparent = True)
