@@ -9,6 +9,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as matl
+from mpl_toolkits import mplot3d
 import xarray as xr
 import configparser
 import os.path
@@ -29,12 +30,12 @@ def orderAngles(angles, steps, simulations):
     return finalAngles
         
         
-def countStableStates(finalAngles, distance, plot = False):
+def countStableStates(finalAngles, distance, method, plot = False):
     
     import scipy.cluster.hierarchy as hierarch
     from scipy.spatial.distance import pdist
                                        
-    Z = hierarch.linkage(finalAngles, 'centroid')
+    Z = hierarch.linkage(finalAngles, method)
     inverse = hierarch.fcluster(Z, distance, criterion='distance')
     c = hierarch.cophenet(Z, pdist(finalAngles))
 
@@ -140,7 +141,7 @@ def NiceGraph2Dlog(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [
     return
 
 #%%
-def NiceTerciaryGraph(ax, scale, divisions):
+def NiceTerciaryGraph(ax, name, scale, divisions):
     
     ax.axis('off')
     tax = ternary.TernaryAxesSubplot(ax=ax, scale = scale)
@@ -154,6 +155,7 @@ def NiceTerciaryGraph(ax, scale, divisions):
     tax.boundary(linewidth=linewidth)
     tax.gridlines(color=gray, multiple=mult)
     
+    tax.set_title(name, fontsize=fontsize, color = gray, pad = 15)
     tax.left_axis_label("Angle1", fontsize=fontsize, color = gray, offset = 0.3)
     tax.right_axis_label("Angle2", fontsize=fontsize, color = gray, offset = 0.3)
     tax.bottom_axis_label("Angle3", fontsize=fontsize, color = gray, offset = 0.3)
@@ -214,7 +216,7 @@ for subdir in os.listdir(Folder_name):
         dataAngles = np.delete(dataAngles, 0, 1)
         dataAnglesOrd = orderAngles(dataAngles, 2, simLen)
         dataEnergy['StableStates'] = np.zeros((simLen,1))
-        dataEnergy['StableStates'] = countStableStates(dataAnglesOrd, 0.4)
+        dataEnergy['StableStates'] = countStableStates(dataAnglesOrd, 0.3, 'centroid')
 #        dataEnergy[['ang1','ang2','ang3','ang4']] = pd.DataFrame(dataAnglesOrd)
         dataEnergy[['ang1','ang2','ang3']] = pd.DataFrame(dataAnglesOrd)
         
@@ -241,8 +243,8 @@ for subdir in os.listdir(Folder_name):
     
     kappasStSt = kappasStSt.reset_index(level=0)
     kappasStSt = kappasStSt.reset_index(level=0, drop=True)
-#    kappasStSt['StableState'] = countStableStates(kappasStSt[['ang1','ang2','ang3','ang4']],1)
-    kappasStSt['StableState'] = countStableStates(kappasStSt[['ang1','ang2','ang3']],0.4)
+#    kappasStSt['StableState'] = countStableStates(kappasStSt[['ang1','ang2','ang3','ang4']],1, 'centroid')
+    kappasStSt['StableState'] = countStableStates(kappasStSt[['ang1','ang2','ang3']],0.45, 'centroid')
     
     selection = allData.groupby('kappa', as_index=False).apply(lambda _df: _df.groupby('StableStates').apply(lambda _df2: _df2.sample(1, random_state = 0)))
     selection = selection.reset_index(level = [0,1], drop = True)
@@ -303,34 +305,47 @@ for subdir in os.listdir(Folder_name):
 #%%
 allDesigns['desang3'] = 360-allDesigns['desang1']-allDesigns['desang2']
 allDesigns = allDesigns.reset_index(level=0, drop =True)
-allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3']],1, True)
+
+#%%
+allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3']], 4, 'ward')
 stst = np.unique(allDesigns['StableStateAll'])
 cmap2 = matl.cm.get_cmap('Set2',np.size(stst))
 colors = cmap2(np.linspace(0,1,np.size(stst)))
 
-#%%
-fig2, axes = plt.subplots(2,3, figsize=(cm2inch(15.8), cm2inch(10)))
-fig2.subplots_adjust(top=0.945,
-bottom=0.065,
-left=0.035,
-right=0.97,
-hspace=0.295,
-wspace=0.26)
-
-for i, ax in enumerate(axes.flat):
-    if i >= np.size(kappas):
-        ax.axis('off')
-        continue
-    thiskappa = allDesigns[allDesigns['kappa'] == kappas[i]]
+for state in stst:
+    plt.close('all')
     
-    tax = NiceTerciaryGraph(ax, 180, 6)
+    fig2, axes = plt.subplots(2,3, figsize=(cm2inch(15.8), cm2inch(10)))
+    fig2.subplots_adjust(top=0.91,
+    bottom=0.055,
+    left=0.035,
+    right=0.97,
+    hspace=0.41,
+    wspace=0.26)
+
+    thisstate = allDesigns[allDesigns['StableStateAll'] == state]
     
-    tax.scatter(-thiskappa[['desang1','desang2','desang3']].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
-    tax.scatter(-thiskappa[['desang2','desang3','desang1']].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
-    tax.scatter(-thiskappa[['desang3','desang1','desang2']].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
+    for i, ax in enumerate(axes.flat):
+        if i >= np.size(kappas):
+            ax.axis('off')
+            continue
+        thiskappa = thisstate[thisstate['kappa'] == kappas[i]]
+        
+        tax = NiceTerciaryGraph(ax, 'kappa '+str(kappas[i]) , 180, 6)
+        
+        if not thiskappa.empty:
+            tax.scatter(-thiskappa[['desang1','desang2','desang3']].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
+            tax.scatter(-thiskappa[['desang2','desang3','desang1']].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
+            tax.scatter(-thiskappa[['desang3','desang1','desang2']].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
+    
+    fig2.show()
+    fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStSt' + str(state) + '.pdf', transparent = True)
+    fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStSt' + str(state) + '.png', transparent = True)
 
-fig2.show()
-fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceMirror.pdf', transparent = True)
-fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceMirror.png', transparent = True)
+fig3 = plt.figure(3,figsize=(cm2inch(17.8), cm2inch(7)))
+ax3 = plt.subplot(111,projection='3d')
+for state in stst:
+    thisstate = allDesigns[allDesigns['StableStateAll'] == state]
+    ax3.scatter(thisstate['ang1'].values/np.pi,thisstate['ang2'].values/np.pi,thisstate['ang3'].values/np.pi, c = colors[thisstate['StableStateAll']-1])
 
-
+allDesigns[['kappa','Hinge Number','desang1','desang2','desang3', 'StableStateAll']].to_csv(Folder_name + '/Images/InfoforImages.csv', index = False)
