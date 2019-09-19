@@ -182,7 +182,7 @@ def ReadMetadata(file):
 
 kappas = np.logspace(-3,1,5)#23
 
-Folder_name = "Results/SingleVertex3/sqp/energy/01-Aug-2019DesignAnalysis"
+Folder_name = "Results/SingleVertex4/sqp/energy/01-Aug-2019DesignAnalysis"
 file_name1 = "/EnergyData.csv" 
 file_name2 = "/Hinges.csv"
 file_name3 = "/PosStad.csv"
@@ -199,8 +199,8 @@ for subdir in os.listdir(Folder_name):
     prevFolder_name = Folder_name + '/' + subdir
     
     allData = pd.DataFrame()
-#    allAngles = np.empty((0,4))
-    allAngles = np.empty((0,3))
+    allAngles = np.empty((0,4))
+#    allAngles = np.empty((0,3))
     
     for k in kappas:
         folder_name = prevFolder_name + "/kh%.5f_kta1000.00_ke1.00_kf100.00" %k
@@ -217,8 +217,8 @@ for subdir in os.listdir(Folder_name):
         dataAnglesOrd = orderAngles(dataAngles, 2, simLen)
         dataEnergy['StableStates'] = np.zeros((simLen,1))
         dataEnergy['StableStates'] = countStableStates(dataAnglesOrd, 0.3, 'centroid')
-#        dataEnergy[['ang1','ang2','ang3','ang4']] = pd.DataFrame(dataAnglesOrd)
-        dataEnergy[['ang1','ang2','ang3']] = pd.DataFrame(dataAnglesOrd)
+        dataEnergy[['ang1','ang2','ang3','ang4']] = pd.DataFrame(dataAnglesOrd)
+#        dataEnergy[['ang1','ang2','ang3']] = pd.DataFrame(dataAnglesOrd)
         
         allAngles = np.append(allAngles, dataAngles, axis = 0)
         allData = allData.append(dataEnergy)
@@ -236,15 +236,16 @@ for subdir in os.listdir(Folder_name):
     allData.set_index(['kappa','Hinge Number'], inplace = True)
     allData.sort_index(inplace=True)
     
-    kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['EdgeEnergy', 'HingeEnergy', 'TotalEnergy','ang1','ang2','ang3']].mean())
+    kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['EdgeEnergy', 'HingeEnergy', 'TotalEnergy','ang1','ang2','ang3','ang4']].mean())
+#    kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['EdgeEnergy', 'HingeEnergy', 'TotalEnergy','ang1','ang2','ang3']].mean())
     ####Only select stable states that have more than 10% appearance in each simulation
     kappasStSt['amountStSt'] = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['DiagonalEnergy']].count())
     kappasStSt = kappasStSt[kappasStSt['amountStSt']>simLen*0.1]
     
     kappasStSt = kappasStSt.reset_index(level=0)
     kappasStSt = kappasStSt.reset_index(level=0, drop=True)
-#    kappasStSt['StableState'] = countStableStates(kappasStSt[['ang1','ang2','ang3','ang4']],1, 'centroid')
-    kappasStSt['StableState'] = countStableStates(kappasStSt[['ang1','ang2','ang3']],0.45, 'centroid')
+    kappasStSt['StableState'] = countStableStates(kappasStSt[['ang1','ang2','ang3','ang4']], 1, 'centroid')
+#    kappasStSt['StableState'] = countStableStates(kappasStSt[['ang1','ang2','ang3']],0.45, 'centroid')
     
     selection = allData.groupby('kappa', as_index=False).apply(lambda _df: _df.groupby('StableStates').apply(lambda _df2: _df2.sample(1, random_state = 0)))
     selection = selection.reset_index(level = [0,1], drop = True)
@@ -254,7 +255,9 @@ for subdir in os.listdir(Folder_name):
     kappasStSt['LogKappas'] = np.log10(kappasStSt.kappa)
     
     kappasStSt['desang1'] = np.ones(np.shape(kappasStSt)[0])*designang[1]
-    kappasStSt['desang2'] = np.ones(np.shape(kappasStSt)[0])*(designang[2]-designang[1])
+    kappasStSt['desang2'] = np.ones(np.shape(kappasStSt)[0])*(180-designang[1])
+    kappasStSt['desang3'] = np.ones(np.shape(kappasStSt)[0])*(designang[3]-180)
+    kappasStSt['desang4'] = np.ones(np.shape(kappasStSt)[0])*(360-designang[3])
     
     data = kappasStSt.to_xarray()
     
@@ -303,11 +306,9 @@ for subdir in os.listdir(Folder_name):
 #    fig1.savefig(Folder_name + '/Images/' + subdir[7:] + '.png', transparent = True)
     
 #%%
-allDesigns['desang3'] = 360-allDesigns['desang1']-allDesigns['desang2']
 allDesigns = allDesigns.reset_index(level=0, drop =True)
 
-#%%
-allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3']], 1.1, 'centroid', True)
+allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3','ang4']], 20, 'ward', True)
 stst = np.unique(allDesigns['StableStateAll'])
 cmap2 = matl.cm.get_cmap('Set2',np.size(stst))
 colors = cmap2(np.linspace(0,1,np.size(stst)))
@@ -331,13 +332,15 @@ for state in stst:
             continue
         thiskappa = thisstate[thisstate['kappa'] == kappas[i]]
         
-        tax = NiceTerciaryGraph(ax, 'kappa '+str(kappas[i]) , 180, 6)
+        NiceGraph2D(ax, 'Angle1', 'Angle3' , mincoord=[0,0], maxcoord=[180,180], divisions=[6,6], buffer = [5,5])
+        ax.set_title('kappa '+str(kappas[i]), fontsize=9, color = '0.2')
         
         if not thiskappa.empty:
-            tax.scatter(-thiskappa[['desang1','desang2','desang3']].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
-            tax.scatter(-thiskappa[['desang2','desang3','desang1']].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
-            tax.scatter(-thiskappa[['desang3','desang1','desang2']].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
-    
+            ax.scatter(thiskappa['desang1'].values,thiskappa['desang3'].values, c = colors[thiskappa['StableStateAll']-1], s = 4)
+            ax.scatter(-thiskappa['desang1'].values+180,-thiskappa['desang3'].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
+            ax.scatter(thiskappa['desang3'].values,thiskappa['desang1'].values, c = colors[thiskappa['StableStateAll']-1], s = 4)
+            ax.scatter(-thiskappa['desang3'].values+180,-thiskappa['desang1'].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
+            
     fig2.show()
     fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStSt' + str(state) + '.pdf', transparent = True)
     fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStSt' + str(state) + '.png', transparent = True)
@@ -348,4 +351,4 @@ for state in stst:
     thisstate = allDesigns[allDesigns['StableStateAll'] == state]
     ax3.scatter(thisstate['ang1'].values,thisstate['ang2'].values,thisstate['ang3'].values, c = colors[thisstate['StableStateAll']-1])
 
-allDesigns[['kappa','Hinge Number','desang1','desang2','desang3', 'StableStateAll']].to_csv(Folder_name + '/Images/InfoforImages.csv', index = False)
+allDesigns[['kappa','Hinge Number','desang1','desang2','desang3','desang4','StableStateAll']].to_csv(Folder_name + '/Images/InfoforImages.csv', index = False)
