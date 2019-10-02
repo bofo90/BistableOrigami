@@ -195,7 +195,7 @@ if ~exist(folderName, 'dir')
 end
     
 opt.KtargetAngle = 0;
-for i = 1:opt.numIterations
+parfor i = 1:opt.numIterations
     
     %%%%%% Folding part %%%%%%
     %Perturb the structure
@@ -216,12 +216,16 @@ for i = 1:opt.numIterations
 
     %Save the result in a file
     fileName = strcat(folderName,'/iter_',mat2str(i),'.mat');
-    save(fileName, 'result');
+    parsave(fileName, result);
 
 end
 %Clear variables for next fold
 clearvars result E exfl output;
 fclose('all');
+
+function parsave(filename,result)
+
+save(filename, 'result')
 
 function [V, exfl, output, E] = FoldStructure(u0, E, exfl, extrudedUnitCell, opt, iter, steps, Aeq, Beq)
 
@@ -432,7 +436,7 @@ function [Aeq, Beq]=linearConstr(extrudedUnitCell, opt)
 %FIX NODE CONSTRAINTS
 %IMPROVE FOLLOWING - AUTOMATIC DEPENDING ON NODES OF FACE 1
 nodeFix=extrudedUnitCell.face{1};
-e1=extrudedUnitCell.node(nodeFix(2),:)-extrudedUnitCell.node(nodeFix(1),:);
+e1=extrudedUnitCell.node(nodeFix(1),:)-extrudedUnitCell.node(nodeFix(2),:);
 e2=extrudedUnitCell.node(nodeFix(3),:)-extrudedUnitCell.node(nodeFix(2),:);
 e1=e1/norm(e1);
 e2=e2/norm(e2);
@@ -441,11 +445,11 @@ e3=e3/norm(e3);
 
 Aeq=zeros(6,3*size(extrudedUnitCell.node,1));
 Beq=zeros(6,1);
-Aeq(1,3*nodeFix(2)-2)=1;
-Aeq(2,3*nodeFix(2)-1)=1;
-Aeq(3,3*nodeFix(2))=1;
-Aeq(4,3*nodeFix(1)-2:3*nodeFix(1))=e3;
-Aeq(5,3*nodeFix(1)-2:3*nodeFix(1))=e2;
+Aeq(1,3*nodeFix(1)-2)=1;
+Aeq(2,3*nodeFix(1)-1)=1;
+Aeq(3,3*nodeFix(1))=1;
+Aeq(4,3*nodeFix(2)-2:3*nodeFix(2))=e3;
+Aeq(5,3*nodeFix(2)-2:3*nodeFix(2))=e2;
 Aeq(6,3*nodeFix(3)-2:3*nodeFix(3))=e3;
 
 %MERGE NODES AT INITIALLY SAME LOCATION

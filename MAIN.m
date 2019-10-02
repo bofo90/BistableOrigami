@@ -27,7 +27,7 @@ opt=initOpt('inputType', 'origami','template','SingleVertex',...
             'periodic', 'off');    
 
 
-opt.saveFile = strcat('/',date,'_temp');
+% opt.saveFile = strcat('/',date,'_temp');
 % opt.saveFile = strcat('/24-Jun-2019_vertexDesign2');
 tic;
 
@@ -41,8 +41,8 @@ for i = 35:5:90
         if (i+j)<180 || (i+j)>=195
             continue;
         end
-        opt.angDesign = [0, i, 180, 360-j];
-        opt.saveFile = strcat('/01-Aug-2019DesignAnalysis/Angles_',num2str(i),'_',num2str(j));
+        opt.angDesign = [0, i, 180, 360-j]*pi/180;
+        opt.saveFile = strcat('/01-Aug-2019DesignAnalysis_3/Angles_',num2str(i),'_',num2str(j));
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %BUILD
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
