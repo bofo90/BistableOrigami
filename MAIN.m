@@ -34,11 +34,11 @@ tic;
 
 hingeSet = [757 306];
 opt.angleConstrFinal(1).val=[ hingeSet(:) , [ones(1,size(hingeSet,2))*opt.restang]'];
-for i = 35:5:90
-    for j = 15:5:165
+for i = 15:5:165
+    for j = i:5:165
 
     
-        if (i+j)<180 || (i+j)>=195
+        if (i+j)<180
             continue;
         end
         opt.angDesign = [0, i, 180, 360-j]*pi/180;
