@@ -38,7 +38,7 @@ for i = 15:5:165
     for j = i:5:165
 
     
-        if (i+j)<180
+        if (i+j)<180 || ((i <=90 && i >=35) && (i+j) <195)
             continue;
         end
         opt.angDesign = [0, i, 180, 360-j]*pi/180;
