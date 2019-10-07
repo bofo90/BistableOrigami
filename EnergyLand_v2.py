@@ -22,8 +22,8 @@ def orderAngles(angles, steps, simulations):
     
     finalAngles = np.empty((0,np.size(angles,1)))
     for hinge in np.arange(simulations):
-        if np.sum(np.sign(np.around(angles[steps*(hinge+1)-1,:], decimals = 4))) < 0:
-            angles[steps*(hinge+1)-1,:] = angles[steps*(hinge+1)-1,:]*(-1)        
+#        if np.sum(np.sign(np.around(angles[steps*(hinge+1)-1,:], decimals = 4))) < 0:
+#            angles[steps*(hinge+1)-1,:] = angles[steps*(hinge+1)-1,:]*(-1)        
         sortAllAngIndex = np.lexsort((angles[steps*(hinge+1)-1,:],angles[steps*hinge,:]))#[0,1,2,3]
         finalAngles = np.append(finalAngles, [angles[steps*(hinge+1)-1,sortAllAngIndex]], axis = 0)
         
@@ -170,11 +170,11 @@ def NiceTerciaryGraph(ax, name, scale, divisions):
 def ReadMetadata(file):
     
     if os.path.isfile(file):
-        metadata = configparser.RawConfigParser()
+        metadata = configparser.RawConfigParser(allow_no_value=True)
         metadata.read(file)
     
         restang = float(metadata.get('options','restang'))
-        designang = np.array(metadata.get('options','angDesign').split(),dtype = int)
+        designang = np.array(metadata.get('options','angDesign').split(),dtype = float)
     else:
         raise FileNotFoundError('No metafile found at the given directory. Changes to the script to put manually the variables are needed\n') 
 
@@ -182,13 +182,18 @@ def ReadMetadata(file):
 
 kappas = np.logspace(-3,1,5)#23
 
-Folder_name = "Results/SingleVertex4/sqp/energy/01-Aug-2019DesignAnalysis"
+Folder_name = "Results/SingleVertex4/sqp/energy/01-Aug-2019DesignAnalysis_3"
 file_name1 = "/EnergyData.csv" 
 file_name2 = "/Hinges.csv"
 file_name3 = "/PosStad.csv"
 file_name4 = "/Angles.csv"
 
 allDesigns = pd.DataFrame()
+allKappasAnalysis = pd.DataFrame()
+
+if not os.path.isdir(Folder_name + '/Images/'):
+    os.mkdir(Folder_name + '/Images/')
+    os.mkdir(Folder_name + '/Images/SingleDes/')
 
 for subdir in os.listdir(Folder_name):
     
@@ -240,14 +245,16 @@ for subdir in os.listdir(Folder_name):
 #    kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['EdgeEnergy', 'HingeEnergy', 'TotalEnergy','ang1','ang2','ang3']].mean())
     ####Only select stable states that have more than 10% appearance in each simulation
     kappasStSt['amountStSt'] = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['DiagonalEnergy']].count())
-    kappasStSt = kappasStSt[kappasStSt['amountStSt']>simLen*0.1]
+    more10percent = kappasStSt['amountStSt']>simLen*0.1
+    kappasStSt = kappasStSt[more10percent]
     
     kappasStSt = kappasStSt.reset_index(level=0)
-    kappasStSt = kappasStSt.reset_index(level=0, drop=True)
-    kappasStSt['StableState'] = countStableStates(kappasStSt[['ang1','ang2','ang3','ang4']], 1, 'centroid')
+    kappasStSt = kappasStSt.reset_index(level=0)#, drop=True)
+#    kappasStSt['StableState'] = countStableStates(kappasStSt[['ang1','ang2','ang3','ang4']],1, 'centroid')
 #    kappasStSt['StableState'] = countStableStates(kappasStSt[['ang1','ang2','ang3']],0.45, 'centroid')
     
-    selection = allData.groupby('kappa', as_index=False).apply(lambda _df: _df.groupby('StableStates').apply(lambda _df2: _df2.sample(1, random_state = 0)))
+    selection = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates').apply(lambda _df2: _df2.sample(1, random_state = 0)))
+    selection = selection[more10percent]
     selection = selection.reset_index(level = [0,1], drop = True)
     selection = selection.reset_index(level = [0,1])
     
@@ -255,59 +262,69 @@ for subdir in os.listdir(Folder_name):
     kappasStSt['LogKappas'] = np.log10(kappasStSt.kappa)
     
     kappasStSt['desang1'] = np.ones(np.shape(kappasStSt)[0])*designang[1]
-    kappasStSt['desang2'] = np.ones(np.shape(kappasStSt)[0])*(180-designang[1])
-    kappasStSt['desang3'] = np.ones(np.shape(kappasStSt)[0])*(designang[3]-180)
-    kappasStSt['desang4'] = np.ones(np.shape(kappasStSt)[0])*(360-designang[3])
+    kappasStSt['desang2'] = np.ones(np.shape(kappasStSt)[0])*(np.pi-designang[1])
+    kappasStSt['desang3'] = np.ones(np.shape(kappasStSt)[0])*(designang[3]-np.pi)
+    kappasStSt['desang4'] = np.ones(np.shape(kappasStSt)[0])*(2*np.pi-designang[3])
+    
+    kappasnumStSt = kappasStSt.groupby('kappa')['StableStates'].nunique()
+    kappasnumStSt = kappasnumStSt.reset_index()
+    kappasnumStSt['desang1'] = np.ones(np.shape(kappasnumStSt)[0])*designang[1]
+    kappasnumStSt['desang2'] = np.ones(np.shape(kappasnumStSt)[0])*(designang[2]-designang[1])
+    kappasnumStSt['desang3'] = np.ones(np.shape(kappasnumStSt)[0])*(2*np.pi-designang[2])
+
+    allKappasAnalysis = allKappasAnalysis.append(kappasnumStSt)
     
     data = kappasStSt.to_xarray()
     
     allDesigns = allDesigns.append(kappasStSt)    
     
     #%%
-#    fig1 = plt.figure(1,figsize=(cm2inch(17.8), cm2inch(7)))
-#    ax1 = plt.subplot(131)
-#    ax2 = plt.subplot(132)
-#    ax3 = plt.subplot(133)
-#    fig1.subplots_adjust(top=0.99,
-#    bottom=0.17,
-#    left=0.07,
-#    right=0.98,
-#    hspace=0.25,
-#    wspace=0.295)
-#    
-#    stst = np.unique(data.StableState)
-#    
-#    cmap = matl.cm.get_cmap('Set2',np.size(stst))
-#    
-#    for i, j in zip(stst, cmap(np.linspace(0,1,np.size(stst)))):
-#        onstst = np.array(data.StableState == i)
-#        ax1.scatter(data.kappa[onstst], data.TotalEnergy[onstst], c = [j], label = i)#
-#        ax2.scatter(data.kappa[onstst], data.HingeEnergy[onstst], c = [j])
-#        ax3.scatter(data.kappa[onstst], data.EdgeEnergy[onstst], c = [j])
-#    
-#    
-#    NiceGraph2D(ax1, 'Kappa', 'Total Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],1], divisions=[np.nan, 3], buffer=[0, 0.01])
-#    NiceGraph2D(ax2, 'Kappa', 'Normalized Hinge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],1], buffer=[0, 0.05])
-#    NiceGraph2D(ax3, 'Kappa', 'Normalized Edge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],1], divisions=[np.nan, 3], buffer=[0, 0.01])
-#    
-#    ax1.set_xscale('log')
-#    ax2.set_xscale('log')
-#    ax3.set_xscale('log')
-#    
-#    leg = ax1.legend(loc = 2, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False) 
-#    #           borderpad = 0.3, labelspacing = 0.1, handlelength = 0.4, handletextpad = 0.4)
-#    plt.setp(leg.get_texts(), color='0.2')
-#    leg.get_frame().set_linewidth(0.4)
-#    
-#    
-#    #%%
-#    fig1.show()
-#    fig1.savefig(Folder_name + '/Images/' + subdir[7:] + '.pdf', transparent = True)
-#    fig1.savefig(Folder_name + '/Images/' + subdir[7:] + '.png', transparent = True)
+    fig1 = plt.figure(1,figsize=(cm2inch(17.8), cm2inch(7)))
+    ax1 = plt.subplot(131)
+    ax2 = plt.subplot(132)
+    ax3 = plt.subplot(133)
+    fig1.subplots_adjust(top=0.99,
+    bottom=0.17,
+    left=0.07,
+    right=0.98,
+    hspace=0.25,
+    wspace=0.295)
     
-#%%
+    stst = np.unique(data.StableStates)
+    
+    cmap = matl.cm.get_cmap('Set2',np.size(stst))
+    
+    for i, j in zip(stst, cmap(np.linspace(0,1,np.size(stst)))):
+        onstst = np.array(data.StableStates == i)
+        ax1.scatter(data.kappa[onstst], data.TotalEnergy[onstst], c = [j], label = i)#
+        ax2.scatter(data.kappa[onstst], data.HingeEnergy[onstst], c = [j])
+        ax3.scatter(data.kappa[onstst], data.EdgeEnergy[onstst], c = [j])
+    
+    
+    NiceGraph2D(ax1, 'Kappa', 'Total Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],1], divisions=[np.nan, 3], buffer=[0, 0.01])
+    NiceGraph2D(ax2, 'Kappa', 'Normalized Hinge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],1], buffer=[0, 0.05])
+    NiceGraph2D(ax3, 'Kappa', 'Normalized Edge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],1], divisions=[np.nan, 3], buffer=[0, 0.01])
+    
+    ax1.set_xscale('log')
+    ax2.set_xscale('log')
+    ax3.set_xscale('log')
+    
+    leg = ax1.legend(loc = 2, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False) 
+    #           borderpad = 0.3, labelspacing = 0.1, handlelength = 0.4, handletextpad = 0.4)
+    plt.setp(leg.get_texts(), color='0.2')
+    leg.get_frame().set_linewidth(0.4)
+    
+    
+    #%%
+    fig1.show()
+    fig1.savefig(Folder_name + '/Images/SingleDes/' + subdir[7:] + '.pdf', transparent = True)
+    fig1.savefig(Folder_name + '/Images/SingleDes/' + subdir[7:] + '.png', transparent = True)
+    
 allDesigns = allDesigns.reset_index(level=0, drop =True)
+allDesigns[['desang1','desang2','desang3']]=np.around(allDesigns[['desang1','desang2','desang3']]*180/np.pi,0).astype(int)
+allKappasAnalysis[['desang1','desang2','desang3']]=np.around(allKappasAnalysis[['desang1','desang2','desang3']]*180/np.pi,0).astype(int)
 
+#%%
 allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3','ang4']], 20, 'ward', True)
 stst = np.unique(allDesigns['StableStateAll'])
 cmap2 = matl.cm.get_cmap('Set2',np.size(stst))
@@ -345,10 +362,11 @@ for state in stst:
     fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStSt' + str(state) + '.pdf', transparent = True)
     fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStSt' + str(state) + '.png', transparent = True)
 
-fig3 = plt.figure(3,figsize=(cm2inch(17.8), cm2inch(7)))
+#%%
+fig3 = plt.figure(figsize=(cm2inch(17.8), cm2inch(7)))
 ax3 = plt.subplot(111,projection='3d')
 for state in stst:
     thisstate = allDesigns[allDesigns['StableStateAll'] == state]
-    ax3.scatter(thisstate['ang1'].values,thisstate['ang2'].values,thisstate['ang3'].values, c = colors[thisstate['StableStateAll']-1])
+    ax3.scatter(thisstate['ang1'].values,thisstate['ang2'].values,thisstate['ang4'].values, c = colors[thisstate['StableStateAll']-1])
 
 allDesigns[['kappa','Hinge Number','desang1','desang2','desang3','desang4','StableStateAll']].to_csv(Folder_name + '/Images/InfoforImages.csv', index = False)
