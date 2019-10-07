@@ -28,7 +28,7 @@ opt=initOpt('inputType', 'origami','template','SingleVertex',...
 
 
 % opt.saveFile = strcat('/',date,'_temp');
-saveFile = strcat('/01-Aug-2019DesignAnalysis_3');
+saveFile = strcat('/02-Aug-2019DesignRand_3');
 tic;
 
 
@@ -96,5 +96,7 @@ function Angles = getAngles(fileName)
     parsedName = strsplit(fileName(1:end), '_');
     Angl1 = str2double(parsedName{2});
     Angl2 = str2double(parsedName{3});
-    Angles = [0, Angl1, 180, 360-Angl2]*pi/180;
+    Angl3 = str2double(parsedName{4});
+%     Angles = [0, Angl1, 180, 360-Angl2]*pi/180;
+    Angles = [0, Angl1, Angl1+Angl2, Angl1+Angl2+Angl3]*pi/180;
 end

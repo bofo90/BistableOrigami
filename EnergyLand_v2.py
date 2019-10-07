@@ -182,7 +182,7 @@ def ReadMetadata(file):
 
 kappas = np.logspace(-3,1,5)#23
 
-Folder_name = "Results/SingleVertex4/sqp/energy/01-Aug-2019DesignAnalysis_3"
+Folder_name = "Results/SingleVertex4/sqp/energy/02-Aug-2019DesignRand_3"
 file_name1 = "/EnergyData.csv" 
 file_name2 = "/Hinges.csv"
 file_name3 = "/PosStad.csv"
@@ -262,15 +262,16 @@ for subdir in os.listdir(Folder_name):
     kappasStSt['LogKappas'] = np.log10(kappasStSt.kappa)
     
     kappasStSt['desang1'] = np.ones(np.shape(kappasStSt)[0])*designang[1]
-    kappasStSt['desang2'] = np.ones(np.shape(kappasStSt)[0])*(np.pi-designang[1])
-    kappasStSt['desang3'] = np.ones(np.shape(kappasStSt)[0])*(designang[3]-np.pi)
+    kappasStSt['desang2'] = np.ones(np.shape(kappasStSt)[0])*(designang[2]-designang[1])
+    kappasStSt['desang3'] = np.ones(np.shape(kappasStSt)[0])*(designang[3]-designang[2])
     kappasStSt['desang4'] = np.ones(np.shape(kappasStSt)[0])*(2*np.pi-designang[3])
     
     kappasnumStSt = kappasStSt.groupby('kappa')['StableStates'].nunique()
     kappasnumStSt = kappasnumStSt.reset_index()
     kappasnumStSt['desang1'] = np.ones(np.shape(kappasnumStSt)[0])*designang[1]
     kappasnumStSt['desang2'] = np.ones(np.shape(kappasnumStSt)[0])*(designang[2]-designang[1])
-    kappasnumStSt['desang3'] = np.ones(np.shape(kappasnumStSt)[0])*(2*np.pi-designang[2])
+    kappasnumStSt['desang3'] = np.ones(np.shape(kappasnumStSt)[0])*(designang[3]-designang[2])
+    kappasnumStSt['desang4'] = np.ones(np.shape(kappasnumStSt)[0])*(2*np.pi-designang[3])
 
     allKappasAnalysis = allKappasAnalysis.append(kappasnumStSt)
     
@@ -313,60 +314,94 @@ for subdir in os.listdir(Folder_name):
     #           borderpad = 0.3, labelspacing = 0.1, handlelength = 0.4, handletextpad = 0.4)
     plt.setp(leg.get_texts(), color='0.2')
     leg.get_frame().set_linewidth(0.4)
-    
-    
-    #%%
+
     fig1.show()
     fig1.savefig(Folder_name + '/Images/SingleDes/' + subdir[7:] + '.pdf', transparent = True)
     fig1.savefig(Folder_name + '/Images/SingleDes/' + subdir[7:] + '.png', transparent = True)
     
 allDesigns = allDesigns.reset_index(level=0, drop =True)
-allDesigns[['desang1','desang2','desang3']]=np.around(allDesigns[['desang1','desang2','desang3']]*180/np.pi,0).astype(int)
-allKappasAnalysis[['desang1','desang2','desang3']]=np.around(allKappasAnalysis[['desang1','desang2','desang3']]*180/np.pi,0).astype(int)
+allDesigns[['desang1','desang2','desang3','desang4']]=np.around(allDesigns[['desang1','desang2','desang3','desang4']]*180/np.pi,0)#.astype(int)
+allKappasAnalysis[['desang1','desang2','desang3','desang4']]=np.around(allKappasAnalysis[['desang1','desang2','desang3','desang4']]*180/np.pi,0)#.astype(int)
 
 #%%
-allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3','ang4']], 20, 'ward', True)
-stst = np.unique(allDesigns['StableStateAll'])
+allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3','ang4']], 1, 'centroid', True)
+#stst = np.unique(allDesigns['StableStateAll'])
+#cmap2 = matl.cm.get_cmap('Set2',np.size(stst))
+#colors = cmap2(np.linspace(0,1,np.size(stst)))
+#
+#for state in stst:
+#    plt.close('all')
+#    
+#    fig2, axes = plt.subplots(2,3, figsize=(cm2inch(15.8), cm2inch(10)))
+#    fig2.subplots_adjust(top=0.91,
+#    bottom=0.055,
+#    left=0.035,
+#    right=0.97,
+#    hspace=0.41,
+#    wspace=0.26)
+#
+#    thisstate = allDesigns[allDesigns['StableStateAll'] == state]
+#    
+#    for i, ax in enumerate(axes.flat):
+#        if i >= np.size(kappas):
+#            ax.axis('off')
+#            continue
+#        thiskappa = thisstate[thisstate['kappa'] == kappas[i]]
+#        
+#        NiceGraph2D(ax, 'Angle1', 'Angle3' , mincoord=[0,0], maxcoord=[180,180], divisions=[6,6], buffer = [5,5])
+#        ax.set_title('kappa '+str(kappas[i]), fontsize=9, color = '0.2')
+#        
+#        if not thiskappa.empty:
+#            ax.scatter(thiskappa['desang1'].values,thiskappa['desang3'].values, c = colors[thiskappa['StableStateAll']-1], s = 4)
+#            ax.scatter(-thiskappa['desang1'].values+180,-thiskappa['desang3'].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
+#            ax.scatter(thiskappa['desang3'].values,thiskappa['desang1'].values, c = colors[thiskappa['StableStateAll']-1], s = 4)
+#            ax.scatter(-thiskappa['desang3'].values+180,-thiskappa['desang1'].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
+#            
+#    fig2.show()
+#    fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStSt' + str(state) + '.pdf', transparent = True)
+#    fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStSt' + str(state) + '.png', transparent = True)
+
+#%%
+#fig3 = plt.figure(figsize=(cm2inch(17.8), cm2inch(7)))
+#ax3 = plt.subplot(111,projection='3d')
+#cmap2 = matl.cm.get_cmap('Set2',np.size(kappas))
+#colors = cmap2(np.linspace(0,1,np.size(kappas)))    
 cmap2 = matl.cm.get_cmap('Set2',np.size(stst))
 colors = cmap2(np.linspace(0,1,np.size(stst)))
 
-for state in stst:
-    plt.close('all')
+for kappa in kappas:
     
-    fig2, axes = plt.subplots(2,3, figsize=(cm2inch(15.8), cm2inch(10)))
-    fig2.subplots_adjust(top=0.91,
-    bottom=0.055,
-    left=0.035,
-    right=0.97,
-    hspace=0.41,
-    wspace=0.26)
-
-    thisstate = allDesigns[allDesigns['StableStateAll'] == state]
+    fig3 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
+    ax3 = plt.subplot(111,projection='3d')
     
-    for i, ax in enumerate(axes.flat):
-        if i >= np.size(kappas):
-            ax.axis('off')
-            continue
-        thiskappa = thisstate[thisstate['kappa'] == kappas[i]]
-        
-        NiceGraph2D(ax, 'Angle1', 'Angle3' , mincoord=[0,0], maxcoord=[180,180], divisions=[6,6], buffer = [5,5])
-        ax.set_title('kappa '+str(kappas[i]), fontsize=9, color = '0.2')
-        
-        if not thiskappa.empty:
-            ax.scatter(thiskappa['desang1'].values,thiskappa['desang3'].values, c = colors[thiskappa['StableStateAll']-1], s = 4)
-            ax.scatter(-thiskappa['desang1'].values+180,-thiskappa['desang3'].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
-            ax.scatter(thiskappa['desang3'].values,thiskappa['desang1'].values, c = colors[thiskappa['StableStateAll']-1], s = 4)
-            ax.scatter(-thiskappa['desang3'].values+180,-thiskappa['desang1'].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
-            
-    fig2.show()
-    fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStSt' + str(state) + '.pdf', transparent = True)
-    fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStSt' + str(state) + '.png', transparent = True)
-
-#%%
-fig3 = plt.figure(figsize=(cm2inch(17.8), cm2inch(7)))
-ax3 = plt.subplot(111,projection='3d')
-for state in stst:
-    thisstate = allDesigns[allDesigns['StableStateAll'] == state]
-    ax3.scatter(thisstate['ang1'].values,thisstate['ang2'].values,thisstate['ang4'].values, c = colors[thisstate['StableStateAll']-1])
+    ax3.set_xlim([-np.pi,np.pi])
+    ax3.set_ylim([-np.pi,np.pi])
+    ax3.set_zlim([-np.pi,np.pi])
+    
+    thisstate = allDesigns[allDesigns['kappa'] == kappa]
+    ax3.scatter(thisstate['ang1'].values,thisstate['ang2'].values,thisstate['ang3'].values, 
+#                c = colors[thisstate['LogKappas'].astype(int).values+3])
+                c = colors[thisstate['StableStateAll']-1])
+    ax3.scatter(thisstate['ang2'].values,thisstate['ang3'].values,thisstate['ang4'].values, 
+#                c = colors[thisstate['LogKappas'].astype(int).values+3])
+                c = colors[thisstate['StableStateAll']-1])
+    ax3.scatter(thisstate['ang3'].values,thisstate['ang4'].values,thisstate['ang1'].values, 
+#                c = colors[thisstate['LogKappas'].astype(int).values+3])
+                c = colors[thisstate['StableStateAll']-1])
+    ax3.scatter(thisstate['ang4'].values,thisstate['ang1'].values,thisstate['ang2'].values, 
+#                c = colors[thisstate['LogKappas'].astype(int).values+3])
+                c = colors[thisstate['StableStateAll']-1])
+    ax3.scatter(thisstate['ang3'].values,thisstate['ang2'].values,thisstate['ang1'].values, 
+#                c = colors[thisstate['LogKappas'].astype(int).values+3])
+                c = colors[thisstate['StableStateAll']-1])
+    ax3.scatter(thisstate['ang4'].values,thisstate['ang3'].values,thisstate['ang2'].values, 
+#                c = colors[thisstate['LogKappas'].astype(int).values+3])
+                c = colors[thisstate['StableStateAll']-1])
+    ax3.scatter(thisstate['ang1'].values,thisstate['ang4'].values,thisstate['ang3'].values, 
+#                c = colors[thisstate['LogKappas'].astype(int).values+3])
+                c = colors[thisstate['StableStateAll']-1])
+    ax3.scatter(thisstate['ang2'].values,thisstate['ang1'].values,thisstate['ang4'].values, 
+#                c = colors[thisstate['LogKappas'].astype(int).values+3],)
+                c = colors[thisstate['StableStateAll']-1])
 
 allDesigns[['kappa','Hinge Number','desang1','desang2','desang3','desang4','StableStateAll']].to_csv(Folder_name + '/Images/InfoforImages.csv', index = False)
