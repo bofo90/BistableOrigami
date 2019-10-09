@@ -23,8 +23,8 @@ def orderAngles(angles, steps, simulations):
     
     finalAngles = np.empty((0,np.size(angles,1)))
     for hinge in np.arange(simulations):
-#        if np.sum(np.sign(np.around(angles[steps*(hinge+1)-1,:], decimals = 4))) < 0:
-#            angles[steps*(hinge+1)-1,:] = angles[steps*(hinge+1)-1,:]*(-1)        
+        if np.sum(np.sign(np.around(angles[steps*(hinge+1)-1,:], decimals = 4))) < 0:
+            angles[steps*(hinge+1)-1,:] = angles[steps*(hinge+1)-1,:]*(-1)        
         sortAllAngIndex = np.lexsort((angles[steps*(hinge+1)-1,:],angles[steps*hinge,:]))#[0,1,2,3]
         finalAngles = np.append(finalAngles, [angles[steps*(hinge+1)-1,sortAllAngIndex]], axis = 0)
         
@@ -87,11 +87,11 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.set_ylabel(nameY)
    
     axes.xaxis.label.set_color(gray)
-    axes.tick_params(axis='x',colors=gray)
+    axes.tick_params(axis='x',colors=gray, width = 0.4)
     axes.spines['bottom'].set_color(gray)
     axes.spines['top'].set_color(gray)
     axes.yaxis.label.set_color(gray)
-    axes.tick_params(axis='y', colors=gray)
+    axes.tick_params(axis='y', colors=gray, width = 0.4)
     axes.spines['left'].set_color(gray)
     axes.spines['right'].set_color(gray)
     axes.tick_params(pad = 2)
@@ -328,40 +328,43 @@ allKappasAnalysis[['desang1','desang2','desang3','desang4']]=np.around(allKappas
 #%%
 allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3','ang4']], 1, 'centroid', True)
 stst = np.unique(allDesigns['StableStateAll'])
-#cmap2 = matl.cm.get_cmap('Set2',np.size(stst))
-#colors = cmap2(np.linspace(0,1,np.size(stst)))
-#
-#for state in stst:
-#    plt.close('all')
-#    
-#    fig2, axes = plt.subplots(2,3, figsize=(cm2inch(15.8), cm2inch(10)))
-#    fig2.subplots_adjust(top=0.91,
-#    bottom=0.055,
-#    left=0.035,
-#    right=0.97,
-#    hspace=0.41,
-#    wspace=0.26)
-#
-#    thisstate = allDesigns[allDesigns['StableStateAll'] == state]
-#    
-#    for i, ax in enumerate(axes.flat):
-#        if i >= np.size(kappas):
-#            ax.axis('off')
-#            continue
-#        thiskappa = thisstate[thisstate['kappa'] == kappas[i]]
-#        
-#        NiceGraph2D(ax, 'Angle1', 'Angle3' , mincoord=[0,0], maxcoord=[180,180], divisions=[6,6], buffer = [5,5])
-#        ax.set_title('kappa '+str(kappas[i]), fontsize=9, color = '0.2')
-#        
-#        if not thiskappa.empty:
-#            ax.scatter(thiskappa['desang1'].values,thiskappa['desang3'].values, c = colors[thiskappa['StableStateAll']-1], s = 4)
-#            ax.scatter(-thiskappa['desang1'].values+180,-thiskappa['desang3'].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
-#            ax.scatter(thiskappa['desang3'].values,thiskappa['desang1'].values, c = colors[thiskappa['StableStateAll']-1], s = 4)
-#            ax.scatter(-thiskappa['desang3'].values+180,-thiskappa['desang1'].values+180, c = colors[thiskappa['StableStateAll']-1], s = 4)
-#            
-#    fig2.show()
-#    fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStSt' + str(state) + '.pdf', transparent = True)
-#    fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStSt' + str(state) + '.png', transparent = True)
+cmap2 = matl.cm.get_cmap('Set2',np.size(kappas))
+colors = cmap2(np.linspace(0,1,np.size(kappas)))
+
+for state in stst:
+    plt.close('all')
+    
+    fig2 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
+    ax1 = plt.subplot(111)
+    fig2.subplots_adjust(top=0.91,
+    bottom=0.185,
+    left=0.175,
+    right=0.98)
+    NiceGraph2D(ax1, 'Angle1', 'Angle3' , mincoord=[0,0], maxcoord=[180,180], divisions=[7,7], buffer = [5,5])
+    ax1.set_title('St.St. '+str(state), fontsize=9, color = '0.2')   
+    
+    thisstate = allDesigns[allDesigns['StableStateAll'] == state]
+    
+    for i in np.arange(np.size(kappas))[::-1]:
+        thiskappa = thisstate[thisstate['kappa'] == kappas[i]]
+       
+        if not thiskappa.empty:
+            ax1.scatter(thiskappa['desang1'].values,thiskappa['desang3'].values, c = [colors[i]], s = 4, label = str(kappas[i]))
+            ax1.scatter(-thiskappa['desang1'].values+180,-thiskappa['desang3'].values+180, c = [colors[i]], s = 4)
+            ax1.scatter(thiskappa['desang3'].values,thiskappa['desang1'].values, c = [colors[i]], s = 4)
+            ax1.scatter(-thiskappa['desang3'].values+180,-thiskappa['desang1'].values+180, c = [colors[i]], s = 4)
+        else:
+            ax1.scater([],c = [colors[i]], s = 4, label = str(kappas[i]) )
+            
+            
+    leg = ax1.legend(loc = 5, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False)
+    plt.setp(leg.get_texts(), color='0.2')
+    leg.get_frame().set_linewidth(0.4)
+
+
+    fig2.show()
+    fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStSt' + str(state) + '.pdf', transparent = True)
+    fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStSt' + str(state) + '.png', transparent = True)
 
 #%%
 fig3 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
