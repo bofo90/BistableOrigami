@@ -354,16 +354,16 @@ for state in stst:
         thiskappa = thisstate[thisstate['kappa'] == kappas[i]]
        
         if not thiskappa.empty:
-            ax1.scatter(thiskappa['desang1'].values,thiskappa['desang3'].values, c = [colors[i]], s = 4, zorder = 5-i)
-            ax1.scatter(-thiskappa['desang1'].values+180,-thiskappa['desang3'].values+180, zorder = 5-i,  c = [colors[i]], s = 4)
-            ax1.scatter(thiskappa['desang3'].values,thiskappa['desang1'].values, c = [colors[i]], zorder = 5-i,  s = 4)
-            ax1.scatter(-thiskappa['desang3'].values+180,-thiskappa['desang1'].values+180, zorder = 5-i,  c = [colors[i]], s = 4)
-            ax2.scatter(thiskappa['desang1'].values,thiskappa['desang3'].values, c = [colors[i]], s = 4, label = str(kappas[i]))
-            ax2.scatter(-thiskappa['desang1'].values+180,-thiskappa['desang3'].values+180, c = [colors[i]], s = 4)
-            ax2.scatter(thiskappa['desang3'].values,thiskappa['desang1'].values, c = [colors[i]], s = 4)
-            ax2.scatter(-thiskappa['desang3'].values+180,-thiskappa['desang1'].values+180, c = [colors[i]], s = 4)
+            ax1.scatter(thiskappa['desang1'].values,thiskappa['desang3'].values, c = [colors[i]], marker = 's', s = 4, edgecolor = 'None', zorder = 5-i)
+            ax1.scatter(-thiskappa['desang1'].values+180,-thiskappa['desang3'].values+180, zorder = 5-i, marker = 's',  c = [colors[i]], s = 4, edgecolor = 'None')
+            ax1.scatter(thiskappa['desang3'].values,thiskappa['desang1'].values, c = [colors[i]], zorder = 5-i, marker = 's',  s = 4, edgecolor = 'None')
+            ax1.scatter(-thiskappa['desang3'].values+180,-thiskappa['desang1'].values+180, zorder = 5-i, marker = 's',  c = [colors[i]], s = 4, edgecolor = 'None')
+            ax2.scatter(thiskappa['desang1'].values,thiskappa['desang3'].values, c = [colors[i]], s = 4, edgecolor = 'None', marker = 's', label = str(kappas[i]))
+            ax2.scatter(-thiskappa['desang1'].values+180,-thiskappa['desang3'].values+180, c = [colors[i]], marker = 's', s = 4, edgecolor = 'None')
+            ax2.scatter(thiskappa['desang3'].values,thiskappa['desang1'].values, c = [colors[i]], marker = 's', s = 4, edgecolor = 'None')
+            ax2.scatter(-thiskappa['desang3'].values+180,-thiskappa['desang1'].values+180, c = [colors[i]], marker = 's', s = 4, edgecolor = 'None')
         else:
-            ax2.scatter([],[],c = [colors[i]], s = 4, label = str(kappas[i]) )
+            ax2.scatter([],[],c = [colors[i]], s = 4, edgecolor = 'None', marker = 's', label = str(kappas[i]) )
             
             
     leg = ax2.legend(loc = 5, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False)
