@@ -14,6 +14,7 @@ import xarray as xr
 import configparser
 import os.path
 import ternary #from https://github.com/marcharper/python-ternary
+import itertools
 
 def cm2inch(value):
     return value/2.54
@@ -182,7 +183,8 @@ def ReadMetadata(file):
 
 kappas = np.logspace(-3,1,5)#23
 
-Folder_name = "Results/SingleVertex4/sqp/energy/02-Aug-2019DesignRand_3"
+#Folder_name = "Results/SingleVertex4/sqp/energy/02-Aug-2019DesignRand_3"
+Folder_name = "Results/SingleVertex4/sqp/energy/01-Aug-2019DesignAnalysis_3"
 file_name1 = "/EnergyData.csv" 
 file_name2 = "/Hinges.csv"
 file_name3 = "/PosStad.csv"
@@ -280,44 +282,44 @@ for subdir in os.listdir(Folder_name):
     allDesigns = allDesigns.append(kappasStSt)    
     
     #%%
-    fig1 = plt.figure(1,figsize=(cm2inch(17.8), cm2inch(7)))
-    ax1 = plt.subplot(131)
-    ax2 = plt.subplot(132)
-    ax3 = plt.subplot(133)
-    fig1.subplots_adjust(top=0.99,
-    bottom=0.17,
-    left=0.07,
-    right=0.98,
-    hspace=0.25,
-    wspace=0.295)
-    
-    stst = np.unique(data.StableStates)
-    
-    cmap = matl.cm.get_cmap('Set2',np.size(stst))
-    
-    for i, j in zip(stst, cmap(np.linspace(0,1,np.size(stst)))):
-        onstst = np.array(data.StableStates == i)
-        ax1.scatter(data.kappa[onstst], data.TotalEnergy[onstst], c = [j], label = i)#
-        ax2.scatter(data.kappa[onstst], data.HingeEnergy[onstst], c = [j])
-        ax3.scatter(data.kappa[onstst], data.EdgeEnergy[onstst], c = [j])
-    
-    
-    NiceGraph2D(ax1, 'Kappa', 'Total Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],1], divisions=[np.nan, 3], buffer=[0, 0.01])
-    NiceGraph2D(ax2, 'Kappa', 'Normalized Hinge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],1], buffer=[0, 0.05])
-    NiceGraph2D(ax3, 'Kappa', 'Normalized Edge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],1], divisions=[np.nan, 3], buffer=[0, 0.01])
-    
-    ax1.set_xscale('log')
-    ax2.set_xscale('log')
-    ax3.set_xscale('log')
-    
-    leg = ax1.legend(loc = 2, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False) 
-    #           borderpad = 0.3, labelspacing = 0.1, handlelength = 0.4, handletextpad = 0.4)
-    plt.setp(leg.get_texts(), color='0.2')
-    leg.get_frame().set_linewidth(0.4)
-
-    fig1.show()
-    fig1.savefig(Folder_name + '/Images/SingleDes/' + subdir[7:] + '.pdf', transparent = True)
-    fig1.savefig(Folder_name + '/Images/SingleDes/' + subdir[7:] + '.png', transparent = True)
+#    fig1 = plt.figure(1,figsize=(cm2inch(17.8), cm2inch(7)))
+#    ax1 = plt.subplot(131)
+#    ax2 = plt.subplot(132)
+#    ax3 = plt.subplot(133)
+#    fig1.subplots_adjust(top=0.99,
+#    bottom=0.17,
+#    left=0.07,
+#    right=0.98,
+#    hspace=0.25,
+#    wspace=0.295)
+#    
+#    stst = np.unique(data.StableStates)
+#    
+#    cmap = matl.cm.get_cmap('Set2',np.size(stst))
+#    
+#    for i, j in zip(stst, cmap(np.linspace(0,1,np.size(stst)))):
+#        onstst = np.array(data.StableStates == i)
+#        ax1.scatter(data.kappa[onstst], data.TotalEnergy[onstst], c = [j], label = i)#
+#        ax2.scatter(data.kappa[onstst], data.HingeEnergy[onstst], c = [j])
+#        ax3.scatter(data.kappa[onstst], data.EdgeEnergy[onstst], c = [j])
+#    
+#    
+#    NiceGraph2D(ax1, 'Kappa', 'Total Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],1], divisions=[np.nan, 3], buffer=[0, 0.01])
+#    NiceGraph2D(ax2, 'Kappa', 'Normalized Hinge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],1], buffer=[0, 0.05])
+#    NiceGraph2D(ax3, 'Kappa', 'Normalized Edge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],1], divisions=[np.nan, 3], buffer=[0, 0.01])
+#    
+#    ax1.set_xscale('log')
+#    ax2.set_xscale('log')
+#    ax3.set_xscale('log')
+#    
+#    leg = ax1.legend(loc = 2, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False) 
+#    #           borderpad = 0.3, labelspacing = 0.1, handlelength = 0.4, handletextpad = 0.4)
+#    plt.setp(leg.get_texts(), color='0.2')
+#    leg.get_frame().set_linewidth(0.4)
+#
+#    fig1.show()
+#    fig1.savefig(Folder_name + '/Images/SingleDes/' + subdir[7:] + '.pdf', transparent = True)
+#    fig1.savefig(Folder_name + '/Images/SingleDes/' + subdir[7:] + '.png', transparent = True)
     
 allDesigns = allDesigns.reset_index(level=0, drop =True)
 allDesigns[['desang1','desang2','desang3','desang4']]=np.around(allDesigns[['desang1','desang2','desang3','desang4']]*180/np.pi,0)#.astype(int)
@@ -325,7 +327,7 @@ allKappasAnalysis[['desang1','desang2','desang3','desang4']]=np.around(allKappas
 
 #%%
 allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3','ang4']], 1, 'centroid', True)
-#stst = np.unique(allDesigns['StableStateAll'])
+stst = np.unique(allDesigns['StableStateAll'])
 #cmap2 = matl.cm.get_cmap('Set2',np.size(stst))
 #colors = cmap2(np.linspace(0,1,np.size(stst)))
 #
@@ -362,12 +364,34 @@ allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3
 #    fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStSt' + str(state) + '.png', transparent = True)
 
 #%%
+fig3 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
+ax3 = plt.subplot(111)
+NiceGraph2D(ax3, 'Desang1', 'Desang2', mincoord=[0,0], maxcoord=[180,180], divisions=[6,6],buffer=[5,5])
+
+onekappa = allKappasAnalysis[allKappasAnalysis['kappa'] == kappas[0]]
+onekappa['desang0'] = np.ones(np.shape(onekappa['desang1']))*180
+
+
+ax3.scatter(onekappa['desang1'],onekappa['desang3'], 
+            c = onekappa[['desang1','desang3','desang0','desang0']].values/180)
+ax3.scatter(onekappa['desang3'],onekappa['desang1'], 
+            c = onekappa[['desang3','desang1','desang0','desang0']].values/180)
+onekappa['desang0'] = onekappa['desang0']*0
+ax3.scatter(180-onekappa['desang1'],180-onekappa['desang3'], 
+            c = 1-onekappa[['desang1','desang3','desang0','desang0']].values/180)
+ax3.scatter(180-onekappa['desang3'],180-onekappa['desang1'], 
+            c = 1-onekappa[['desang3','desang1','desang0','desang0']].values/180)
+
+
+
 #fig3 = plt.figure(figsize=(cm2inch(17.8), cm2inch(7)))
 #ax3 = plt.subplot(111,projection='3d')
 #cmap2 = matl.cm.get_cmap('Set2',np.size(kappas))
 #colors = cmap2(np.linspace(0,1,np.size(kappas)))    
 cmap2 = matl.cm.get_cmap('Set2',np.size(stst))
 colors = cmap2(np.linspace(0,1,np.size(stst)))
+
+order = [5,6,7,8]
 
 for kappa in kappas:
     
@@ -379,29 +403,28 @@ for kappa in kappas:
     ax3.set_zlim([-np.pi,np.pi])
     
     thisstate = allDesigns[allDesigns['kappa'] == kappa]
-    ax3.scatter(thisstate['ang1'].values,thisstate['ang2'].values,thisstate['ang3'].values, 
-#                c = colors[thisstate['LogKappas'].astype(int).values+3])
-                c = colors[thisstate['StableStateAll']-1])
-    ax3.scatter(thisstate['ang2'].values,thisstate['ang3'].values,thisstate['ang4'].values, 
-#                c = colors[thisstate['LogKappas'].astype(int).values+3])
-                c = colors[thisstate['StableStateAll']-1])
-    ax3.scatter(thisstate['ang3'].values,thisstate['ang4'].values,thisstate['ang1'].values, 
-#                c = colors[thisstate['LogKappas'].astype(int).values+3])
-                c = colors[thisstate['StableStateAll']-1])
-    ax3.scatter(thisstate['ang4'].values,thisstate['ang1'].values,thisstate['ang2'].values, 
-#                c = colors[thisstate['LogKappas'].astype(int).values+3])
-                c = colors[thisstate['StableStateAll']-1])
-    ax3.scatter(thisstate['ang3'].values,thisstate['ang2'].values,thisstate['ang1'].values, 
-#                c = colors[thisstate['LogKappas'].astype(int).values+3])
-                c = colors[thisstate['StableStateAll']-1])
-    ax3.scatter(thisstate['ang4'].values,thisstate['ang3'].values,thisstate['ang2'].values, 
-#                c = colors[thisstate['LogKappas'].astype(int).values+3])
-                c = colors[thisstate['StableStateAll']-1])
-    ax3.scatter(thisstate['ang1'].values,thisstate['ang4'].values,thisstate['ang3'].values, 
-#                c = colors[thisstate['LogKappas'].astype(int).values+3])
-                c = colors[thisstate['StableStateAll']-1])
-    ax3.scatter(thisstate['ang2'].values,thisstate['ang1'].values,thisstate['ang4'].values, 
-#                c = colors[thisstate['LogKappas'].astype(int).values+3],)
-                c = colors[thisstate['StableStateAll']-1])
+    thisstate['desang0'] = np.zeros(np.shape(thisstate['desang1']))
+
+    if not thisstate.empty:
+        
+#        for order in np.array(list(itertools.permutations([5,6,7,8],3)))[[0,9,16,18,5,7,14,23]]:
+            thisstate['desang0'] = thisstate['desang0']+180
+            ax3.scatter(thisstate.iloc[:,order[0]].values,thisstate.iloc[:,order[1]].values,thisstate.iloc[:,order[2]].values, 
+#                        c = (thisstate.iloc[:,[order[0]+7,order[2]+7,17,17]].values)/180)
+#                        c = colors[thisstate['LogKappas'].astype(int).values+3])
+                        c = colors[thisstate['StableStateAll']-1])
+#            ax3.scatter(thisstate.iloc[:,order[2]].values,thisstate.iloc[:,order[3]].values,thisstate.iloc[:,order[0]].values, 
+#                        c = (thisstate.iloc[:,[order[2]+7,order[0]+7,17,17]].values)/180)
+##                        c = colors[thisstate['LogKappas'].astype(int).values+3])
+##                        c = colors[thisstate['StableStateAll']-1])
+#            thisstate['desang0'] = thisstate['desang0']*0
+#            ax3.scatter(thisstate.iloc[:,order[0]].values,thisstate.iloc[:,order[3]].values,thisstate.iloc[:,order[2]].values, 
+#                        c = 1-(thisstate.iloc[:,[order[0]+7,order[2]+7,17,17]].values)/180)
+##                        c = colors[thisstate['LogKappas'].astype(int).values+3])
+##                        c = colors[thisstate['StableStateAll']-1])
+#            ax3.scatter(thisstate.iloc[:,order[2]].values,thisstate.iloc[:,order[1]].values,thisstate.iloc[:,order[0]].values, 
+#                        c = 1-(thisstate.iloc[:,[order[2]+7,order[0]+7,17,17]].values)/180)
+##                        c = colors[thisstate['LogKappas'].astype(int).values+3])
+##                        c = colors[thisstate['StableStateAll']-1])
 
 allDesigns[['kappa','Hinge Number','desang1','desang2','desang3','desang4','StableStateAll']].to_csv(Folder_name + '/Images/InfoforImages.csv', index = False)
