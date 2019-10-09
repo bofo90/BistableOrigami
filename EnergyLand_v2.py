@@ -326,7 +326,7 @@ allDesigns[['desang1','desang2','desang3','desang4']]=np.around(allDesigns[['des
 allKappasAnalysis[['desang1','desang2','desang3','desang4']]=np.around(allKappasAnalysis[['desang1','desang2','desang3','desang4']]*180/np.pi,0)#.astype(int)
 
 #%%
-allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3','ang4']], 1, 'centroid', True)
+allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3','ang4']], 10, 'ward', True)
 stst = np.unique(allDesigns['StableStateAll'])
 cmap2 = matl.cm.get_cmap('Set2',np.size(kappas))
 colors = cmap2(np.linspace(0,1,np.size(kappas)))
@@ -334,37 +334,48 @@ colors = cmap2(np.linspace(0,1,np.size(kappas)))
 for state in stst:
     plt.close('all')
     
-    fig2 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
-    ax1 = plt.subplot(111)
-    fig2.subplots_adjust(top=0.91,
-    bottom=0.185,
-    left=0.175,
-    right=0.98)
+    fig2 = plt.figure(figsize=(cm2inch(8.6), cm2inch(4.5)))
+    ax1 = plt.subplot(121)
+    ax2 = plt.subplot(122)
+    fig2.subplots_adjust(top=0.885,
+        bottom=0.24,
+        left=0.155,
+        right=0.985,
+        hspace=0.215,
+        wspace=0.5)
     NiceGraph2D(ax1, 'Angle1', 'Angle3' , mincoord=[0,0], maxcoord=[180,180], divisions=[7,7], buffer = [5,5])
-    ax1.set_title('St.St. '+str(state), fontsize=9, color = '0.2')   
+    NiceGraph2D(ax2, 'Angle1', 'Angle3' , mincoord=[0,0], maxcoord=[180,180], divisions=[7,7], buffer = [5,5])
+    ax1.set_title('St.St. FirstK'+str(state), fontsize=9, color = '0.2')   
+    ax2.set_title('St.St. LastK'+str(state), fontsize=9, color = '0.2') 
     
     thisstate = allDesigns[allDesigns['StableStateAll'] == state]
     
-    for i in np.arange(np.size(kappas))[::-1]:
+    for i in np.arange(np.size(kappas)):
         thiskappa = thisstate[thisstate['kappa'] == kappas[i]]
        
         if not thiskappa.empty:
-            ax1.scatter(thiskappa['desang1'].values,thiskappa['desang3'].values, c = [colors[i]], s = 4, label = str(kappas[i]))
-            ax1.scatter(-thiskappa['desang1'].values+180,-thiskappa['desang3'].values+180, c = [colors[i]], s = 4)
-            ax1.scatter(thiskappa['desang3'].values,thiskappa['desang1'].values, c = [colors[i]], s = 4)
-            ax1.scatter(-thiskappa['desang3'].values+180,-thiskappa['desang1'].values+180, c = [colors[i]], s = 4)
+            ax1.scatter(thiskappa['desang1'].values,thiskappa['desang3'].values, c = [colors[i]], s = 4, zorder = 5-i)
+            ax1.scatter(-thiskappa['desang1'].values+180,-thiskappa['desang3'].values+180, zorder = 5-i,  c = [colors[i]], s = 4)
+            ax1.scatter(thiskappa['desang3'].values,thiskappa['desang1'].values, c = [colors[i]], zorder = 5-i,  s = 4)
+            ax1.scatter(-thiskappa['desang3'].values+180,-thiskappa['desang1'].values+180, zorder = 5-i,  c = [colors[i]], s = 4)
+            ax2.scatter(thiskappa['desang1'].values,thiskappa['desang3'].values, c = [colors[i]], s = 4, label = str(kappas[i]))
+            ax2.scatter(-thiskappa['desang1'].values+180,-thiskappa['desang3'].values+180, c = [colors[i]], s = 4)
+            ax2.scatter(thiskappa['desang3'].values,thiskappa['desang1'].values, c = [colors[i]], s = 4)
+            ax2.scatter(-thiskappa['desang3'].values+180,-thiskappa['desang1'].values+180, c = [colors[i]], s = 4)
         else:
-            ax1.scater([],c = [colors[i]], s = 4, label = str(kappas[i]) )
+            ax2.scatter([],[],c = [colors[i]], s = 4, label = str(kappas[i]) )
             
             
-    leg = ax1.legend(loc = 5, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False)
+    leg = ax2.legend(loc = 5, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False)
     plt.setp(leg.get_texts(), color='0.2')
     leg.get_frame().set_linewidth(0.4)
 
 
     fig2.show()
-    fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStSt' + str(state) + '.pdf', transparent = True)
-    fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStSt' + str(state) + '.png', transparent = True)
+    fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStStLastK' + str(state) + '.pdf', transparent = True)
+    fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStStLastK' + str(state) + '.png', transparent = True)
+#    fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStStFirstK' + str(state) + '.pdf', transparent = True)
+#    fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStStFirstK' + str(state) + '.png', transparent = True)
 
 #%%
 fig3 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
