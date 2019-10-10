@@ -224,7 +224,7 @@ for subdir in os.listdir(Folder_name):
         dataAngles = np.delete(dataAngles, 0, 1)
         dataAnglesOrd = orderAngles(dataAngles, 2, simLen)
         dataEnergy['StableStates'] = np.zeros((simLen,1))
-        dataEnergy['StableStates'] = countStableStates(dataAnglesOrd, 0.3, 'centroid')
+        dataEnergy['StableStates'] = countStableStates(dataAnglesOrd, 10, 'ward')
         dataEnergy[['ang1','ang2','ang3','ang4']] = pd.DataFrame(dataAnglesOrd)
 #        dataEnergy[['ang1','ang2','ang3']] = pd.DataFrame(dataAnglesOrd)
         
@@ -389,29 +389,30 @@ for d in designs:
 #%%
     
     
-for d in designs[-2:-1]:
+for d in designs:
     plt.close('all')
     
     thisdesign = allDesigns[(allDesigns[['desang1','desang2','desang3','desang4']] == d).all(axis = 1)]
     
-    fig1,axes  = plt.subplots(1,4, figsize=(cm2inch(17.8), cm2inch(5.5)))
+    fig1,axes  = plt.subplots(1,4, figsize=(cm2inch(20), cm2inch(5.5)))
     fig1.subplots_adjust(top=0.98,
     bottom=0.215,
-    left=0.095,
-    right=0.975,
+    left=0.085,
+    right=0.995,
     hspace=0.25,
-    wspace=0.46)
+    wspace=0.495)
     
     cmap = matl.cm.get_cmap('Set2',np.size(stst))
     colors = cmap(np.linspace(0,1,np.size(stst)))
     
     for i, ax in enumerate(axes.flat):
         ax.set_xscale('log')
-        NiceGraph2Dlog(ax, 'Kappa', 'Angle '+ str(i+1), mincoord=[kappas[0],-np.pi/2], maxcoord=[kappas[-1],np.pi/2], divisions=[3, 3], buffer=[2, 0.1])
+        NiceGraph2Dlog(ax, 'Kappa', 'Angle '+ str(i+1) +' [rad/pi]', mincoord=[kappas[0],-0.5], maxcoord=[kappas[-1],0.5], divisions=[3, 3], buffer=[2, 0.1])
         
         for s in stst:
             thisstate = thisdesign[thisdesign['StableStateAll']== s]
-            ax.scatter(thisstate['kappa'], thisstate.iloc[:,5+i], c = colors[thisstate['StableStateAll']-1], label = s)
+            ax.scatter(thisstate['kappa'], thisstate.iloc[:,5+i]/np.pi, c = colors[thisstate['StableStateAll']-1], label = s)
+            ax.scatter(thisstate['kappa'], -thisstate.iloc[:,5+i]/np.pi, c = colors[thisstate['StableStateAll']-1], marker ='^')
     
     leg = axes[-1].legend(loc = 0, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False) 
     #           borderpad = 0.3, labelspacing = 0.1, handlelength = 0.4, handletextpad = 0.4)
@@ -419,8 +420,8 @@ for d in designs[-2:-1]:
     leg.get_frame().set_linewidth(0.4)
     
     fig1.show()
-    fig1.savefig(Folder_name + '/Images/SingleDes/Energy_' + str(d[0].astype(int))+ '_' + str(d[3].astype(int)) + '.pdf', transparent = True)
-    fig1.savefig(Folder_name + '/Images/SingleDes/Energy_' + str(d[0].astype(int))+ '_' + str(d[3].astype(int)) + '.png', transparent = True)
+    fig1.savefig(Folder_name + '/Images/SingleDes/Angles_' + str(d[0].astype(int))+ '_' + str(d[3].astype(int)) + '.pdf', transparent = True)
+    fig1.savefig(Folder_name + '/Images/SingleDes/Angles_' + str(d[0].astype(int))+ '_' + str(d[3].astype(int)) + '.png', transparent = True)
 
 
 
@@ -488,4 +489,5 @@ for kappa in kappas:
 ##                        c = colors[thisstate['LogKappas'].astype(int).values+3])
 ##                        c = colors[thisstate['StableStateAll']-1])
 
+#%%
 allDesigns[['kappa','Hinge Number','desang1','desang2','desang3','desang4','StableStateAll']].to_csv(Folder_name + '/Images/InfoforImages.csv', index = False)
