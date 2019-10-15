@@ -13,14 +13,15 @@ if strcmp(opt.analysis,'result')
             nonlinearFoldingMulti(extrudedUnitCell, opt, opt.angleConstrFinal(1).val);
             
         case 'randomPert'
-            kappas = logspace(-3,1,13);
-            angles = linspace(0,pi/3,11);
+            kappas = logspace(-3,1,9);
+            angles = linspace(0,pi/3,8);
             for angle = 2:size(angles,2)
+                optpar = opt;
+                extrudedUnitCell.theta = ones(size(extrudedUnitCell.theta,1),1)*optpar.restang;
+                optpar.restang = angles(angle);
+                optpar.saveFile = strcat(optpar.saveFile,'/RestAng_',num2str(optpar.restang,'%.3f'));
                 for kappa = 1:size(kappas,2)
-                    optpar = opt;
                     optpar.Khinge = kappas(kappa);
-                    optpar.restang = angles(angle);
-                    optpar.saveFile = strcat(optpar.saveFile,'/RestAng_',num2str(optpar.restang,'%.3f'));
                     metadataFile(optpar, extrudedUnitCell);
                     nonlinearFoldingRand(extrudedUnitCell, optpar, opt.RandstDev);
                 end
