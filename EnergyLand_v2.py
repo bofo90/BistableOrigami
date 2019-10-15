@@ -182,10 +182,10 @@ def ReadMetadata(file):
 
     return restang/np.pi, designang
 
-kappas = np.logspace(-3,1,5)#23
+kappas = np.logspace(-3,1,13)#23
 
 #Folder_name = "Results/SingleVertex4/sqp/energy/02-Aug-2019DesignRand_3"
-Folder_name = "Results/SingleVertex4/sqp/energy/01-Aug-2019DesignAnalysis_3"
+Folder_name = "Results/SingleVertex4/sqp/energy/14-Oct-2019_KandTheta0/Angles_90_90"
 file_name1 = "/EnergyData.csv" 
 file_name2 = "/Hinges.csv"
 file_name3 = "/PosStad.csv"
@@ -224,7 +224,7 @@ for subdir in os.listdir(Folder_name):
         dataAngles = np.delete(dataAngles, 0, 1)
         dataAnglesOrd = orderAngles(dataAngles, 2, simLen)
         dataEnergy['StableStates'] = np.zeros((simLen,1))
-        dataEnergy['StableStates'] = countStableStates(dataAnglesOrd, 10, 'ward')
+        dataEnergy['StableStates'] = countStableStates(dataAnglesOrd, 0.5, 'centroid')
         dataEnergy[['ang1','ang2','ang3','ang4']] = pd.DataFrame(dataAnglesOrd)
 #        dataEnergy[['ang1','ang2','ang3']] = pd.DataFrame(dataAnglesOrd)
         
@@ -264,17 +264,11 @@ for subdir in os.listdir(Folder_name):
     kappasStSt = kappasStSt.join(selection['Hinge Number'])
     kappasStSt['LogKappas'] = np.log10(kappasStSt.kappa)
     
-    kappasStSt['desang1'] = np.ones(np.shape(kappasStSt)[0])*designang[1]
-    kappasStSt['desang2'] = np.ones(np.shape(kappasStSt)[0])*(designang[2]-designang[1])
-    kappasStSt['desang3'] = np.ones(np.shape(kappasStSt)[0])*(designang[3]-designang[2])
-    kappasStSt['desang4'] = np.ones(np.shape(kappasStSt)[0])*(2*np.pi-designang[3])
+    kappasStSt['restang'] = np.ones(np.shape(kappasStSt)[0])*restang
     
     kappasnumStSt = kappasStSt.groupby('kappa')['StableStates'].nunique()
     kappasnumStSt = kappasnumStSt.reset_index()
-    kappasnumStSt['desang1'] = np.ones(np.shape(kappasnumStSt)[0])*designang[1]
-    kappasnumStSt['desang2'] = np.ones(np.shape(kappasnumStSt)[0])*(designang[2]-designang[1])
-    kappasnumStSt['desang3'] = np.ones(np.shape(kappasnumStSt)[0])*(designang[3]-designang[2])
-    kappasnumStSt['desang4'] = np.ones(np.shape(kappasnumStSt)[0])*(2*np.pi-designang[3])
+    kappasnumStSt['restang'] = np.ones(np.shape(kappasnumStSt)[0])*restang
 
     allKappasAnalysis = allKappasAnalysis.append(kappasnumStSt)
     
@@ -283,14 +277,14 @@ for subdir in os.listdir(Folder_name):
     allDesigns = allDesigns.append(kappasStSt)    
       
 allDesigns = allDesigns.reset_index(level=0, drop =True)
-allDesigns[['desang1','desang2','desang3','desang4']]=np.around(allDesigns[['desang1','desang2','desang3','desang4']]*180/np.pi,0)#.astype(int)
-allKappasAnalysis[['desang1','desang2','desang3','desang4']]=np.around(allKappasAnalysis[['desang1','desang2','desang3','desang4']]*180/np.pi,0)#.astype(int)
 
 #%%
-allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3','ang4']], 10, 'ward', True)
+allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3','ang4']], 0.5, 'centroid', True)
 stst = np.unique(allDesigns['StableStateAll'])
 cmap2 = matl.cm.get_cmap('Set2',np.size(kappas))
 colors = cmap2(np.linspace(0,1,np.size(kappas)))
+
+plt.scatter(np.log10(allKappasAnalysis['kappa']),allKappasAnalysis['restang'],c = colors[allKappasAnalysis['StableStates'].values])
 
 for state in stst:
     plt.close('all')
@@ -304,10 +298,7 @@ for state in stst:
         right=0.985,
         hspace=0.215,
         wspace=0.5)
-    NiceGraph2D(ax1, 'Angle1', 'Angle3' , mincoord=[0,0], maxcoord=[180,180], divisions=[7,7], buffer = [5,5])
-    NiceGraph2D(ax2, 'Angle1', 'Angle3' , mincoord=[0,0], maxcoord=[180,180], divisions=[7,7], buffer = [5,5])
-    ax1.set_title('St.St. FirstK'+str(state), fontsize=9, color = '0.2')   
-    ax2.set_title('St.St. LastK'+str(state), fontsize=9, color = '0.2') 
+    NiceGraph2D(ax1, 'Kappa', 'RestAngle' , mincoord=[0,0], maxcoord=[180,180], divisions=[7,7], buffer = [5,5])
     
     thisstate = allDesigns[allDesigns['StableStateAll'] == state]
     
@@ -426,23 +417,23 @@ for d in designs:
 
 
 #%%
-fig3 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
-ax3 = plt.subplot(111)
-NiceGraph2D(ax3, 'Desang1', 'Desang2', mincoord=[0,0], maxcoord=[180,180], divisions=[6,6],buffer=[5,5])
-
-onekappa = allKappasAnalysis[allKappasAnalysis['kappa'] == kappas[0]]
-onekappa['desang0'] = np.ones(np.shape(onekappa['desang1']))*180
-
-
-ax3.scatter(onekappa['desang1'],onekappa['desang3'], 
-            c = onekappa[['desang1','desang3','desang0','desang0']].values/180)
-ax3.scatter(onekappa['desang3'],onekappa['desang1'], 
-            c = onekappa[['desang3','desang1','desang0','desang0']].values/180)
-onekappa['desang0'] = onekappa['desang0']*0
-ax3.scatter(180-onekappa['desang1'],180-onekappa['desang3'], 
-            c = 1-onekappa[['desang1','desang3','desang0','desang0']].values/180)
-ax3.scatter(180-onekappa['desang3'],180-onekappa['desang1'], 
-            c = 1-onekappa[['desang3','desang1','desang0','desang0']].values/180)
+#fig3 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
+#ax3 = plt.subplot(111)
+#NiceGraph2D(ax3, 'Desang1', 'Desang2', mincoord=[0,0], maxcoord=[180,180], divisions=[6,6],buffer=[5,5])
+#
+#onekappa = allKappasAnalysis[allKappasAnalysis['kappa'] == kappas[0]]
+#onekappa['desang0'] = np.ones(np.shape(onekappa['desang1']))*180
+#
+#
+#ax3.scatter(onekappa['desang1'],onekappa['desang3'], 
+#            c = onekappa[['desang1','desang3','desang0','desang0']].values/180)
+#ax3.scatter(onekappa['desang3'],onekappa['desang1'], 
+#            c = onekappa[['desang3','desang1','desang0','desang0']].values/180)
+#onekappa['desang0'] = onekappa['desang0']*0
+#ax3.scatter(180-onekappa['desang1'],180-onekappa['desang3'], 
+#            c = 1-onekappa[['desang1','desang3','desang0','desang0']].values/180)
+#ax3.scatter(180-onekappa['desang3'],180-onekappa['desang1'], 
+#            c = 1-onekappa[['desang3','desang1','desang0','desang0']].values/180)
 
 
 
@@ -465,12 +456,12 @@ for kappa in kappas:
     ax3.set_zlim([-np.pi,np.pi])
     
     thisstate = allDesigns[allDesigns['kappa'] == kappa]
-    thisstate['desang0'] = np.zeros(np.shape(thisstate['desang1']))
+#    thisstate['desang0'] = np.zeros(np.shape(thisstate['desang1']))
 
     if not thisstate.empty:
         
 #        for order in np.array(list(itertools.permutations([5,6,7,8],3)))[[0,9,16,18,5,7,14,23]]:
-            thisstate['desang0'] = thisstate['desang0']+180
+#            thisstate['desang0'] = thisstate['desang0']+180
             ax3.scatter(thisstate.iloc[:,order[0]].values,thisstate.iloc[:,order[1]].values,thisstate.iloc[:,order[2]].values, 
 #                        c = (thisstate.iloc[:,[order[0]+7,order[2]+7,17,17]].values)/180)
 #                        c = colors[thisstate['LogKappas'].astype(int).values+3])
