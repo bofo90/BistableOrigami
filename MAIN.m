@@ -28,7 +28,7 @@ opt=initOpt('inputType', 'origami','template','SingleVertex',...
 
 
 % opt.saveFile = strcat('/',date,'_temp');
-saveFile = strcat('/02-Aug-2019DesignRand_3');
+saveFile = strcat('/14-Oct-2019_KandTheta0/Angles_90_90');
 tic;
 
 
@@ -78,10 +78,10 @@ else
     folderResults = strcat(pwd, '/Results/', opt.template,num2str(opt.numVert),'/',opt.relAlgor,'/mat', saveFile);
     allFiles = dir(folderResults);
     for j = 3:length(allFiles)
-        opt.angDesign = getAngles(allFiles(j).name);
+        opt.angDesign = [0 90 180 270]*pi/180;
         [extrudedUnitCell,opt]=buildGeometry(opt);
         opt.saveFile = strcat(saveFile, '\', allFiles(j).name);
-        kappas = logspace(-3,1,5);
+        kappas = logspace(-3,1,13);
         close all
         for i = kappas
             opt.Khinge = i;
