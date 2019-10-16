@@ -509,4 +509,4 @@ for kappa in kappas:
 ##                        c = colors[thisstate['StableStateAll']-1])
 
 #%%
-allDesigns[['kappa','Hinge Number','desang1','desang2','desang3','desang4','StableStateAll']].to_csv(Folder_name + '/Images/InfoforImages.csv', index = False)
+allDesigns[['kappa','Hinge Number','StableStateAll','restang']].to_csv(Folder_name + '/Images/InfoforImages.csv', index = False)
