@@ -16,14 +16,13 @@ if strcmp(opt.analysis,'result')
             kappas = logspace(-3,1,13);
             angles = linspace(0,pi/2,11);
             for angle = 2:size(angles,2)
-                optpar = opt;
-                extrudedUnitCell.theta = ones(size(extrudedUnitCell.theta,1),1)*optpar.restang;
-                optpar.restang = angles(angle);
-                optpar.saveFile = strcat(optpar.saveFile,'/RestAng_',num2str(optpar.restang,'%.3f'));
+                opt.restang = angles(angle);
+                extrudedUnitCell.theta = ones(size(extrudedUnitCell.theta,1),1)*opt.restang;
+                opt.saveFile = strcat(opt.saveFile,'/RestAng_',num2str(opt.restang,'%.3f'));
                 for kappa = 1:size(kappas,2)
-                    optpar.Khinge = kappas(kappa);
-                    metadataFile(optpar, extrudedUnitCell);
-                    nonlinearFoldingRand(extrudedUnitCell, optpar, opt.RandstDev);
+                    opt.Khinge = kappas(kappa);
+                    metadataFile(opt, extrudedUnitCell);
+                    nonlinearFoldingRand(extrudedUnitCell, opt, opt.RandstDev);
                 end
             end
     end
