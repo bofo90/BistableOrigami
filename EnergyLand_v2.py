@@ -295,8 +295,12 @@ NiceGraph2D(ax1, 'Kappa', 'RestAngle', mincoord = [np.log10(kappas[0]), allDesig
 sep1 = (np.log10(kappas.max())-np.log10(kappas.min()))/np.size(kappas)/2
 sep2 = (allDesigns.restang.max()-allDesigns.restang.min())/(np.size(allDesigns.restang.unique())-1)/2
 
-cs1 = ax1.imshow(allDesigns.TotalEnergy.values.reshape(10,13), extent=[np.log10(kappas[0])-sep1,np.log10(kappas[-1])+sep1,allDesigns.restang.min()-sep2,allDesigns.restang.max()+sep2], 
-                     cmap = matl.cm.nipy_spectral,vmax = allDesigns.TotalEnergy.max(), aspect = 'auto', origin = 'lower') #nipy_spectral,
+#cs1 = ax1.imshow(allDesigns.TotalEnergy.values.reshape(10,13), extent=[np.log10(kappas[0])-sep1,np.log10(kappas[-1])+sep1,allDesigns.restang.min()-sep2,allDesigns.restang.max()+sep2], 
+#                     cmap = matl.cm.nipy_spectral,vmax = allDesigns.TotalEnergy.max(), aspect = 'auto', origin = 'lower') #nipy_spectral,
+#cs1 = ax1.imshow(allDesigns.Curvature.values.reshape(10,13), extent=[np.log10(kappas[0])-sep1,np.log10(kappas[-1])+sep1,allDesigns.restang.min()-sep2,allDesigns.restang.max()+sep2], 
+#                     cmap = matl.cm.nipy_spectral,vmax = allDesigns.Curvature.max(), aspect = 'auto', origin = 'lower') #nipy_spectral,
+cs1 = ax1.imshow(allDesigns.ang1.values.reshape(10,13), extent=[np.log10(kappas[0])-sep1,np.log10(kappas[-1])+sep1,allDesigns.restang.min()-sep2,allDesigns.restang.max()+sep2], 
+                     cmap = matl.cm.nipy_spectral,vmax = allDesigns.ang1.max(), aspect = 'auto', origin = 'lower') #nipy_spectral,
 
 #ax1.set_xscale('log')
 
