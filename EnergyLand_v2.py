@@ -186,7 +186,7 @@ def ReadMetadata(file):
 kappas = np.logspace(-3,1,13)#23
 
 #Folder_name = "Results/SingleVertex4/sqp/energy/02-Aug-2019DesignRand_3"
-Folder_name = "Results/SingleVertex3/sqp/energy/15-Oct-2019_KandTheta0/Angles_120_120"
+Folder_name = "Results/SingleVertex3/sqp/energy/16-Oct-2019_KandTheta0/Angles_120_120"
 file_name1 = "/EnergyData.csv" 
 file_name2 = "/Hinges.csv"
 file_name3 = "/PosStad.csv"
