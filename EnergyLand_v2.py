@@ -114,7 +114,8 @@ def NiceGraph2Dlog(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [
         else:
             if ~np.isnan(divisions[0]):
                 axes.set_xticks(np.logspace(np.log10(mincoord[0]),np.log10(maxcoord[0]),divisions[0]))
-                
+#    axes.set_xscale('log')
+            
     axes.set_xlabel(nameX)
     if ~np.isnan(mincoord[1]) and ~np.isnan(maxcoord[1]):
         axes.set_ylim([mincoord[1]-buffer[1], maxcoord[1]+buffer[1]])
@@ -185,7 +186,7 @@ def ReadMetadata(file):
 kappas = np.logspace(-3,1,13)#23
 
 #Folder_name = "Results/SingleVertex4/sqp/energy/02-Aug-2019DesignRand_3"
-Folder_name = "Results/SingleVertex4/sqp/energy/14-Oct-2019_KandTheta0/Angles_90_90"
+Folder_name = "Results/SingleVertex3/sqp/energy/15-Oct-2019_KandTheta0/Angles_120_120"
 file_name1 = "/EnergyData.csv" 
 file_name2 = "/Hinges.csv"
 file_name3 = "/PosStad.csv"
@@ -207,8 +208,8 @@ for subdir in os.listdir(Folder_name):
     prevFolder_name = Folder_name + '/' + subdir
     
     allData = pd.DataFrame()
-    allAngles = np.empty((0,4))
-#    allAngles = np.empty((0,3))
+#    allAngles = np.empty((0,4))
+    allAngles = np.empty((0,3))
     
     for k in kappas:
         folder_name = prevFolder_name + "/kh%.5f_kta1000.00_ke1.00_kf100.00" %k
@@ -219,14 +220,17 @@ for subdir in os.listdir(Folder_name):
         dataEnergy['TotalEnergy'] = dataEnergy['EdgeEnergy']+dataEnergy['DiagonalEnergy']+dataEnergy['HingeEnergy']
         dataEnergy['HingeEnergy'] = dataEnergy['HingeEnergy']
         dataEnergy['kappa'] = np.ones(simLen)*k
+        
+        dataHinges = pd.read_csv(folder_name+file_name2)
+        dataEnergy['Curvature'] = dataHinges['Curvature']
     
         dataAngles = np.loadtxt(folder_name+file_name4,skiprows=1, delimiter = ',', dtype = np.float64)
         dataAngles = np.delete(dataAngles, 0, 1)
         dataAnglesOrd = orderAngles(dataAngles, 2, simLen)
         dataEnergy['StableStates'] = np.zeros((simLen,1))
         dataEnergy['StableStates'] = countStableStates(dataAnglesOrd, 0.5, 'centroid')
-        dataEnergy[['ang1','ang2','ang3','ang4']] = pd.DataFrame(dataAnglesOrd)
-#        dataEnergy[['ang1','ang2','ang3']] = pd.DataFrame(dataAnglesOrd)
+#        dataEnergy[['ang1','ang2','ang3','ang4']] = pd.DataFrame(dataAnglesOrd)
+        dataEnergy[['ang1','ang2','ang3']] = pd.DataFrame(dataAnglesOrd)
         
         allAngles = np.append(allAngles, dataAngles, axis = 0)
         allData = allData.append(dataEnergy)
@@ -244,8 +248,8 @@ for subdir in os.listdir(Folder_name):
     allData.set_index(['kappa','Hinge Number'], inplace = True)
     allData.sort_index(inplace=True)
     
-    kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['EdgeEnergy', 'HingeEnergy', 'TotalEnergy','ang1','ang2','ang3','ang4']].mean())
-#    kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['EdgeEnergy', 'HingeEnergy', 'TotalEnergy','ang1','ang2','ang3']].mean())
+#    kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['EdgeEnergy', 'HingeEnergy', 'TotalEnergy','ang1','ang2','ang3','ang4', 'Curvature']].mean())
+    kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['EdgeEnergy', 'HingeEnergy', 'TotalEnergy','ang1','ang2','ang3', 'Curvature']].mean())
     ####Only select stable states that have more than 10% appearance in each simulation
     kappasStSt['amountStSt'] = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['DiagonalEnergy']].count())
     more10percent = kappasStSt['amountStSt']>simLen*0.1
@@ -279,7 +283,27 @@ for subdir in os.listdir(Folder_name):
 allDesigns = allDesigns.reset_index(level=0, drop =True)
 
 #%%
-allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3','ang4']], 0.5, 'centroid', True)
+fig1 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
+ax1 =plt.subplot(111)
+fig1.subplots_adjust(top=0.987,
+bottom=0.18,
+left=0.227,
+right=0.982)
+
+NiceGraph2D(ax1, 'Kappa', 'RestAngle', mincoord = [np.log10(kappas[0]), allDesigns.restang.min()], maxcoord = [np.log10(kappas[-1]), allDesigns.restang.max()], divisions = [5,5], buffer = [0.1,0.05])
+
+sep1 = (np.log10(kappas.max())-np.log10(kappas.min()))/np.size(kappas)/2
+sep2 = (allDesigns.restang.max()-allDesigns.restang.min())/(np.size(allDesigns.restang.unique())-1)/2
+
+cs1 = ax1.imshow(allDesigns.TotalEnergy.values.reshape(10,13), extent=[np.log10(kappas[0])-sep1,np.log10(kappas[-1])+sep1,allDesigns.restang.min()-sep2,allDesigns.restang.max()+sep2], 
+                     cmap = matl.cm.nipy_spectral,vmax = allDesigns.TotalEnergy.max(), aspect = 'auto', origin = 'lower') #nipy_spectral,
+
+ax1.set_xscale('log')
+
+
+#%%
+#allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3','ang4']], 0.5, 'centroid', True)
+allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3']], 0.5, 'centroid')
 stst = np.unique(allDesigns['StableStateAll'])
 cmap2 = matl.cm.get_cmap('Set2',np.size(kappas))
 colors = cmap2(np.linspace(0,1,np.size(kappas)))
@@ -437,8 +461,12 @@ for d in designs:
 
 
 
-#fig3 = plt.figure(figsize=(cm2inch(17.8), cm2inch(7)))
-#ax3 = plt.subplot(111,projection='3d')
+fig3 = plt.figure(figsize=(cm2inch(17.8), cm2inch(7)))
+ax3 = plt.subplot(111,projection='3d')
+ax3.set_xlim([-np.pi,np.pi])
+ax3.set_ylim([-np.pi,np.pi])
+ax3.set_zlim([-np.pi,np.pi])
+    
 #cmap2 = matl.cm.get_cmap('Set2',np.size(kappas))
 #colors = cmap2(np.linspace(0,1,np.size(kappas)))    
 cmap2 = matl.cm.get_cmap('Set2',np.size(stst))
@@ -448,12 +476,12 @@ order = [5,6,7,8]
 
 for kappa in kappas:
     
-    fig3 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
-    ax3 = plt.subplot(111,projection='3d')
-    
-    ax3.set_xlim([-np.pi,np.pi])
-    ax3.set_ylim([-np.pi,np.pi])
-    ax3.set_zlim([-np.pi,np.pi])
+#    fig3 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
+#    ax3 = plt.subplot(111,projection='3d')
+#    
+#    ax3.set_xlim([-np.pi,np.pi])
+#    ax3.set_ylim([-np.pi,np.pi])
+#    ax3.set_zlim([-np.pi,np.pi])
     
     thisstate = allDesigns[allDesigns['kappa'] == kappa]
 #    thisstate['desang0'] = np.zeros(np.shape(thisstate['desang1']))
