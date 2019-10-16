@@ -181,7 +181,7 @@ def ReadMetadata(file):
     else:
         raise FileNotFoundError('No metafile found at the given directory. Changes to the script to put manually the variables are needed\n') 
 
-    return restang/np.pi, designang
+    return restang, designang
 
 kappas = np.logspace(-3,1,13)#23
 
@@ -298,7 +298,7 @@ sep2 = (allDesigns.restang.max()-allDesigns.restang.min())/(np.size(allDesigns.r
 cs1 = ax1.imshow(allDesigns.TotalEnergy.values.reshape(10,13), extent=[np.log10(kappas[0])-sep1,np.log10(kappas[-1])+sep1,allDesigns.restang.min()-sep2,allDesigns.restang.max()+sep2], 
                      cmap = matl.cm.nipy_spectral,vmax = allDesigns.TotalEnergy.max(), aspect = 'auto', origin = 'lower') #nipy_spectral,
 
-ax1.set_xscale('log')
+#ax1.set_xscale('log')
 
 
 #%%
