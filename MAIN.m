@@ -14,7 +14,7 @@ clearvars -global
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 opt=initOpt('inputType', 'origami','template','SingleVertex',...
             'angDesign', [0 120*pi/180 240*pi/180],...
-            'restang', pi/4, 'numVert', 3, 'numIterations', 1000,'RandstDev', 0.2,...
+            'restang', pi/4, 'numVert', 4, 'numIterations', 1000,'RandstDev', 0.2,...
             'analysis','savedata','analysisType','on',...
             'createFig', 'off','saveFig','on','saveMovie', 'off',...
             'figDPI',200,'safeMovieAntiAlias', 0,...
@@ -28,7 +28,7 @@ opt=initOpt('inputType', 'origami','template','SingleVertex',...
 
 
 % opt.saveFile = strcat('/',date,'_temp');
-saveFile = strcat('/16-Oct-2019_KandTheta0/Angles_120_120');
+saveFile = strcat('/16-Oct-2019_KandTheta0/Angles_90_90');
 tic;
 
 
@@ -78,10 +78,10 @@ else
     folderResults = strcat(pwd, '/Results/', opt.template,num2str(opt.numVert),'/',opt.relAlgor,'/mat', saveFile);
     allFiles = dir(folderResults);
     for j = 3:length(allFiles)
-        opt.angDesign = [0 120 240]*pi/180;
+        opt.angDesign = [0 90 180 270]*pi/180;
         [extrudedUnitCell,opt]=buildGeometry(opt);
         opt.saveFile = strcat(saveFile, '\', allFiles(j).name);
-        kappas = logspace(-3,1,13);
+        kappas = logspace(-3,1,41);
         close all
         for i = kappas
             opt.Khinge = i;

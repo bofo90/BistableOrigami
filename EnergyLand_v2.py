@@ -183,10 +183,11 @@ def ReadMetadata(file):
 
     return restang, designang
 
-kappas = np.logspace(-3,1,13)#23
+kappas = np.logspace(-3,1,41)
+#kappas = np.logspace(-3,1,13)#23
 
-#Folder_name = "Results/SingleVertex4/sqp/energy/02-Aug-2019DesignRand_3"
-Folder_name = "Results/SingleVertex3/sqp/energy/16-Oct-2019_KandTheta0/Angles_120_120"
+Folder_name = "Results/SingleVertex4/sqp/energy/16-Oct-2019_KandTheta0/Angles_90_90"
+#Folder_name = "Results/SingleVertex3/sqp/energy/16-Oct-2019_KandTheta0/Angles_120_120"
 file_name1 = "/EnergyData.csv" 
 file_name2 = "/Hinges.csv"
 file_name3 = "/PosStad.csv"
@@ -208,8 +209,8 @@ for subdir in os.listdir(Folder_name):
     prevFolder_name = Folder_name + '/' + subdir
     
     allData = pd.DataFrame()
-#    allAngles = np.empty((0,4))
-    allAngles = np.empty((0,3))
+    allAngles = np.empty((0,4))
+#    allAngles = np.empty((0,3))
     
     for k in kappas:
         folder_name = prevFolder_name + "/kh%.5f_kta1000.00_ke1.00_kf100.00" %k
@@ -228,9 +229,10 @@ for subdir in os.listdir(Folder_name):
         dataAngles = np.delete(dataAngles, 0, 1)
         dataAnglesOrd = orderAngles(dataAngles, 2, simLen)
         dataEnergy['StableStates'] = np.zeros((simLen,1))
-        dataEnergy['StableStates'] = countStableStates(dataAnglesOrd, 0.5, 'centroid')
-#        dataEnergy[['ang1','ang2','ang3','ang4']] = pd.DataFrame(dataAnglesOrd)
-        dataEnergy[['ang1','ang2','ang3']] = pd.DataFrame(dataAnglesOrd)
+        dataEnergy['StableStates'] = countStableStates(dataAnglesOrd, 10, 'ward')
+#        dataEnergy['StableStates'] = countStableStates(dataAnglesOrd, 0.5, 'centroid')
+        dataEnergy[['ang1','ang2','ang3','ang4']] = pd.DataFrame(dataAnglesOrd)
+#        dataEnergy[['ang1','ang2','ang3']] = pd.DataFrame(dataAnglesOrd)
         
         allAngles = np.append(allAngles, dataAngles, axis = 0)
         allData = allData.append(dataEnergy)
@@ -248,8 +250,8 @@ for subdir in os.listdir(Folder_name):
     allData.set_index(['kappa','Hinge Number'], inplace = True)
     allData.sort_index(inplace=True)
     
-#    kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['EdgeEnergy', 'HingeEnergy', 'TotalEnergy','ang1','ang2','ang3','ang4', 'Curvature']].mean())
-    kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['EdgeEnergy', 'HingeEnergy', 'TotalEnergy','ang1','ang2','ang3', 'Curvature']].mean())
+    kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['EdgeEnergy', 'HingeEnergy', 'TotalEnergy','ang1','ang2','ang3','ang4', 'Curvature']].mean())
+#    kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['EdgeEnergy', 'HingeEnergy', 'TotalEnergy','ang1','ang2','ang3', 'Curvature']].mean())
     ####Only select stable states that have more than 10% appearance in each simulation
     kappasStSt['amountStSt'] = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['DiagonalEnergy']].count())
     more10percent = kappasStSt['amountStSt']>simLen*0.1
@@ -283,31 +285,31 @@ for subdir in os.listdir(Folder_name):
 allDesigns = allDesigns.reset_index(level=0, drop =True)
 
 #%%
-fig1 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
-ax1 =plt.subplot(111)
-fig1.subplots_adjust(top=0.987,
-bottom=0.18,
-left=0.227,
-right=0.982)
-
-NiceGraph2D(ax1, 'Kappa', 'RestAngle', mincoord = [np.log10(kappas[0]), allDesigns.restang.min()], maxcoord = [np.log10(kappas[-1]), allDesigns.restang.max()], divisions = [5,5], buffer = [0.1,0.05])
-
-sep1 = (np.log10(kappas.max())-np.log10(kappas.min()))/np.size(kappas)/2
-sep2 = (allDesigns.restang.max()-allDesigns.restang.min())/(np.size(allDesigns.restang.unique())-1)/2
-
-#cs1 = ax1.imshow(allDesigns.TotalEnergy.values.reshape(10,13), extent=[np.log10(kappas[0])-sep1,np.log10(kappas[-1])+sep1,allDesigns.restang.min()-sep2,allDesigns.restang.max()+sep2], 
-#                     cmap = matl.cm.nipy_spectral,vmax = allDesigns.TotalEnergy.max(), aspect = 'auto', origin = 'lower') #nipy_spectral,
-#cs1 = ax1.imshow(allDesigns.Curvature.values.reshape(10,13), extent=[np.log10(kappas[0])-sep1,np.log10(kappas[-1])+sep1,allDesigns.restang.min()-sep2,allDesigns.restang.max()+sep2], 
-#                     cmap = matl.cm.nipy_spectral,vmax = allDesigns.Curvature.max(), aspect = 'auto', origin = 'lower') #nipy_spectral,
-cs1 = ax1.imshow(allDesigns.ang1.values.reshape(10,13), extent=[np.log10(kappas[0])-sep1,np.log10(kappas[-1])+sep1,allDesigns.restang.min()-sep2,allDesigns.restang.max()+sep2], 
-                     cmap = matl.cm.nipy_spectral,vmax = allDesigns.ang1.max(), aspect = 'auto', origin = 'lower') #nipy_spectral,
-
-#ax1.set_xscale('log')
+#fig1 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
+#ax1 =plt.subplot(111)
+#fig1.subplots_adjust(top=0.987,
+#bottom=0.18,
+#left=0.227,
+#right=0.982)
+#
+#NiceGraph2D(ax1, 'Kappa', 'RestAngle', mincoord = [np.log10(kappas[0]), allDesigns.restang.min()], maxcoord = [np.log10(kappas[-1]), allDesigns.restang.max()], divisions = [5,5], buffer = [0.1,0.05])
+#
+#sep1 = (np.log10(kappas.max())-np.log10(kappas.min()))/np.size(kappas)/2
+#sep2 = (allDesigns.restang.max()-allDesigns.restang.min())/(np.size(allDesigns.restang.unique())-1)/2
+#
+##cs1 = ax1.imshow(allDesigns.TotalEnergy.values.reshape(10,13), extent=[np.log10(kappas[0])-sep1,np.log10(kappas[-1])+sep1,allDesigns.restang.min()-sep2,allDesigns.restang.max()+sep2], 
+##                     cmap = matl.cm.nipy_spectral,vmax = allDesigns.TotalEnergy.max(), aspect = 'auto', origin = 'lower') #nipy_spectral,
+##cs1 = ax1.imshow(allDesigns.Curvature.values.reshape(10,13), extent=[np.log10(kappas[0])-sep1,np.log10(kappas[-1])+sep1,allDesigns.restang.min()-sep2,allDesigns.restang.max()+sep2], 
+##                     cmap = matl.cm.nipy_spectral,vmax = allDesigns.Curvature.max(), aspect = 'auto', origin = 'lower') #nipy_spectral,
+##cs1 = ax1.imshow(allDesigns.ang1.values.reshape(10,13), extent=[np.log10(kappas[0])-sep1,np.log10(kappas[-1])+sep1,allDesigns.restang.min()-sep2,allDesigns.restang.max()+sep2], 
+##                     cmap = matl.cm.nipy_spectral,vmax = allDesigns.ang1.max(), aspect = 'auto', origin = 'lower') #nipy_spectral,
+#
+##ax1.set_xscale('log')
 
 
 #%%
-#allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3','ang4']], 0.5, 'centroid', True)
-allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3']], 0.5, 'centroid')
+allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3','ang4']], 2, 'ward', True)
+#allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3']], 0.5, 'centroid')
 stst = np.unique(allDesigns['StableStateAll'])
 cmap2 = matl.cm.get_cmap('Set2',np.size(kappas))
 colors = cmap2(np.linspace(0,1,np.size(kappas)))
@@ -358,53 +360,61 @@ for state in stst:
 #    fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStStFirstK' + str(state) + '.png', transparent = True)
 
     #%%
-designs = allKappasAnalysis[['desang1','desang2','desang3','desang4']].drop_duplicates().values
+restangles = allKappasAnalysis.restang.drop_duplicates().values
 
-maxTotEn = allDesigns['TotalEnergy'].quantile(0.95)
-maxHinEn = allDesigns['HingeEnergy'].quantile(0.95)
-maxStrEn = allDesigns['EdgeEnergy'].quantile(0.95)
+#maxTotEn = allDesigns['TotalEnergy'].max()#quantile(0.95)
+#maxHinEn = allDesigns['HingeEnergy'].max()#quantile(0.95)
+#maxStrEn = allDesigns['EdgeEnergy'].max()#quantile(0.95)
+#maxCurv = allDesigns['Curvature'].max()#quantile(0.95)
+#minCurv = allDesigns['Curvature'].min()
 
-for d in designs:
+allDesigns['StableStatesAng'] = 0
+
+for i in restangles:
+    thisangBool = allDesigns['restang'] == i
+    angles = allDesigns[['ang1','ang2','ang3','ang4']]
+    allDesigns.loc[thisangBool,'StableStatesAng'] = countStableStates(angles[thisangBool], 2, 'ward', True)
+    
+    thisang = allDesigns[thisangBool]
+    
+    maxTotEn = thisang['TotalEnergy'].max()#quantile(0.95)
+    maxCurv = thisang['Curvature'].max()#quantile(0.95)
+    minCurv = thisang['Curvature'].min()
+
     plt.close('all')
     
-    thisdesign = allDesigns[(allDesigns[['desang1','desang2','desang3','desang4']] == d).all(axis = 1)]
+    fig1 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
+    ax1 = plt.subplot(111)
+    fig1.subplots_adjust(top=0.987,
+    bottom=0.18,
+    left=0.227,
+    right=0.982)
     
-    fig1 = plt.figure(figsize=(cm2inch(17.8), cm2inch(5.5)))
-    ax1 = plt.subplot(131)
-    ax2 = plt.subplot(132)
-    ax3 = plt.subplot(133)
-    fig1.subplots_adjust(top=0.98,
-    bottom=0.215,
-    left=0.095,
-    right=0.975,
-    hspace=0.25,
-    wspace=0.46)
-    
-    NiceGraph2D(ax1, 'Kappa', 'Total Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],maxTotEn], divisions=[5, 3], buffer=[0, 0.01])
-    NiceGraph2D(ax2, 'Kappa', 'Hinge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],maxHinEn], divisions=[5, 3], buffer=[0, 0.001])
-    NiceGraph2D(ax3, 'Kappa', 'Edge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],maxStrEn], divisions=[5, 3], buffer=[0, 0.005])
+#    NiceGraph2D(ax1, 'Kappa', 'TotalEnergy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],maxTotEn], divisions=[5, 3], buffer=[0, 0.01])
+    #NiceGraph2D(ax1, 'Kappa', 'Hinge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],maxHinEn], divisions=[5, 3], buffer=[0, 0.001])
+    #NiceGraph2D(ax1, 'Kappa', 'Edge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],maxStrEn], divisions=[5, 3], buffer=[0, 0.005])
+    NiceGraph2D(ax1, 'Kappa', 'Curvature', mincoord=[kappas[0],minCurv], maxcoord=[kappas[-1],maxCurv], divisions=[5, 5], buffer=[0, 0.01])
     
     cmap = matl.cm.get_cmap('Set2',np.size(stst))
     colors = cmap(np.linspace(0,1,np.size(stst)))
     
-    for i, j in zip(stst, colors):
-        thisstate = thisdesign[thisdesign['StableStates'] == i]
-        ax1.scatter(thisstate['kappa'], thisstate['TotalEnergy'], c = [j], label = i)#
-        ax2.scatter(thisstate['kappa'], thisstate['HingeEnergy'], c = [j])
-        ax3.scatter(thisstate['kappa'], thisstate['EdgeEnergy'], c = [j])
-    
+#    ax1.scatter(thisang['kappa'], thisang['TotalEnergy'], c = colors[thisang['StableStatesAng']-1])
+#    ax1.scatter(thisstate['kappa'], thisstate['HingeEnergy'], c = [j])
+#    ax1.scatter(thisstate['kappa'], thisstate['EdgeEnergy'], c = [j])
+    ax1.scatter(thisang['kappa'], thisang['Curvature'], c = colors[thisang['StableStateAll']-1])#
+
     ax1.set_xscale('log')
-    ax2.set_xscale('log')
-    ax3.set_xscale('log')
     
-    leg = ax1.legend(loc = 2, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False) 
+    #leg = ax1.legend(loc = 2, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False) 
     #           borderpad = 0.3, labelspacing = 0.1, handlelength = 0.4, handletextpad = 0.4)
-    plt.setp(leg.get_texts(), color='0.2')
-    leg.get_frame().set_linewidth(0.4)
+    #plt.setp(leg.get_texts(), color='0.2')
+    #leg.get_frame().set_linewidth(0.4)
     
     fig1.show()
-    fig1.savefig(Folder_name + '/Images/SingleDes/Energy_' + str(d[0].astype(int))+ '_' + str(d[3].astype(int)) + '.pdf', transparent = True)
-    fig1.savefig(Folder_name + '/Images/SingleDes/Energy_' + str(d[0].astype(int))+ '_' + str(d[3].astype(int)) + '.png', transparent = True)
+#    fig1.savefig(Folder_name + '/Images/Energy_Restang_' + str(i.astype(float))+'.pdf', transparent = True)
+#    fig1.savefig(Folder_name + '/Images/Energy_Restang_' + str(i.astype(float))+ '.png', transparent = True)
+    fig1.savefig(Folder_name + '/Images/Restang_' + str(i.astype(float))+'.pdf', transparent = True)
+    fig1.savefig(Folder_name + '/Images/Restang_' + str(i.astype(float))+ '.png', transparent = True)
 #%%
     
     
