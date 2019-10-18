@@ -287,25 +287,39 @@ allDesigns = allDesigns.reset_index(level=0, drop =True)
 #%%
 #fig1 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
 #ax1 =plt.subplot(111)
-#fig1.subplots_adjust(top=0.987,
-#bottom=0.18,
-#left=0.227,
-#right=0.982)
+#fig1.subplots_adjust(top=0.967,
+#bottom=0.185,
+#left=0.215,
+#right=0.917)
 #
-#NiceGraph2D(ax1, 'Kappa', 'RestAngle', mincoord = [np.log10(kappas[0]), allDesigns.restang.min()], maxcoord = [np.log10(kappas[-1]), allDesigns.restang.max()], divisions = [5,5], buffer = [0.1,0.05])
+#NiceGraph2D(ax1, r'$Log(\kappa)$', r'$\theta_0/\pi$', mincoord = [np.log10(kappas[0]), allDesigns.restang.min()], 
+#            maxcoord = [np.log10(kappas[-1]), allDesigns.restang.max()], divisions = [5,4], buffer = [0.1,0.05])
+#ax1.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2f'))
 #
 #sep1 = (np.log10(kappas.max())-np.log10(kappas.min()))/np.size(kappas)/2
 #sep2 = (allDesigns.restang.max()-allDesigns.restang.min())/(np.size(allDesigns.restang.unique())-1)/2
 #
-##cs1 = ax1.imshow(allDesigns.TotalEnergy.values.reshape(10,13), extent=[np.log10(kappas[0])-sep1,np.log10(kappas[-1])+sep1,allDesigns.restang.min()-sep2,allDesigns.restang.max()+sep2], 
-##                     cmap = matl.cm.nipy_spectral,vmax = allDesigns.TotalEnergy.max(), aspect = 'auto', origin = 'lower') #nipy_spectral,
+#cs1 = ax1.imshow(allDesigns.TotalEnergy.values.reshape(10,13), extent=[np.log10(kappas[0])-sep1,np.log10(kappas[-1])+sep1,allDesigns.restang.min()-sep2,allDesigns.restang.max()+sep2], 
+#                     cmap = matl.cm.nipy_spectral,vmax = allDesigns.TotalEnergy.max(), vmin = 0, aspect = 'auto', origin = 'lower') #nipy_spectral,
 ##cs1 = ax1.imshow(allDesigns.Curvature.values.reshape(10,13), extent=[np.log10(kappas[0])-sep1,np.log10(kappas[-1])+sep1,allDesigns.restang.min()-sep2,allDesigns.restang.max()+sep2], 
-##                     cmap = matl.cm.nipy_spectral,vmax = allDesigns.Curvature.max(), aspect = 'auto', origin = 'lower') #nipy_spectral,
+##                     cmap = matl.cm.nipy_spectral,vmax = allDesigns.Curvature.max(), vmin = 0, aspect = 'auto', origin = 'lower') #nipy_spectral,
 ##cs1 = ax1.imshow(allDesigns.ang1.values.reshape(10,13), extent=[np.log10(kappas[0])-sep1,np.log10(kappas[-1])+sep1,allDesigns.restang.min()-sep2,allDesigns.restang.max()+sep2], 
 ##                     cmap = matl.cm.nipy_spectral,vmax = allDesigns.ang1.max(), aspect = 'auto', origin = 'lower') #nipy_spectral,
 #
-##ax1.set_xscale('log')
-
+#cbar = plt.colorbar(cs1, pad=0.01, format="%.2f")# fraction=0.99,extend = 'max',, orientation='horizontal'
+##cbar.set_ticks(np.linspace(0, allDesigns.Curvature.max(), 5))
+##cbar.set_label(r'$C$', fontsize = 9, color = '0.2',labelpad = 0)
+#cbar.set_ticks(np.linspace(0, allDesigns.TotalEnergy.max(), 5))
+#cbar.set_label(r'$E_\mathrm{tot}$', fontsize = 9, color = '0.2',labelpad = 0)
+#cbar.ax.tick_params(colors='0.2', pad=2, width=0.4)
+#cbar.outline.set_edgecolor('0.2')
+#cbar.outline.set_linewidth(0.4)
+#
+#fig1.show()
+##fig1.savefig(Folder_name + '/Images/' + 'Theta0Kappa_Curvature' + '.pdf', transparent = True)
+##fig1.savefig(Folder_name + '/Images/' + 'Theta0Kappa_Curvature' + '.png', transparent = True)
+#fig1.savefig(Folder_name + '/Images/' + 'Theta0Kappa_Energy' + '.pdf', transparent = True)
+#fig1.savefig(Folder_name + '/Images/' + 'Theta0Kappa_Energy' + '.png', transparent = True)
 
 #%%
 allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3','ang4']], 9, 'ward', True)
