@@ -308,7 +308,7 @@ allDesigns = allDesigns.reset_index(level=0, drop =True)
 
 
 #%%
-allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3','ang4']], 2, 'ward', True)
+allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3','ang4']], 9, 'ward', True)
 #allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3']], 0.5, 'centroid')
 stst = np.unique(allDesigns['StableStateAll'])
 cmap2 = matl.cm.get_cmap('Set2',np.size(kappas))
@@ -398,8 +398,8 @@ for i in restangles:
     cmap = matl.cm.get_cmap('Set2',np.size(stst))
     colors = cmap(np.linspace(0,1,np.size(stst)))
     
-#    ax1.scatter(thisang['kappa'], thisang['TotalEnergy'], c = colors[thisang['StableStatesAng']-1])
-#    ax1.scatter(thisstate['kappa'], thisstate['HingeEnergy'], c = [j])
+#    ax1.scatter(thisang['kappa'], thisang['TotalEnergy'], c = colors[thisang['StableStateAll']-1])
+#    ax1.scatter(thisang['kappa'], thisang['EdgeEnergy'], c = colors[thisang['StableStateAll']-1])
 #    ax1.scatter(thisstate['kappa'], thisstate['EdgeEnergy'], c = [j])
     ax1.scatter(thisang['kappa'], thisang['Curvature'], c = colors[thisang['StableStateAll']-1])#
 
