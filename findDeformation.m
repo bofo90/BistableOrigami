@@ -14,7 +14,7 @@ if strcmp(opt.analysis,'result')
             
         case 'randomPert'
             kappas = logspace(-3,1,41);
-            angles = linspace(0,pi/2,5);
+            angles = linspace(0,3*pi/2,7);
             savefile = opt.saveFile;
             for angle = 2:size(angles,2)
                 opt.restang = angles(angle);
