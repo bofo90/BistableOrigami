@@ -13,10 +13,10 @@ if strcmp(opt.analysis,'result')
             nonlinearFoldingMulti(extrudedUnitCell, opt, opt.angleConstrFinal(1).val);
             
         case 'randomPert'
-            kappas = logspace(-3,1,41);
-            angles = linspace(0,3*pi/2,7);
+            kappas = logspace(-3,1,81);
+            angles = linspace(0,pi,5);
             savefile = opt.saveFile;
-            for angle = 2:size(angles,2)
+            for angle = 2:size(angles,2)-1
                 opt.restang = angles(angle);
                 extrudedUnitCell.theta = ones(size(extrudedUnitCell.theta,1),1)*opt.restang;
                 opt.saveFile = strcat(savefile,'/RestAng_',num2str(opt.restang,'%.3f'));

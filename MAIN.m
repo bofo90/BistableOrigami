@@ -41,8 +41,8 @@ for i = 90:5:90
 %         if (i+j)<180 || ((i <=90 && i >=35) && (i+j) <195)
 %             continue;
 %         end
-        opt.angDesign = [0, 90, 135, 225]*pi/180;
-        opt.saveFile = strcat('/16-Oct-2019_KandTheta0/SquareTwist');
+        opt.angDesign = [0, 90, 180, 270]*pi/180;
+        opt.saveFile = strcat('/15-Nov-2019_KandTheta0/DoubleSym');
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %BUILD
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
