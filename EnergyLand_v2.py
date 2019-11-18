@@ -183,10 +183,10 @@ def ReadMetadata(file):
 
     return restang, designang
 
-kappas = np.logspace(-3,1,41)
+kappas = np.logspace(-3,1,81)
 #kappas = np.logspace(-3,1,13)#23
 
-Folder_name = "Results/SingleVertex4/sqp/energy/16-Oct-2019_KandTheta0/Angles_90_90"
+Folder_name = "Results/SingleVertex4/sqp/energy/15-Nov-2019_KandTheta0/DoubleSym"
 #Folder_name = "Results/SingleVertex3/sqp/energy/16-Oct-2019_KandTheta0/Angles_120_120"
 file_name1 = "/EnergyData.csv" 
 file_name2 = "/Hinges.csv"
@@ -322,56 +322,56 @@ allDesigns = allDesigns.reset_index(level=0, drop =True)
 #fig1.savefig(Folder_name + '/Images/' + 'Theta0Kappa_Energy' + '.png', transparent = True)
 
 #%%
-allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3','ang4']], 9, 'ward', True)
+allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3','ang4']], 5, 'ward', True)
 #allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3']], 0.5, 'centroid')
 stst = np.unique(allDesigns['StableStateAll'])
 cmap2 = matl.cm.get_cmap('Set2',np.size(kappas))
 colors = cmap2(np.linspace(0,1,np.size(kappas)))
-
-plt.scatter(np.log10(allKappasAnalysis['kappa']),allKappasAnalysis['restang'],c = colors[allKappasAnalysis['StableStates'].values])
-
-for state in stst:
-    plt.close('all')
-    
-    fig2 = plt.figure(figsize=(cm2inch(8.6), cm2inch(4.5)))
-    ax1 = plt.subplot(121)
-    ax2 = plt.subplot(122)
-    fig2.subplots_adjust(top=0.885,
-        bottom=0.24,
-        left=0.155,
-        right=0.985,
-        hspace=0.215,
-        wspace=0.5)
-    NiceGraph2D(ax1, 'Kappa', 'RestAngle' , mincoord=[0,0], maxcoord=[180,180], divisions=[7,7], buffer = [5,5])
-    
-    thisstate = allDesigns[allDesigns['StableStateAll'] == state]
-    
-    for i in np.arange(np.size(kappas)):
-        thiskappa = thisstate[thisstate['kappa'] == kappas[i]]
-       
-        if not thiskappa.empty:
-            ax1.scatter(thiskappa['desang1'].values,thiskappa['desang3'].values, c = [colors[i]], marker = 's', s = 4, edgecolor = 'None', zorder = 5-i)
-            ax1.scatter(-thiskappa['desang1'].values+180,-thiskappa['desang3'].values+180, zorder = 5-i, marker = 's',  c = [colors[i]], s = 4, edgecolor = 'None')
-            ax1.scatter(thiskappa['desang3'].values,thiskappa['desang1'].values, c = [colors[i]], zorder = 5-i, marker = 's',  s = 4, edgecolor = 'None')
-            ax1.scatter(-thiskappa['desang3'].values+180,-thiskappa['desang1'].values+180, zorder = 5-i, marker = 's',  c = [colors[i]], s = 4, edgecolor = 'None')
-            ax2.scatter(thiskappa['desang1'].values,thiskappa['desang3'].values, c = [colors[i]], s = 4, edgecolor = 'None', marker = 's', label = str(kappas[i]))
-            ax2.scatter(-thiskappa['desang1'].values+180,-thiskappa['desang3'].values+180, c = [colors[i]], marker = 's', s = 4, edgecolor = 'None')
-            ax2.scatter(thiskappa['desang3'].values,thiskappa['desang1'].values, c = [colors[i]], marker = 's', s = 4, edgecolor = 'None')
-            ax2.scatter(-thiskappa['desang3'].values+180,-thiskappa['desang1'].values+180, c = [colors[i]], marker = 's', s = 4, edgecolor = 'None')
-        else:
-            ax2.scatter([],[],c = [colors[i]], s = 4, edgecolor = 'None', marker = 's', label = str(kappas[i]) )
-            
-            
-    leg = ax2.legend(loc = 5, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False)
-    plt.setp(leg.get_texts(), color='0.2')
-    leg.get_frame().set_linewidth(0.4)
-
-
-    fig2.show()
-    fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStStLastK' + str(state) + '.pdf', transparent = True)
-    fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStStLastK' + str(state) + '.png', transparent = True)
-#    fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStStFirstK' + str(state) + '.pdf', transparent = True)
-#    fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStStFirstK' + str(state) + '.png', transparent = True)
+#
+#plt.scatter(np.log10(allKappasAnalysis['kappa']),allKappasAnalysis['restang'],c = colors[allKappasAnalysis['StableStates'].values])
+#
+#for state in stst:
+#    plt.close('all')
+#    
+#    fig2 = plt.figure(figsize=(cm2inch(8.6), cm2inch(4.5)))
+#    ax1 = plt.subplot(121)
+#    ax2 = plt.subplot(122)
+#    fig2.subplots_adjust(top=0.885,
+#        bottom=0.24,
+#        left=0.155,
+#        right=0.985,
+#        hspace=0.215,
+#        wspace=0.5)
+#    NiceGraph2D(ax1, 'Kappa', 'RestAngle' , mincoord=[0,0], maxcoord=[180,180], divisions=[7,7], buffer = [5,5])
+#    
+#    thisstate = allDesigns[allDesigns['StableStateAll'] == state]
+#    
+#    for i in np.arange(np.size(kappas)):
+#        thiskappa = thisstate[thisstate['kappa'] == kappas[i]]
+#       
+#        if not thiskappa.empty:
+#            ax1.scatter(thiskappa['desang1'].values,thiskappa['desang3'].values, c = [colors[i]], marker = 's', s = 4, edgecolor = 'None', zorder = 5-i)
+#            ax1.scatter(-thiskappa['desang1'].values+180,-thiskappa['desang3'].values+180, zorder = 5-i, marker = 's',  c = [colors[i]], s = 4, edgecolor = 'None')
+#            ax1.scatter(thiskappa['desang3'].values,thiskappa['desang1'].values, c = [colors[i]], zorder = 5-i, marker = 's',  s = 4, edgecolor = 'None')
+#            ax1.scatter(-thiskappa['desang3'].values+180,-thiskappa['desang1'].values+180, zorder = 5-i, marker = 's',  c = [colors[i]], s = 4, edgecolor = 'None')
+#            ax2.scatter(thiskappa['desang1'].values,thiskappa['desang3'].values, c = [colors[i]], s = 4, edgecolor = 'None', marker = 's', label = str(kappas[i]))
+#            ax2.scatter(-thiskappa['desang1'].values+180,-thiskappa['desang3'].values+180, c = [colors[i]], marker = 's', s = 4, edgecolor = 'None')
+#            ax2.scatter(thiskappa['desang3'].values,thiskappa['desang1'].values, c = [colors[i]], marker = 's', s = 4, edgecolor = 'None')
+#            ax2.scatter(-thiskappa['desang3'].values+180,-thiskappa['desang1'].values+180, c = [colors[i]], marker = 's', s = 4, edgecolor = 'None')
+#        else:
+#            ax2.scatter([],[],c = [colors[i]], s = 4, edgecolor = 'None', marker = 's', label = str(kappas[i]) )
+#            
+#            
+#    leg = ax2.legend(loc = 5, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False)
+#    plt.setp(leg.get_texts(), color='0.2')
+#    leg.get_frame().set_linewidth(0.4)
+#
+#
+#    fig2.show()
+#    fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStStLastK' + str(state) + '.pdf', transparent = True)
+#    fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStStLastK' + str(state) + '.png', transparent = True)
+##    fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStStFirstK' + str(state) + '.pdf', transparent = True)
+##    fig2.savefig(Folder_name + '/Images/' + 'DesignSpaceStStFirstK' + str(state) + '.png', transparent = True)
 
     #%%
 restangles = allKappasAnalysis.restang.drop_duplicates().values
@@ -384,40 +384,41 @@ restangles = allKappasAnalysis.restang.drop_duplicates().values
 
 allDesigns['StableStatesAng'] = 0
 
+maxTotEn = allDesigns['TotalEnergy'].max()#quantile(0.95)
+maxCurv = allDesigns['Curvature'].max()#quantile(0.95)
+minCurv = allDesigns['Curvature'].min()
+    
+fig1 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
+ax1 = plt.subplot(111)
+fig1.subplots_adjust(top=0.987,
+bottom=0.18,
+left=0.227,
+right=0.982)
+
+#    NiceGraph2D(ax1,  r'$Log(\kappa)$', r'$E_\mathrm{tot}$', mincoord=[np.log10(kappas[0]),0], maxcoord=[np.log10(kappas[-1]),maxTotEn], divisions=[5, 3], buffer=[0.1, 0.01])
+#NiceGraph2D(ax1, 'Kappa', 'Hinge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],maxHinEn], divisions=[5, 3], buffer=[0, 0.001])
+#NiceGraph2D(ax1, 'Kappa', 'Edge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],maxStrEn], divisions=[5, 3], buffer=[0, 0.005])
+NiceGraph2D(ax1, r'$Log(\kappa)$', r'$C$', mincoord=[np.log10(kappas[0]),minCurv], maxcoord=[np.log10(kappas[-1]),maxCurv], divisions=[5, 5], buffer=[0.1, 1])
+
 for i in restangles:
     thisangBool = allDesigns['restang'] == i
     angles = allDesigns[['ang1','ang2','ang3','ang4']]
     allDesigns.loc[thisangBool,'StableStatesAng'] = countStableStates(angles[thisangBool], 2, 'ward', True)
     
     thisang = allDesigns[thisangBool]
-    
-    maxTotEn = thisang['TotalEnergy'].max()#quantile(0.95)
-    maxCurv = thisang['Curvature'].max()#quantile(0.95)
-    minCurv = thisang['Curvature'].min()
-
+   
     plt.close('all')
     
-    fig1 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
-    ax1 = plt.subplot(111)
-    fig1.subplots_adjust(top=0.987,
-    bottom=0.18,
-    left=0.227,
-    right=0.982)
-    
-    NiceGraph2D(ax1,  r'$Log(\kappa)$', r'$E_\mathrm{tot}$', mincoord=[np.log10(kappas[0]),0], maxcoord=[np.log10(kappas[-1]),maxTotEn], divisions=[5, 3], buffer=[0.1, 0.01])
-    #NiceGraph2D(ax1, 'Kappa', 'Hinge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],maxHinEn], divisions=[5, 3], buffer=[0, 0.001])
-    #NiceGraph2D(ax1, 'Kappa', 'Edge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],maxStrEn], divisions=[5, 3], buffer=[0, 0.005])
-#    NiceGraph2D(ax1, r'$Log(\kappa)$', r'$C$', mincoord=[np.log10(kappas[0]),minCurv], maxcoord=[np.log10(kappas[-1]),maxCurv], divisions=[5, 5], buffer=[0.1, 1])
     
     ax1.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2f'))
             
     cmap = matl.cm.get_cmap('Set2',np.size(stst))
     colors = cmap(np.linspace(0,1,np.size(stst)))
     
-    ax1.scatter(np.log10(thisang['kappa']), thisang['TotalEnergy'], c = colors[thisang['StableStateAll']-1])
+#    ax1.scatter(np.log10(thisang['kappa']), thisang['TotalEnergy'], c = colors[thisang['StableStateAll']-1])
 #    ax1.scatter(thisang['kappa'], thisang['EdgeEnergy'], c = colors[thisang['StableStateAll']-1])
 #    ax1.scatter(thisstate['kappa'], thisstate['EdgeEnergy'], c = [j])
-#    ax1.scatter(np.log10(thisang['kappa']), thisang['Curvature'], c = colors[thisang['StableStateAll']-1])#
+    ax1.scatter(np.log10(thisang['kappa']), thisang['Curvature'], c = colors[thisang['StableStateAll']-1])#
 
     #leg = ax1.legend(loc = 2, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False) 
     #           borderpad = 0.3, labelspacing = 0.1, handlelength = 0.4, handletextpad = 0.4)
@@ -425,10 +426,10 @@ for i in restangles:
     #leg.get_frame().set_linewidth(0.4)
     
     fig1.show()
-    fig1.savefig(Folder_name + '/Images/Energy_Restang_' + str(i.astype(float))+'.pdf', transparent = True)
-    fig1.savefig(Folder_name + '/Images/Energy_Restang_' + str(i.astype(float))+ '.png', transparent = True)
-#    fig1.savefig(Folder_name + '/Images/Restang_' + str(i.astype(float))+'.pdf', transparent = True)
-#    fig1.savefig(Folder_name + '/Images/Restang_' + str(i.astype(float))+ '.png', transparent = True)
+#    fig1.savefig(Folder_name + '/Images/Energy_Restang_' + str(i.astype(float))+'.pdf', transparent = True)
+#    fig1.savefig(Folder_name + '/Images/Energy_Restang_' + str(i.astype(float))+ '.png', transparent = True)
+    fig1.savefig(Folder_name + '/Images/All_Restang_' + str(i.astype(float))+'.pdf', transparent = True)
+    fig1.savefig(Folder_name + '/Images/All_Restang_' + str(i.astype(float))+ '.png', transparent = True)
 #%%
     
     
