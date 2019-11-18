@@ -16,6 +16,12 @@ import os.path
 import ternary #from https://github.com/marcharper/python-ternary
 import itertools
 import copy
+matl.rcParams['pdf.fonttype'] = 42
+matl.rcParams['ps.fonttype'] = 42
+matl.rcParams['font.family'] = 'sans-serif'
+matl.rcParams['font.sans-serif'] = 'Arial'
+matl.rcParams['mathtext.fontset'] = 'cm'
+
 
 def cm2inch(value):
     return value/2.54
@@ -88,14 +94,18 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
     axes.set_ylabel(nameY)
    
     axes.xaxis.label.set_color(gray)
-    axes.tick_params(axis='x',colors=gray, width = 0.4)
+    axes.tick_params(axis='x',colors=gray, direction = 'in', width = 0.4)
     axes.spines['bottom'].set_color(gray)
     axes.spines['top'].set_color(gray)
     axes.yaxis.label.set_color(gray)
-    axes.tick_params(axis='y', colors=gray, width = 0.4)
+    axes.tick_params(axis='y', colors=gray, direction = 'in', width = 0.4)
     axes.spines['left'].set_color(gray)
     axes.spines['right'].set_color(gray)
     axes.tick_params(pad = 2)
+    
+    axes.tick_params(axis='y', which='minor', colors='0.2', direction = 'in', width = 0.4)
+    axes.tick_params(axis='x', which='minor', colors='0.2', direction = 'in', width = 0.4)
+
     
     for axis in ['top','bottom','left','right']:
         axes.spines[axis].set_linewidth(0.4)
@@ -400,22 +410,26 @@ maxTotEn = allDesigns['TotalEnergy'].max()#quantile(0.95)
 maxCurv = allDesigns['Curvature'].max()#quantile(0.95)
 minCurv = allDesigns['Curvature'].min()
     
-fig1 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
+fig1 = plt.figure(figsize=(cm2inch(8.7), cm2inch(7)))
 ax1 = plt.subplot(111)
 fig1.subplots_adjust(top=0.987,
-bottom=0.18,
-left=0.227,
-right=0.982)
+bottom=0.14,
+left=0.11,
+right=0.987)
 
 markers = np.array(['o', 'v', '^', '<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 'd', 'P', 'X'])
 markers = ['o','^','s']
+lines = ['-','--',':']#,'-.'
 cmap = matl.cm.get_cmap('Set2',np.size(stst))
 colors = cmap(np.linspace(0,1,np.size(stst)))
 #    NiceGraph2D(ax1,  r'$Log(\kappa)$', r'$E_\mathrm{tot}$', mincoord=[np.log10(kappas[0]),0], maxcoord=[np.log10(kappas[-1]),maxTotEn], divisions=[5, 3], buffer=[0.1, 0.01])
 #NiceGraph2D(ax1, 'Kappa', 'Hinge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],maxHinEn], divisions=[5, 3], buffer=[0, 0.001])
 #NiceGraph2D(ax1, 'Kappa', 'Edge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],maxStrEn], divisions=[5, 3], buffer=[0, 0.005])
-NiceGraph2D(ax1, r'$Log(\kappa)$', r'$C$', mincoord=[np.log10(kappas[0]),-3], maxcoord=[np.log10(kappas[-1]),3], divisions=[5, 5], buffer=[0.1, 1])
-ax1.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2f'))
+NiceGraph2D(ax1, r'$\kappa$', r'$C$')#, mincoord=[np.log10(kappas[0]),-3], maxcoord=[np.log10(kappas[-1]),3], divisions=[5, 5], buffer=[0.1, 1])
+#ax1.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2f'))
+ax1.set_yticks(np.linspace(-4, 4,5))
+ax1.set_ylim([-4.1,4.1])
+ax1.set_xscale('log')
 
 for i in np.arange(np.size(restangles)):
     thisangBool = allDesigns['restang'] == restangles[i]
@@ -423,14 +437,15 @@ for i in np.arange(np.size(restangles)):
 #    allDesigns.loc[thisangBool,'StableStatesAng'] = countStableStates(angles[thisangBool], 2, 'ward', False)
     
     thisang = allDesigns[thisangBool]
-   
+    for j in stst:
+        thisstst = thisang[thisang.StableStateAll == j]
 #    plt.close('all')
 
 #    ax1.scatter(np.log10(thisang['kappa']), thisang['TotalEnergy'], c = colors[thisang['StableStateAll']-1])
 #    ax1.scatter(thisang['kappa'], thisang['EdgeEnergy'], c = colors[thisang['StableStateAll']-1])
 #    ax1.scatter(thisstate['kappa'], thisstate['EdgeEnergy'], c = [j])
-    ax1.scatter(np.log10(thisang['kappa']), thisang['Curvature'], c = colors[thisang['StableStateAll'].values.astype('int')-1],
-                s = 5, marker = markers[i])
+        ax1.plot(thisstst['kappa'], thisstst['Curvature'], c = colors[j-1], linestyle = lines[i], lw = 2.5)#thisang['StableStateAll'].values.astype('int')-1])#,
+#                s = 5, marker = markers[i])
 
 #leg = ax1.legend(loc = 2, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False) 
 ##           borderpad = 0.3, labelspacing = 0.1, handlelength = 0.4, handletextpad = 0.4)
