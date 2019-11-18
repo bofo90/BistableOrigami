@@ -458,43 +458,61 @@ fig1.show()
 fig1.savefig(Folder_name + '/Images/All_Restang_' + str(i.astype(float))+'.pdf', transparent = True)
 fig1.savefig(Folder_name + '/Images/All_Restang_' + str(i.astype(float))+ '.png', transparent = True)
 #%%
+plt.close('all')   
+
+markers = np.array(['o', 'v', '^', '<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 'd', 'P', 'X'])
+markers = ['o','^','s']
+lines = ['-','--',':']#,'-.'
+cmap = matl.cm.get_cmap('Set2',np.size(stst))
+colors = cmap(np.linspace(0,1,np.size(stst)))
+
+
+for i in np.arange(np.size(restangles)):
     
+    fig1 = plt.figure(figsize=(cm2inch(5.5), cm2inch(4)))
+    ax1 = plt.subplot(111)
+    fig1.subplots_adjust(top=0.962,
+    bottom=0.27,
+    left=0.24,
+    right=0.987)
     
-for d in designs:
-    plt.close('all')
+    thisangBool = allDesigns['restang'] == restangles[i]
+    thisang = allDesigns[thisangBool]    
     
-    thisdesign = allDesigns[(allDesigns[['desang1','desang2','desang3','desang4']] == d).all(axis = 1)]
+    maxCurv = np.ceil(thisang['Curvature'].max())#quantile(0.95)
+    minCurv = np.floor(thisang['Curvature'].min())
     
-    fig1,axes  = plt.subplots(1,4, figsize=(cm2inch(20), cm2inch(5.5)))
-    fig1.subplots_adjust(top=0.98,
-    bottom=0.215,
-    left=0.085,
-    right=0.995,
-    hspace=0.25,
-    wspace=0.495)
+        #    NiceGraph2D(ax1,  r'$Log(\kappa)$', r'$E_\mathrm{tot}$', mincoord=[np.log10(kappas[0]),0], maxcoord=[np.log10(kappas[-1]),maxTotEn], divisions=[5, 3], buffer=[0.1, 0.01])
+    #NiceGraph2D(ax1, 'Kappa', 'Hinge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],maxHinEn], divisions=[5, 3], buffer=[0, 0.001])
+    #NiceGraph2D(ax1, 'Kappa', 'Edge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],maxStrEn], divisions=[5, 3], buffer=[0, 0.005])
+    NiceGraph2D(ax1, r'$\kappa$', r'$C$')#, mincoord=[np.log10(kappas[0]),-3], maxcoord=[np.log10(kappas[-1]),3], divisions=[5, 5], buffer=[0.1, 1])
     
-    cmap = matl.cm.get_cmap('Set2',np.size(stst))
-    colors = cmap(np.linspace(0,1,np.size(stst)))
-    
-    for i, ax in enumerate(axes.flat):
-        ax.set_xscale('log')
-        NiceGraph2Dlog(ax, 'Kappa', 'Angle '+ str(i+1) +' [rad/pi]', mincoord=[kappas[0],-0.5], maxcoord=[kappas[-1],0.5], divisions=[3, 3], buffer=[2, 0.1])
+    ax1.set_yticks(np.linspace(minCurv, maxCurv,5))
+    ax1.set_ylim([minCurv+minCurv*0.1, maxCurv+maxCurv*0.1])
+    ax1.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.1f'))
+    ax1.set_xscale('log')
+    ax1.set_xlim([0.0007,15])
         
-        for s in stst:
-            thisstate = thisdesign[thisdesign['StableStateAll']== s]
-            ax.scatter(thisstate['kappa'], thisstate.iloc[:,5+i]/np.pi, c = colors[thisstate['StableStateAll']-1], label = s)
-            ax.scatter(thisstate['kappa'], -thisstate.iloc[:,5+i]/np.pi, c = colors[thisstate['StableStateAll']-1], marker ='^')
-    
-    leg = axes[-1].legend(loc = 0, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False) 
-    #           borderpad = 0.3, labelspacing = 0.1, handlelength = 0.4, handletextpad = 0.4)
-    plt.setp(leg.get_texts(), color='0.2')
-    leg.get_frame().set_linewidth(0.4)
+    for j in stst:
+        thisstst = thisang[thisang.StableStateAll == j]
+#    plt.close('all')
+
+#    ax1.scatter(np.log10(thisang['kappa']), thisang['TotalEnergy'], c = colors[thisang['StableStateAll']-1])
+#    ax1.scatter(thisang['kappa'], thisang['EdgeEnergy'], c = colors[thisang['StableStateAll']-1])
+#    ax1.scatter(thisstate['kappa'], thisstate['EdgeEnergy'], c = [j])
+        ax1.scatter(thisstst['kappa'], thisstst['Curvature'], c = colors[thisstst['StableStateAll'].values.astype('int')-1], s = 10)#,
+#                s = 5, marker = markers[i])#, linestyle = lines[i], lw = 2.5)
+
+#leg = ax1.legend(loc = 2, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False) 
+##           borderpad = 0.3, labelspacing = 0.1, handlelength = 0.4, handletextpad = 0.4)
+#plt.setp(leg.get_texts(), color='0.2')
+#leg.get_frame().set_linewidth(0.4)
     
     fig1.show()
-    fig1.savefig(Folder_name + '/Images/SingleDes/Angles_' + str(d[0].astype(int))+ '_' + str(d[3].astype(int)) + '.pdf', transparent = True)
-    fig1.savefig(Folder_name + '/Images/SingleDes/Angles_' + str(d[0].astype(int))+ '_' + str(d[3].astype(int)) + '.png', transparent = True)
-
-
+    #    fig1.savefig(Folder_name + '/Images/Energy_Restang_' + str(i.astype(float))+'.pdf', transparent = True)
+    #    fig1.savefig(Folder_name + '/Images/Energy_Restang_' + str(i.astype(float))+ '.png', transparent = True)
+    fig1.savefig(Folder_name + '/Images/Restang_' + str(restangles[i].astype(float))+'.pdf', transparent = True)
+    fig1.savefig(Folder_name + '/Images/Restang_' + str(restangles[i].astype(float))+ '.png', transparent = True)
 
 #%%
 #fig3 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
