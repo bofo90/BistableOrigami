@@ -28,7 +28,7 @@ opt=initOpt('inputType', 'origami','template','SingleVertex',...
 
 
 % opt.saveFile = strcat('/',date,'_temp');
-saveFile = strcat('/16-Oct-2019_KandTheta0/Angles_90_90');
+saveFile = strcat('/15-Nov-2019_KandTheta0/DoubleSym');
 tic;
 
 
@@ -81,7 +81,7 @@ else
         opt.angDesign = [0 90 180 270]*pi/180;
         [extrudedUnitCell,opt]=buildGeometry(opt);
         opt.saveFile = strcat(saveFile, '\', allFiles(j).name);
-        kappas = logspace(-3,1,41);
+        kappas = logspace(-3,1,81);
         close all
         for i = kappas
             opt.Khinge = i;
