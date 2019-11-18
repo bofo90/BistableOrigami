@@ -15,6 +15,7 @@ import configparser
 import os.path
 import ternary #from https://github.com/marcharper/python-ternary
 import itertools
+import copy
 
 def cm2inch(value):
     return value/2.54
@@ -322,9 +323,20 @@ allDesigns = allDesigns.reset_index(level=0, drop =True)
 #fig1.savefig(Folder_name + '/Images/' + 'Theta0Kappa_Energy' + '.png', transparent = True)
 
 #%%
-allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3','ang4']], 5, 'ward', True)
+allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3','ang4']], 1, 'centroid', True)
 #allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3']], 0.5, 'centroid')
 stst = np.unique(allDesigns['StableStateAll'])
+############################################# TO make SS consistence between plots (its done manualy)
+newSS = np.array([4,4,3,3,1,1,2,1,2])
+invmask_copy = copy.deepcopy(allDesigns.StableStateAll)
+
+for old,new in zip(stst, newSS):
+    allDesigns.StableStateAll[invmask_copy == old] = new
+
+delSS = np.array([4,5,6,7,8,9])
+stst = np.delete(stst, delSS)
+#####################################################################################################
+
 cmap2 = matl.cm.get_cmap('Set2',np.size(kappas))
 colors = cmap2(np.linspace(0,1,np.size(kappas)))
 #
@@ -395,41 +407,41 @@ bottom=0.18,
 left=0.227,
 right=0.982)
 
+markers = np.array(['o', 'v', '^', '<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 'd', 'P', 'X'])
+markers = ['o','^','s']
+cmap = matl.cm.get_cmap('Set2',np.size(stst))
+colors = cmap(np.linspace(0,1,np.size(stst)))
 #    NiceGraph2D(ax1,  r'$Log(\kappa)$', r'$E_\mathrm{tot}$', mincoord=[np.log10(kappas[0]),0], maxcoord=[np.log10(kappas[-1]),maxTotEn], divisions=[5, 3], buffer=[0.1, 0.01])
 #NiceGraph2D(ax1, 'Kappa', 'Hinge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],maxHinEn], divisions=[5, 3], buffer=[0, 0.001])
 #NiceGraph2D(ax1, 'Kappa', 'Edge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],maxStrEn], divisions=[5, 3], buffer=[0, 0.005])
-NiceGraph2D(ax1, r'$Log(\kappa)$', r'$C$', mincoord=[np.log10(kappas[0]),minCurv], maxcoord=[np.log10(kappas[-1]),maxCurv], divisions=[5, 5], buffer=[0.1, 1])
+NiceGraph2D(ax1, r'$Log(\kappa)$', r'$C$', mincoord=[np.log10(kappas[0]),-3], maxcoord=[np.log10(kappas[-1]),3], divisions=[5, 5], buffer=[0.1, 1])
+ax1.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2f'))
 
-for i in restangles:
-    thisangBool = allDesigns['restang'] == i
-    angles = allDesigns[['ang1','ang2','ang3','ang4']]
-    allDesigns.loc[thisangBool,'StableStatesAng'] = countStableStates(angles[thisangBool], 2, 'ward', True)
+for i in np.arange(np.size(restangles)):
+    thisangBool = allDesigns['restang'] == restangles[i]
+#    angles = allDesigns[['ang1','ang2','ang3','ang4']]
+#    allDesigns.loc[thisangBool,'StableStatesAng'] = countStableStates(angles[thisangBool], 2, 'ward', False)
     
     thisang = allDesigns[thisangBool]
    
-    plt.close('all')
-    
-    
-    ax1.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2f'))
-            
-    cmap = matl.cm.get_cmap('Set2',np.size(stst))
-    colors = cmap(np.linspace(0,1,np.size(stst)))
-    
+#    plt.close('all')
+
 #    ax1.scatter(np.log10(thisang['kappa']), thisang['TotalEnergy'], c = colors[thisang['StableStateAll']-1])
 #    ax1.scatter(thisang['kappa'], thisang['EdgeEnergy'], c = colors[thisang['StableStateAll']-1])
 #    ax1.scatter(thisstate['kappa'], thisstate['EdgeEnergy'], c = [j])
-    ax1.scatter(np.log10(thisang['kappa']), thisang['Curvature'], c = colors[thisang['StableStateAll']-1])#
+    ax1.scatter(np.log10(thisang['kappa']), thisang['Curvature'], c = colors[thisang['StableStateAll'].values.astype('int')-1],
+                s = 5, marker = markers[i])
 
-    #leg = ax1.legend(loc = 2, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False) 
-    #           borderpad = 0.3, labelspacing = 0.1, handlelength = 0.4, handletextpad = 0.4)
-    #plt.setp(leg.get_texts(), color='0.2')
-    #leg.get_frame().set_linewidth(0.4)
+#leg = ax1.legend(loc = 2, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False) 
+##           borderpad = 0.3, labelspacing = 0.1, handlelength = 0.4, handletextpad = 0.4)
+#plt.setp(leg.get_texts(), color='0.2')
+#leg.get_frame().set_linewidth(0.4)
     
-    fig1.show()
+fig1.show()
 #    fig1.savefig(Folder_name + '/Images/Energy_Restang_' + str(i.astype(float))+'.pdf', transparent = True)
 #    fig1.savefig(Folder_name + '/Images/Energy_Restang_' + str(i.astype(float))+ '.png', transparent = True)
-    fig1.savefig(Folder_name + '/Images/All_Restang_' + str(i.astype(float))+'.pdf', transparent = True)
-    fig1.savefig(Folder_name + '/Images/All_Restang_' + str(i.astype(float))+ '.png', transparent = True)
+fig1.savefig(Folder_name + '/Images/All_Restang_' + str(i.astype(float))+'.pdf', transparent = True)
+fig1.savefig(Folder_name + '/Images/All_Restang_' + str(i.astype(float))+ '.png', transparent = True)
 #%%
     
     
@@ -498,7 +510,7 @@ ax3.set_zlim([-np.pi,np.pi])
     
 #cmap2 = matl.cm.get_cmap('Set2',np.size(kappas))
 #colors = cmap2(np.linspace(0,1,np.size(kappas)))    
-cmap2 = matl.cm.get_cmap('Set2',np.size(stst))
+cmap2 = matl.cm.get_cmap('Set3',np.size(stst))
 colors = cmap2(np.linspace(0,1,np.size(stst)))
 
 order = [5,6,7,8]
