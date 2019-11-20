@@ -454,8 +454,8 @@ for i in np.arange(np.size(restangles)):
 #leg.get_frame().set_linewidth(0.4)
     
 fig1.show()
-fig1.savefig(Folder_name + '/Images/AllEnergy_Restang_' + str(i.astype(float))+'.pdf', transparent = True)
-fig1.savefig(Folder_name + '/Images/AllEnergy_Restang_' + str(i.astype(float))+ '.png', transparent = True)
+#fig1.savefig(Folder_name + '/Images/AllEnergy_Restang_' + str(i.astype(float))+'.pdf', transparent = True)
+#fig1.savefig(Folder_name + '/Images/AllEnergy_Restang_' + str(i.astype(float))+ '.png', transparent = True)
 #fig1.savefig(Folder_name + '/Images/All_Restang_' + str(i.astype(float))+'.pdf', transparent = True)
 #fig1.savefig(Folder_name + '/Images/All_Restang_' + str(i.astype(float))+ '.png', transparent = True)
 #%%
@@ -466,6 +466,9 @@ markers = ['o','^','s']
 lines = ['-','--',':']#,'-.'
 cmap = matl.cm.get_cmap('Set2',np.size(stst))
 colors = cmap(np.linspace(0,1,np.size(stst)))
+
+yticks = [[2,1,0,-1,-2],[10,0,-10,-20,-30],[1,0,-1,-2,-3]]
+ylim = [[2.1,-2.1],[12,-39],[1.1,-3.1]]
 
 
 for i in np.arange(np.size(restangles)):
@@ -486,14 +489,14 @@ for i in np.arange(np.size(restangles)):
     
         #    NiceGraph2D(ax1,  r'$Log(\kappa)$', r'$E_\mathrm{tot}$', mincoord=[np.log10(kappas[0]),0], maxcoord=[np.log10(kappas[-1]),maxTotEn], divisions=[5, 3], buffer=[0.1, 0.01])
     #NiceGraph2D(ax1, 'Kappa', 'Hinge Energy', mincoord=[kappas[0],0], maxcoord=[kappas[-1],maxHinEn], divisions=[5, 3], buffer=[0, 0.001])
-    NiceGraph2D(ax1, r'$\kappa$', r'$E_\mathrm{tot}$')
-#    NiceGraph2D(ax1, r'$\kappa$', r'$C$')#, mincoord=[np.log10(kappas[0]),-3], maxcoord=[np.log10(kappas[-1]),3], divisions=[5, 5], buffer=[0.1, 1])
+#    NiceGraph2D(ax1, r'$\kappa$', r'$E_\mathrm{tot}$')
+    NiceGraph2D(ax1, r'$\kappa$', r'$C$')#, mincoord=[np.log10(kappas[0]),-3], maxcoord=[np.log10(kappas[-1]),3], divisions=[5, 5], buffer=[0.1, 1])
     
     ax1.set_yticks(np.linspace(0, maxTotEn,5))
     ax1.set_ylim([-0.005, maxTotEn+0.005])
     ax1.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.2f'))
-#    ax1.set_yticks(np.linspace(minCurv, maxCurv,5))
-#    ax1.set_ylim([minCurv+minCurv*0.1, maxCurv+maxCurv*0.1])
+    ax1.set_yticks(yticks[i])
+    ax1.set_ylim(ylim[i])
 #    ax1.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.1f'))
     ax1.set_xscale('log')
     ax1.set_xlim([0.0007,15])
@@ -504,8 +507,8 @@ for i in np.arange(np.size(restangles)):
 
 #    ax1.scatter(np.log10(thisang['kappa']), thisang['TotalEnergy'], c = colors[thisang['StableStateAll']-1])
 #    ax1.scatter(thisang['kappa'], thisang['EdgeEnergy'], c = colors[thisang['StableStateAll']-1])
-        ax1.scatter(thisstst['kappa'], thisstst['TotalEnergy'], c = colors[thisstst['StableStateAll'].values.astype('int')-1], s = 10)
-#        ax1.scatter(thisstst['kappa'], thisstst['Curvature'], c = colors[thisstst['StableStateAll'].values.astype('int')-1], s = 10)#,
+#        ax1.scatter(thisstst['kappa'], thisstst['TotalEnergy'], c = colors[thisstst['StableStateAll'].values.astype('int')-1], s = 10)
+        ax1.scatter(thisstst['kappa'], thisstst['Curvature'], c = colors[thisstst['StableStateAll'].values.astype('int')-1], s = 10)#,
 #                s = 5, marker = markers[i])#, linestyle = lines[i], lw = 2.5)
 
 #leg = ax1.legend(loc = 2, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False) 
@@ -514,8 +517,8 @@ for i in np.arange(np.size(restangles)):
 #leg.get_frame().set_linewidth(0.4)
     
     fig1.show()
-    fig1.savefig(Folder_name + '/Images/Energy_Restang_' + str(i.astype(float))+'.pdf', transparent = True)
-    fig1.savefig(Folder_name + '/Images/Energy_Restang_' + str(i.astype(float))+ '.png', transparent = True)
+#    fig1.savefig(Folder_name + '/Images/Energy_Restang_' + str(i.astype(float))+'.pdf', transparent = True)
+#    fig1.savefig(Folder_name + '/Images/Energy_Restang_' + str(i.astype(float))+ '.png', transparent = True)
 #    fig1.savefig(Folder_name + '/Images/Restang_' + str(restangles[i].astype(float))+'.pdf', transparent = True)
 #    fig1.savefig(Folder_name + '/Images/Restang_' + str(restangles[i].astype(float))+ '.png', transparent = True)
 
