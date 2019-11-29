@@ -15,14 +15,15 @@ switch opt.template
         
     case{'SingleVertex'}
         
-        
-        diameter = 2*opt.Lextrude;%/sin(pi/opt.numVert);
-        anglerotation = 0;%(opt.numVert-2)*pi/(2*opt.numVert);
+        if opt.numVert == 4
+            opt.angDesign = chooseAnglesDesign(opt);
+        end
+                
+        radius = opt.Lextrude;
         extrudedUnitCell.node = [0,0,0];
-%         for phi = 0:(2*pi/opt.numVert):2*pi*0.99999
         for phi = opt.angDesign
             extrudedUnitCell.node = [extrudedUnitCell.node; ...
-                diameter/2*cos(phi-anglerotation),diameter/2*sin(phi-anglerotation),0];
+                radius*cos(phi),radius*sin(phi),0];
         end
         
         perimNodes = (1:opt.numVert)+1;
@@ -278,8 +279,6 @@ for i=1:size(extrudedUnitCell.edge,1)
     extrudedUnitCell.edgeL(i)=sqrt(dx*dx');
 end
 
-
-
 function extrudedUnitCell = addDiagonals(extrudedUnitCell)
 
 extrudedUnitCell.diagonals = [];
@@ -356,7 +355,6 @@ link.nodeHingeEx = [s1u.side(dir1,1).nodeHingeEx + [0 0 0 s2.face{1}(dir2)];...
                     s1d.side(dir1,2).nodeHingeEx + [0 0 0 s2.face{1}(dir2)];...
                     s2.side(dir2,1).nodeHingeEx + [0 0 0 s1d.face{1}(dir1)]];
 
-
 function eUC = combineAll(eUC, or)
 
 eUC.edge = [];
@@ -378,3 +376,85 @@ for i = 1:size(or.link,2)
     eUC.face = [eUC.face  or.link(i).face];
     eUC.nodeHingeEx = [eUC.nodeHingeEx; or.link(i).nodeHingeEx];
 end
+
+function angles = chooseAnglesDesign(opt)
+
+switch opt.vertexType
+    case {'non'}
+        angles = opt.angDesign;
+    case{'random'}
+        ang = randAngOrdered();
+        angles = [0, ang(1), sum(ang(1:2)), sum(ang)]*pi/180;
+        
+    case{'X1'}
+        while 1
+            ang = randAngOrdered();
+            if ang(1)+ang(4) < ang(2)+ang(3)
+                break;
+            end
+        end
+        ang = ang([1 2 4 3]);        
+        angles = [0, ang(1), sum(ang(1:2)), sum(ang(1:3))]*pi/180;  
+        
+    case{'X2'}
+        while 1
+            ang = randAngOrdered();
+            if ang(1)+ang(4) > ang(2)+ang(3)
+                break;
+            end
+        end
+        ang = ang([1 2 4 3]);
+        angles = [0, ang(1), sum(ang(1:2)), sum(ang(1:3))]*pi/180;  
+        
+	case{'Y1'}
+        while 1
+            ang = randAngOrdered();
+            if ang(1)+ang(4) < ang(2)+ang(3)
+                break;
+            end
+        end
+        angles = [0, ang(1), sum(ang(1:2)), sum(ang(1:3))]*pi/180;  
+        
+    case{'Y2'}
+        while 1
+            ang = randAngOrdered();
+            if ang(1)+ang(4) > ang(2)+ang(3)
+                break;
+            end
+        end
+        angles = [0, ang(1), sum(ang(1:2)), sum(ang(1:3))]*pi/180;    
+        
+	case{'Z1'}
+        while 1
+            ang = randAngOrdered();
+            if ang(1)+ang(4) < ang(2)+ang(3)
+                break;
+            end
+        end
+        ang = ang([1 3 2 4]);        
+        angles = [0, ang(1), sum(ang(1:2)), sum(ang(1:3))]*pi/180;  
+        
+    case{'Z2'}
+        while 1
+            ang = randAngOrdered();
+            if ang(1)+ang(4) > ang(2)+ang(3)
+                break;
+            end
+        end
+        ang = ang([1 3 2 4]);
+        angles = [0, ang(1), sum(ang(1:2)), sum(ang(1:3))]*pi/180;      
+
+end   
+
+function ang = randAngOrdered()
+while 1
+    ang = rand(1,3)*150+15;
+    ang(4) = 360 - sum(ang);
+    ang = sort(ang);
+    if ~(sum(ang>15) < 4 || sum(ang<165) < 4)
+        break;
+    end
+end
+
+
+    
