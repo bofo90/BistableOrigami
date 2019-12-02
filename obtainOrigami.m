@@ -1,4 +1,4 @@
-function extrudedUnitCell = obtainOrigami(opt)
+function [extrudedUnitCell, opt] = obtainOrigami(opt)
 
 extrudedUnitCell.node = [];
 extrudedUnitCell.edge = [];
