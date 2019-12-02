@@ -13,7 +13,7 @@ clearvars -global
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 opt=initOpt('inputType', 'origami','template','SingleVertex',...
-            'numVert', 4, 'vertexType', '3S',...
+            'numVert', 4, 'vertexType', '3L',...
             'restang', pi/4, 'angDesign', [0 65 130 195]*pi/180,...
             'analysis','result','analysisType','randomPert',...
             'numIterations', 1000,'RandstDev', 0.2,...
@@ -27,30 +27,33 @@ opt=initOpt('inputType', 'origami','template','SingleVertex',...
             'periodic', 'off');    
 
 tic;
-hingeSet = [1 2];
-opt.angleConstrFinal(1).val=[ hingeSet(:) , [ones(1,size(hingeSet,2))*pi/2]'];
+% hingeSet = [1 2];
+% opt.angleConstrFinal(1).val=[ hingeSet(:) , [ones(1,size(hingeSet,2))*pi/2]'];
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%BUILD
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-[extrudedUnitCell,opt]=buildGeometry(opt);
 
-opt.saveFile = strcat('/',date,'_',num2str(opt.angDesign*180/pi,'%.2f_'),'temp');
-% opt.saveFile = strcat('/02-Dec-2019_0.00_ 79.60_159.21_280.40_temp\RestAng_1.571\kappa_10.00000');
-opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.vertexType,opt.saveFile);
+for i = 1:100
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %BUILD
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    [extrudedUnitCell,opt]=buildGeometry(opt);
 
-%SOLVER OPTIONS
-opt.options=optimoptions('fmincon','GradConstr','off','GradObj','off',...
-                         'tolfun',1e-6,'tolx',1e-9, 'tolcon',1e-9,...
-                         'Display','off','DerivativeCheck','off',...
-                         'maxfunevals',30000, 'MaxIterations', 2000,...
-                         'Algorithm', opt.folAlgor, 'OutputFcn',@outfun,...               
-                         'RelLineSrchBnd', 0.01, 'RelLineSrchBndDuration', 5000);
+    opt.saveFile = strcat('/',date,'_',num2str(opt.angDesign*180/pi,'%.2f_'));
+    % opt.saveFile = strcat('/02-Dec-2019_0.00_ 79.60_159.21_280.40_temp\RestAng_1.571\kappa_10.00000');
+    opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.vertexType,opt.saveFile);
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%ANALYSIS
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-findDeformation(extrudedUnitCell,opt);
+    %SOLVER OPTIONS
+    opt.options=optimoptions('fmincon','GradConstr','off','GradObj','off',...
+                             'tolfun',1e-6,'tolx',1e-9, 'tolcon',1e-9,...
+                             'Display','off','DerivativeCheck','off',...
+                             'maxfunevals',30000, 'MaxIterations', 2000,...
+                             'Algorithm', opt.folAlgor, 'OutputFcn',@outfun,...               
+                             'RelLineSrchBnd', 0.01, 'RelLineSrchBndDuration', 5000);
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %ANALYSIS
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    findDeformation(extrudedUnitCell,opt);
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %OUTPUT AND PLOT GEOMETRY
