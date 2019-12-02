@@ -27,20 +27,18 @@ opt=initOpt('inputType', 'origami','template','SingleVertex',...
             'maxArea', 0.1,...
             'periodic', 'off');    
 
-
-opt.saveFile = strcat('/',date,'_temp');
-% opt.saveFile = strcat('/24-Jun-2019_vertexDesign2');
-opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.vertexType,opt.saveFile);
 tic;
-
-
-% hingeSet = [757 306];
-% opt.angleConstrFinal(1).val=[ hingeSet(:) , [ones(1,size(hingeSet,2))*opt.restang]'];
+hingeSet = [1 2];
+opt.angleConstrFinal(1).val=[ hingeSet(:) , [ones(1,size(hingeSet,2))*pi/2]'];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %BUILD
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 [extrudedUnitCell,opt]=buildGeometry(opt);
+
+opt.saveFile = strcat('/',date,'_',num2str(opt.angDesign*180/pi,'%.2f_'),'temp');
+% opt.saveFile = strcat('/24-Jun-2019_vertexDesign2');
+opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.vertexType,opt.saveFile);
 
 %SOLVER OPTIONS
 opt.options=optimoptions('fmincon','GradConstr','off','GradObj','off',...

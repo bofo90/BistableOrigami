@@ -5,7 +5,7 @@ switch opt.vertexType
         angles = opt.angDesign;
     case{'random'}
         ang = randAng();
-        angles = [0, ang(1), sum(ang(1:2)), sum(ang)]*pi/180;
+        angles = [0, ang(1), sum(ang(1:2)), sum(ang(1:3))]*pi/180;
         
     case{'X1'}
         ang = randAngOrdered(1);
@@ -116,7 +116,7 @@ function ang = randAng()
 while 1
     ang = rand(1,3)*150+15;
     ang(4) = 360 - sum(ang);
-    if ~(sum(ang>15) < 4 || sum(ang<165) < 4)
+    if (sum(ang>15) == 4 && sum(ang<165) == 4)
         break;
     end
 end
@@ -126,7 +126,7 @@ while 1
     ang = rand(1,3)*150+15;
     ang(4) = 360 - sum(ang);
     ang = sort(ang);
-    if ~(sum(ang>15) < 4 || sum(ang<165) < 4)
+    if (sum(ang>15) == 4 && sum(ang<165) == 4)
         if (subtype == 1) && (ang(1)+ang(4) < ang(2)+ang(3))
             break;
         end
@@ -142,7 +142,7 @@ while 1
     ang(3) = ang(1);
     ang(4) = 360 - sum(ang);
     ang = sort(ang);
-    if ~(sum(ang>15) < 4 || sum(ang<165) < 4)
+    if (sum(ang>15) == 4 && sum(ang<165) == 4)
         if equal == 's' && ang(1) == ang(2)
             break;
         end
@@ -187,7 +187,7 @@ while 1
     ang(3) = ang(1);
     ang(4) = 360 - sum(ang);
     ang = sort(ang);
-    if ~(sum(ang>15) < 4 || sum(ang<165) < 4)
+    if (sum(ang>15) == 4 && sum(ang<165) == 4)
         if equal == 's' && ang(1) == ang(2)
             break;
         end
