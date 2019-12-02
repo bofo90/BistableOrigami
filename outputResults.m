@@ -24,11 +24,11 @@ opt.tranPol=0.5;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Check if output folder is required, and create it if it doesn't exist
 nameFolder=strcat(opt.file,'/images');
-if or(strcmp(opt.saveFig,'on'),strcmp(opt.saveMovie,'on'))
-    if exist(nameFolder, 'dir')==0
-        mkdir(nameFolder)
-    end
+if exist(nameFolder, 'dir')==0
+    mkdir(nameFolder)
 end
+
+makeAnglePlot(result, nameFolder, filename)
 
 % nref=size(unitCell.l,1);
 % if nref==0
@@ -537,18 +537,15 @@ function printGif(opt,fram,f,nameFolder,nam)
     
 function printHigRes(f,opt,nam,nameFolder)
     pause(1/opt.frames)
-    switch opt.saveFig
-        case 'on'
             
-%             name=[nameFolder,'/',opt.template,'_',num2str(opt.plotPer),'_',nam];
-            name=[nameFolder,'/',nam,'.png'];
-            savefig([nameFolder,'/',nam])
-            figpos=getpixelposition(f); %dont need to change anything here
-            resolution=get(0,'ScreenPixelsPerInch'); %dont need to change anything here
-            set(f,'paperunits','inches','papersize',figpos(3:4)/resolution,...
-            'paperposition',[0 0 figpos(3:4)/resolution]); %dont need to change anything here
-            print(f,name,'-dpng',['-r',num2str(opt.figDPI)],'-opengl') %save file
-    end
+%     name=[nameFolder,'/',opt.template,'_',num2str(opt.plotPer),'_',nam];
+    name=[nameFolder,'/',nam,'.png'];
+    savefig([nameFolder,'/',nam])
+    figpos=getpixelposition(f); %dont need to change anything here
+    resolution=get(0,'ScreenPixelsPerInch'); %dont need to change anything here
+    set(f,'paperunits','inches','papersize',figpos(3:4)/resolution,...
+    'paperposition',[0 0 figpos(3:4)/resolution]); %dont need to change anything here
+    print(f,name,'-dpng',['-r',num2str(opt.figDPI)],'-opengl') %save file
 
 function [f,hs,hie,his] = copyFigure(unitCell,extrudedUnitCell,opt,hs,hie,his)
     f=figure('Position', [0 0 800 800]);
@@ -568,3 +565,25 @@ function [f,hs,hie,his] = copyFigure(unitCell,extrudedUnitCell,opt,hs,hie,his)
     end
 %     set(gca,'xlim',opt.xlim,'ylim',opt.ylim,'zlim',opt.zlim);
     hl2=plotOpt(opt);
+    
+function makeAnglePlot(result, nameFolder, filename)
+
+    nameFilePlot = ['/',filename,'_AnglEv'];
+    allangles = [];
+    for iter = 1:size(result.deform,2)
+        allangles = [allangles result.deform(iter).interV(:).theta];
+    end
+    p = plot(allangles', 'Color', 'k');
+%     for i = result.anglConstr(:,1)'
+%         set(p(i), 'color', rand(1,3), 'LineWidth', 2, 'DisplayName',num2str(i));
+%     end
+    x = 0;
+    for iter = 1:(size(result.deform,2)-1)
+        x = x + size(result.deform(iter).interV,2)+0.5;
+        line([x x],[-1.1*pi 1.1*pi], 'Color', [0 0 0])
+    end
+%     legend(p(result.anglConstr(:,1)'))
+    saveas(gcf, [nameFolder, nameFilePlot, '.png']);
+    savefig([nameFolder,nameFilePlot,'.fig'])
+    close 'all';  
+        

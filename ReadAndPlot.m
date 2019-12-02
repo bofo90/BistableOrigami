@@ -4,101 +4,82 @@ switch opt.analysis
     case 'info'
         result = [];
         outputResults(extrudedUnitCell,result,opt);
-    case {'result', 'savedata', 'plot'}
+    case {'plot'}
         %get file of results
         folderResults = strcat(opt.file,'/mat');
-        folderEnergy = strcat(opt.file,'/energy');
-        folderImages = strcat(opt.file,'/images');
         if ~exist(folderResults, 'dir')
-            fprintf(['No folder with results:',folderResults,'\n']);
-        else
-            
-            %create folder of data with files
-            if strcmp(opt.analysis,'savedata')
-                [fMassDist, fHinge, fEnergy, fAngles] = makeFileswHeaders(folderEnergy, folderResults);
+            error('\n----------\nNo data directory found\n----------\n',[])
+        end 
+        allFiles = dirs(folderResults);
+        
+        for ct = 1:length(allFiles)
+            if allFiles(ct).isdir || strcmp(allFiles(ct).name(1:end-4), 'metadata')
+                % skip all directories and metadata file
+                continue;
             end
             
-            allFiles = dir(folderResults);
-            directories = 0;
-            succesfullFiles = 0;
-            Energies = [];
-            Hinges = [];
-            AllAngles = [];
-            
-            for ct = 1:length(allFiles)
-                if allFiles(ct).isdir || strcmp(allFiles(ct).name(1:end-4), 'metadata')
-                    % skip all directories and metadata file
-                    directories = directories+1;
-                    continue;
-                end
-
-                % parse the file name to get back hinge set
-                resfilename = allFiles(ct).name;
+            % parse the file name to get back hinge set
+            resfilename = allFiles(ct).name;
+            if strcmp(opt.plotAll, 'off')
                 hingeSet = getHingeSet(resfilename);
-                if strcmp(opt.analysisType,'single')
-                    if ~ismember(hingeSet, opt.angleConstrFinal(1).val(:,1))
-                        continue;
+                if ~ismember(hingeSet, opt.angleConstrFinal(1).val(:,1))
+                    continue;
 %                     elseif ~strcmp(resfilename(1:end-4), '[8 3]_Ang1_18_Angl2_27')
 %                         continue;
-                    end
                 end
-                % load results from file
-                lofile = load(strcat(folderResults,'/', allFiles(ct).name));
-                succesfullFiles = succesfullFiles + 1;
-                fprintf('Plot of Hinges number %d/%d\n', succesfullFiles, length(allFiles)-directories);
-                
-                if strcmp(opt.analysis, 'savedata')
-%                     [lowerR, upperR] = getData(extrudedUnitCell, opt, result);
-                    Energies = [Energies; [ones(size(lofile.result.E,2),1)*(hingeSet), lofile.result.Eedge(2,:)',...
-                        lofile.result.Ediag(2,:)', lofile.result.Eface(2,:)', lofile.result.Ehinge(2,:)',...
-                        lofile.result.EtargetAngle(2,:)', lofile.result.exfl(2,:)']];
-%                     PosStad = [(ct-directories), lowerR, upperR];
-                    Hinges = [Hinges; [hingeSet, hingeSet(1)]];
-                    AllAnglesTemp = zeros(size(extrudedUnitCell.theta));
-                    for iter = 1:size(lofile.result.deform,2)
-                        AllAnglesTemp = [AllAnglesTemp lofile.result.deform(iter).theta];
-                    end
-                    AllAngles = [AllAngles; [ones(size(AllAnglesTemp,2),1)*(hingeSet) AllAnglesTemp']];
-                end
-                
-                if strcmp(opt.createFig, 'on') || strcmp(opt.analysis, 'plot')
-                    
-                    nameFilePlot = ['/',resfilename(1:end-4),'_AnglEv'];
-                    
-                    if ~exist(nameFolderPlot, 'dir')
-                        mkdir(nameFolderPlot);
-                    end
-                    allangles = [];
-                    for iter = 1:size(lofile.result.deform,2)
-                        allangles = [allangles lofile.result.deform(iter).interV(:).theta];
-                    end
-                    p = plot(allangles', 'Color', 'k');
-%                     for i = lofile.result.anglConstr(:,1)'
-%                         set(p(i), 'color', rand(1,3), 'LineWidth', 2, 'DisplayName',num2str(i));
-%                     end
-                    x = 0;
-                    for iter = 1:(size(lofile.result.deform,2)-1)
-                        x = x + size(lofile.result.deform(iter).interV,2)+0.5;
-                        line([x x],[-1.1*pi 1.1*pi], 'Color', [0 0 0])
-                    end
-%                     legend(p(lofile.result.anglConstr(:,1)'))
-                    saveas(gcf, [folderImages, nameFilePlot, '.png']);
-                    savefig([folderImages,nameFilePlot,'.fig'])
-                    close 'all';                    
-                    
-                    outputResults(extrudedUnitCell,lofile.result,opt,resfilename(1:end-4));
-                end
-                close all;
-                clear lofile;
             end
             
-            if strcmp(opt.analysis,'savedata')
-    %           dlmwrite(fMassDist, PosStad, 'delimiter', ',', '-append','precision',7);
-                dlmwrite(fHinge, Hinges, 'delimiter', ',', '-append','precision',7);
-                dlmwrite(fEnergy, Energies, 'delimiter', ',', '-append','precision',7);
-                dlmwrite(fAngles, AllAngles, 'delimiter', ',', '-append','precision',7);
-            end
+            lofile = load(strcat(folderResults,'/', resfilename));
+            outputResults(extrudedUnitCell,lofile.result,opt,resfilename(1:end-4));
+            
         end
+
+    case {'savedata'}     
+        folderResults = strcat(opt.file,'/mat');
+        folderEnergy = strcat(opt.file,'/energy');
+        if ~exist(folderResults, 'dir')
+            error('\n----------\nNo data directory found\n----------\n',[])
+        end 
+        
+        allFiles = dir(folderResults);
+
+        %create folder of data with files
+        [fMassDist, fHinge, fEnergy, fAngles] = makeFileswHeaders(folderEnergy, folderResults);
+        Energies = [];
+%         Hinges = [];
+        AllAngles = [];
+        dirs = 0;
+        for ct = 1:length(allFiles)
+            if allFiles(ct).isdir || strcmp(allFiles(ct).name(1:end-4), 'metadata')
+                % skip all directories and metadata file
+                dirs = dirs+1;
+                continue;
+            end
+
+            % load results from file
+            lofile = load(strcat(folderResults,'/', allFiles(ct).name));
+            fprintf('Saving data %d\n', ct);
+
+%                     [lowerR, upperR] = getData(extrudedUnitCell, opt, result);
+            Energies = [Energies; [ones(size(lofile.result.E,2),1)*(ct-dirs), lofile.result.Eedge(2,:)',...
+                lofile.result.Ediag(2,:)', lofile.result.Eface(2,:)', lofile.result.Ehinge(2,:)',...
+                lofile.result.EtargetAngle(2,:)', lofile.result.exfl(2,:)']];
+%                     PosStad = [(ct-directories), lowerR, upperR];
+%             Hinges = [Hinges; [hingeSet, hingeSet(1)]];
+            AllAnglesTemp = zeros([size(extrudedUnitCell.theta,1),size(lofile.result.deform,2)]);
+            for iter = 1:size(lofile.result.deform,2)
+                AllAnglesTemp(:,iter) = lofile.result.deform(iter).theta;
+            end
+            AllAngles = [AllAngles; [ones(size(AllAnglesTemp,2),1)*(ct-dirs) AllAnglesTemp']];
+ 
+            close all;
+            clear lofile;
+        end
+        
+%         dlmwrite(fMassDist, PosStad, 'delimiter', ',', '-append','precision',7);
+%         dlmwrite(fHinge, Hinges, 'delimiter', ',', '-append','precision',7);
+        dlmwrite(fEnergy, Energies, 'delimiter', ',', '-append','precision',7);
+        dlmwrite(fAngles, AllAngles, 'delimiter', ',', '-append','precision',7);
         fclose('all');
         
 end
