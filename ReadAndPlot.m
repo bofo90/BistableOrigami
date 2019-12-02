@@ -6,17 +6,16 @@ switch opt.analysis
         outputResults(extrudedUnitCell,result,opt);
     case {'result', 'savedata', 'plot'}
         %get file of results
-        extraName = sprintf('/kh%2.5f_kta%2.2f_ke%2.2f_kf%2.2f', opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
-        folderResults = strcat(pwd, '/Results/', opt.template,num2str(opt.numVert),'/',opt.relAlgor,'/mat', opt.saveFile, extraName);
+        folderResults = strcat(opt.file,'/mat');
+        folderEnergy = strcat(opt.file,'/energy');
+        folderImages = strcat(opt.file,'/images');
         if ~exist(folderResults, 'dir')
             fprintf(['No folder with results:',folderResults,'\n']);
         else
             
             %create folder of data with files
             if strcmp(opt.analysis,'savedata')
-                folderEnergy = strcat(pwd, '/Results/', opt.template,num2str(opt.numVert),'/',opt.relAlgor,'/energy', opt.saveFile, extraName);
                 [fMassDist, fHinge, fEnergy, fAngles] = makeFileswHeaders(folderEnergy, folderResults);
-                
             end
             
             allFiles = dir(folderResults);
@@ -64,9 +63,7 @@ switch opt.analysis
                 
                 if strcmp(opt.createFig, 'on') || strcmp(opt.analysis, 'plot')
                     
-                    nameFolderPlot=[pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.relAlgor,'/images',...
-                        opt.saveFile,extraName];
-                    nameFilePlot = ['/',resfilename(1:end-4),'_AnglEv.png'];
+                    nameFilePlot = ['/',resfilename(1:end-4),'_AnglEv'];
                     
                     if ~exist(nameFolderPlot, 'dir')
                         mkdir(nameFolderPlot);
@@ -85,8 +82,8 @@ switch opt.analysis
                         line([x x],[-1.1*pi 1.1*pi], 'Color', [0 0 0])
                     end
 %                     legend(p(lofile.result.anglConstr(:,1)'))
-                    saveas(gcf, [nameFolderPlot, nameFilePlot]);
-                    savefig([nameFolderPlot,'/',resfilename(1:end-4),'_AnglEv.fig'])
+                    saveas(gcf, [folderImages, nameFilePlot, '.png']);
+                    savefig([folderImages,nameFilePlot,'.fig'])
                     close 'all';                    
                     
                     outputResults(extrudedUnitCell,lofile.result,opt,resfilename(1:end-4));

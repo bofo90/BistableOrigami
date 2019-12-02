@@ -13,11 +13,11 @@ clearvars -global
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 opt=initOpt('inputType', 'origami','template','SingleVertex',...
-            'numVert', 4, 'vertexType', 'non',...
+            'numVert', 4, 'vertexType', '2NC',...
             'restang', pi/4, 'angDesign', [0 120*pi/180 240*pi/180],...
-            'analysis','result','analysisType','randomPert',...
+            'analysis','info','analysisType','randomPert',...
             'numIterations', 1000,'RandstDev', 0.2,...
-            'createFig', 'off','saveFig','on','saveMovie', 'off',...
+            'createFig', 'on','saveFig','on','saveMovie', 'off',...
             'figDPI',200,'safeMovieAntiAlias', 0,...
             'folAlgor', 'sqp','relAlgor', 'sqp',...
             'gethistory', 'off',...
@@ -28,47 +28,32 @@ opt=initOpt('inputType', 'origami','template','SingleVertex',...
             'periodic', 'off');    
 
 
-% opt.saveFile = strcat('/',date,'_temp');
+opt.saveFile = strcat('/',date,'_temp');
 % opt.saveFile = strcat('/24-Jun-2019_vertexDesign2');
+opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.vertexType,opt.saveFile);
 tic;
 
 
-hingeSet = [757 306];
-opt.angleConstrFinal(1).val=[ hingeSet(:) , [ones(1,size(hingeSet,2))*opt.restang]'];
-for i = 90:5:90
-    for j = i:5:90
+% hingeSet = [757 306];
+% opt.angleConstrFinal(1).val=[ hingeSet(:) , [ones(1,size(hingeSet,2))*opt.restang]'];
 
-    
-%         if (i+j)<180 || ((i <=90 && i >=35) && (i+j) <195)
-%             continue;
-%         end
-        opt.angDesign = [0, 90, 180, 270]*pi/180;
-        opt.saveFile = strcat('/15-Nov-2019_KandTheta0/DoubleSym');
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %BUILD
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        [extrudedUnitCell,opt]=buildGeometry(opt);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%BUILD
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+[extrudedUnitCell,opt]=buildGeometry(opt);
 
-        %SOLVER OPTIONS
-        opt.options=optimoptions('fmincon','GradConstr','off','GradObj','off',...
-                                 'tolfun',1e-6,'tolx',1e-9, 'tolcon',1e-9,...
-                                 'Display','off','DerivativeCheck','off',...
-                                 'maxfunevals',30000, 'MaxIterations', 2000,...
-                                 'Algorithm', opt.folAlgor, 'OutputFcn',@outfun,...               
-                                 'RelLineSrchBnd', 0.01, 'RelLineSrchBndDuration', 5000);
+%SOLVER OPTIONS
+opt.options=optimoptions('fmincon','GradConstr','off','GradObj','off',...
+                         'tolfun',1e-6,'tolx',1e-9, 'tolcon',1e-9,...
+                         'Display','off','DerivativeCheck','off',...
+                         'maxfunevals',30000, 'MaxIterations', 2000,...
+                         'Algorithm', opt.folAlgor, 'OutputFcn',@outfun,...               
+                         'RelLineSrchBnd', 0.01, 'RelLineSrchBndDuration', 5000);
 
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %SELECT HINGES
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % selectHinges(unitCell, extrudedUnitCell, opt);
-
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %ANALYSIS
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        findDeformation(extrudedUnitCell,opt);
-    
-    end
-end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%ANALYSIS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+findDeformation(extrudedUnitCell,opt);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %OUTPUT AND PLOT GEOMETRY
