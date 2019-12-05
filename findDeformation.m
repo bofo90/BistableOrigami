@@ -201,7 +201,7 @@ if ~exist(folderName, 'dir')
 end
     
 opt.KtargetAngle = 0;
-for i = 1:opt.numIterations
+parfor i = 1:opt.numIterations
     
     %%%%%% Folding part %%%%%%
     %Perturb the structure

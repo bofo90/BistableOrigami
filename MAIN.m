@@ -13,7 +13,7 @@ clearvars -global
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 opt=initOpt('inputType', 'origami','template','SingleVertex',...
-            'numVert', 4, 'vertexType', '3L',...
+            'numVert', 4, 'vertexType', "3L",...
             'restang', pi/4, 'angDesign', [0 65 130 195]*pi/180,...
             'analysis','result','analysisType','randomPert',...
             'numIterations', 1000,'RandstDev', 0.2,...
@@ -31,13 +31,15 @@ tic;
 % opt.angleConstrFinal(1).val=[ hingeSet(:) , [ones(1,size(hingeSet,2))*pi/2]'];
 
 
-for i = 1:100
+for i = ["CY", "CFF"]
+    
+    opt.vertexType = i;
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %BUILD
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     [extrudedUnitCell,opt]=buildGeometry(opt);
 
-    opt.saveFile = strcat('/',date,'_',num2str(opt.angDesign*180/pi,'%.2f_'));
+    opt.saveFile = strcat('/02-Dec-2019_',num2str(opt.angDesign*180/pi,'%.2f_'));
     % opt.saveFile = strcat('/02-Dec-2019_0.00_ 79.60_159.21_280.40_temp\RestAng_1.571\kappa_10.00000');
     opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.vertexType,opt.saveFile);
 
