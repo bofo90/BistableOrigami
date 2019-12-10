@@ -12,10 +12,11 @@ clearvars -global
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-opt=initOpt('inputType', 'origami','template','SingleVertex',...
-            'numVert', 4, 'vertexType', "3L",...
+opt=initOpt('inputType', 'origami','template','Tessellation',...
+            'numVert', 4, 'vertexType', "2C", ...
+            'tessellationType', '25','xrep', 10, 'yrep', 10,...
             'restang', pi/4, 'angDesign', [0 65 130 195]*pi/180,...
-            'analysis','result','analysisType','randomPert',...
+            'analysis','info','analysisType','randomPert',...
             'numIterations', 1000,'RandstDev', 0.2,...
             'figDPI',200, 'saveMovie', 'off', 'safeMovieAntiAlias', 0,...
             'folAlgor', 'sqp','relAlgor', 'sqp',...
@@ -30,35 +31,36 @@ tic;
 % hingeSet = [1 2];
 % opt.angleConstrFinal(1).val=[ hingeSet(:) , [ones(1,size(hingeSet,2))*pi/2]'];
 
-%"GFF", "2OFF","3S", "2OM1", "2OM2", "2NM1", "2NM2", "2OL", "2NL", "2OS", "2NS", "Z1", "Z2", "Y1", "Y2", "X2"
-for i = ["X1", "3L", "2NC", "2C", "CZ", "CFF", "CY"]
-    
-    opt.vertexType = i;
-    
-    for j = 1:10
+% "CZ", "X1", "3L", "2NC", "2C", "GFF", "2OFF","3S", "2OM1", "2OM2", "2NM1", "2NM2", "2OL", "2NL", "2OS", "2NS", "Z1", "Z2", "Y1", "Y2", "X2"
+% for i = [ "CFF", "CY"]
+%     
+%     opt.vertexType = i;
+%     
+%     for j = 1:10
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %BUILD
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         [extrudedUnitCell,opt]=buildGeometry(opt);
 
-        opt.saveFile = strcat('/06-Dec-2019_',num2str(opt.angDesign*180/pi,'%.2f_'));
+        opt.saveFile = strcat(date,'_temp');
+%         opt.saveFile = strcat('/06-Dec-2019_',num2str(opt.angDesign*180/pi,'%.2f_'));
         % opt.saveFile = strcat('/02-Dec-2019_0.00_ 79.60_159.21_280.40_temp\RestAng_1.571\kappa_10.00000');
         opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.vertexType,opt.saveFile);
 
         %SOLVER OPTIONS
-        opt.options=optimoptions('fmincon','GradConstr','off','GradObj','off',...
-                                 'tolfun',1e-6,'tolx',1e-9, 'tolcon',1e-9,...
-                                 'Display','off','DerivativeCheck','off',...
-                                 'maxfunevals',30000, 'MaxIterations', 2000,...
-                                 'Algorithm', opt.folAlgor, 'OutputFcn',@outfun,...               
-                                 'RelLineSrchBnd', 0.01, 'RelLineSrchBndDuration', 5000);
-
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %ANALYSIS
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        findDeformation(extrudedUnitCell,opt);
-    end
-end
+%         opt.options=optimoptions('fmincon','GradConstr','off','GradObj','off',...
+%                                  'tolfun',1e-6,'tolx',1e-9, 'tolcon',1e-9,...
+%                                  'Display','off','DerivativeCheck','off',...
+%                                  'maxfunevals',30000, 'MaxIterations', 2000,...
+%                                  'Algorithm', opt.folAlgor, 'OutputFcn',@outfun,...               
+%                                  'RelLineSrchBnd', 0.01, 'RelLineSrchBndDuration', 5000);
+% 
+%         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%         %ANALYSIS
+%         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%         findDeformation(extrudedUnitCell,opt);
+%     end
+% end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %OUTPUT AND PLOT GEOMETRY
@@ -67,10 +69,10 @@ end
 % close all
 % for i = kappas
 %     opt.Khinge = i;
-    if (strcmp(opt.analysis, 'result') && strcmp(opt.createFig, 'off'))
+    if (strcmp(opt.analysis, 'result'))
         fprintf('Not ploting any results.\n');
     else
-        ReadAndPlot( extrudedUnitCell, opt);
+        ReadAndPlot(extrudedUnitCell, opt);
     end
 % end
 t = toc;

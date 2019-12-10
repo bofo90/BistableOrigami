@@ -38,6 +38,20 @@ switch opt.template
         extrudedUnitCell.theta = ones(size(extrudedUnitCell.nodeHingeEx,1),1)*opt.restang;
         
 %         extrudedUnitCell.node = extrudedUnitCell.node+rand(size(extrudedUnitCell.node))*0.01;
+
+    case{'Tessellation'}
+        
+        if opt.numVert ~= 4
+            error('\n----------\nFor the moment we only consider tessellations of a 4-Vertex\n----------\n',[])
+        end
+        
+        [unitCell, opt] = unitcell4Vertex(opt);
+        
+        extrudedUnitCell = createTessellation(unitCell, opt);
+        extrudedUnitCell = addDiagonals(extrudedUnitCell);
+        extrudedUnitCell = calculateLength(extrudedUnitCell);
+        extrudedUnitCell.theta = ones(size(extrudedUnitCell.nodeHingeEx,1),1)*opt.restang;
+        
         
     case{'TriangularTiling'}
         tri_node = [-0.5,0,0;0.5,0,0;0,sqrt(3)/2,0];
