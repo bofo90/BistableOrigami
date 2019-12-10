@@ -28,8 +28,6 @@ if exist(nameFolder, 'dir')==0
     mkdir(nameFolder)
 end
 
-makeAnglePlot(result, nameFolder, filename)
-
 % nref=size(unitCell.l,1);
 % if nref==0
 extrudedUnitCell.ref=[];
@@ -81,6 +79,9 @@ opt.xlim=xlim;
 opt.ylim=ylim;
 opt.zlim=zlim;
 if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(opt.analysis,'plot')
+    
+    makeAnglePlot(result, nameFolder, filename)
+    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %PREPARE PLOTTING OF DEFORMED CONFIGURATION
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -539,8 +540,8 @@ function printHigRes(f,opt,nam,nameFolder)
     pause(1/opt.frames)
             
 %     name=[nameFolder,'/',opt.template,'_',num2str(opt.plotPer),'_',nam];
-    name=[nameFolder,'/',nam,'.png'];
-    savefig([nameFolder,'/',nam])
+    name=strcat(nameFolder,'/',nam,'.png');
+    savefig(strcat(nameFolder,'/',nam))
     figpos=getpixelposition(f); %dont need to change anything here
     resolution=get(0,'ScreenPixelsPerInch'); %dont need to change anything here
     set(f,'paperunits','inches','papersize',figpos(3:4)/resolution,...
