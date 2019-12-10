@@ -46,12 +46,7 @@ switch opt.template
         end
         
         [unitCell, opt] = unitcell4Vertex(opt);
-        
         extrudedUnitCell = createTessellation(unitCell, opt);
-        extrudedUnitCell = addDiagonals(extrudedUnitCell);
-        extrudedUnitCell = calculateLength(extrudedUnitCell);
-        extrudedUnitCell.theta = ones(size(extrudedUnitCell.nodeHingeEx,1),1)*opt.restang;
-        
         
     case{'TriangularTiling'}
         tri_node = [-0.5,0,0;0.5,0,0;0,sqrt(3)/2,0];

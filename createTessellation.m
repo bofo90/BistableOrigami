@@ -5,7 +5,9 @@ extrudedUnitCell = removeDuplicateNodes(extrudedUnitCell);
 extrudedUnitCell.edge = unique(sort(extrudedUnitCell.edge,2), 'rows');
 extrudedUnitCell = removeDuplicateHinges(extrudedUnitCell);
 extrudedUnitCell = makeSquareFaces(extrudedUnitCell);
-
+extrudedUnitCell = addDiagonals(extrudedUnitCell);
+extrudedUnitCell = calculateLength(extrudedUnitCell);
+extrudedUnitCell.theta = ones(size(extrudedUnitCell.nodeHingeEx,1),1)*opt.restang;
 
 
 function extrudedUnitCell = copyUnitCell(unitCell, opt)
@@ -122,6 +124,31 @@ extrudedUnitCell.edge(deledges,:) = [];
 extrudedUnitCell.edge = [extrudedUnitCell.edge; addedges];
 extrudedUnitCell.face = [extrudedUnitCell.face num2cell(squareface,2)'];
 
+function extrudedUnitCell = calculateLength(extrudedUnitCell)
+
+extrudedUnitCell.edgeL = [];
+
+for i=1:size(extrudedUnitCell.edge,1)
+    coor1=extrudedUnitCell.node(extrudedUnitCell.edge(i,1),:);
+    coor2=extrudedUnitCell.node(extrudedUnitCell.edge(i,2),:);
+    dx=coor2-coor1;
+    extrudedUnitCell.edgeL(i)=sqrt(dx*dx');
+end
+
+function extrudedUnitCell = addDiagonals(extrudedUnitCell)
+
+extrudedUnitCell.diagonals = [];
+
+for i = 1:length(extrudedUnitCell.face)
+    s = length(extrudedUnitCell.face{i});
+    if s>3
+        for j = 1:round(s/2)
+            extrudedUnitCell.edge = [extrudedUnitCell.edge; ...
+                extrudedUnitCell.face{i}(j) extrudedUnitCell.face{i}(j+round(length(extrudedUnitCell.face{i})/2))];
+            extrudedUnitCell.diagonals = [extrudedUnitCell.diagonals, size(extrudedUnitCell.edge,1)];
+        end
+    end
+end
 
 
 
