@@ -12,8 +12,36 @@ if strcmp(opt.analysis,'result')
             metadataFile(opt, extrudedUnitCell);
             nonlinearFoldingMulti(extrudedUnitCell, opt, opt.angleConstrFinal(1).val);
             
-        case 'randomPert'
-            kappas = logspace(-3,1,9);
+        case 'randomPert1'
+            kappas = logspace(-3,1,81);
+            angles = linspace(0,pi,5);
+            savefile = opt.file;
+            for angle = 2:size(angles,2)-1
+                opt.restang = angles(angle);
+                extrudedUnitCell.theta = ones(size(extrudedUnitCell.theta,1),1)*opt.restang;
+                for kappa = 1:size(kappas,2)
+                    opt.Khinge = kappas(kappa);
+                    opt.file = strcat(savefile,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge));                    
+                    metadataFile(opt, extrudedUnitCell);
+                    nonlinearFoldingRand(extrudedUnitCell, opt, opt.RandstDev);
+                end
+            end
+        case 'randomPert2'
+            kappas = logspace(-3,1,13);
+            angles = linspace(0,pi,5);
+            savefile = opt.file;
+            for angle = 2:size(angles,2)-1
+                opt.restang = angles(angle);
+                extrudedUnitCell.theta = ones(size(extrudedUnitCell.theta,1),1)*opt.restang;
+                for kappa = 1:size(kappas,2)
+                    opt.Khinge = kappas(kappa);
+                    opt.file = strcat(savefile,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge));                    
+                    metadataFile(opt, extrudedUnitCell);
+                    nonlinearFoldingRand(extrudedUnitCell, opt, opt.RandstDev);
+                end
+            end
+        case 'randomPert3'
+            kappas = logspace(-3,1,17);
             angles = linspace(0,pi,5);
             savefile = opt.file;
             for angle = 2:size(angles,2)-1
