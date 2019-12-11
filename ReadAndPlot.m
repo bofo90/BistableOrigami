@@ -10,7 +10,7 @@ switch opt.analysis
         if ~exist(folderResults, 'dir')
             error('\n----------\nNo data directory found\n----------\n',[])
         end 
-        allFiles = dirs(folderResults);
+        allFiles = dir(folderResults);
         
         for ct = 1:length(allFiles)
             if allFiles(ct).isdir || strcmp(allFiles(ct).name(1:end-4), 'metadata')

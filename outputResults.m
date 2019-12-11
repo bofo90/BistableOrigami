@@ -19,6 +19,7 @@ colt(5,:)=[225,225,225]/255;
     
 viewCoor=[sind(opt.AZ) -cosd(opt.AZ) sind(opt.EL)];
 opt.tranPol=0.5;
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %PREPARE PLOTTING UNDEFORMED CONFIGURATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -26,6 +27,10 @@ opt.tranPol=0.5;
 nameFolder=strcat(opt.file,'/images');
 if exist(nameFolder, 'dir')==0
     mkdir(nameFolder)
+end
+
+if strcmp(opt.analysis,'plot')
+    makeAnglePlot(result, nameFolder, filename)
 end
 
 % nref=size(unitCell.l,1);
@@ -78,9 +83,7 @@ hl2=plotOpt(opt);
 opt.xlim=xlim;
 opt.ylim=ylim;
 opt.zlim=zlim;
-if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(opt.analysis,'plot')
-    
-    makeAnglePlot(result, nameFolder, filename)
+if strcmp(opt.analysis,'plot')
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %PREPARE PLOTTING OF DEFORMED CONFIGURATION
@@ -250,7 +253,7 @@ if strcmp(opt.analysis,'info')
 
 end
 
-if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(opt.analysis,'plot')
+if strcmp(opt.analysis,'plot')
         %First make solid face with 100% transparency
         for nc=1:size(extrudedUnitCell.latVec,1)
             for i=3:15
@@ -584,7 +587,7 @@ function makeAnglePlot(result, nameFolder, filename)
         line([x x],[-1.1*pi 1.1*pi], 'Color', [0 0 0])
     end
 %     legend(p(result.anglConstr(:,1)'))
-    saveas(gcf, [nameFolder, nameFilePlot, '.png']);
-    savefig([nameFolder,nameFilePlot,'.fig'])
+    saveas(gcf, strcat(nameFolder, nameFilePlot, '.png'));
+    savefig(strcat(nameFolder,nameFilePlot,'.fig'))
     close 'all';  
         
