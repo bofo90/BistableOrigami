@@ -46,7 +46,7 @@ switch opt.analysis
         %create folder of data with files
         [fMassDist, fHinge, fEnergy, fAngles] = makeFileswHeaders(folderEnergy, folderResults);
         Energies = [];
-%         Hinges = [];
+        Hinges = [];
         AllAngles = [];
         dirs = 0;
         for ct = 1:length(allFiles)
@@ -59,13 +59,14 @@ switch opt.analysis
             % load results from file
             lofile = load(strcat(folderResults,'/', allFiles(ct).name));
             fprintf('Saving data %d\n', ct);
+            
+            [curv, areas] = getCurvature(extrudedUnitCell, opt, lofile.result);
 
-%                     [lowerR, upperR] = getData(extrudedUnitCell, opt, result);
             Energies = [Energies; [ones(size(lofile.result.E,2),1)*(ct-dirs), lofile.result.Eedge(2,:)',...
                 lofile.result.Ediag(2,:)', lofile.result.Eface(2,:)', lofile.result.Ehinge(2,:)',...
                 lofile.result.EtargetAngle(2,:)', lofile.result.exfl(2,:)']];
-%                     PosStad = [(ct-directories), lowerR, upperR];
-%             Hinges = [Hinges; [hingeSet, hingeSet(1)]];
+            PosStad = [ones(size(areas))*(ct-dirs), areas];
+            Hinges = [Hinges; [(ct-dirs), curv]];%, designAng(1), designAng(2), designAng(3)]];
             AllAnglesTemp = zeros([size(extrudedUnitCell.theta,1),size(lofile.result.deform,2)]);
             for iter = 1:size(lofile.result.deform,2)
                 AllAnglesTemp(:,iter) = lofile.result.deform(iter).theta;
@@ -76,8 +77,8 @@ switch opt.analysis
             clear lofile;
         end
         
-%         dlmwrite(fMassDist, PosStad, 'delimiter', ',', '-append','precision',7);
-%         dlmwrite(fHinge, Hinges, 'delimiter', ',', '-append','precision',7);
+        dlmwrite(fMassDist, PosStad', 'delimiter', ',', '-append','precision',7);
+        dlmwrite(fHinge, Hinges, 'delimiter', ',', '-append','precision',7);
         dlmwrite(fEnergy, Energies, 'delimiter', ',', '-append','precision',7);
         dlmwrite(fAngles, AllAngles, 'delimiter', ',', '-append','precision',7);
         fclose('all');
@@ -123,7 +124,7 @@ fileMetadata = strcat(folderEnergy, '/','metadata.txt');
 if exist(fileMetadata, 'file')
     delete(fileMetadata) % always start with new file
 end
-copyfile([folderResults '/metadata.txt'],fileMetadata);
+copyfile(strcat(folderResults,'/metadata.txt'),fileMetadata);
 
 function writeHeader(file, headers)
 
@@ -147,7 +148,7 @@ Angl1 = parsedName{2};
 hingeSet = str2double(Angl1);
 % hingeSet = [hinges' zeros(size(hinges))'];
 
-function [curvature] = getCurvature(extrudedUnitCell, opt, result)
+function [curvature, areaFaces] = getCurvature(extrudedUnitCell, opt, result)
 endPos = extrudedUnitCell.node + result.deform(end).interV(end).V;
 anglesFaces = zeros(opt.numVert,1);
 areaFaces = zeros(opt.numVert,1);

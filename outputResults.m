@@ -29,9 +29,9 @@ if exist(nameFolder, 'dir')==0
     mkdir(nameFolder)
 end
 
-if strcmp(opt.analysis,'plot')
-    makeAnglePlot(result, nameFolder, filename)
-end
+% if strcmp(opt.analysis,'plot')
+%     makeAnglePlot(result, nameFolder, filename)
+% end
 
 % nref=size(unitCell.l,1);
 % if nref==0
