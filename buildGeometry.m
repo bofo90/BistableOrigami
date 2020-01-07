@@ -4,7 +4,7 @@ function [extrudedUnitCell,opt]=buildGeometry(opt)
 %INITIALIZE EXTRUDED UNIT CELL
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if strcmp(opt.inputType,'origami')
-    extrudedUnitCell = obtainOrigami(opt);   
+    [extrudedUnitCell, opt] = obtainOrigami(opt);   
 else
     %Get initial geometry
     [unitCell,opt]=selectUnitCell(opt);

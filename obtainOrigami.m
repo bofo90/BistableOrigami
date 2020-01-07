@@ -1,4 +1,4 @@
-function extrudedUnitCell = obtainOrigami(opt)
+function [extrudedUnitCell, opt] = obtainOrigami(opt)
 
 extrudedUnitCell.node = [];
 extrudedUnitCell.edge = [];
@@ -15,14 +15,15 @@ switch opt.template
         
     case{'SingleVertex'}
         
-        
-        diameter = 2*opt.Lextrude;%/sin(pi/opt.numVert);
-        anglerotation = 0;%(opt.numVert-2)*pi/(2*opt.numVert);
+        if opt.numVert == 4
+            opt.angDesign = anglesDesign4Vertex(opt);
+        end
+                
+        radius = opt.Lextrude;
         extrudedUnitCell.node = [0,0,0];
-%         for phi = 0:(2*pi/opt.numVert):2*pi*0.99999
         for phi = opt.angDesign
             extrudedUnitCell.node = [extrudedUnitCell.node; ...
-                diameter/2*cos(phi-anglerotation),diameter/2*sin(phi-anglerotation),0];
+                radius*cos(phi),radius*sin(phi),0];
         end
         
         perimNodes = (1:opt.numVert)+1;
@@ -37,6 +38,15 @@ switch opt.template
         extrudedUnitCell.theta = ones(size(extrudedUnitCell.nodeHingeEx,1),1)*opt.restang;
         
 %         extrudedUnitCell.node = extrudedUnitCell.node+rand(size(extrudedUnitCell.node))*0.01;
+
+    case{'Tessellation'}
+        
+        if opt.numVert ~= 4
+            error('\n----------\nFor the moment we only consider tessellations of a 4-Vertex\n----------\n',[])
+        end
+        
+        [unitCell, opt] = unitcell4Vertex(opt);
+        extrudedUnitCell = createTessellation(unitCell, opt);
         
     case{'TriangularTiling'}
         tri_node = [-0.5,0,0;0.5,0,0;0,sqrt(3)/2,0];
@@ -278,8 +288,6 @@ for i=1:size(extrudedUnitCell.edge,1)
     extrudedUnitCell.edgeL(i)=sqrt(dx*dx');
 end
 
-
-
 function extrudedUnitCell = addDiagonals(extrudedUnitCell)
 
 extrudedUnitCell.diagonals = [];
@@ -356,7 +364,6 @@ link.nodeHingeEx = [s1u.side(dir1,1).nodeHingeEx + [0 0 0 s2.face{1}(dir2)];...
                     s1d.side(dir1,2).nodeHingeEx + [0 0 0 s2.face{1}(dir2)];...
                     s2.side(dir2,1).nodeHingeEx + [0 0 0 s1d.face{1}(dir1)]];
 
-
 function eUC = combineAll(eUC, or)
 
 eUC.edge = [];
@@ -378,3 +385,4 @@ for i = 1:size(or.link,2)
     eUC.face = [eUC.face  or.link(i).face];
     eUC.nodeHingeEx = [eUC.nodeHingeEx; or.link(i).nodeHingeEx];
 end
+

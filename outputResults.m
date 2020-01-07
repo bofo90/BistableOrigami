@@ -19,16 +19,18 @@ colt(5,:)=[225,225,225]/255;
     
 viewCoor=[sind(opt.AZ) -cosd(opt.AZ) sind(opt.EL)];
 opt.tranPol=0.5;
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %PREPARE PLOTTING UNDEFORMED CONFIGURATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Check if output folder is required, and create it if it doesn't exist
-extraName = sprintf('/kh%2.5f_kta%2.2f_ke%2.2f_kf%2.2f', opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
-nameFolder=[pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.relAlgor,'/images',opt.saveFile,extraName];
-if or(strcmp(opt.saveFig,'on'),strcmp(opt.saveMovie,'on'))
-    if exist(nameFolder, 'dir')==0
-        mkdir(nameFolder)
-    end
+nameFolder=strcat(opt.file,'/images');
+if exist(nameFolder, 'dir')==0
+    mkdir(nameFolder)
+end
+
+if strcmp(opt.analysis,'plot')
+    makeAnglePlot(result, nameFolder, filename)
 end
 
 % nref=size(unitCell.l,1);
@@ -81,7 +83,8 @@ hl2=plotOpt(opt);
 opt.xlim=xlim;
 opt.ylim=ylim;
 opt.zlim=zlim;
-if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(opt.analysis,'plot')
+if strcmp(opt.analysis,'plot')
+    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %PREPARE PLOTTING OF DEFORMED CONFIGURATION
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -250,7 +253,7 @@ if strcmp(opt.analysis,'info')
 
 end
 
-if strcmp(opt.analysis,'result') || strcmp(opt.analysis,'savedata') || strcmp(opt.analysis,'plot')
+if strcmp(opt.analysis,'plot')
         %First make solid face with 100% transparency
         for nc=1:size(extrudedUnitCell.latVec,1)
             for i=3:15
@@ -538,18 +541,15 @@ function printGif(opt,fram,f,nameFolder,nam)
     
 function printHigRes(f,opt,nam,nameFolder)
     pause(1/opt.frames)
-    switch opt.saveFig
-        case 'on'
             
-%             name=[nameFolder,'/',opt.template,'_',num2str(opt.plotPer),'_',nam];
-            name=[nameFolder,'/',nam,'.png'];
-            savefig([nameFolder,'/',nam])
-            figpos=getpixelposition(f); %dont need to change anything here
-            resolution=get(0,'ScreenPixelsPerInch'); %dont need to change anything here
-            set(f,'paperunits','inches','papersize',figpos(3:4)/resolution,...
-            'paperposition',[0 0 figpos(3:4)/resolution]); %dont need to change anything here
-            print(f,name,'-dpng',['-r',num2str(opt.figDPI)],'-opengl') %save file
-    end
+%     name=[nameFolder,'/',opt.template,'_',num2str(opt.plotPer),'_',nam];
+    name=strcat(nameFolder,'/',nam,'.png');
+    savefig(strcat(nameFolder,'/',nam))
+    figpos=getpixelposition(f); %dont need to change anything here
+    resolution=get(0,'ScreenPixelsPerInch'); %dont need to change anything here
+    set(f,'paperunits','inches','papersize',figpos(3:4)/resolution,...
+    'paperposition',[0 0 figpos(3:4)/resolution]); %dont need to change anything here
+    print(f,name,'-dpng',['-r',num2str(opt.figDPI)],'-opengl') %save file
 
 function [f,hs,hie,his] = copyFigure(unitCell,extrudedUnitCell,opt,hs,hie,his)
     f=figure('Position', [0 0 800 800]);
@@ -569,3 +569,25 @@ function [f,hs,hie,his] = copyFigure(unitCell,extrudedUnitCell,opt,hs,hie,his)
     end
 %     set(gca,'xlim',opt.xlim,'ylim',opt.ylim,'zlim',opt.zlim);
     hl2=plotOpt(opt);
+    
+function makeAnglePlot(result, nameFolder, filename)
+
+    nameFilePlot = ['/',filename,'_AnglEv'];
+    allangles = [];
+    for iter = 1:size(result.deform,2)
+        allangles = [allangles result.deform(iter).interV(:).theta];
+    end
+    p = plot(allangles', 'Color', 'k');
+%     for i = result.anglConstr(:,1)'
+%         set(p(i), 'color', rand(1,3), 'LineWidth', 2, 'DisplayName',num2str(i));
+%     end
+    x = 0;
+    for iter = 1:(size(result.deform,2)-1)
+        x = x + size(result.deform(iter).interV,2)+0.5;
+        line([x x],[-1.1*pi 1.1*pi], 'Color', [0 0 0])
+    end
+%     legend(p(result.anglConstr(:,1)'))
+    saveas(gcf, strcat(nameFolder, nameFilePlot, '.png'));
+    savefig(strcat(nameFolder,nameFilePlot,'.fig'))
+    close 'all';  
+        

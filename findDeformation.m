@@ -12,13 +12,47 @@ if strcmp(opt.analysis,'result')
             metadataFile(opt, extrudedUnitCell);
             nonlinearFoldingMulti(extrudedUnitCell, opt, opt.angleConstrFinal(1).val);
             
-        case 'randomPert'
-            kappas = logspace(-3,1,5);
-            for kappa = 1:size(kappas,2)
-                optpar = opt;
-                optpar.Khinge = kappas(kappa);
-                metadataFile(optpar, extrudedUnitCell);
-                nonlinearFoldingRand(extrudedUnitCell, optpar, opt.RandstDev);
+        case 'randomPert1'
+            kappas = logspace(-3,1,81);
+            angles = linspace(0,pi,5);
+            savefile = opt.file;
+            for angle = 2:size(angles,2)-1
+                opt.restang = angles(angle);
+                extrudedUnitCell.theta = ones(size(extrudedUnitCell.theta,1),1)*opt.restang;
+                for kappa = 1:size(kappas,2)
+                    opt.Khinge = kappas(kappa);
+                    opt.file = strcat(savefile,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge));                    
+                    metadataFile(opt, extrudedUnitCell);
+                    nonlinearFoldingRand(extrudedUnitCell, opt, opt.RandstDev);
+                end
+            end
+        case 'randomPert2'
+            kappas = logspace(-3,1,13);
+            angles = linspace(0,pi,5);
+            savefile = opt.file;
+            for angle = 2:size(angles,2)-1
+                opt.restang = angles(angle);
+                extrudedUnitCell.theta = ones(size(extrudedUnitCell.theta,1),1)*opt.restang;
+                for kappa = 1:size(kappas,2)
+                    opt.Khinge = kappas(kappa);
+                    opt.file = strcat(savefile,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge));                    
+                    metadataFile(opt, extrudedUnitCell);
+                    nonlinearFoldingRand(extrudedUnitCell, opt, opt.RandstDev);
+                end
+            end
+        case 'randomPert3'
+            kappas = logspace(-3,1,17);
+            angles = linspace(0,pi,5);
+            savefile = opt.file;
+            for angle = 2:size(angles,2)-1
+                opt.restang = angles(angle);
+                extrudedUnitCell.theta = ones(size(extrudedUnitCell.theta,1),1)*opt.restang;
+                for kappa = 1:size(kappas,2)
+                    opt.Khinge = kappas(kappa);
+                    opt.file = strcat(savefile,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge));                    
+                    metadataFile(opt, extrudedUnitCell);
+                    nonlinearFoldingRand(extrudedUnitCell, opt, opt.RandstDev);
+                end
             end
     end
 end
@@ -30,6 +64,8 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function nonlinearFoldingMulti(extrudedUnitCell,opt,angtemp)
+
+savefile = opt.file;
 
 %INITIALIZE LINEAR CONSTRAINTS
 [Aeq, Beq]=linearConstr(extrudedUnitCell,opt);
@@ -55,8 +91,8 @@ for kappa = 1:size(kappas,2)
     
     opt.Khinge = kappas(kappa);
     %Create file for saving the results
-    extraName = sprintf('/kh%2.5f_kta%2.2f_ke%2.2f_kf%2.2f', opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
-    folderName = strcat(pwd, '/Results/', opt.template,num2str(opt.numVert),'/',opt.relAlgor,'/mat', opt.saveFile, extraName);
+    opt.file = strcat(savefile,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge)); 
+    folderName = strcat(opt.file,'/mat');
     if ~exist(folderName, 'dir')
         mkdir(folderName);
     end
@@ -142,8 +178,7 @@ u0=zeros(3*size(extrudedUnitCell.node,1),1);
 theta0=zeros(size(extrudedUnitCell.theta));
 
 %Create file for saving the results
-extraName = sprintf('/kh%2.3f_kta%2.3f_ke%2.3f_kf%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
-folderName = strcat(pwd, '/Results/', opt.template,num2str(opt.numVert),'/',opt.relAlgor,'/mat', opt.saveFile, extraName);
+folderName = strcat(opt.file,'/mat');
 if ~exist(folderName, 'dir')
     mkdir(folderName);
 end
@@ -188,14 +223,13 @@ extrudedUnitCell.angleConstr=[];
 rng('shuffle');
 
 %Create file for saving the results
-extraName = sprintf('/kh%2.5f_kta%2.2f_ke%2.2f_kf%2.2f', opt.Khinge,opt.KtargetAngle,opt.Kedge, opt.Kface);
-folderName = strcat(pwd, '/Results/', opt.template,num2str(opt.numVert),'/',opt.relAlgor,'/mat', opt.saveFile, extraName);
+folderName = strcat(opt.file,'/mat');
 if ~exist(folderName, 'dir')
     mkdir(folderName);
 end
     
 opt.KtargetAngle = 0;
-for i = 1:opt.numIterations
+parfor i = 1:opt.numIterations
     
     %%%%%% Folding part %%%%%%
     %Perturb the structure
@@ -216,12 +250,16 @@ for i = 1:opt.numIterations
 
     %Save the result in a file
     fileName = strcat(folderName,'/iter_',mat2str(i),'.mat');
-    save(fileName, 'result');
+    parsave(fileName, result);
 
 end
 %Clear variables for next fold
 clearvars result E exfl output;
 fclose('all');
+
+function parsave(filename,result)
+
+save(filename, 'result')
 
 function [V, exfl, output, E] = FoldStructure(u0, E, exfl, extrudedUnitCell, opt, iter, steps, Aeq, Beq)
 
@@ -432,7 +470,7 @@ function [Aeq, Beq]=linearConstr(extrudedUnitCell, opt)
 %FIX NODE CONSTRAINTS
 %IMPROVE FOLLOWING - AUTOMATIC DEPENDING ON NODES OF FACE 1
 nodeFix=extrudedUnitCell.face{1};
-e1=extrudedUnitCell.node(nodeFix(2),:)-extrudedUnitCell.node(nodeFix(1),:);
+e1=extrudedUnitCell.node(nodeFix(1),:)-extrudedUnitCell.node(nodeFix(2),:);
 e2=extrudedUnitCell.node(nodeFix(3),:)-extrudedUnitCell.node(nodeFix(2),:);
 e1=e1/norm(e1);
 e2=e2/norm(e2);
@@ -441,11 +479,11 @@ e3=e3/norm(e3);
 
 Aeq=zeros(6,3*size(extrudedUnitCell.node,1));
 Beq=zeros(6,1);
-Aeq(1,3*nodeFix(2)-2)=1;
-Aeq(2,3*nodeFix(2)-1)=1;
-Aeq(3,3*nodeFix(2))=1;
-Aeq(4,3*nodeFix(1)-2:3*nodeFix(1))=e3;
-Aeq(5,3*nodeFix(1)-2:3*nodeFix(1))=e2;
+Aeq(1,3*nodeFix(1)-2)=1;
+Aeq(2,3*nodeFix(1)-1)=1;
+Aeq(3,3*nodeFix(1))=1;
+Aeq(4,3*nodeFix(2)-2:3*nodeFix(2))=e3;
+Aeq(5,3*nodeFix(2)-2:3*nodeFix(2))=e2;
 Aeq(6,3*nodeFix(3)-2:3*nodeFix(3))=e3;
 
 %MERGE NODES AT INITIALLY SAME LOCATION

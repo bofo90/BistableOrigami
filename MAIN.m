@@ -13,82 +13,115 @@ clearvars -global
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 opt=initOpt('inputType', 'origami','template','SingleVertex',...
-            'angDesign', [0 120*pi/180 240*pi/180],...
-            'restang', pi/4, 'numVert', 4, 'numIterations', 1000,'RandstDev', 0.2,...
-            'analysis','savedata','analysisType','on',...
-            'createFig', 'off','saveFig','on','saveMovie', 'off',...
-            'figDPI',200,'safeMovieAntiAlias', 0,...
+            'numVert', 4, 'vertexType', "2CFF", ...
+            'tessellationType', '25','xrep', 2, 'yrep', 1,...
+            'restang', pi/4, 'angDesign', [0 65 130 195]*pi/180,...
+            'analysis','result','analysisType','randomPert',...
+            'numIterations', 1000,'RandstDev', 0.2,...
+            'figDPI',200, 'saveMovie', 'off', 'safeMovieAntiAlias', 0,...
             'folAlgor', 'sqp','relAlgor', 'sqp',...
-            'gethistory', 'off',...
+            'gethistory', 'off', 'plotAll', 'off',...
             'constrEdge','off','constrFace','on','constAnglePerc',0.99,... 
             'Khinge',10^-2.875,'Kedge',1,'Kdiag',1,'Kface',100,'KtargetAngle',1000,...
             'maxStretch', nan,'steps',3,...
             'maxArea', 0.1,...
             'periodic', 'off');    
 
-
-% opt.saveFile = strcat('/',date,'_temp');
-saveFile = strcat('/15-Nov-2019_KandTheta0/DoubleSym');
 tic;
+% hingeSet = [1 2];
+% opt.angleConstrFinal(1).val=[ hingeSet(:) , [ones(1,size(hingeSet,2))*pi/2]'];
+
+%SOLVER OPTIONS
+opt.options=optimoptions('fmincon','GradConstr','off','GradObj','off',...
+                         'tolfun',1e-6,'tolx',1e-9, 'tolcon',1e-9,...
+                         'Display','off','DerivativeCheck','off',...
+                         'maxfunevals',30000, 'MaxIterations', 2000,...
+                         'Algorithm', opt.folAlgor, 'OutputFcn',@outfun,...               
+                         'RelLineSrchBnd', 0.01, 'RelLineSrchBndDuration', 5000);
+                     
+% "CZ", "X1", "3L", "2NC", "2C", "GFF", "2OFF","3S", "2OM1", "2OM2", "2NM1", "2NM2", "2OL", "2NL", "2OS", "2NS", "Z1", "Z2", "Y1", "Y2", "X2"
+
+opt.analysisType = 'randomPert1';
+for i = ["GFF", "2OFF","3S", "2OM1", "2OM2", "2NM1", "2NM2", "2OL", "2NL", "2OS", "2NS", "Z1", "Z2", "Y1", "Y2", "X2"]
+    
+    opt.vertexType = i;
+    
+    [extrudedUnitCell,opt]=buildGeometry(opt);
+    opt.saveFile = strcat('/02-Dec-2019_',num2str(opt.angDesign*180/pi,'%.2f_'));
+    opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.vertexType,opt.saveFile);
+    
+    findDeformation(extrudedUnitCell,opt);
+    
+end
+
+opt.analysisType = 'randomPert2';
+for i = ["CFF", "CY", "GFF", "2OFF","3S", "2OM1", "2OM2", "2NM1", "2NM2", "2OL", "2NL", "2OS", "2NS", "Z1", "Z2", "Y1", "Y2", "X2"]
+    
+    opt.vertexType = i;
+    for j = 1:10
+        [extrudedUnitCell,opt]=buildGeometry(opt);
+        opt.saveFile = strcat('/06-Dec-2019_',num2str(opt.angDesign*180/pi,'%.2f_'));
+        opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.vertexType,opt.saveFile);
+
+        findDeformation(extrudedUnitCell,opt);
+    end
+end
 
 
-hingeSet = [757 306];
-opt.angleConstrFinal(1).val=[ hingeSet(:) , [ones(1,size(hingeSet,2))*opt.restang]'];
-% for i = 35:5:90
-%     for j = 15:5:165
-% 
-%     
-%         if (i+j)<180 || (i+j)>=195
-%             continue;
-%         end
-%         opt.angDesign = [0, i, 180, 360-j];
-%         opt.saveFile = strcat('/01-Aug-2019DesignAnalysis/Angles_',num2str(i),'_',num2str(j));
-%         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%         %BUILD
-%         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%         [extrudedUnitCell,opt]=buildGeometry(opt);
-% 
-%         %SOLVER OPTIONS
-%         opt.options=optimoptions('fmincon','GradConstr','off','GradObj','off',...
-%                                  'tolfun',1e-6,'tolx',1e-9, 'tolcon',1e-9,...
-%                                  'Display','off','DerivativeCheck','off',...
-%                                  'maxfunevals',30000, 'MaxIterations', 2000,...
-%                                  'Algorithm', opt.folAlgor, 'OutputFcn',@outfun,...               
-%                                  'RelLineSrchBnd', 0.01, 'RelLineSrchBndDuration', 5000);
-% 
-%         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%         %SELECT HINGES
-%         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%         % selectHinges(unitCell, extrudedUnitCell, opt);
-% 
-%         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%         %ANALYSIS
-%         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%         findDeformation(extrudedUnitCell,opt);
-%     
-%     end
-% end
+opt.analysisType = 'randomPert3';
+opt.template = 'Tessellation';
+opt.vertexType = '2CFF';
+for i = 2:5
+    
+    opt.xrep = i;
+    
+    for j = 1:5
+        
+        opt.yrep = j;
+        
+        if i*j >10
+            opt.numIterations = 10000;
+        else
+            opt.numIterations = i*j*1000;
+        end
+        
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %BUILD
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        [extrudedUnitCell,opt]=buildGeometry(opt);
+        opt.saveFile = strcat('/10-Dec-2019_',num2str([opt.xrep,opt.yrep],'%d_'));
+        opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.tessellationType,'/',opt.vertexType,opt.saveFile);
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %ANALYSIS
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        findDeformation(extrudedUnitCell,opt);
+    end
+end
+
+opt.yrep = 1;
+for i = 6:10
+    opt.xrep = i;
+    opt.numIterations = i*j*1000;
+
+    [extrudedUnitCell,opt]=buildGeometry(opt);
+    opt.saveFile = strcat('/10-Dec-2019_',num2str([opt.xrep,opt.yrep],'%d_'));
+    opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.tessellationType,'/',opt.vertexType,opt.saveFile);
+
+    findDeformation(extrudedUnitCell,opt);
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %OUTPUT AND PLOT GEOMETRY
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if (strcmp(opt.analysis, 'result') && strcmp(opt.createFig, 'off'))
-        fprintf('Not ploting any results.\n');
-else
-    folderResults = strcat(pwd, '/Results/', opt.template,num2str(opt.numVert),'/',opt.relAlgor,'/mat', saveFile);
-    allFiles = dir(folderResults);
-    for j = 3:length(allFiles)
-        opt.angDesign = [0 90 180 270]*pi/180;
-        [extrudedUnitCell,opt]=buildGeometry(opt);
-        opt.saveFile = strcat(saveFile, '\', allFiles(j).name);
-        kappas = logspace(-3,1,81);
-        close all
-        for i = kappas
-            opt.Khinge = i;
-            ReadAndPlot( extrudedUnitCell, opt);
-        end
-    end
-end
+% kappas = logspace(-3,1,33);
+% close all
+% for i = kappas
+%     opt.Khinge = i;
+%         opt.file = strcat(opt.file, '\RestAng_0.785\kappa_0.31623');
+%         opt.angleConstrFinal(1).val=[1500 0];
+        ReadAndPlot(extrudedUnitCell, opt);
+% end
 t = toc;
 fprintf('The whole program lasted %.2f seconds\n', t);
 
