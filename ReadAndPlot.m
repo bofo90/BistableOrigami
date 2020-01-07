@@ -45,9 +45,10 @@ switch opt.analysis
 
         %create folder of data with files
         [fMassDist, fHinge, fEnergy, fAngles] = makeFileswHeaders(folderEnergy, folderResults);
-        Energies = [];
-        Hinges = [];
-        AllAngles = [];
+        Energies = zeros(length(allFiles)-4,7);
+        PosStad = zeros(length(allFiles)-4,size(extrudedUnitCell.face,2)+1);
+        Hinges = zeros(length(allFiles)-4,2);
+        AllAngles = zeros(length(allFiles)-4,size(extrudedUnitCell.theta,1)+1);
         dirs = 0;
         for ct = 1:length(allFiles)
             if allFiles(ct).isdir || strcmp(allFiles(ct).name(1:end-4), 'metadata')
@@ -62,22 +63,22 @@ switch opt.analysis
             
             [curv, areas] = getCurvature(extrudedUnitCell, opt, lofile.result);
 
-            Energies = [Energies; [ones(size(lofile.result.E,2),1)*(ct-dirs), lofile.result.Eedge(2,:)',...
-                lofile.result.Ediag(2,:)', lofile.result.Eface(2,:)', lofile.result.Ehinge(2,:)',...
-                lofile.result.EtargetAngle(2,:)', lofile.result.exfl(2,:)']];
-            PosStad = [ones(size(areas))*(ct-dirs), areas];
-            Hinges = [Hinges; [(ct-dirs), curv]];%, designAng(1), designAng(2), designAng(3)]];
-            AllAnglesTemp = zeros([size(extrudedUnitCell.theta,1),size(lofile.result.deform,2)]);
-            for iter = 1:size(lofile.result.deform,2)
-                AllAnglesTemp(:,iter) = lofile.result.deform(iter).theta;
-            end
-            AllAngles = [AllAngles; [ones(size(AllAnglesTemp,2),1)*(ct-dirs) AllAnglesTemp']];
+            Energies(ct-dirs,:) = [(ct-dirs), lofile.result.Eedge(2,end),...
+                lofile.result.Ediag(2,end), lofile.result.Eface(2,end), lofile.result.Ehinge(2,end),...
+                lofile.result.EtargetAngle(2,end), lofile.result.exfl(2,end)];
+            PosStad(ct-dirs,:) = [(ct-dirs), areas'];
+            Hinges(ct-dirs,:) = [(ct-dirs), curv];%, designAng(1), designAng(2), designAng(3)]];
+%             AllAnglesTemp = zeros([size(extrudedUnitCell.theta,1),size(lofile.result.deform,2)]);
+%             for iter = 1:size(lofile.result.deform,2)
+%                 AllAnglesTemp(:,iter) = lofile.result.deform(iter).theta;
+%             end
+            AllAngles(ct-dirs,:) = [(ct-dirs) lofile.result.deform(end).theta'];
  
             close all;
             clear lofile;
         end
         
-        dlmwrite(fMassDist, PosStad', 'delimiter', ',', '-append','precision',7);
+        dlmwrite(fMassDist, PosStad, 'delimiter', ',', '-append','precision',7);
         dlmwrite(fHinge, Hinges, 'delimiter', ',', '-append','precision',7);
         dlmwrite(fEnergy, Energies, 'delimiter', ',', '-append','precision',7);
         dlmwrite(fAngles, AllAngles, 'delimiter', ',', '-append','precision',7);
@@ -110,7 +111,7 @@ fileMassDist = strcat(folderEnergy, '/','PosStad.csv');
 if exist(fileMassDist, 'file')
     delete(fileMassDist) % always start with new file
 end
-headersMassDist = {'Hinge Number';'LowerRadius';'UpperRadius'};
+headersMassDist = {'Hinge Number';'Face Areas'};
 writeHeader(fileMassDist, headersMassDist);
 
 fileAngles = strcat(folderEnergy, '/','Angles.csv');
