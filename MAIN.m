@@ -114,31 +114,35 @@ opt.options=optimoptions('fmincon','GradConstr','off','GradObj','off',...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %OUTPUT AND PLOT GEOMETRY
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-for i = ["2CFF"]
+%%%%When using savedata
+for i = ["CZ", "X1", "3L", "2NC", "2C", "GFF", "2OFF","3S", "2OM1", "2OM2", "2NM1", "2NM2", "2OL", "2NL", "2OS", "2NS", "Z1", "Z2", "Y1", "Y2", "X2"]
     
+    fileContainer = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',i);
+    allFiles = dir(fileContainer);
     
-    opt.saveFile = '/02-Dec-2019_0.00_90.00_180.00_270.00_';
-    
-    opt.vertexType = 'non';
-    opt.angDesign = getAngles(opt.saveFile);
-    [extrudedUnitCell,opt]=buildGeometry(opt);
-    
-    opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',i,opt.saveFile);
-    file = opt.file;
-    
-    kappas = logspace(-3,1,81);
-    angles = linspace(0,pi,5);
-    close all
-    for j = angles(2:4)
-        opt.restang = j;
-        extrudedUnitCell.theta = ones(size(extrudedUnitCell.theta,1),1)*opt.restang;
-        for k = kappas
-            opt.Khinge = k;
-            opt.file = strcat(file,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge));
-            ReadAndPlot(extrudedUnitCell, opt);
+    for ct = 3:length(allFiles)
+        opt.saveFile = strcat('/',allFiles(ct).name);
+
+        opt.vertexType = 'non';
+        opt.angDesign = getAngles(opt.saveFile);
+        [extrudedUnitCell,opt]=buildGeometry(opt);
+
+        opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',i,opt.saveFile);
+        file = opt.file;
+
+        kappas = logspace(-3,1,81);
+        angles = linspace(0,pi,5);
+        close all
+        for j = angles(2:4)
+            opt.restang = j;
+            extrudedUnitCell.theta = ones(size(extrudedUnitCell.theta,1),1)*opt.restang;
+            for k = kappas
+                opt.Khinge = k;
+                opt.file = strcat(file,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge));
+                ReadAndPlot(extrudedUnitCell, opt);
+            end
         end
     end
-    
 end
 
 %%%%When using plot !!carefull, it is still not so well estabilshed!!
