@@ -424,4 +424,5 @@ for ang, i  in zip(restangles, markers):
                     c = colors[thisstate['StableStateAll']-1], marker = i)
 
 #%%
-allDesigns[['kappa','Hinge Number','StableStateAll','restang']].to_csv(Folder_name + '/Images/InfoforImages.csv', index = False)
+allDesigns[['kappa','Hinge Number','StableStateAll','restang']].to_csv(Folder_name + '/Images/InfoforAllImages.csv', index = False)
+allDesigns.groupby('StableStateAll').apply(lambda df: df.sample(1))[['kappa','Hinge Number','StableStateAll','restang']].to_csv(Folder_name + '/Images/InfoforStableStatesImages.csv', index = False)

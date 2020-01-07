@@ -140,6 +140,30 @@ for i = ["2CFF"]
     end
     
 end
+
+%%%%When using plot !!carefull, it is still not so well estabilshed!!
+% for i = ["2CFF"]
+% 
+%     opt.saveFile = '/02-Dec-2019_0.00_90.00_180.00_270.00_';
+%     
+%     opt.vertexType = 'non';
+%     opt.angDesign = getAngles(opt.saveFile);
+%     [extrudedUnitCell,opt]=buildGeometry(opt);
+%     
+%     opt.origin = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',i,opt.saveFile);
+%     
+%     allFiles = csvread(strcat(opt.origin,'/Images/InfoforStableStatesImages.csv'),1);
+%     
+%     for j = 1:size(allFiles,1)
+%         close all
+%         opt.Khinge = allFiles(j,1);
+%         opt.restang = allFiles(j,4);
+%         opt.sim = allFiles(j,2);
+%         opt.file = strcat(opt.origin,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge));
+%         ReadAndPlot(extrudedUnitCell, opt);
+%     end
+% end
+
 t = toc;
 fprintf('The whole program lasted %.2f seconds\n', t);
 

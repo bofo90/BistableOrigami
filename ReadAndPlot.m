@@ -22,7 +22,7 @@ switch opt.analysis
             resfilename = allFiles(ct).name;
             if strcmp(opt.plotAll, 'off')
                 hingeSet = getHingeSet(resfilename);
-                if ~ismember(hingeSet, opt.angleConstrFinal(1).val(:,1))
+                if hingeSet ~= opt.sim
                     continue;
 %                     elseif ~strcmp(resfilename(1:end-4), '[8 3]_Ang1_18_Angl2_27')
 %                         continue;
@@ -30,7 +30,7 @@ switch opt.analysis
             end
             
             lofile = load(strcat(folderResults,'/', resfilename));
-            outputResults(extrudedUnitCell,lofile.result,opt,resfilename(1:end-4));
+            outputResults(extrudedUnitCell,lofile.result,opt,strcat(resfilename(1:end-4),sprintf('_RestAng_%.3f_kappa_%2.5f', opt.restang, opt.Khinge)));
             
         end
 

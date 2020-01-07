@@ -24,7 +24,7 @@ opt.tranPol=0.5;
 %PREPARE PLOTTING UNDEFORMED CONFIGURATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Check if output folder is required, and create it if it doesn't exist
-nameFolder=strcat(opt.file,'/images');
+nameFolder=strcat(opt.origin,'/images');
 if exist(nameFolder, 'dir')==0
     mkdir(nameFolder)
 end
@@ -544,7 +544,7 @@ function printHigRes(f,opt,nam,nameFolder)
             
 %     name=[nameFolder,'/',opt.template,'_',num2str(opt.plotPer),'_',nam];
     name=strcat(nameFolder,'/',nam,'.png');
-    savefig(strcat(nameFolder,'/',nam))
+    savefig(strcat(nameFolder,'/',nam,'.fig'))
     figpos=getpixelposition(f); %dont need to change anything here
     resolution=get(0,'ScreenPixelsPerInch'); %dont need to change anything here
     set(f,'paperunits','inches','papersize',figpos(3:4)/resolution,...
