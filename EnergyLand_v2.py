@@ -272,6 +272,8 @@ for subdir in os.listdir(Folder_name):
     
     kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['EdgeEnergy', 'HingeEnergy', 'TotalEnergy','ang1','ang2','ang3','ang4', 'Curvature']].mean())
 #    kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['EdgeEnergy', 'HingeEnergy', 'TotalEnergy','ang1','ang2','ang3', 'Curvature']].mean())
+    kappasStSt['amountSym'] = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['Symmetry']].nunique())
+    kappasStSt['Symetries'] = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates').apply(lambda x: str(np.sort(x.Symmetry.unique()))))
     ####Only select stable states that have more than 10% appearance in each simulation
     kappasStSt['amountStSt'] = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['DiagonalEnergy']].count())
     more10percent = kappasStSt['amountStSt']>simLen*0.1
@@ -324,7 +326,16 @@ stst = np.unique(allDesigns['StableStateAll'])
 
 #%%
 
-allDesigns.groupby('StableStateAll').apply(lambda _df: _df.groupby('StableStates')[['DiagonalEnergy']].count())
+symstst = ["" for x in stst]
+
+for i in np.arange(np.size(stst,0)):
+    allsym = allDesigns[allDesigns['StableStateAll'] == stst[i]]['Symetries'].unique()
+    redsym = []
+    for sym in allsym:
+        redsym = np.append(redsym, sym[1:-1].split())
+    symstst[i] = ' '.join(np.unique(redsym))
+    print('Stable state',stst[i],'has symmetries:', symstst[i])
+        
 
 
 #%%
