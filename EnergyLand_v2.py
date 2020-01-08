@@ -234,10 +234,15 @@ for subdir in os.listdir(Folder_name):
         
         dataEnergy['TotalEnergy'] = dataEnergy['EdgeEnergy']+dataEnergy['DiagonalEnergy']+dataEnergy['HingeEnergy']
         dataEnergy['HingeEnergy'] = dataEnergy['HingeEnergy']
-        dataEnergy['kappa'] = np.ones(simLen)*np.float(subdir2.split('_')[1])
+        dataEnergy['kappa'] = np.ones(simLen)*np.float(subdir2.split('_')[1])/4  ### '/4' due to error in the computation of the energy
         
         dataHinges = pd.read_csv(folder_name+file_name2)
         dataEnergy['Curvature'] = dataHinges['Curvature']
+        
+        dataPos = pd.read_csv(folder_name+file_name3)
+        dataPos = dataPos.reset_index()
+        dataPos = dataPos.rename(columns={'level_0':'Hinge Number', 'level_1':'face1', 'level_2':'face2', 'Hinge Number':'face3', 'Face Areas':'face4'})
+        dataEnergy[['face1','face2','face3','face4']] = dataPos[['face1','face2','face3','face4']]
     
         dataAngles = np.loadtxt(folder_name+file_name4,skiprows=1, delimiter = ',', dtype = np.float64)
         dataAngles = np.delete(dataAngles, 0, 1)
@@ -267,7 +272,7 @@ for subdir in os.listdir(Folder_name):
     # allData.set_index(['kappa','Hinge Number'], inplace = True)
     # allData.sort_index(inplace=True)
     
-    kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['EdgeEnergy', 'HingeEnergy', 'TotalEnergy','ang1','ang2','ang3','ang4', 'Curvature']].mean())
+    kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['EdgeEnergy', 'HingeEnergy', 'TotalEnergy','ang1','ang2','ang3','ang4', 'Curvature','face1','face2','face3','face4']].mean())
 #    kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['EdgeEnergy', 'HingeEnergy', 'TotalEnergy','ang1','ang2','ang3', 'Curvature']].mean())
     
     kappasStSt['amountSym'] = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['Symmetry']].nunique())
@@ -303,7 +308,7 @@ allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3
 #allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3']], 0.5, 'centroid')
 stst = np.unique(allDesigns['StableStateAll'])
 ############################################# TO make SS consistence between plots (its done manualy)
-newSS = np.array([1,1,2,2,3,3,4,4,5,4,5,5])
+newSS = np.array([4,4,4,4,2,2,1,1,3,1,3,3])
 invmask_copy = allDesigns['StableStateAll'].to_numpy()
 newStSt = np.zeros(np.shape(invmask_copy))
 
@@ -311,7 +316,7 @@ for old,new in zip(stst, newSS):
     newStSt[invmask_copy == old] = new
 
 allDesigns['StableStateAll'] = newStSt.astype(int)
-delSS = np.array([6,7,8,9,10,11,12])
+delSS = np.array([5,6,7,8,9,10,11,12])
 stst = np.delete(stst, delSS-1)
 #####################################################################################################
 
@@ -331,7 +336,45 @@ for i in np.arange(np.size(stst,0)):
     symstst[i] = ' '.join(np.unique(redsym))
     print('Stable state',stst[i],'has symmetries:', symstst[i])
         
+#%%
+plt.close('all')   
 
+for i in np.arange(np.size(restangles)):
+    
+    fig1 = plt.figure(figsize=(cm2inch(4.3), cm2inch(3.1)))
+    ax1 = plt.subplot(111)
+    fig1.subplots_adjust(top=0.982,
+    bottom=0.23,
+    left=0.225,
+    right=0.940)
+    
+    thisangBool = allDesigns['restang'] == restangles[i]
+    thisang = allDesigns[thisangBool]    
+    
+    maxCurv = 0.7
+    minCurv = 0
+    
+    NiceGraph2D(ax1, r'$\kappa$', r'$Area$')
+    
+    ax1.set_ylim([minCurv, maxCurv])
+    
+    ax1.set_xscale('log')
+    ax1.set_xticks([0.001,0.01,0.1,1])
+    ax1.set_xlim([0.001,1])
+        
+    for j in stst:
+        thisstst = thisang[thisang.StableStateAll == j]
+
+        ax1.scatter(thisstst['kappa'], thisstst['face1'], c = colors[thisstst['StableStateAll']-1], s = 5)
+        ax1.scatter(thisstst['kappa'], thisstst['face2'], c = colors[thisstst['StableStateAll']-1], s = 5)
+        ax1.scatter(thisstst['kappa'], thisstst['face3'], c = colors[thisstst['StableStateAll']-1], s = 5)
+        ax1.scatter(thisstst['kappa'], thisstst['face4'], c = colors[thisstst['StableStateAll']-1], s = 5)
+
+    ax1.axhline(y=0.1, color='r', linestyle='-', linewidth = '0.4')
+    
+    fig1.show()
+    fig1.savefig(Folder_name + '/Images/AreaFaces_' + str(restangles[i].astype(float))+'.pdf', transparent = True)
+    fig1.savefig(Folder_name + '/Images/AreaFaces_' + str(restangles[i].astype(float))+ '.png', transparent = True)
 
 #%%
 plt.close('all')   
@@ -349,7 +392,7 @@ for i in np.arange(np.size(restangles)):
     fig1.subplots_adjust(top=0.982,
     bottom=0.23,
     left=0.225,
-    right=0.967)
+    right=0.940)
     
     thisangBool = allDesigns['restang'] == restangles[i]
     thisang = allDesigns[thisangBool]    
@@ -368,8 +411,8 @@ for i in np.arange(np.size(restangles)):
     ax1.set_ylim(ylim[i])
 #    ax1.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.1f'))
     ax1.set_xscale('log')
-    ax1.set_xticks([0.001,0.01,0.1,1,10])
-    ax1.set_xlim([0.0007,15])
+    ax1.set_xticks([0.001,0.01,0.1,1])
+    ax1.set_xlim([0.001,1])
         
     for j in stst:
         thisstst = thisang[thisang.StableStateAll == j]
