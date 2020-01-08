@@ -59,20 +59,22 @@ switch opt.analysis
 
             % load results from file
             lofile = load(strcat(folderResults,'/', allFiles(ct).name));
-            fprintf('Saving data %d\n', ct);
+%             fprintf('Saving data %d\n', ct);
+            
+            sim = getHingeSet(allFiles(ct).name);
             
             [curv, areas] = getCurvature(extrudedUnitCell, opt, lofile.result);
 
-            Energies(ct-dirs,:) = [(ct-dirs), lofile.result.Eedge(2,end),...
+            Energies(ct-dirs,:) = [sim, lofile.result.Eedge(2,end),...
                 lofile.result.Ediag(2,end), lofile.result.Eface(2,end), lofile.result.Ehinge(2,end),...
                 lofile.result.EtargetAngle(2,end), lofile.result.exfl(2,end)];
-            PosStad(ct-dirs,:) = [(ct-dirs), areas'];
-            Hinges(ct-dirs,:) = [(ct-dirs), curv];%, designAng(1), designAng(2), designAng(3)]];
+            PosStad(ct-dirs,:) = [sim, areas'];
+            Hinges(ct-dirs,:) = [sim, curv];%, designAng(1), designAng(2), designAng(3)]];
 %             AllAnglesTemp = zeros([size(extrudedUnitCell.theta,1),size(lofile.result.deform,2)]);
 %             for iter = 1:size(lofile.result.deform,2)
 %                 AllAnglesTemp(:,iter) = lofile.result.deform(iter).theta;
 %             end
-            AllAngles(ct-dirs,:) = [(ct-dirs) lofile.result.deform(end).theta'];
+            AllAngles(ct-dirs,:) = [sim lofile.result.deform(end).theta'];
  
             close all;
             clear lofile;

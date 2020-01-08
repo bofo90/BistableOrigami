@@ -116,6 +116,7 @@ opt.options=optimoptions('fmincon','GradConstr','off','GradObj','off',...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%When using savedata
 for i = ["CZ", "X1", "3L", "2NC", "2C", "GFF", "2OFF","3S", "2OM1", "2OM2", "2NM1", "2NM2", "2OL", "2NL", "2OS", "2NS", "Z1", "Z2", "Y1", "Y2", "X2"]
+% for i = ["2CFF"]    
     
     fileContainer = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',i);
     allFiles = dir(fileContainer);
@@ -133,10 +134,11 @@ for i = ["CZ", "X1", "3L", "2NC", "2C", "GFF", "2OFF","3S", "2OM1", "2OM2", "2NM
             opt.restang = j;
             extrudedUnitCell.theta = ones(size(extrudedUnitCell.theta,1),1)*opt.restang;
             
-            allFiles2 = dir(strcat(opt.file, sprintf('/RestAng_%.3f', opt.restang)));
+            allFiles2 = dir(strcat(file, sprintf('/RestAng_%.3f', opt.restang)));
             for k = 3:length(allFiles2)
                 opt.Khinge = getKappa(allFiles2(k).name);
                 opt.file = strcat(file,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge));
+                fprintf(strcat('Saving data: ',allFiles(ct).name, sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge), '\n'))
                 ReadAndPlot(extrudedUnitCell, opt);
             end
         end
