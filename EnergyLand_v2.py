@@ -89,8 +89,8 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
         else:
             if ~np.isnan(divisions[0]):
                 axes.set_xticks(np.linspace(mincoord[0],maxcoord[0],divisions[0]))
-                            
-    axes.set_xlabel(nameX)
+    axes.set_xlabel(nameX,labelpad=-3, color = gray)
+    
     if ~np.isnan(mincoord[1]) and ~np.isnan(maxcoord[1]):
         axes.set_ylim([mincoord[1]-buffer[1], maxcoord[1]+buffer[1]])
         if isinstance(divisions[1], (list, tuple, np.ndarray)):
@@ -99,24 +99,20 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
         else:
             if ~np.isnan(divisions[1]):
                 axes.set_yticks(np.linspace(mincoord[1],maxcoord[1],divisions[1]))
-    axes.set_ylabel(nameY)
+    axes.set_ylabel(nameY,labelpad=-3, color = gray)
    
     axes.xaxis.label.set_color(gray)
-    axes.tick_params(axis='x',colors=gray, direction = 'in', width = 0.4)
-    axes.spines['bottom'].set_color(gray)
-    axes.spines['top'].set_color(gray)
+    axes.tick_params(axis='x', colors=gray, direction = 'in', width = 0.4)
     axes.yaxis.label.set_color(gray)
     axes.tick_params(axis='y', colors=gray, direction = 'in', width = 0.4)
-    axes.spines['left'].set_color(gray)
-    axes.spines['right'].set_color(gray)
     axes.tick_params(pad = 2)
     
-    axes.tick_params(axis='y', which='minor', colors='0.2', direction = 'in', width = 0.4)
-    axes.tick_params(axis='x', which='minor', colors='0.2', direction = 'in', width = 0.4)
-
+    axes.tick_params(axis='y', which='minor', colors=gray, direction = 'in', width = 0.4)
+    axes.tick_params(axis='x', which='minor', colors=gray, direction = 'in', width = 0.4)
     
     for axis in ['top','bottom','left','right']:
         axes.spines[axis].set_linewidth(0.4)
+        axes.spines[axis].set_color(gray)
         
     return
 
@@ -218,7 +214,6 @@ allKappasAnalysis = pd.DataFrame()
 
 if not os.path.isdir(Folder_name + '/Images/'):
     os.mkdir(Folder_name + '/Images/')
-    os.mkdir(Folder_name + '/Images/SingleDes/')
     
 designang = np.array(Folder_name.split('_')[1:-1]).astype(float)
   
@@ -320,7 +315,7 @@ delSS = np.array([6,7,8,9,10,11,12])
 stst = np.delete(stst, delSS-1)
 #####################################################################################################
 
-cmap2 = matl.cm.get_cmap('Set3',np.size(kappas))
+cmap2 = matl.cm.get_cmap('Set2',np.size(kappas))
 # cmap2 = matl.cm.get_cmap('jet',np.size(stst))
 colors = cmap2(np.linspace(0,1,np.size(stst)))
 
@@ -343,18 +338,18 @@ plt.close('all')
 
 markers = np.array(['o', 'v', '^', '<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 'd', 'P', 'X'])
 
-yticks = [[-1.2,-0.6,0,0.6,1.2],[-36,-24,-12,0,12],[-2.4,-1.6,-0.8,0]]
+yticks = [[-1.2,0,1.0],[-37,-21,-9,0,10],[-2.4,-0.5,0]]
 ylim = [[-1.5,1.5],[-39,13],[-2.7,0.2]]
 
 
 for i in np.arange(np.size(restangles)):
     
-    fig1 = plt.figure(figsize=(cm2inch(5.5), cm2inch(4)))
+    fig1 = plt.figure(figsize=(cm2inch(4.3), cm2inch(3.1)))
     ax1 = plt.subplot(111)
-    fig1.subplots_adjust(top=0.962,
-    bottom=0.25,
-    left=0.22,
-    right=0.987)
+    fig1.subplots_adjust(top=0.982,
+    bottom=0.23,
+    left=0.225,
+    right=0.967)
     
     thisangBool = allDesigns['restang'] == restangles[i]
     thisang = allDesigns[thisangBool]    
@@ -392,8 +387,8 @@ for i in np.arange(np.size(restangles)):
     fig1.show()
 #    fig1.savefig(Folder_name + '/Images/Energy_Restang_' + str(i.astype(float))+'.pdf', transparent = True)
 #    fig1.savefig(Folder_name + '/Images/Energy_Restang_' + str(i.astype(float))+ '.png', transparent = True)
-    # fig1.savefig(Folder_name + '/Images/Restang_' + str(restangles[i].astype(float))+'.pdf', transparent = True)
-    # fig1.savefig(Folder_name + '/Images/Restang_' + str(restangles[i].astype(float))+ '.png', transparent = True)
+    fig1.savefig(Folder_name + '/Images/Restang_' + str(restangles[i].astype(float))+'.pdf', transparent = True)
+    fig1.savefig(Folder_name + '/Images/Restang_' + str(restangles[i].astype(float))+ '.png', transparent = True)
 
 #%%
 fig3 = plt.figure(figsize=(cm2inch(17.8), cm2inch(7)))
