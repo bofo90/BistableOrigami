@@ -35,10 +35,11 @@ def orderAngles(angles, steps, simulations):
         if np.sum(np.sign(np.around(angles[hinge,:], decimals = 4))) < 0: ### sort to have mayority positive angles
             angles[hinge,:] = angles[hinge,::-1]*(-1)
             sym = sym + 'm'
-        angles[hinge,:]= np.roll(angles[hinge,:],np.argmin(angles[hinge,:]))
+            
+        angles[hinge,:]= np.roll(angles[hinge,:],np.argmin(angles[hinge,:]))         ### sort from smallest to highest angles
         if np.argmin(angles[hinge,:]) != 0:
             sym = sym+'r'+ str(np.argmin(angles[hinge,:]))
-        # angles[hinge,:] = np.sort(angles[hinge,:])          ### sort from smallest to highest angles
+            
         finalAngles[hinge,:] = angles[hinge,:]
         symetries[hinge] = sym
         
@@ -267,13 +268,20 @@ for subdir in os.listdir(Folder_name):
     flagmask = ~flagmask.any(axis= 1)
     allData['Mask'] = flagmask
     
-    allData.set_index(['kappa','Hinge Number'], inplace = True)
-    allData.sort_index(inplace=True)
+    allData.reset_index(level=0, drop=True)
+    # allData.set_index(['kappa','Hinge Number'], inplace = True)
+    # allData.sort_index(inplace=True)
     
     kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['EdgeEnergy', 'HingeEnergy', 'TotalEnergy','ang1','ang2','ang3','ang4', 'Curvature']].mean())
 #    kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['EdgeEnergy', 'HingeEnergy', 'TotalEnergy','ang1','ang2','ang3', 'Curvature']].mean())
+    
     kappasStSt['amountSym'] = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['Symmetry']].nunique())
     kappasStSt['Symetries'] = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates').apply(lambda x: str(np.sort(x.Symmetry.unique()))))
+    
+    kappasStSt['Hinge Number'] =  allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['Hinge Number']].apply(lambda _df2: _df2.sample(1, random_state = 0))).to_numpy()
+  
+    kappasStSt['restang'] = np.ones(np.shape(kappasStSt)[0])*restang
+    
     ####Only select stable states that have more than 10% appearance in each simulation
     kappasStSt['amountStSt'] = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['DiagonalEnergy']].count())
     more10percent = kappasStSt['amountStSt']>simLen*0.1
@@ -283,29 +291,16 @@ for subdir in os.listdir(Folder_name):
     kappasStSt = kappasStSt.reset_index(level=0)#, drop=True)
 #    kappasStSt['StableState'] = countStableStates(kappasStSt[['ang1','ang2','ang3','ang4']],1, 'centroid')
 #    kappasStSt['StableState'] = countStableStates(kappasStSt[['ang1','ang2','ang3']],0.45, 'centroid')
-    
-    selection = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates').apply(lambda _df2: _df2.sample(1, random_state = 0)))
-    selection = selection[more10percent]
-    selection = selection.reset_index(level = [0,1], drop = True)
-    selection = selection.reset_index(level = [0,1])
-    
-    kappasStSt = kappasStSt.join(selection['Hinge Number'])
-    kappasStSt['LogKappas'] = np.log10(kappasStSt.kappa)
-    
-    kappasStSt['restang'] = np.ones(np.shape(kappasStSt)[0])*restang
-    
+
     kappasnumStSt = kappasStSt.groupby('kappa')['StableStates'].nunique()
     kappasnumStSt = kappasnumStSt.reset_index()
     kappasnumStSt['restang'] = np.ones(np.shape(kappasnumStSt)[0])*restang
 
     allKappasAnalysis = allKappasAnalysis.append(kappasnumStSt)
-    
-    data = kappasStSt.to_xarray()
-    
     allDesigns = allDesigns.append(kappasStSt)    
       
 allDesigns = allDesigns.reset_index(level=0, drop =True)
-restangles = allKappasAnalysis.restang.drop_duplicates().values
+restangles = allDesigns.restang.drop_duplicates().values
 
 
 #%%
@@ -313,16 +308,21 @@ allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3
 #allDesigns['StableStateAll'] = countStableStates(allDesigns[['ang1','ang2','ang3']], 0.5, 'centroid')
 stst = np.unique(allDesigns['StableStateAll'])
 ############################################# TO make SS consistence between plots (its done manualy)
-# newSS = np.array([4,4,3,3,1,1,2,1,2])
-# invmask_copy = copy.deepcopy(allDesigns.StableStateAll)
+newSS = np.array([1,1,2,2,3,3,4,4,5,4,5,5])
+invmask_copy = allDesigns['StableStateAll'].to_numpy()
+newStSt = np.zeros(np.shape(invmask_copy))
 
-# for old,new in zip(stst, newSS):
-#     allDesigns.StableStateAll[invmask_copy == old] = new
+for old,new in zip(stst, newSS):
+    newStSt[invmask_copy == old] = new
 
-# delSS = np.array([4,5,6,7,8,9])
-# stst = np.delete(stst, delSS)
+allDesigns['StableStateAll'] = newStSt.astype(int)
+delSS = np.array([6,7,8,9,10,11,12])
+stst = np.delete(stst, delSS-1)
 #####################################################################################################
 
+cmap2 = matl.cm.get_cmap('Set3',np.size(kappas))
+# cmap2 = matl.cm.get_cmap('jet',np.size(stst))
+colors = cmap2(np.linspace(0,1,np.size(stst)))
 
 #%%
 
@@ -342,8 +342,6 @@ for i in np.arange(np.size(stst,0)):
 plt.close('all')   
 
 markers = np.array(['o', 'v', '^', '<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 'd', 'P', 'X'])
-cmap = matl.cm.get_cmap('jet',np.size(stst))
-colors = cmap(np.linspace(0,1,np.size(stst)))
 
 yticks = [[-1.2,-0.6,0,0.6,1.2],[-36,-24,-12,0,12],[-2.4,-1.6,-0.8,0]]
 ylim = [[-1.5,1.5],[-39,13],[-2.7,0.2]]
@@ -383,7 +381,7 @@ for i in np.arange(np.size(restangles)):
 #    plt.close('all')
 
 #        ax1.scatter(thisstst['kappa'], thisstst['TotalEnergy'], c = colors[thisstst['StableStateAll'].values.astype('int')-1], s = 10)
-        ax1.scatter(thisstst['kappa'], thisstst['Curvature'], c = colors[thisstst['StableStateAll'].values.astype('int')-1], s = 5)#,
+        ax1.scatter(thisstst['kappa'], thisstst['Curvature'], c = colors[thisstst['StableStateAll']-1], s = 5)#,
 #                s = 5, marker = markers[i])#, linestyle = lines[i], lw = 2.5)
 
 #leg = ax1.legend(loc = 2, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False) 
@@ -404,11 +402,6 @@ ax3.set_xlim([-np.pi,np.pi])
 ax3.set_ylim([-np.pi,np.pi])
 ax3.set_zlim([-np.pi,np.pi])
     
-#cmap2 = matl.cm.get_cmap('Set2',np.size(kappas))
-#colors = cmap2(np.linspace(0,1,np.size(kappas)))    
-cmap2 = matl.cm.get_cmap('jet',np.size(stst))
-colors = cmap2(np.linspace(0,1,np.size(stst)))
-
 order = [5,6,7,8]
 
 markers = ['o','^','s']
@@ -422,7 +415,11 @@ for ang, i  in zip(restangles, markers):
         
         ax3.scatter(thisstate.iloc[:,order[0]].values,thisstate.iloc[:,order[1]].values,thisstate.iloc[:,order[2]].values, 
                     c = colors[thisstate['StableStateAll']-1], marker = i)
+for i in stst:
+    ax3.scatter(-400,-400,-400, c = [colors[i-1]], label = i)
+
+plt.legend()
 
 #%%
-allDesigns[['kappa','Hinge Number','StableStateAll','restang']].to_csv(Folder_name + '/Images/InfoforAllImages.csv', index = False)
-allDesigns.groupby('StableStateAll').apply(lambda df: df.sample(1))[['kappa','Hinge Number','StableStateAll','restang']].to_csv(Folder_name + '/Images/InfoforStableStatesImages.csv', index = False)
+allDesigns[['kappa','Hinge Number','StableStateAll','restang','Curvature']].to_csv(Folder_name + '/Images/InfoforAllImages.csv', index = False)
+allDesigns.groupby('StableStateAll').apply(lambda df: df.sample(1, random_state = 0))[['kappa','Hinge Number','StableStateAll','restang','Curvature']].to_csv(Folder_name + '/Images/InfoforStableStatesImages.csv', index = False)
