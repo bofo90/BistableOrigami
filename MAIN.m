@@ -119,25 +119,23 @@ for i = ["CZ", "X1", "3L", "2NC", "2C", "GFF", "2OFF","3S", "2OM1", "2OM2", "2NM
     
     fileContainer = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',i);
     allFiles = dir(fileContainer);
-    
     for ct = 3:length(allFiles)
         opt.saveFile = strcat('/',allFiles(ct).name);
-
+        opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',i,opt.saveFile);
+        file = opt.file;
+        
         opt.vertexType = 'non';
         opt.angDesign = getAngles(opt.saveFile);
         [extrudedUnitCell,opt]=buildGeometry(opt);
 
-        opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',i,opt.saveFile);
-        file = opt.file;
-
-        kappas = logspace(-3,1,81);
         angles = linspace(0,pi,5);
-        close all
         for j = angles(2:4)
             opt.restang = j;
             extrudedUnitCell.theta = ones(size(extrudedUnitCell.theta,1),1)*opt.restang;
-            for k = kappas
-                opt.Khinge = k;
+            
+            allFiles2 = dir(strcat(opt.file, sprintf('/RestAng_%.3f', opt.restang)));
+            for k = 3:length(allFiles2)
+                opt.Khinge = getKappa(allFiles2(k).name);
                 opt.file = strcat(file,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge));
                 ReadAndPlot(extrudedUnitCell, opt);
             end
@@ -178,4 +176,9 @@ function Angles = getAngles(fileName)
     Angl3 = str2double(parsedName{5});
 %     Angles = [0, Angl1, 180, 360-Angl2]*pi/180;
     Angles = [0, Angl1, Angl2, Angl3]*pi/180;
+end
+
+function kappa = getKappa(fileName)
+    parsedName = strsplit(fileName(1:end), '_');
+    kappa = str2double(parsedName{2});
 end
