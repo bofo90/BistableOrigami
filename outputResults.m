@@ -24,7 +24,7 @@ opt.tranPol=0.5;
 %PREPARE PLOTTING UNDEFORMED CONFIGURATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Check if output folder is required, and create it if it doesn't exist
-nameFolder=strcat(opt.origin,'/images');
+nameFolder=strcat(opt.origin,'/Images/StSt',num2str(opt.StSt));
 if exist(nameFolder, 'dir')==0
     mkdir(nameFolder)
 end

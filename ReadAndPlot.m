@@ -30,7 +30,7 @@ switch opt.analysis
             end
             
             lofile = load(strcat(folderResults,'/', resfilename));
-            outputResults(extrudedUnitCell,lofile.result,opt,strcat(resfilename(1:end-4),sprintf('_RestAng_%.3f_kappa_%2.5f', opt.restang, opt.Khinge)));
+            outputResults(extrudedUnitCell,lofile.result,opt,strcat(sprintf('RestAng_%.3f_kappa_%2.5f_', opt.restang, opt.Khinge),resfilename(1:end-4)));
             
         end
 
