@@ -79,19 +79,19 @@ restang = 0.5
 restangles = np.array([0.25,0.5,0.75])
 kappa = 1
 
-fig1 = plt.figure(figsize=(cm2inch(4.3), cm2inch(3.1)))
+fig1 = plt.figure(figsize=(cm2inch(3.8), cm2inch(3.3)))
 ax1 = plt.subplot(111)
-fig1.subplots_adjust(top=0.982,
-bottom=0.23,
-left=0.005,
+fig1.subplots_adjust(top=0.995,
+bottom=0.22,
+left=0.020,
 right=0.985)
 
-NiceGraph2DCenter(ax1, r'$\theta$', r'$E_\mathregular{H}$', mincoord = [-1.6*np.max(restangles),0], maxcoord = [1.6*np.max(restangles),1.5*kappa], 
-            divisions = [[-1,-0.5,0.5,1],[kappa]], buffer = [0, 0])
+NiceGraph2DCenter(ax1, r'$\theta$', r'$E_\mathregular{h}$', mincoord = [-1.6*np.max(restangles),0], maxcoord = [1.6*np.max(restangles),1.5*kappa], 
+            divisions = [[-1,-0.5,0,0.5,1],[kappa]], buffer = [0, 0])
 
-ax1.set_xticklabels([r"-180°",r"-90°",r"90°",r"180°"])
+ax1.set_xticklabels([r"-180°",r"-90°",r"0°",r"90°",r"180°"])
 ax1.set_yticklabels([r"$\kappa$"])
-ax1.xaxis.set_label_coords(0.50, -0.02)
+ax1.xaxis.set_label_coords(0.97, 0.13)
 ax1.yaxis.set_label_coords(0.57, 0.85)
 
 cmap = matl.cm.get_cmap('summer_r',np.size(restangles)+1)
@@ -102,13 +102,14 @@ labels = [r"45°", r"90°",r"135°"]
 for restang, i in zip(restangles, np.arange(np.size(restangles))):
 # for kappa in [0.01,0.1, 1]:
 
-    ax1.plot(angle, force(angle, kappa, restang), color = colors[i+1], label = labels[i])
+    ax1.plot(angle, force(angle, kappa, restang), color = colors[i+1], label = labels[i], linewidth = 0.7)
 
-leg = ax1.legend(loc = 1, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False, 
+leg = ax1.legend(loc = 1, fontsize = 7, framealpha = 1, edgecolor = 'inherit', fancybox = False, 
                  labelspacing = 0.1, handlelength = 0.5, handletextpad = 0.5, borderaxespad = 0, borderpad = 0.3)
 plt.setp(leg.get_texts(), color='0.2')
-leg.get_frame().set_linewidth(0.4)
+leg.get_frame().set_linewidth(0)
 
 fig1.show()
 fig1.savefig('D:/Documents/Git Programs/nonlinear-bas_Origami/Results/Bistability.pdf', transparent = True)
 fig1.savefig('D:/Documents/Git Programs/nonlinear-bas_Origami/Results/Bistability.png', transparent = True)
+
