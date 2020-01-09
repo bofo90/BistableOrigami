@@ -320,7 +320,7 @@ delSS = np.array([5,6,7,8,9,10,11,12])
 stst = np.delete(stst, delSS-1)
 #####################################################################################################
 
-cmap2 = matl.cm.get_cmap('Set2',np.size(kappas))
+cmap2 = matl.cm.get_cmap('Set2',np.size(stst))
 # cmap2 = matl.cm.get_cmap('jet',np.size(stst))
 colors = cmap2(np.linspace(0,1,np.size(stst)))
 

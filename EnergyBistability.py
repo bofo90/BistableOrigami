@@ -1,5 +1,3 @@
-
-
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as matl
@@ -38,9 +36,9 @@ def NiceGraph2DCenter(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord 
     axes.set_ylabel(nameY,labelpad=-3, color = gray,rotation=0)
    
     axes.xaxis.label.set_color(gray)
-    axes.tick_params(axis='x', colors=gray, direction = 'in', width = 0.4)
+    axes.tick_params(axis='x', colors=gray, direction = 'out', width = 0.4)
     axes.yaxis.label.set_color(gray)
-    axes.tick_params(axis='y', colors=gray, direction = 'in', width = 0.4)
+    axes.tick_params(axis='y', colors=gray, direction = 'inout', width = 0.4, length = 15)
     axes.tick_params(pad = 2)
     
     axes.tick_params(axis='y', which='minor', colors=gray, direction = 'in', width = 0.4)
@@ -70,7 +68,6 @@ def force2(x, kappa, restang):
     x = x*np.pi
     restang = restang*np.pi
     Theta0 = np.ones(np.shape(x))*restang
-    ThetaVar = x-Theta0
     
     F = kappa/Theta0**4*(x**2-Theta0**2)**2
     return F
@@ -79,31 +76,39 @@ plt.close('all')
 
 angle = np.linspace(-1.5,1.5,100000)
 restang = 0.5
+restangles = np.array([0.25,0.5,0.75])
 kappa = 1
 
 fig1 = plt.figure(figsize=(cm2inch(4.3), cm2inch(3.1)))
 ax1 = plt.subplot(111)
-fig1.subplots_adjust(top=0.937,
-bottom=0.14,
+fig1.subplots_adjust(top=0.982,
+bottom=0.23,
 left=0.005,
 right=0.985)
 
-NiceGraph2DCenter(ax1, r'$\theta_\mathregular{0}$', r'$E$', mincoord = [-1,0], maxcoord = [1,2*kappa], 
-            divisions = [[-1,1],[kappa]], buffer = [0.5, 0])
+NiceGraph2DCenter(ax1, r'$\theta$', r'$E_\mathregular{H}$', mincoord = [-1.6*np.max(restangles),0], maxcoord = [1.6*np.max(restangles),1.5*kappa], 
+            divisions = [[-1,-0.5,0.5,1],[kappa]], buffer = [0, 0])
 
-ax1.set_xticklabels([r"$-\pi$", r"$\pi$"])
-ax1.set_yticklabels([r"$-\kappa$"])
-ax1.xaxis.set_label_coords(0.55, -0.03)
-ax1.yaxis.set_label_coords(0.57, 0.90)
+ax1.set_xticklabels([r"-180°",r"-90°",r"90°",r"180°"])
+ax1.set_yticklabels([r"$\kappa$"])
+ax1.xaxis.set_label_coords(0.50, -0.02)
+ax1.yaxis.set_label_coords(0.57, 0.85)
 
-for restang in [0.25,0.5,0.75]:
+cmap = matl.cm.get_cmap('summer_r',np.size(restangles)+1)
+colors = cmap(np.linspace(0,1,np.size(restangles)+1))
+
+labels = [r"45°", r"90°",r"135°"]
+
+for restang, i in zip(restangles, np.arange(np.size(restangles))):
 # for kappa in [0.01,0.1, 1]:
 
-    ax1.plot(angle, force(angle, kappa, restang))
+    ax1.plot(angle, force(angle, kappa, restang), color = colors[i+1], label = labels[i])
 
+leg = ax1.legend(loc = 1, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False, 
+                 labelspacing = 0.1, handlelength = 0.5, handletextpad = 0.5, borderaxespad = 0, borderpad = 0.3)
+plt.setp(leg.get_texts(), color='0.2')
+leg.get_frame().set_linewidth(0.4)
 
-
-
-
-
-
+fig1.show()
+fig1.savefig('D:/Documents/Git Programs/nonlinear-bas_Origami/Results/Bistability.pdf', transparent = True)
+fig1.savefig('D:/Documents/Git Programs/nonlinear-bas_Origami/Results/Bistability.png', transparent = True)
