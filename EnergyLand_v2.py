@@ -320,6 +320,12 @@ delSS = np.array([5,6,7,8,9,10,11,12])
 stst = np.delete(stst, delSS-1)
 #####################################################################################################
 
+#### Mask results out from the specified range of kappas
+
+kappasrange = [10**-3,10**0]
+dropers = ~((allDesigns.kappa < kappasrange[0]) | (allDesigns.kappa > kappasrange[-1]))
+allDesigns = allDesigns[dropers]
+
 cmap2 = matl.cm.get_cmap('Set2',np.size(stst))
 # cmap2 = matl.cm.get_cmap('jet',np.size(stst))
 colors = cmap2(np.linspace(0,1,np.size(stst)))
@@ -360,15 +366,15 @@ for i in np.arange(np.size(restangles)):
     
     ax1.set_xscale('log')
     ax1.set_xticks([0.001,0.01,0.1,1])
-    ax1.set_xlim([0.001,1])
+    ax1.set_xlim([0.0007,1.5])
         
     for j in stst:
         thisstst = thisang[thisang.StableStateAll == j]
 
-        ax1.scatter(thisstst['kappa'], thisstst['face1'], c = colors[thisstst['StableStateAll']-1], s = 5)
-        ax1.scatter(thisstst['kappa'], thisstst['face2'], c = colors[thisstst['StableStateAll']-1], s = 5)
-        ax1.scatter(thisstst['kappa'], thisstst['face3'], c = colors[thisstst['StableStateAll']-1], s = 5)
-        ax1.scatter(thisstst['kappa'], thisstst['face4'], c = colors[thisstst['StableStateAll']-1], s = 5)
+        ax1.scatter(thisstst['kappa'], thisstst['face1'], c = colors[thisstst['StableStateAll']-1], s = 2)
+        ax1.scatter(thisstst['kappa'], thisstst['face2'], c = colors[thisstst['StableStateAll']-1], s = 2)
+        ax1.scatter(thisstst['kappa'], thisstst['face3'], c = colors[thisstst['StableStateAll']-1], s = 2)
+        ax1.scatter(thisstst['kappa'], thisstst['face4'], c = colors[thisstst['StableStateAll']-1], s = 2)
 
     ax1.axhline(y=0.1, color='r', linestyle='-', linewidth = '0.4')
     
@@ -381,18 +387,18 @@ plt.close('all')
 
 markers = np.array(['o', 'v', '^', '<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 'd', 'P', 'X'])
 
-yticks = [[-1.2,0,1.0],[-37,-21,-9,0,10],[-2.4,-0.5,0]]
-ylim = [[-1.5,1.5],[-39,13],[-2.7,0.2]]
+yticks = [[-1.2,0,1.0],[-38,-21,-9,0,10],[-2.4,-0.5,0]]
+ylim = [[-1.5,1.5],[-40,13],[-2.7,0.2]]
 
 
 for i in np.arange(np.size(restangles)):
     
-    fig1 = plt.figure(figsize=(cm2inch(4.3), cm2inch(3.1)))
+    fig1 = plt.figure(figsize=(cm2inch(4.7), cm2inch(3.3)))
     ax1 = plt.subplot(111)
-    fig1.subplots_adjust(top=0.982,
-    bottom=0.23,
-    left=0.225,
-    right=0.940)
+    fig1.subplots_adjust(top=0.995,
+    bottom=0.22,
+    left=0.20,
+    right=0.98)
     
     thisangBool = allDesigns['restang'] == restangles[i]
     thisang = allDesigns[thisangBool]    
@@ -402,7 +408,7 @@ for i in np.arange(np.size(restangles)):
     minCurv = np.floor(thisang['Curvature'].min())
     
 #    NiceGraph2D(ax1, r'$\kappa$', r'$E_\mathrm{tot}$')
-    NiceGraph2D(ax1, r'$\kappa$', r'$C$')#, mincoord=[np.log10(kappas[0]),-3], maxcoord=[np.log10(kappas[-1]),3], divisions=[5, 5], buffer=[0.1, 1])
+    NiceGraph2D(ax1, r'$\kappa$', r'$K$')#, mincoord=[np.log10(kappas[0]),-3], maxcoord=[np.log10(kappas[-1]),3], divisions=[5, 5], buffer=[0.1, 1])
     
 #    ax1.set_yticks(np.linspace(0, maxTotEn,5))
 #    ax1.set_ylim([-0.005, maxTotEn+0.005])
@@ -412,14 +418,14 @@ for i in np.arange(np.size(restangles)):
 #    ax1.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.1f'))
     ax1.set_xscale('log')
     ax1.set_xticks([0.001,0.01,0.1,1])
-    ax1.set_xlim([0.001,1])
+    ax1.set_xlim([0.0007,1.5])
         
     for j in stst:
         thisstst = thisang[thisang.StableStateAll == j]
 #    plt.close('all')
 
 #        ax1.scatter(thisstst['kappa'], thisstst['TotalEnergy'], c = colors[thisstst['StableStateAll'].values.astype('int')-1], s = 10)
-        ax1.scatter(thisstst['kappa'], thisstst['Curvature'], c = colors[thisstst['StableStateAll']-1], s = 5)#,
+        ax1.scatter(thisstst['kappa'], thisstst['Curvature'], c = colors[thisstst['StableStateAll']-1], s = 1)#,
 #                s = 5, marker = markers[i])#, linestyle = lines[i], lw = 2.5)
 
 #leg = ax1.legend(loc = 2, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False) 
