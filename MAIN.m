@@ -71,11 +71,11 @@ opt.options=optimoptions('fmincon','GradConstr','off','GradObj','off',...
 opt.analysisType = 'randomPert3';
 opt.template = 'Tessellation';
 opt.vertexType = '2CFF';
-for i = 2:5
+for i = 5:5
     
     opt.xrep = i;
     
-    for j = 1:5
+    for j = 1:4:5
         
         opt.yrep = j;
 
@@ -94,7 +94,7 @@ for i = 2:5
 end
 
 opt.yrep = 1;
-for i = 6:10
+for i = 10:10
     opt.xrep = i;
 
     [extrudedUnitCell,opt]=buildGeometry(opt);
