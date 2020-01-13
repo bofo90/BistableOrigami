@@ -57,7 +57,7 @@ hold on;
 for nc=1:size(extrudedUnitCell.latVec,1)
     for i=3:15
         c=(plotextrudedUnitCell.polFace(i).normal*viewCoor')>0;
-        hs{nc,i}=patch('Faces',plotextrudedUnitCell.polFace(i).nod,'Vertices',plotextrudedUnitCell.lat(nc).coor,'facecolor','flat','facevertexCData',c*colt(4,:)+abs(1-c)*colt(5,:),'facealpha',1.0,'edgealpha',1.0);
+        hs{nc,i}=patch('Faces',plotextrudedUnitCell.polFace(i).nod,'Vertices',plotextrudedUnitCell.lat(nc).coor,'facecolor','flat','facevertexCData',c*colt(4,:)+abs(1-c)*colt(5,:),'facealpha',1.0,'edgealpha',1.0, 'LineWidth', 2, 'EdgeColor', [51 51 51]./255);
     end
 end
 
