@@ -16,7 +16,7 @@ opt=initOpt('inputType', 'origami','template','SingleVertex',...
             'numVert', 4, 'vertexType', "2CFF", ...
             'tessellationType', '25','xrep', 2, 'yrep', 1,...
             'restang', pi/4, 'angDesign', [0 65 130 195]*pi/180,...
-            'analysis','result','analysisType','randomPert',...
+            'analysis','savedata','analysisType','randomPert',...
             'numIterations', 1000,'RandstDev', 0.2,...
             'figDPI',200, 'saveMovie', 'off', 'safeMovieAntiAlias', 0,...
             'folAlgor', 'sqp','relAlgor', 'sqp',...
@@ -68,75 +68,78 @@ opt.options=optimoptions('fmincon','GradConstr','off','GradObj','off',...
 % end
 
 
-opt.analysisType = 'randomPert3';
-opt.template = 'Tessellation';
-opt.vertexType = '2CFF';
-for i = 5:5
-    
-    opt.xrep = i;
-    
-    for j = 1:4:5
-        
-        opt.yrep = j;
-
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %BUILD
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        [extrudedUnitCell,opt]=buildGeometry(opt);
-        opt.saveFile = strcat('/09-Jan-2020_',num2str([opt.xrep,opt.yrep],'%d_'));
-        opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.tessellationType,'/',opt.vertexType,opt.saveFile);
-
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %ANALYSIS
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        findDeformation(extrudedUnitCell,opt);
-    end
-end
-
-opt.yrep = 1;
-for i = 10:10
-    opt.xrep = i;
-
-    [extrudedUnitCell,opt]=buildGeometry(opt);
-    opt.saveFile = strcat('/09-Jan-2020_',num2str([opt.xrep,opt.yrep],'%d_'));
-    opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.tessellationType,'/',opt.vertexType,opt.saveFile);
-
-    findDeformation(extrudedUnitCell,opt);
-end
+% opt.analysisType = 'randomPert3';
+% opt.template = 'Tessellation';
+% opt.vertexType = '2CFF';
+% for i = 5:5
+%     
+%     opt.xrep = i;
+%     
+%     for j = 1:4:5
+%         
+%         opt.yrep = j;
+% 
+%         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%         %BUILD
+%         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%         [extrudedUnitCell,opt]=buildGeometry(opt);
+%         opt.saveFile = strcat('/09-Jan-2020_',num2str([opt.xrep,opt.yrep],'%d_'));
+%         opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.tessellationType,'/',opt.vertexType,opt.saveFile);
+% 
+%         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%         %ANALYSIS
+%         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%         findDeformation(extrudedUnitCell,opt);
+%     end
+% end
+% 
+% opt.yrep = 1;
+% for i = 10:10
+%     opt.xrep = i;
+% 
+%     [extrudedUnitCell,opt]=buildGeometry(opt);
+%     opt.saveFile = strcat('/09-Jan-2020_',num2str([opt.xrep,opt.yrep],'%d_'));
+%     opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.tessellationType,'/',opt.vertexType,opt.saveFile);
+% 
+%     findDeformation(extrudedUnitCell,opt);
+% end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %OUTPUT AND PLOT GEOMETRY
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%When using savedata
+
+opt.template = 'Tessellation';
 % for i = ["2C", "GFF", "2OFF","3S", "2OM1", "2OM2", "2NM1", "2NM2", "2OL", "2NL", "2OS", "2NS", "Z1", "Z2", "Y1", "Y2", "X2"]
-% % for i = ["2CFF"]    
-%     
-%     fileContainer = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',i);
-%     allFiles = dir(fileContainer);
-%     for ct = 3:length(allFiles)
-%         opt.saveFile = strcat('/',allFiles(ct).name);
-%         opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',i,opt.saveFile);
-%         file = opt.file;
-%         
-%         opt.vertexType = 'non';
-%         opt.angDesign = getAngles(opt.saveFile);
-%         [extrudedUnitCell,opt]=buildGeometry(opt);
-% 
-%         angles = linspace(0,pi,5);
-%         for j = angles(2:4)
-%             opt.restang = j;
-%             extrudedUnitCell.theta = ones(size(extrudedUnitCell.theta,1),1)*opt.restang;
-%             
-%             allFiles2 = dir(strcat(file, sprintf('/RestAng_%.3f', opt.restang)));
-%             for k = 3:length(allFiles2)
-%                 opt.Khinge = getKappa(allFiles2(k).name);
-%                 opt.file = strcat(file,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge));
-%                 fprintf(strcat('Saving data: ',allFiles(ct).name, sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge), '\n'))
-%                 ReadAndPlot(extrudedUnitCell, opt);
-%             end
-%         end
-%     end
-% end
+for i = ["2CFF"]    
+    
+    fileContainer = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/25/',i);
+
+    allFiles = dir(fileContainer);
+    for ct = 3:length(allFiles)
+        opt.saveFile = strcat('/',allFiles(ct).name);
+        opt.file = strcat(fileContainer,opt.saveFile);
+        file = opt.file;
+        
+        opt.vertexType = i;
+        [opt.xrep, opt.yrep] = getAngles(opt.saveFile);
+        [extrudedUnitCell,opt]=buildGeometry(opt);
+
+        angles = linspace(0,pi,5);
+        for j = angles(2:4)
+            opt.restang = j;
+            extrudedUnitCell.theta = ones(size(extrudedUnitCell.theta,1),1)*opt.restang;
+            
+            allFiles2 = dir(strcat(file, sprintf('/RestAng_%.3f', opt.restang)));
+            for k = 3:length(allFiles2)
+                opt.Khinge = getKappa(allFiles2(k).name);
+                opt.file = strcat(file,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge));
+                fprintf(strcat('Saving data: ',allFiles(ct).name, sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge), '\n'))
+                ReadAndPlot(extrudedUnitCell, opt);
+            end
+        end
+    end
+end
 
 %%%%When using plot !!carefull, it is still not so well estabilshed!!
 % for i = ["2CFF"]
@@ -165,13 +168,11 @@ end
 t = toc;
 fprintf('The whole program lasted %.2f seconds\n', t);
 
-function Angles = getAngles(fileName)
+function [x,y] = getAngles(fileName)
     parsedName = strsplit(fileName(1:end), '_');
-    Angl1 = str2double(parsedName{3});
-    Angl2 = str2double(parsedName{4});
-    Angl3 = str2double(parsedName{5});
-%     Angles = [0, Angl1, 180, 360-Angl2]*pi/180;
-    Angles = [0, Angl1, Angl2, Angl3]*pi/180;
+    x = str2double(parsedName{2});
+    y = str2double(parsedName{3});
+
 end
 
 function kappa = getKappa(fileName)

@@ -63,7 +63,8 @@ switch opt.analysis
             
             sim = getHingeSet(allFiles(ct).name);
             
-            [curv, areas] = getCurvature(extrudedUnitCell, opt, lofile.result);
+            [curv] = getCurvature(extrudedUnitCell, opt, lofile.result);
+            areas = getAreas(extrudedUnitCell, lofile.result);
 
             Energies(ct-dirs,:) = [sim, lofile.result.Eedge(2,end),...
                 lofile.result.Ediag(2,end), lofile.result.Eface(2,end), lofile.result.Ehinge(2,end),...
@@ -165,6 +166,18 @@ for i = 1: opt.numVert
 end
 
 curvature = 3*(2*pi-sum(anglesFaces))/sum(areaFaces);
+
+function areas = getAreas(extrudedUnitCell, result)
+endPos = extrudedUnitCell.node + result.deform(end).interV(end).V;
+areas = zeros(size(extrudedUnitCell.face'));
+for i = 1: size(extrudedUnitCell.face,2)
+    v1 = endPos(extrudedUnitCell.face{i}(2),:)-endPos(extrudedUnitCell.face{i}(1),:);
+    v2 = endPos(extrudedUnitCell.face{i}(3),:)-endPos(extrudedUnitCell.face{i}(1),:);
+    l1 = sqrt(v1*v1');
+    l2 = sqrt(v2*v2');
+    angle = acos(v1*v2'/l1/l2);
+    areas(i) = l1*l2*sin(angle)/2;
+end
 
 function [lowerR, upperR] = getData(extrudedUnitCell, opt, result)
 currIter = length(result.deform);
