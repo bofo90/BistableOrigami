@@ -37,6 +37,7 @@ switch opt.template
         extrudedUnitCell = calculateLength(extrudedUnitCell);
         extrudedUnitCell.theta = ones(size(extrudedUnitCell.nodeHingeEx,1),1)*opt.restang;
         
+        extrudedUnitCell.allnodes = 2:size(extrudedUnitCell.node,1);
 %         extrudedUnitCell.node = extrudedUnitCell.node+rand(size(extrudedUnitCell.node))*0.01;
 
     case{'Tessellation'}

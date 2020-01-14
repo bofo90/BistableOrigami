@@ -33,6 +33,8 @@ for i = 0:opt.xrep-1
     end
 end
 
+extrudedUnitCell.allnodes = 1:size(extrudedUnitCell.node,1);
+extrudedUnitCell.allnodes(extrudedUnitCell.center)=[];
 function face = addingIndexFace(face,index)
 for i = 1:size(face,2)
     face{i} = face{i} + index;
@@ -54,6 +56,7 @@ for i = 1:size(extrudedUnitCell.node,1)
     for f = 1:size(extrudedUnitCell.face,2)
         exUC.face{f}(extrudedUnitCell.face{f}==i) = newnodes(i);
     end
+    exUC.allnodes(extrudedUnitCell.allnodes ==i) = newnodes(i);
 end
 
 function extrudedUnitCell = removeDuplicateHinges(extrudedUnitCell)

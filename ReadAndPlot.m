@@ -47,8 +47,8 @@ switch opt.analysis
         [fMassDist, fHinge, fEnergy, fAngles] = makeFileswHeaders(folderEnergy, folderResults);
         Energies = zeros(length(allFiles)-4,7);
         PosStad = zeros(length(allFiles)-4,size(extrudedUnitCell.face,2)+1);
-        Hinges = zeros(length(allFiles)-4,2);
         AllAngles = zeros(length(allFiles)-4,size(extrudedUnitCell.theta,1)+1);
+        Hinges = zeros(length(allFiles)-4,size(extrudedUnitCell.allnodes,2)/4+1);
         dirs = 0;
         for ct = 1:length(allFiles)
             if allFiles(ct).isdir || strcmp(allFiles(ct).name(1:end-4), 'metadata')
@@ -63,14 +63,14 @@ switch opt.analysis
             
             sim = getHingeSet(allFiles(ct).name);
             
-            [curv] = getCurvature(extrudedUnitCell, opt, lofile.result);
+            curv = getCurvature(extrudedUnitCell, opt, lofile.result);
             areas = getAreas(extrudedUnitCell, lofile.result);
 
             Energies(ct-dirs,:) = [sim, lofile.result.Eedge(2,end),...
                 lofile.result.Ediag(2,end), lofile.result.Eface(2,end), lofile.result.Ehinge(2,end),...
                 lofile.result.EtargetAngle(2,end), lofile.result.exfl(2,end)];
             PosStad(ct-dirs,:) = [sim, areas'];
-            Hinges(ct-dirs,:) = [sim, curv];%, designAng(1), designAng(2), designAng(3)]];
+            Hinges(ct-dirs,:) = [sim, curv'];%, designAng(1), designAng(2), designAng(3)]];
 %             AllAnglesTemp = zeros([size(extrudedUnitCell.theta,1),size(lofile.result.deform,2)]);
 %             for iter = 1:size(lofile.result.deform,2)
 %                 AllAnglesTemp(:,iter) = lofile.result.deform(iter).theta;
@@ -154,18 +154,22 @@ hingeSet = str2double(Angl1);
 
 function [curvature, areaFaces] = getCurvature(extrudedUnitCell, opt, result)
 endPos = extrudedUnitCell.node + result.deform(end).interV(end).V;
-anglesFaces = zeros(opt.numVert,1);
-areaFaces = zeros(opt.numVert,1);
-for i = 1: opt.numVert
-    v1 = endPos(extrudedUnitCell.face{i}(2),:)-endPos(extrudedUnitCell.face{i}(1),:);
-    v2 = endPos(extrudedUnitCell.face{i}(3),:)-endPos(extrudedUnitCell.face{i}(1),:);
-    l1 = sqrt(v1*v1');
-    l2 = sqrt(v2*v2');
-    anglesFaces(i) = acos(v1*v2'/l1/l2);
-    areaFaces(i) = l1*l2*sin(anglesFaces(i))/2;
+vertexnodes = reshape(extrudedUnitCell.allnodes,4,[])';
+vertexnodes2 = circshift(vertexnodes,1,2);
+curvature = zeros(size(vertexnodes,1),1);
+for j = 1:size(vertexnodes,1)
+    anglesFaces = zeros(opt.numVert,1);
+    areaFaces = zeros(opt.numVert,1);
+    for i = 1: opt.numVert
+        v1 = endPos(vertexnodes(j,i),:)-endPos(extrudedUnitCell.center(j),:);
+        v2 = endPos(vertexnodes2(j,i),:)-endPos(extrudedUnitCell.center(j),:);
+        l1 = sqrt(v1*v1');
+        l2 = sqrt(v2*v2');
+        anglesFaces(i) = acos(v1*v2'/l1/l2);
+        areaFaces(i) = l1*l2*sin(anglesFaces(i))/2;
+    end
+    curvature(j) = 3*(2*pi-sum(anglesFaces))/sum(areaFaces);
 end
-
-curvature = 3*(2*pi-sum(anglesFaces))/sum(areaFaces);
 
 function areas = getAreas(extrudedUnitCell, result)
 endPos = extrudedUnitCell.node + result.deform(end).interV(end).V;
