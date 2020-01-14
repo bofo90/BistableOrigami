@@ -35,6 +35,8 @@ end
 
 extrudedUnitCell.allnodes = 1:size(extrudedUnitCell.node,1);
 extrudedUnitCell.allnodes(extrudedUnitCell.center)=[];
+extrudedUnitCell.allhinges = 1:size(extrudedUnitCell.nodeHingeEx,1);
+
 function face = addingIndexFace(face,index)
 for i = 1:size(face,2)
     face{i} = face{i} + index;
@@ -80,6 +82,14 @@ end
 
 extrudedUnitCell.nodeHingeEx(loc1,:) = hinges;
 extrudedUnitCell.nodeHingeEx(loc2,:) = [];
+
+exUC = extrudedUnitCell;
+for i = 1:size(loc1,2)
+    extrudedUnitCell.allhinges(exUC.allhinges==loc2(i))= loc1(i);
+end
+[a,~,c] = unique(extrudedUnitCell.allhinges);
+orderedHinges = 1:size(a,2);
+extrudedUnitCell.allhinges = orderedHinges(c);
 
 function extrudedUnitCell = makeSquareFaces(extrudedUnitCell)
 

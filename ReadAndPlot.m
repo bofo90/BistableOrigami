@@ -47,8 +47,8 @@ switch opt.analysis
         [fMassDist, fHinge, fEnergy, fAngles] = makeFileswHeaders(folderEnergy, folderResults);
         Energies = zeros(length(allFiles)-4,7);
         PosStad = zeros(length(allFiles)-4,size(extrudedUnitCell.face,2)+1);
-        AllAngles = zeros(length(allFiles)-4,size(extrudedUnitCell.theta,1)+1);
         Hinges = zeros(length(allFiles)-4,size(extrudedUnitCell.allnodes,2)/4+1);
+        AllAngles = zeros(length(allFiles)-4,size(extrudedUnitCell.allhinges,2)+1);
         dirs = 0;
         for ct = 1:length(allFiles)
             if allFiles(ct).isdir || strcmp(allFiles(ct).name(1:end-4), 'metadata')
@@ -75,7 +75,7 @@ switch opt.analysis
 %             for iter = 1:size(lofile.result.deform,2)
 %                 AllAnglesTemp(:,iter) = lofile.result.deform(iter).theta;
 %             end
-            AllAngles(ct-dirs,:) = [sim lofile.result.deform(end).theta'];
+            AllAngles(ct-dirs,:) = [sim lofile.result.deform(end).theta(extrudedUnitCell.allhinges)'];
  
             close all;
             clear lofile;
