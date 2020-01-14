@@ -24,7 +24,11 @@ opt.tranPol=0.5;
 %PREPARE PLOTTING UNDEFORMED CONFIGURATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Check if output folder is required, and create it if it doesn't exist
-nameFolder=strcat(opt.origin,'/Images/StSt',num2str(opt.StSt));
+if strcmp(opt.analysis,'plot')
+    nameFolder=strcat(opt.origin,'/Images/StSt',num2str(opt.StSt));
+elseif strcmp(opt.analysis, 'info')
+    nameFolder = strcat(opt.origin,'/Images/Info');
+end
 if exist(nameFolder, 'dir')==0
     mkdir(nameFolder)
 end
@@ -197,7 +201,7 @@ if strcmp(opt.analysis,'info')
     hold on;
     for i=3:15
         c=(plotextrudedUnitCell.polFace(i).normal*viewCoor')>0;
-        hsu{1,i} = patch('Faces',plotextrudedUnitCell.polFace(i).nod,'Vertices',plotextrudedUnitCell.lat(1).coor,'facecolor','flat','facevertexCData',c*colt(4,:)+abs(1-c)*colt(5,:),'facealpha',1,'edgealpha',1);
+        hsu{1,i} = patch('Faces',plotextrudedUnitCell.polFace(i).nod,'Vertices',plotextrudedUnitCell.lat(1).coor,'facecolor','flat','facevertexCData',c*colt(4,:)+abs(1-c)*colt(5,:),'facealpha',1,'edgealpha',1, 'LineWidth', 2, 'EdgeColor', [51 51 51]./255);
     end
 
     hl2=plotOpt(opt); 

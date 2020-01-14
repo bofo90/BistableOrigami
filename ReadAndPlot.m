@@ -1,9 +1,9 @@
 function ReadAndPlot(extrudedUnitCell, opt)
 
 switch opt.analysis
-    case 'info'
+    case {'info'}
         result = [];
-        outputResults(extrudedUnitCell,result,opt);
+        outputResults(extrudedUnitCell,result,opt,'');
     case {'plot'}
         %get file of results
         folderResults = strcat(opt.file,'/mat');
