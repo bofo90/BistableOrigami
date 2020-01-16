@@ -3,8 +3,10 @@ function [unitCell,opt] = unitcell4Vertex(opt)
 switch opt.tessellationType
     
     case{'25'}
-        if strcmp(opt.vertexType, 'non') && sum(opt.angDesign(1:2)) ~= pi && sum(opt.angDesign(3:4)) ~= pi
-            error('\n----------\nThe angles that you described are incompatible to this tessellation. Please try again or select a compatible 4-Vertex type.\n----------\n',[])
+        if strcmp(opt.vertexType, 'non') 
+            if ((opt.angDesign(3)-opt.angDesign(1)) ~= pi || (opt.angDesign(4)-opt.angDesign(2)) ~= pi)
+                error('\n----------\nThe angles that you described are incompatible to this tessellation. Please try again or select a compatible 4-Vertex type.\n----------\n',[])
+            end
         elseif ~strcmp(opt.vertexType, '2C') && ~strcmp(opt.vertexType, '2CFF')
             error('\n----------\nThe 4-Vertex type is not compatible to this tessellations.Please select either 2C or 2CFF.\n----------\n',[])
         end

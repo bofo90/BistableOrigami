@@ -37,6 +37,7 @@ switch opt.template
         extrudedUnitCell = calculateLength(extrudedUnitCell);
         extrudedUnitCell.theta = ones(size(extrudedUnitCell.nodeHingeEx,1),1)*opt.restang;
         
+        extrudedUnitCell.center = 1;
         extrudedUnitCell.allnodes = 2:size(extrudedUnitCell.node,1);
         extrudedUnitCell.allhinges = 1:size(extrudedUnitCell.nodeHingeEx,1);
         

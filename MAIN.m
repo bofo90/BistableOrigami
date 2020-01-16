@@ -9,27 +9,23 @@ close all
 clc
 format long
 clearvars -global
+tic
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-opt=initOpt('inputType', 'origami','template','Tessellation',...
-            'numVert', 4, 'vertexType', "2CFF", ...
-            'tessellationType', '25','xrep', 2, 'yrep', 1,...
-            'restang', pi/4, 'angDesign', [0 65 130 195]*pi/180,...
-            'analysis','info','analysisType','randomPert',...
+opt=initOpt('template','Tessellation','numVert', 4,'vertexType', "2CFF",...
+            'tessellationType', '25','xrep', 2, 'yrep', 2,...
+            'restang', 0.785, 'angDesign', [0.00 90 180.00 270]*pi/180,...
+            'analysis','plot','analysisType','randomPert',...
             'numIterations', 1000,'RandstDev', 0.2,...
             'figDPI',200, 'saveMovie', 'off', 'safeMovieAntiAlias', 0,...
             'folAlgor', 'sqp','relAlgor', 'sqp',...
             'gethistory', 'off', 'plotAll', 'off',...
             'constrEdge','off','constrFace','on','constAnglePerc',0.99,... 
-            'Khinge',10^-2.875,'Kedge',1,'Kdiag',1,'Kface',100,'KtargetAngle',1000,...
+            'Khinge',0.01,'Kedge',1,'Kdiag',1,'Kface',100,'KtargetAngle',1000,...
             'maxStretch', nan,'steps',3,...
             'maxArea', 0.1,...
             'periodic', 'off');    
-
-tic;
-% hingeSet = [1 2];
-% opt.angleConstrFinal(1).val=[ hingeSet(:) , [ones(1,size(hingeSet,2))*pi/2]'];
 
 %SOLVER OPTIONS
 opt.options=optimoptions('fmincon','GradConstr','off','GradObj','off',...
@@ -39,147 +35,32 @@ opt.options=optimoptions('fmincon','GradConstr','off','GradObj','off',...
                          'Algorithm', opt.folAlgor, 'OutputFcn',@outfun,...               
                          'RelLineSrchBnd', 0.01, 'RelLineSrchBndDuration', 5000);
                      
-% "CZ", "X1", "3L", "2NC", "2C", "GFF", "2OFF","3S", "2OM1", "2OM2", "2NM1", "2NM2", "2OL", "2NL", "2OS", "2NS", "Z1", "Z2", "Y1", "Y2", "X2"
+opt.file = '/09-Jan-2020_2_2_';
+switch opt.analysis
+    case{'info'}
+        [extrudedUnitCell,opt]=obtainOrigami(opt);
+        outputResults(extrudedUnitCell,[],opt,'')
+    case{'result'}
+        %when using des = 'non' the opt.angDes need to be specified
+        %possible des ["2C", "GFF", "2OFF","3S", "2OM1", "2OM2", "2NM1", "2NM2", "2OL", "2NL", "2OS", "2NS", "Z1", "Z2", "Y1", "Y2", "X2"];
+        des = ["2C"];
+        ang = linspace(0,pi,5);
+        ang = ang(2:4);
+        kap = logspace(-3,0,4);
+        xrep = 1:5; %only used when having tessellations
+        yrep = 1:5; %only used when having tessellations
+        findDeformation(opt, des, xrep, yrep, ang, kap) 
+    case{'savedata'}
+        %!!!When tessellation, the design angles need to be given!!!!!
+        des = ["2CFF"];
+        ReadAndPlot(opt,'oneDes', des) %other option is 'allDes', 'oneDes'
+    case{'plot'}
+        opt.sim = 367;   %only used when selecting option 'oneRes'
+        PlotResults(opt,'oneRes') %other options is 'allRes','ststRes','oneRes'
+end
 
-% opt.analysisType = 'randomPert1';
-% for i = ["GFF", "2OFF","3S", "2OM1", "2OM2", "2NM1", "2NM2", "2OL", "2NL", "2OS", "2NS", "Z1", "Z2", "Y1", "Y2", "X2"]
-%     
-%     opt.vertexType = i;
-%     
-%     [extrudedUnitCell,opt]=buildGeometry(opt);
-%     opt.saveFile = strcat('/02-Dec-2019_',num2str(opt.angDesign*180/pi,'%.2f_'));
-%     opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.vertexType,opt.saveFile);
-%     
-%     findDeformation(extrudedUnitCell,opt);
-%     
-% end
-
-% opt.analysisType = 'randomPert2';
-% for i = ["CFF", "CY", "GFF", "2OFF","3S", "2OM1", "2OM2", "2NM1", "2NM2", "2OL", "2NL", "2OS", "2NS", "Z1", "Z2", "Y1", "Y2", "X2"]
-%     
-%     opt.vertexType = i;
-%     for j = 1:10
-%         [extrudedUnitCell,opt]=buildGeometry(opt);
-%         opt.saveFile = strcat('/06-Dec-2019_',num2str(opt.angDesign*180/pi,'%.2f_'));
-%         opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.vertexType,opt.saveFile);
-% 
-%         findDeformation(extrudedUnitCell,opt);
-%     end
-% end
-
-
-% opt.analysisType = 'randomPert3';
-% opt.template = 'Tessellation';
-% opt.vertexType = '2CFF';
-% for i = 5:5
-%     
-%     opt.xrep = i;
-%     
-%     for j = 1:4:5
-%         
-%         opt.yrep = j;
-% 
-%         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%         %BUILD
-%         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%         [extrudedUnitCell,opt]=buildGeometry(opt);
-%         opt.saveFile = strcat('/09-Jan-2020_',num2str([opt.xrep,opt.yrep],'%d_'));
-%         opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.tessellationType,'/',opt.vertexType,opt.saveFile);
-% 
-%         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%         %ANALYSIS
-%         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%         findDeformation(extrudedUnitCell,opt);
-%     end
-% end
-% 
-% opt.yrep = 1;
-% for i = 10:10
-%     opt.xrep = i;
-% 
-%     [extrudedUnitCell,opt]=buildGeometry(opt);
-%     opt.saveFile = strcat('/09-Jan-2020_',num2str([opt.xrep,opt.yrep],'%d_'));
-%     opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.tessellationType,'/',opt.vertexType,opt.saveFile);
-% 
-%     findDeformation(extrudedUnitCell,opt);
-% end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%OUTPUT AND PLOT GEOMETRY
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%When using savedata
-% for i = ["2C", "GFF", "2OFF","3S", "2OM1", "2OM2", "2NM1", "2NM2", "2OL", "2NL", "2OS", "2NS", "Z1", "Z2", "Y1", "Y2", "X2"]
-% for i = ["2CFF"]    
-%     
-%     fileContainer = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/25/',i);
-% 
-%     allFiles = dir(fileContainer);
-%     for ct = 3:length(allFiles)
-%         opt.saveFile = strcat('/',allFiles(ct).name);
-%         opt.file = strcat(fileContainer,opt.saveFile);
-%         file = opt.file;
-%         
-%         opt.vertexType = i;
-%         [opt.xrep, opt.yrep] = getAngles(opt.saveFile);
-%         [extrudedUnitCell,opt]=buildGeometry(opt);
-% 
-%         angles = linspace(0,pi,5);
-%         for j = angles(2:4)
-%             opt.restang = j;
-%             extrudedUnitCell.theta = ones(size(extrudedUnitCell.theta,1),1)*opt.restang;
-%             
-%             allFiles2 = dir(strcat(file, sprintf('/RestAng_%.3f', opt.restang)));
-%             for k = 3:length(allFiles2)
-%                 opt.Khinge = getKappa(allFiles2(k).name);
-%                 opt.file = strcat(file,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge));
-%                 fprintf(strcat('Saving data: ',allFiles(ct).name, sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge), '\n'))
-%                 ReadAndPlot(extrudedUnitCell, opt);
-%             end
-%         end
-%     end
-% end
-
-%%%%When using plot !!carefull, it is still not so well estabilshed!!
-% for i = ["2CFF"]
-% 
-%     opt.saveFile = '/02-Dec-2019_0.00_90.00_180.00_270.00_';
-%     
-%     opt.vertexType = 'non';
-%     opt.angDesign = getAngles(opt.saveFile);
-%     [extrudedUnitCell,opt]=buildGeometry(opt);
-%     
-%     opt.origin = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',i,opt.saveFile);
-%     
-%     allFiles = csvread(strcat(opt.origin,'/Images/InfoforAllImages.csv'),1);
-%     
-%     for j = 1:size(allFiles,1)
-%         close all
-%         opt.Khinge = allFiles(j,1);
-%         opt.restang = allFiles(j,4);
-%         opt.sim = allFiles(j,2);
-%         opt.StSt = allFiles(j,3);
-%         opt.file = strcat(opt.origin,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge));
-%         ReadAndPlot(extrudedUnitCell, opt);
-%     end
-% end
-
-%%%%When using info !!carefull, it is still not so well estabilshed!!
-opt.saveFile = '/09-Jan-2020_2_4_';
-opt.origin = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.tessellationType,'/',opt.vertexType,opt.saveFile);
-[extrudedUnitCell,opt]=buildGeometry(opt);
-ReadAndPlot(extrudedUnitCell,opt);
 
 t = toc;
 fprintf('The whole program lasted %.2f seconds\n', t);
 
-function [x,y] = getAngles(fileName)
-    parsedName = strsplit(fileName(1:end), '_');
-    x = str2double(parsedName{2});
-    y = str2double(parsedName{3});
 
-end
-
-function kappa = getKappa(fileName)
-    parsedName = strsplit(fileName(1:end), '_');
-    kappa = str2double(parsedName{2});
-end

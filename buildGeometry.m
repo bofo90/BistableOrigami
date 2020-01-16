@@ -3,16 +3,13 @@ function [extrudedUnitCell,opt]=buildGeometry(opt)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %INITIALIZE EXTRUDED UNIT CELL
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if strcmp(opt.inputType,'origami')
-    [extrudedUnitCell, opt] = obtainOrigami(opt);   
-else
-    %Get initial geometry
-    [unitCell,opt]=selectUnitCell(opt);
-    %Expand unit cell in case neccesary
-    [unitCell]=expandUnitCell(unitCell,opt);
-    %Create decoupled extruded faces
-    [extrudedUnitCell,~]=extrudeUnitCell(unitCell,opt);
-end
+%Get initial geometry
+[unitCell,opt]=selectUnitCell(opt);
+%Expand unit cell in case neccesary
+[unitCell]=expandUnitCell(unitCell,opt);
+%Create decoupled extruded faces
+[extrudedUnitCell,~]=extrudeUnitCell(unitCell,opt);
+
 
 function [unitCell,opt]=selectUnitCell(opt)
 

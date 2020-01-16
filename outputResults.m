@@ -25,9 +25,14 @@ opt.tranPol=0.5;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Check if output folder is required, and create it if it doesn't exist
 if strcmp(opt.analysis,'plot')
-    nameFolder=strcat(opt.origin,'/Images/StSt',num2str(opt.StSt));
+    nameFolder=strcat(opt.file,'/Images/StSt',num2str(opt.StSt));
 elseif strcmp(opt.analysis, 'info')
-    nameFolder = strcat(opt.origin,'/Images/Info');
+    if strcmp(opt.template,'Tessellation')
+        opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.tessellationType,'/',opt.vertexType, opt.file);
+    elseif strcmp(opt.template,'SingleVertex')
+        opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.vertexType, opt.file);
+    end
+    nameFolder = strcat(opt.file,'/Images/Info');
 end
 if exist(nameFolder, 'dir')==0
     mkdir(nameFolder)

@@ -1,59 +1,56 @@
-function findDeformation(extrudedUnitCell,opt)
+function findDeformation(opt, des, xrep, yrep, ang, kap)
+file = opt.file;
+for d = des
+    opt.vertexType = d;
+    
+    if strcmp(opt.template, 'SingleVertex')
+        xrep = 1;
+        yrep = 1;
+    end
+    
+    for x = xrep
+        opt.xrep = x;
+        for y = yrep
+            opt.yrep = y;
 
-%Show details geometries (if requested)
-if strcmp(opt.analysis,'result')
-    fprintf('Start folding...\n');
-    switch opt.analysisType
-        case 'single'
-            metadataFile(opt, extrudedUnitCell);
-            nonlinearFoldingOne(extrudedUnitCell, opt, opt.angleConstrFinal(1).val);
-%             
-        case 'multiple'
-            metadataFile(opt, extrudedUnitCell);
-            nonlinearFoldingMulti(extrudedUnitCell, opt, opt.angleConstrFinal(1).val);
+            [extrudedUnitCell,opt]=obtainOrigami(opt);
+            if strcmp(opt.template, 'Tessellation')
+                opt.file = strcat(file,num2str([opt.xrep,opt.yrep],'%d_'));
+            elseif strcmp(opt.template, 'SingleVertex')
+                opt.file = strcat(file,num2str(opt.angDesign*180/pi,'%.2f_'));
+            end
             
-        case 'randomPert1'
-            kappas = logspace(-3,1,81);
-            angles = linspace(0,pi,5);
-            savefile = opt.file;
-            for angle = 2:size(angles,2)-1
-                opt.restang = angles(angle);
-                extrudedUnitCell.theta = ones(size(extrudedUnitCell.theta,1),1)*opt.restang;
-                for kappa = 1:size(kappas,2)
-                    opt.Khinge = kappas(kappa);
-                    opt.file = strcat(savefile,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge));                    
-                    metadataFile(opt, extrudedUnitCell);
-                    nonlinearFoldingRand(extrudedUnitCell, opt, opt.RandstDev);
-                end
-            end
-        case 'randomPert2'
-            kappas = logspace(-3,1,13);
-            angles = linspace(0,pi,5);
-            savefile = opt.file;
-            for angle = 2:size(angles,2)-1
-                opt.restang = angles(angle);
-                extrudedUnitCell.theta = ones(size(extrudedUnitCell.theta,1),1)*opt.restang;
-                for kappa = 1:size(kappas,2)
-                    opt.Khinge = kappas(kappa);
-                    opt.file = strcat(savefile,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge));                    
-                    metadataFile(opt, extrudedUnitCell);
-                    nonlinearFoldingRand(extrudedUnitCell, opt, opt.RandstDev);
-                end
-            end
-        case 'randomPert3'
-            kappas = logspace(-3,0,4);
-            angles = linspace(0,pi,5);
-            savefile = opt.file;
-            for angle = 2:size(angles,2)-1
-                opt.restang = angles(angle);
-                extrudedUnitCell.theta = ones(size(extrudedUnitCell.theta,1),1)*opt.restang;
-                for kappa = 1:size(kappas,2)
-                    opt.Khinge = kappas(kappa);
-                    opt.file = strcat(savefile,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge));                    
-                    metadataFile(opt, extrudedUnitCell);
-                    nonlinearFoldingRand(extrudedUnitCell, opt, opt.RandstDev);
-                end
-            end
+            ChangeParam(extrudedUnitCell,opt, ang, kap);
+            
+        end
+    end
+end
+
+
+function ChangeParam(extrudedUnitCell,opt, ang, kap)
+for a = ang
+    opt.restang = a;
+    extrudedUnitCell.theta = ones(size(extrudedUnitCell.theta,1),1)*opt.restang;
+    for k = kap
+        opt.Khinge = k;
+
+        if strcmp(opt.template,'Tessellation')
+            opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.tessellationType,'/',opt.vertexType,opt.file,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge));
+        elseif strcmp(opt.template,'SingleVertex')
+            opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.vertexType,opt.file,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge));
+        end
+        
+        fprintf('Start folding...\n');
+        metadataFile(opt, extrudedUnitCell);
+        switch opt.analysisType
+            case 'single'
+                nonlinearFoldingOne(extrudedUnitCell, opt, opt.angleConstrFinal(1).val);
+            case 'multiple'
+                nonlinearFoldingMulti(extrudedUnitCell, opt, opt.angleConstrFinal(1).val);
+            case 'randomPert'
+                nonlinearFoldingRand(extrudedUnitCell, opt, opt.RandstDev);
+        end
+        
     end
 end
 

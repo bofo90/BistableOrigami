@@ -1,93 +1,127 @@
-function ReadAndPlot(extrudedUnitCell, opt)
+function ReadAndPlot(opt, flag, des)
 
-switch opt.analysis
-    case {'info'}
-        result = [];
-        outputResults(extrudedUnitCell,result,opt,'');
-    case {'plot'}
-        %get file of results
-        folderResults = strcat(opt.file,'/mat');
-        if ~exist(folderResults, 'dir')
-            error('\n----------\nNo data directory found\n----------\n',[])
-        end 
-        allFiles = dir(folderResults);
-        
-        for ct = 1:length(allFiles)
-            if allFiles(ct).isdir || strcmp(allFiles(ct).name(1:end-4), 'metadata')
-                % skip all directories and metadata file
-                continue;
+switch flag
+    case{'allDes'}
+        for i = des  
+
+            if strcmp(opt.template,'Tessellation')
+                fileContainer = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.tessellationType,'/',i);
+            elseif strcmp(opt.template,'SingleVertex')
+                fileContainer = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',i);
+            end    
+
+            allFiles = dir(fileContainer);
+            for ct = 3:length(allFiles)
+                opt.file = strcat(fileContainer,'/',allFiles(ct).name);
+                SingleFileRead(opt)
             end
-            
-            % parse the file name to get back hinge set
-            resfilename = allFiles(ct).name;
-            if strcmp(opt.plotAll, 'off')
-                hingeSet = getHingeSet(resfilename);
-                if hingeSet ~= opt.sim
-                    continue;
-%                     elseif ~strcmp(resfilename(1:end-4), '[8 3]_Ang1_18_Angl2_27')
-%                         continue;
-                end
-            end
-            
-            lofile = load(strcat(folderResults,'/', resfilename));
-            outputResults(extrudedUnitCell,lofile.result,opt,strcat(sprintf('RestAng_%.3f_kappa_%2.5f_', opt.restang, opt.Khinge),resfilename(1:end-4)));
-            
         end
-
-    case {'savedata'}     
-        folderResults = strcat(opt.file,'/mat');
-        folderEnergy = strcat(opt.file,'/energy');
-        if ~exist(folderResults, 'dir')
-            error('\n----------\nNo data directory found\n----------\n',[])
+    case{'oneDes'}
+        if strcmp(opt.template,'Tessellation')
+            fileContainer = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.tessellationType,'/',opt.vertexType);
+        elseif strcmp(opt.template,'SingleVertex')
+            fileContainer = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.vertexType);
         end 
+        opt.file = strcat(fileContainer,opt.file);
+        SingleFileRead(opt)
+end
+
+function SingleFileRead(opt)
+file = opt.file;
+
+opt.vertexType = 'non';
+if strcmp(opt.template,'Tessellation')
+    [opt.xrep, opt.yrep] = getTessell(opt.file);
+elseif strcmp(opt.template,'SingleVertex')
+    opt.angDesign = getAngles(opt.file);
+end
+[extrudedUnitCell,opt]=obtainOrigami(opt);
+
+angles = linspace(0,pi,5);
+for j = angles(2:4)
+    opt.restang = j;
+    extrudedUnitCell.theta = ones(size(extrudedUnitCell.theta,1),1)*opt.restang;
+
+    allFiles2 = dir(strcat(file, sprintf('/RestAng_%.3f', opt.restang)));
+    for k = 3:length(allFiles2)
+        opt.Khinge = getKappa(allFiles2(k).name);
+        opt.file = strcat(file,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge));
+        temp = char(opt.file);
+        fprintf(strcat('Saving data: ', temp(end-65:end), '\n'))
+        obtainData(extrudedUnitCell, opt);
+    end
+end
         
-        allFiles = dir(folderResults);
+function Angles = getAngles(fileName)
+parsedName = strsplit(fileName(1:end), '_');
+Angl1 = str2double(parsedName{end-3});
+Angl2 = str2double(parsedName{end-2});
+Angl3 = str2double(parsedName{end-1});
+Angles = [0, Angl1, Angl2, Angl3]*pi/180;
 
-        %create folder of data with files
-        [fMassDist, fHinge, fEnergy, fAngles] = makeFileswHeaders(folderEnergy, folderResults);
-        Energies = zeros(length(allFiles)-4,7);
-        PosStad = zeros(length(allFiles)-4,size(extrudedUnitCell.face,2)+1);
-        Hinges = zeros(length(allFiles)-4,size(extrudedUnitCell.allnodes,2)/4+1);
-        AllAngles = zeros(length(allFiles)-4,size(extrudedUnitCell.allhinges,2)+1);
-        dirs = 0;
-        for ct = 1:length(allFiles)
-            if allFiles(ct).isdir || strcmp(allFiles(ct).name(1:end-4), 'metadata')
-                % skip all directories and metadata file
-                dirs = dirs+1;
-                continue;
-            end
+function [x,y] = getTessell(fileName)
+parsedName = strsplit(fileName(1:end), '_');
+x = str2double(parsedName{end-2});
+y = str2double(parsedName{end-1});
+    
+function kappa = getKappa(fileName)
+parsedName = strsplit(fileName(1:end), '_');
+kappa = str2double(parsedName{2});
 
-            % load results from file
-            lofile = load(strcat(folderResults,'/', allFiles(ct).name));
+function obtainData(extrudedUnitCell,opt)  
+folderResults = strcat(opt.file,'/mat');
+folderEnergy = strcat(opt.file,'/energy');
+if ~exist(folderResults, 'dir')
+    error('\n----------\nNo data directory found\n----------\n',[])
+end 
+
+allFiles = dir(folderResults);
+
+%create folder of data with files
+[fMassDist, fHinge, fEnergy, fAngles] = makeFileswHeaders(folderEnergy, folderResults);
+Energies = zeros(length(allFiles)-4,7);
+PosStad = zeros(length(allFiles)-4,size(extrudedUnitCell.face,2)+1);
+Hinges = zeros(length(allFiles)-4,size(extrudedUnitCell.allnodes,2)/4+1);
+AllAngles = zeros(length(allFiles)-4,size(extrudedUnitCell.allhinges,2)+1);
+dirs = 0;
+for ct = 1:length(allFiles)
+    if allFiles(ct).isdir || strcmp(allFiles(ct).name(1:end-4), 'metadata')
+        % skip all directories and metadata file
+        dirs = dirs+1;
+        continue;
+    end
+
+    % load results from file
+    lofile = load(strcat(folderResults,'/', allFiles(ct).name));
 %             fprintf('Saving data %d\n', ct);
-            
-            sim = getHingeSet(allFiles(ct).name);
-            
-            curv = getCurvature(extrudedUnitCell, opt, lofile.result);
-            areas = getAreas(extrudedUnitCell, lofile.result);
 
-            Energies(ct-dirs,:) = [sim, lofile.result.Eedge(2,end),...
-                lofile.result.Ediag(2,end), lofile.result.Eface(2,end), lofile.result.Ehinge(2,end),...
-                lofile.result.EtargetAngle(2,end), lofile.result.exfl(2,end)];
-            PosStad(ct-dirs,:) = [sim, areas'];
-            Hinges(ct-dirs,:) = [sim, curv'];%, designAng(1), designAng(2), designAng(3)]];
+    sim = getSimulation(allFiles(ct).name);
+
+    curv = getCurvature(extrudedUnitCell, opt, lofile.result);
+    areas = getAreas(extrudedUnitCell, lofile.result);
+
+    Energies(ct-dirs,:) = [sim, lofile.result.Eedge(2,end),...
+        lofile.result.Ediag(2,end), lofile.result.Eface(2,end), lofile.result.Ehinge(2,end),...
+        lofile.result.EtargetAngle(2,end), lofile.result.exfl(2,end)];
+    PosStad(ct-dirs,:) = [sim, areas'];
+    Hinges(ct-dirs,:) = [sim, curv'];%, designAng(1), designAng(2), designAng(3)]];
 %             AllAnglesTemp = zeros([size(extrudedUnitCell.theta,1),size(lofile.result.deform,2)]);
 %             for iter = 1:size(lofile.result.deform,2)
 %                 AllAnglesTemp(:,iter) = lofile.result.deform(iter).theta;
 %             end
-            AllAngles(ct-dirs,:) = [sim lofile.result.deform(end).theta(extrudedUnitCell.allhinges)'];
- 
-            close all;
-            clear lofile;
-        end
-        
-        dlmwrite(fMassDist, PosStad, 'delimiter', ',', '-append','precision',7);
-        dlmwrite(fHinge, Hinges, 'delimiter', ',', '-append','precision',7);
-        dlmwrite(fEnergy, Energies, 'delimiter', ',', '-append','precision',7);
-        dlmwrite(fAngles, AllAngles, 'delimiter', ',', '-append','precision',7);
-        fclose('all');
-        
+    AllAngles(ct-dirs,:) = [sim lofile.result.deform(end).theta(extrudedUnitCell.allhinges)'];
+
+    close all;
+    clear lofile;
 end
+
+dlmwrite(fMassDist, PosStad, 'delimiter', ',', '-append','precision',7);
+dlmwrite(fHinge, Hinges, 'delimiter', ',', '-append','precision',7);
+dlmwrite(fEnergy, Energies, 'delimiter', ',', '-append','precision',7);
+dlmwrite(fAngles, AllAngles, 'delimiter', ',', '-append','precision',7);
+fclose('all');
+        
+
 
 function [fileMassDist, fileHinge, fileEnergy, fileAngles] = makeFileswHeaders(folderEnergy, folderResults)
 
@@ -144,13 +178,11 @@ end
 fclose(fid) ;                                          % Closes file.
 
 
-function hingeSet = getHingeSet(fileName)
+function hingeSet = getSimulation(fileName)
 
 parsedName = strsplit(fileName(1:end-4), '_');
 Angl1 = parsedName{2};
-% Angl2 = parsedName{5};
 hingeSet = str2double(Angl1);
-% hingeSet = [hinges' zeros(size(hinges))'];
 
 function [curvature, areaFaces] = getCurvature(extrudedUnitCell, opt, result)
 endPos = extrudedUnitCell.node + result.deform(end).interV(end).V;
