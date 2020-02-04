@@ -28,6 +28,7 @@ end
 
 
 function ChangeParam(extrudedUnitCell,opt, ang, kap)
+file = opt.file;
 for a = ang
     opt.restang = a;
     extrudedUnitCell.theta = ones(size(extrudedUnitCell.theta,1),1)*opt.restang;
@@ -35,9 +36,9 @@ for a = ang
         opt.Khinge = k;
 
         if strcmp(opt.template,'Tessellation')
-            opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.tessellationType,'/',opt.vertexType,opt.file,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge));
+            opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.tessellationType,'/',opt.vertexType,file,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge));
         elseif strcmp(opt.template,'SingleVertex')
-            opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.vertexType,opt.file,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge));
+            opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.vertexType,file,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge));
         end
         
         fprintf('Start folding...\n');
