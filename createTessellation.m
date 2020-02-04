@@ -2,10 +2,10 @@ function extrudedUnitCell = createTessellation(unitCell, opt)
 
 extrudedUnitCell = copyUnitCell(unitCell,opt);
 extrudedUnitCell = removeDuplicateNodes(extrudedUnitCell);
-extrudedUnitCell.edge = unique(sort(extrudedUnitCell.edge,2), 'rows');
-extrudedUnitCell = removeDuplicateHinges(extrudedUnitCell);
+extrudedUnitCell = removeDuplicateEdges(extrudedUnitCell,opt);
+extrudedUnitCell = removeDuplicateHinges(extrudedUnitCell,opt);
 extrudedUnitCell = makeSquareFaces(extrudedUnitCell);
-extrudedUnitCell = addDiagonals(extrudedUnitCell);
+% extrudedUnitCell = addDiagonals(extrudedUnitCell);
 extrudedUnitCell = calculateLength(extrudedUnitCell);
 extrudedUnitCell.theta = ones(size(extrudedUnitCell.nodeHingeEx,1),1)*opt.restang;
 
@@ -17,7 +17,12 @@ extrudedUnitCell.center = [];
 extrudedUnitCell.edge = [];
 extrudedUnitCell.face = {};
 extrudedUnitCell.nodeHingeEx = [];
-
+if strcmp(opt.periodic, 'on')
+    extrudedUnitCell.perxedge = zeros(opt.yrep,2);
+    extrudedUnitCell.peryedge = zeros(opt.xrep,2);
+    extrudedUnitCell.perxhinge = zeros(opt.yrep,2);
+    extrudedUnitCell.peryhinge = zeros(opt.xrep,2);    
+end
 shiftnode = 0;
 
 for i = 0:opt.xrep-1
@@ -29,6 +34,23 @@ for i = 0:opt.xrep-1
         extrudedUnitCell.face = [extrudedUnitCell.face addingIndexFace(unitCell.face,shiftnode)];
         extrudedUnitCell.center = [extrudedUnitCell.center unitCell.centerNode+shiftnode];
         shiftnode = size(extrudedUnitCell.node,1);
+        
+        if (i == 0) && strcmp(opt.periodic, 'on')
+            extrudedUnitCell.perxedge(j+1,1)= size(extrudedUnitCell.edge,1)-5; 
+            extrudedUnitCell.perxhinge(j+1,1)= size(extrudedUnitCell.nodeHingeEx,1)-1;
+        end
+        if (i == opt.xrep-1) && strcmp(opt.periodic, 'on')
+            extrudedUnitCell.perxedge(j+1,2)= size(extrudedUnitCell.edge,1)-7; 
+            extrudedUnitCell.perxhinge(j+1,2)= size(extrudedUnitCell.nodeHingeEx,1)-3;
+        end
+        if (j == 0) && strcmp(opt.periodic, 'on')
+            extrudedUnitCell.peryedge(i+1,1)= size(extrudedUnitCell.edge,1)-4; 
+            extrudedUnitCell.peryhinge(i+1,1)= size(extrudedUnitCell.nodeHingeEx,1);
+        end
+        if (j == opt.yrep-1) && strcmp(opt.periodic, 'on')
+            extrudedUnitCell.peryedge(i+1,2)= size(extrudedUnitCell.edge,1)-6; 
+            extrudedUnitCell.peryhinge(i+1,2)= size(extrudedUnitCell.nodeHingeEx,1)-2;
+        end
 
     end
 end
@@ -61,8 +83,20 @@ for i = 1:size(extrudedUnitCell.node,1)
     exUC.allnodes(extrudedUnitCell.allnodes ==i) = newnodes(i);
 end
 
-function extrudedUnitCell = removeDuplicateHinges(extrudedUnitCell)
+function exUC = removeDuplicateEdges(extrudedUnitCell,opt)
 
+exUC = extrudedUnitCell;
+
+[exUC.edge, ~,newedges] = unique(sort(extrudedUnitCell.edge,2), 'rows');
+
+if strcmp(opt.periodic,'on')
+    for i = 1:size(extrudedUnitCell.edge,1)
+        exUC.perxedge(extrudedUnitCell.perxedge == i) = newedges(i);
+        exUC.peryedge(extrudedUnitCell.peryedge == i) = newedges(i);
+    end
+end
+
+function extrudedUnitCell = removeDuplicateHinges(extrudedUnitCell,opt)
 
 [a,b,~] = unique((extrudedUnitCell.nodeHingeEx(:,1)==extrudedUnitCell.center) + ...
     (extrudedUnitCell.nodeHingeEx(:,2)==extrudedUnitCell.center),'rows');
@@ -80,16 +114,21 @@ for i = 1:size(b,1)
     end
 end
 
+numhinges = 1:size(extrudedUnitCell.nodeHingeEx,1);
 extrudedUnitCell.nodeHingeEx(loc1,:) = hinges;
 extrudedUnitCell.nodeHingeEx(loc2,:) = [];
 
-exUC = extrudedUnitCell;
-for i = 1:size(loc1,2)
-    extrudedUnitCell.allhinges(exUC.allhinges==loc2(i))= loc1(i);
-end
-[a,~,c] = unique(extrudedUnitCell.allhinges);
+numhinges(loc2) = loc1;
+[a,~,c]=unique(numhinges);
 orderedHinges = 1:size(a,2);
-extrudedUnitCell.allhinges = orderedHinges(c);
+orderedHinges = orderedHinges(c);
+
+exUC = extrudedUnitCell;
+for i = 1:size(numhinges,2)
+    extrudedUnitCell.allhinges(exUC.allhinges==i)= orderedHinges(i);
+    extrudedUnitCell.perxhinge(exUC.perxhinge==i)= orderedHinges(i);
+    extrudedUnitCell.peryhinge(exUC.peryhinge==i)= orderedHinges(i);
+end
 
 function extrudedUnitCell = makeSquareFaces(extrudedUnitCell)
 
@@ -98,7 +137,7 @@ faces = reshape(cell2mat(extrudedUnitCell.face),[3,size(extrudedUnitCell.face,2)
 squareface = [];
 loc1 = [];
 loc2 = [];
-deledges = [];
+% deledges = [];
 
 for i = 1:size(faces,1)
     [~,y] = ismember(faces(i,[3,2]),faces(i:end,[2,3]),'rows');
@@ -107,7 +146,7 @@ for i = 1:size(faces,1)
         loc2 = [loc2 y+i-1];
         squareface = [squareface; faces(i,[1,2]) faces(y+i-1,[1,2])];
         [~,x] = ismember(sort(faces(i,[2,3])),extrudedUnitCell.edge,'rows');
-        deledges = [deledges x];
+%         deledges = [deledges x];
         
     end
 end
@@ -125,7 +164,7 @@ for i = redfacesloc
         edges = [faces(i,[2,3]); faces(y,[2,3])];
         addedges = [addedges; faces(i,2) faces(y,3)];
         [~,x] = ismember(sort(edges,2),extrudedUnitCell.edge,'rows');
-        deledges = [deledges x'];        
+%         deledges = [deledges x'];        
     end
 end
 
@@ -133,7 +172,7 @@ end
 squareface = squareface(y,:);
 
 extrudedUnitCell.face([loc1,loc2]) = [];
-extrudedUnitCell.edge(deledges,:) = [];
+% extrudedUnitCell.edge(deledges,:) = [];
 extrudedUnitCell.edge = [extrudedUnitCell.edge; addedges];
 extrudedUnitCell.face = [extrudedUnitCell.face num2cell(squareface,2)'];
 
