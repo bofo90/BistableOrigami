@@ -5,17 +5,15 @@ if strcmp(opt.template,'Tessellation')
 elseif strcmp(opt.template,'SingleVertex')
     fileContainer = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.vertexType);
 end
-opt.file = strcat(fileContainer,'/',opt.file);
+opt.file = strcat(fileContainer,opt.file);
 
 opt.vertexType = 'non';
 if strcmp(opt.template,'Tessellation')
-    [opt.xrep, opt.yrep] = getTessell(opt.file);
+%     [opt.xrep, opt.yrep] = getTessell(opt.file);
 elseif strcmp(opt.template,'SingleVertex')
     opt.angDesign = getAngles(opt.file);
 end
 [extrudedUnitCell,opt]=obtainOrigami(opt);
-
-
 
 switch flag
     case {'allRes', 'ststRes'}
