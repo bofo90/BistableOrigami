@@ -375,24 +375,24 @@ if strcmp(opt.constrEdge,'off')
 %     %streching energy
 %     notdiagonal = 1:size(extrudedUnitCell.edge,1);
 %     notdiagonal(extrudedUnitCell.diagonals) = [];
-    Eedge=1/2*opt.Kedge*sum(dEdge.^2);
-    dE=dE+opt.Kedge*(Jedge'*dEdge);
+    Eedge=1/2*sum(opt.Kedge.*dEdge.^2);
+    dE=dE+Jedge'*(opt.Kedge.*dEdge);
 end
 
 %ENERGY ASSOCIATED TO FACE BENDING
 if strcmp(opt.constrFace,'off')
     [dFace, Jface]=getFace(extrudedUnitCell);
-    Eface=opt.Kface/2*sum(dFace.^2);
-    dE=dE+opt.Kface*Jface'*dFace;
+    Eface=1/2*sum(opt.Kface.*dFace.^2);
+    dE=dE+Jface'*(opt.Kface.*dFace);
 end
 
 %ENERGY ASSOCIATED TO HINGE BENDING
 [theta, Jhinge]=getHinge(extrudedUnitCell, extrudedUnitCellPrev);
-ThetaVar = theta-extrudedUnitCell.theta;
-Ehinge=4*opt.Khinge/(opt.restang^4)*sum(0.25*ThetaVar.^4+...
+ThetaVar = theta-extrudedUnitCell.theta;%*
+Ehinge=4/(opt.restang^4)*sum(opt.Khinge.*(0.25*ThetaVar.^4+...
     ThetaVar.^3.*extrudedUnitCell.theta+...
-    ThetaVar.^2.*extrudedUnitCell.theta.^2);
-dE=dE+4*opt.Khinge/(opt.restang^4)*(Jhinge'*(ThetaVar.^3+...
+    ThetaVar.^2.*extrudedUnitCell.theta.^2));
+dE=dE+4/(opt.restang^4)*Jhinge'*(opt.Khinge.*(ThetaVar.^3+...
     3*ThetaVar.^2.*extrudedUnitCell.theta+...
     2*ThetaVar.*extrudedUnitCell.theta.^2));
 
