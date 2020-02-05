@@ -217,27 +217,28 @@ extrudedUnitCell.latVec = unitCell.latvec.*[opt.xrep;opt.yrep];
 extrudedUnitCell.node = [extrudedUnitCell.node; rand(2,3)*0.01];
 extrudedUnitCell.ref = [size(extrudedUnitCell.node,1)-1, size(extrudedUnitCell.node,1)];
 
-xrepnodes = [];
-yrepnodes = [];
+extrudedUnitCell.repnumnodes = [];
+extrudedUnitCell.repnodes = [];
+extrudedUnitCell.repedges = [];
+extrudedUnitCell.rephinges = [];
 
-for i=1:size(extrudedUnitCell.node,1)-2
-    for j=1:size(extrudedUnitCell.node,1)-2
-        if norm(extrudedUnitCell.node(i,:)+extrudedUnitCell.latVec(1,:)-extrudedUnitCell.node(j,:)) < 10^(-8)
-            xrepnodes = [xrepnodes; i j];
-        end
-        if norm(extrudedUnitCell.node(i,:)+extrudedUnitCell.latVec(2,:)-extrudedUnitCell.node(j,:)) < 10^(-8)
-            yrepnodes = [yrepnodes; i j];
+%%%These lattice vectors might change depending on the tessellation
+tessvec = [extrudedUnitCell.latVec; sum(extrudedUnitCell.latVec); diff(extrudedUnitCell.latVec)];
+
+for vec = 1:size(tessvec,1)
+    repnodes = [];
+    for i=1:size(extrudedUnitCell.node,1)-2
+        for j=1:size(extrudedUnitCell.node,1)-2
+            if norm(extrudedUnitCell.node(i,:)+tessvec(vec,:)-extrudedUnitCell.node(j,:)) < 10^(-8)
+                repnodes = [repnodes; i j];
+            end
         end
     end
+    extrudedUnitCell.repnumnodes = [extrudedUnitCell.repnumnodes; size(repnodes,1)];
+    extrudedUnitCell.repnodes = [extrudedUnitCell.repnodes; repnodes];
+    extrudedUnitCell.repedges = [extrudedUnitCell.repedges; getLib(extrudedUnitCell.edge, repnodes)];
+    extrudedUnitCell.rephinges = [extrudedUnitCell.rephinges; getLib(sort(extrudedUnitCell.nodeHingeEx(:,1:2),2), repnodes)];
 end
-
-extrudedUnitCell.xrepnodes = xrepnodes;
-extrudedUnitCell.yrepnodes = yrepnodes;
-
-extrudedUnitCell.xrepedges = getLib(extrudedUnitCell.edge, xrepnodes);
-extrudedUnitCell.yrepedges = getLib(extrudedUnitCell.edge, yrepnodes);
-extrudedUnitCell.xrephinges = getLib(sort(extrudedUnitCell.nodeHingeEx(:,1:2),2), xrepnodes);
-extrudedUnitCell.yrephinges = getLib(sort(extrudedUnitCell.nodeHingeEx(:,1:2),2), yrepnodes);
 
 
 function lib2 = getLib(hinges, lib)
