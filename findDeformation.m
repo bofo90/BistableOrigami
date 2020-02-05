@@ -418,8 +418,8 @@ function [C,Ceq,DC,DCeq]=nonlinearConstr(u,extrudedUnitCell,opt)
 
 C1=[]; C2=[]; C3=[];
 DC1=[]; DC2=[];
-Ceq1=[]; Ceq2=[]; Ceq3=[];
-DCeq1=[]; DCeq2=[]; DCeq3=[];
+Ceq1=[]; Ceq2=[]; Ceq3=[]; Ceq4=[];
+DCeq1=[]; DCeq2=[]; DCeq3=[]; DCeq4=[];
 
 %APPLY DEFORMATION NODES
 extrudedUnitCellPrev = extrudedUnitCell;
@@ -429,8 +429,8 @@ extrudedUnitCell.node=extrudedUnitCell.node+[u(1:3:end) u(2:3:end) u(3:3:end)];
 %INEQUALITY CONSTRAINS
 %%%%%%%%%%%%%%%%%%%%%%
 %MAXIMUM AND MINIMUM ANGLES
+[angles, Dangles]=getHinge(extrudedUnitCell, extrudedUnitCellPrev);
 if ~isnan(opt.constAnglePerc)
-    [angles, Dangles]=getHinge(extrudedUnitCell, extrudedUnitCellPrev);
     C1 = [-angles-pi*opt.constAnglePerc; angles-pi*opt.constAnglePerc];
     DC1 = [-Dangles; Dangles];
 end
@@ -461,9 +461,18 @@ end
 if strcmp(opt.constrFace,'on')
     [Ceq2, DCeq2]=getFace(extrudedUnitCell);
 end
+%CONSTRAINT ASSOCIATED TO BOUNDARY CONDITIONS
+if strcmp(opt.periodic,'on')
+    [strech, Dstrech] = getEdge(extrudedUnitCell);
+    Ceq3 = strech(extrudedUnitCell.repedges(:,1))-strech(extrudedUnitCell.repedges(:,2));
+    DCeq3 = Dstrech(extrudedUnitCell.repedges(:,1),:)-Dstrech(extrudedUnitCell.repedges(:,2),:);
+
+    Ceq4 = angles(extrudedUnitCell.rephinges(:,1))-angles(extrudedUnitCell.rephinges(:,2));
+    DCeq4 = Dangles(extrudedUnitCell.rephinges(:,1),:)-Dangles(extrudedUnitCell.rephinges(:,2),:);
+end
 %FINAL CONSTRAINTS
-Ceq=[Ceq1; Ceq2; Ceq3];
-DCeq=[DCeq1; DCeq2; DCeq3]';
+Ceq=[Ceq1; Ceq2; Ceq3; Ceq4];
+DCeq=[DCeq1; DCeq2; DCeq3; DCeq4]';
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -510,30 +519,32 @@ Aeq(6,3*nodeFix(3)-2:3*nodeFix(3))=e3;
 %      end
 % end
 
-%PERIODIC NODAL CONSTRAINTS
-% if strcmp(opt.periodic,'on')
-%     nref=length(extrudedUnitCell.ref);
-%     rep=size(Aeq,1);
-%     for i=1:size(unitCell.possibleAlpha,1)
-%         for j=1:size(extrudedUnitCell.node,1)-nref
-%             coor1=extrudedUnitCell.node(j,:)';
-%             for k=1:size(extrudedUnitCell.node,1)-nref
-%                 coor2=extrudedUnitCell.node(k,:)';
-%                 if norm(coor2-coor1-unitCell.l'*unitCell.possibleAlpha(i,:)')<1e-6
-%                     rep=rep+1;
-%                     %sprintf('%d, node 1 = %d, node 2 =%d',[rep,j,k])
-%                     Aeq(3*rep-2:3*rep,:)=zeros(3,size(extrudedUnitCell.node,1)*3);
-%                     Aeq(3*rep-2:3*rep,3*j-2:3*j)=[1 0 0; 0 1 0; 0 0 1];
-%                     Aeq(3*rep-2:3*rep,3*k-2:3*k)=[-1 0 0; 0 -1 0; 0 0 -1];
-%                     for l=1:nref
-%                         Aeq(3*rep-2:3*rep,3*extrudedUnitCell.ref(l)-2:3*extrudedUnitCell.ref(l))=unitCell.possibleAlpha(i,l)*[-1 0 0; 0 -1 0; 0 0 -1];
-%                     end
-%                     Beq(3*rep-2:3*rep)=0;
-%                 end
-%             end
-%         end
-%     end
-% end
+% PERIODIC NODAL CONSTRAINTS
+if strcmp(opt.periodic,'on')
+    nref=length(extrudedUnitCell.ref);
+    rep=size(Aeq,1);
+    
+    %%%These lattice vectors might change depending on the tessellation
+    tessvec = [extrudedUnitCell.latVec; sum(extrudedUnitCell.latVec); diff(extrudedUnitCell.latVec)];
+    possibleAlpha=[1 0; 0 1; 1 1; -1 1];
+    for i=1:size(tessvec,1)
+        for j=1:size(extrudedUnitCell.node,1)-nref
+            for k=1:size(extrudedUnitCell.node,1)-nref
+                if norm(extrudedUnitCell.node(j,:)+tessvec(i,:)-extrudedUnitCell.node(k,:))<1e-6
+                    rep=rep+1;
+                    %sprintf('%d, node 1 = %d, node 2 =%d',[rep,j,k])
+                    Aeq(3*rep-2:3*rep,:)=zeros(3,size(extrudedUnitCell.node,1)*3);
+                    Aeq(3*rep-2:3*rep,3*j-2:3*j)=[1 0 0; 0 1 0; 0 0 1];
+                    Aeq(3*rep-2:3*rep,3*k-2:3*k)=[-1 0 0; 0 -1 0; 0 0 -1];
+                    for l=1:nref
+                        Aeq(3*rep-2:3*rep,3*extrudedUnitCell.ref(l)-2:3*extrudedUnitCell.ref(l))=possibleAlpha(i,l)*[-1 0 0; 0 -1 0; 0 0 -1];
+                    end
+                    Beq(3*rep-2:3*rep)=0;
+                end
+            end
+        end
+    end
+end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
