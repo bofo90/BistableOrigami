@@ -29,11 +29,13 @@ end
 
 function ChangeParam(extrudedUnitCell,opt, ang, kap)
 file = opt.file;
+ke = opt.Kedge;
 for a = ang
     opt.restang = a;
     extrudedUnitCell.theta = ones(size(extrudedUnitCell.theta,1),1)*opt.restang;
     for k = kap
         opt.Khinge = k;
+        opt.Kedge = ke;
 
         if strcmp(opt.template,'Tessellation')
             opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.tessellationType,'/',opt.vertexType,file,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge));
@@ -43,6 +45,12 @@ for a = ang
         
         fprintf('Start folding...\n');
         metadataFile(opt, extrudedUnitCell);
+        if strcmp(opt.periodic, 'on')
+            opt.Khinge = ones(size(extrudedUnitCell.nodeHingeEx,1),1)*opt.Khinge;
+            opt.Khinge(extrudedUnitCell.rephinges) = opt.Khinge(extrudedUnitCell.rephinges)/2;
+            opt.Kedge = ones(size(extrudedUnitCell.edge,1),1)*opt.Kedge;
+            opt.Kedge(extrudedUnitCell.repedges) = opt.Kedge(extrudedUnitCell.repedges)/2;
+        end
         switch opt.analysisType
             case 'single'
                 nonlinearFoldingOne(extrudedUnitCell, opt, opt.angleConstrFinal(1).val);
