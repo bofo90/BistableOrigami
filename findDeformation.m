@@ -462,14 +462,14 @@ if strcmp(opt.constrFace,'on')
     [Ceq2, DCeq2]=getFace(extrudedUnitCell);
 end
 %CONSTRAINT ASSOCIATED TO BOUNDARY CONDITIONS
-if strcmp(opt.periodic,'on')
-    [strech, Dstrech] = getEdge(extrudedUnitCell);
-    Ceq3 = strech(extrudedUnitCell.repedges(:,1))-strech(extrudedUnitCell.repedges(:,2));
-    DCeq3 = Dstrech(extrudedUnitCell.repedges(:,1),:)-Dstrech(extrudedUnitCell.repedges(:,2),:);
-
-    Ceq4 = angles(extrudedUnitCell.rephinges(:,1))-angles(extrudedUnitCell.rephinges(:,2));
-    DCeq4 = Dangles(extrudedUnitCell.rephinges(:,1),:)-Dangles(extrudedUnitCell.rephinges(:,2),:);
-end
+% if strcmp(opt.periodic,'on')
+%     [strech, Dstrech] = getEdge(extrudedUnitCell);
+%     Ceq3 = strech(extrudedUnitCell.repedges(:,1))-strech(extrudedUnitCell.repedges(:,2));
+%     DCeq3 = Dstrech(extrudedUnitCell.repedges(:,1),:)-Dstrech(extrudedUnitCell.repedges(:,2),:);
+% 
+%     Ceq4 = angles(extrudedUnitCell.rephinges(:,1))-angles(extrudedUnitCell.rephinges(:,2));
+%     DCeq4 = Dangles(extrudedUnitCell.rephinges(:,1),:)-Dangles(extrudedUnitCell.rephinges(:,2),:);
+% end
 %FINAL CONSTRAINTS
 Ceq=[Ceq1; Ceq2; Ceq3; Ceq4];
 DCeq=[DCeq1; DCeq2; DCeq3; DCeq4]';
@@ -482,8 +482,8 @@ DCeq=[DCeq1; DCeq2; DCeq3; DCeq4]';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [Aeq, Beq]=linearConstr(extrudedUnitCell, opt)
 
-%FIX NODE CONSTRAINTS
-%IMPROVE FOLLOWING - AUTOMATIC DEPENDING ON NODES OF FACE 1
+%%%%%FIX NODE CONSTRAINTS
+%%%%%IMPROVE FOLLOWING - AUTOMATIC DEPENDING ON NODES OF FACE 1
 nodeFix=extrudedUnitCell.face{1};
 e1=extrudedUnitCell.node(nodeFix(1),:)-extrudedUnitCell.node(nodeFix(2),:);
 e2=extrudedUnitCell.node(nodeFix(3),:)-extrudedUnitCell.node(nodeFix(2),:);
@@ -501,7 +501,7 @@ Aeq(4,3*nodeFix(2)-2:3*nodeFix(2))=e3;
 Aeq(5,3*nodeFix(2)-2:3*nodeFix(2))=e2;
 Aeq(6,3*nodeFix(3)-2:3*nodeFix(3))=e3;
 
-%MERGE NODES AT INITIALLY SAME LOCATION
+%%%%%%%%%%%%MERGE NODES AT INITIALLY SAME LOCATION
 % rep=size(Aeq,1);
 % for i=1:size(unitCell.internalFacePairs,1)   
 %     for j=1:length(unitCell.Polyhedron(unitCell.internalFacePairs(i,2)).faceNodeExtrude{unitCell.internalFacePairs(i,1)})
@@ -519,7 +519,7 @@ Aeq(6,3*nodeFix(3)-2:3*nodeFix(3))=e3;
 %      end
 % end
 
-% PERIODIC NODAL CONSTRAINTS
+%%%%%%%%%%%%PERIODIC NODAL CONSTRAINTS
 if strcmp(opt.periodic,'on')
     nref=length(extrudedUnitCell.ref);
     rep=size(Aeq,1);

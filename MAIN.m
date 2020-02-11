@@ -34,7 +34,7 @@ opt.options=optimoptions('fmincon','GradConstr','off','GradObj','off',...
                          'Algorithm', opt.folAlgor, 'OutputFcn',@outfun,...               
                          'RelLineSrchBnd', 0.01, 'RelLineSrchBndDuration', 5000);
                      
-opt.file = '/05-Feb-2020_';
+opt.file = '/11-Feb-2020_';
 switch opt.analysis
     case{'info'}
         [extrudedUnitCell,opt]=obtainOrigami(opt);
@@ -45,20 +45,17 @@ switch opt.analysis
         des = opt.vertexType;
         ang = linspace(0,pi,5);
         ang = ang(2:4);
-        kap = logspace(-3,0,13); %opt.Khinge;
-        xrep = opt.xrep; %only used when having tessellations
+        kap = logspace(-3,0,4); %opt.Khinge;
+        xrep = [1,2];%opt.xrep; %only used when having tessellations
         yrep = opt.yrep; %only used when having tessellations
         findDeformation(opt, des, xrep, yrep, ang, kap)
-        xrep = 2;
-        yrep = [1 2];
-        findDeformation(opt, des, xrep, yrep, ang, kap) 
     case{'savedata'}
         %!!!When tessellation, the design angles need to be given!!!!!
         des = ["2CFF"];
         ReadAndPlot(opt,'oneDes', des) %other option is 'allDes', 'oneDes'
     case{'plot'}
         opt.sim =1;   %only used when selecting option 'oneRes'
-        PlotResults(opt,'oneRes') %other options is 'allRes','ststRes','oneRes'
+        PlotResults(opt,'allRes') %other options is 'allRes','ststRes','oneRes'
 end
 
 
