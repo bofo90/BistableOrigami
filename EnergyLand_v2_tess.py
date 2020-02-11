@@ -46,6 +46,37 @@ def orderAngles(angles, ucsize, simulations):
         
     return [finalAngles, symetries]
     # return [angles, symetries]
+
+def orderAnglesMat(angles, ucsize, tessellation):
+    
+    nunitcells = np.prod(tessellation)
+    simulations = np.size(angles,0)
+    
+    finalAngles = np.reshape(np.sum(np.reshape(angles,(simulations*nunitcells,4)),axis = 1),(simulations,nunitcells))
+    mirror = (np.sum(np.sign(np.around(finalAngles, decimals = 4)),axis = 1) < 0)
+    
+    angles[mirror,:] = angles[mirror,:]*-1
+    
+    orderedang = np.zeros(np.shape(angles))
+    order = np.zeros([simulations, nunitcells]).astype(int)
+    for i in np.arange(simulations):
+        locorder = np.reshape(np.arange(nunitcells),tessellation)
+        ststs = finalAngles[i,:]
+        ststs = np.reshape(ststs, tessellation)
+        rot = np.argmin([ststs[0,0], ststs[0,-1],ststs[-1,-1],ststs[-1,0]])
+        ststs = np.rot90(ststs,rot)
+        locorder = np.rot90(locorder,rot)
+        mir = np.argsort([ststs[0,0], ststs[0,-1],ststs[-1,-1],ststs[-1,0]])
+        if mir[1]> mir[2]:
+            ststs = ststs.transpose()
+            locorder = locorder.transpose()
+        ststs = ststs.flatten()
+        finalAngles[i,:] = ststs
+        order[i,:] = locorder.flatten().astype(int)
+        for j in np.arange(nunitcells):
+            orderedang[i,j*4:j*4+4] = angles[i,order[i,j]*4:order[i,j]*4+4]
+           
+    return orderedang
         
         
 def countStableStates(finalAngles, distance, method, plot = False):
@@ -81,7 +112,7 @@ def countStableStates(finalAngles, distance, method, plot = False):
 def getStableStatesMat(data, tessellation):
     
     numsim = np.size(data,0)
-    stst = np.zeros(numsim).astype(int)
+    stst = np.zeros(numsim)
     order = np.zeros([numsim, np.prod(tessellation)]).astype(int)
     
     for i in np.arange(numsim):
@@ -97,7 +128,7 @@ def getStableStatesMat(data, tessellation):
             locorder = locorder.transpose()
         ststs = ststs.flatten().astype(int)
         colstst = np.array2string(ststs, separator='')
-        stst[i] = np.int(colstst[1:-1])
+        stst[i] = colstst[1:-1]
         order[i,:] = locorder.flatten().astype(int)
         
     return stst, order
@@ -249,11 +280,13 @@ for subdir in os.listdir(Folder_name):
     
         dataAngles = np.loadtxt(folder_name+file_name4,skiprows=1, delimiter = ',', dtype = np.float64)
         dataAngles = np.delete(dataAngles, 0, 1)
-        [dataAnglesOrd, dataSym] = orderAngles(dataAngles, 4, simLen)
-        dataStSt = countStableStates(np.resize(dataAnglesOrd,(simLen*numUC,4)), 0.8, 'centroid',True)
-        dataStSt = np.resize(dataStSt,(simLen,numUC))
-        
-        allAngles = np.concatenate((dataCurv,dataLen,dataAnglesOrd,dataStSt),1)
+        # [dataAnglesOrd, dataSym] = orderAngles(dataAngles, 4, simLen)
+        dataAnglesOrd = orderAnglesMat(dataAngles, 4, tessellation)
+        # dataStSt = countStableStates(np.resize(dataAnglesOrd,(simLen*numUC,4)), 0.8, 'centroid',True)
+        dataEnergy['StableStates'] = countStableStates(dataAnglesOrd, 0.6, 'centroid')
+        # dataStSt = np.resize(dataStSt,(simLen,numUC))
+                
+        allAngles = np.concatenate((dataCurv,dataLen,dataAnglesOrd),1)
         allAngles = pd.DataFrame(allAngles)
         dataEnergy = pd.concat([dataEnergy, allAngles], axis=1, sort=False)
         allData = allData.append(dataEnergy)
@@ -270,24 +303,24 @@ for subdir in os.listdir(Folder_name):
     
     allData.reset_index(level=0, drop=True)
     
-    [allData['StableStates'], angord] = getStableStatesMat(allData.iloc[:,-1-numUC:-1].to_numpy(), tessellation)
-    orderedang = np.zeros([TotSimul,numUC*4])
-    for i in np.arange(TotSimul):
-        for j in np.arange(numUC):
-            orderedang[i,j*4:j*4+4] = allData.iloc[i,-(2+5*numUC)+angord[i,j]*4:-(2+5*numUC)+angord[i,j]*4+4]
-    allData.iloc[:,-(2+5*numUC):-(2+numUC)] = orderedang
+    # [allData['StableStates'], angord] = getStableStatesMat(allData.iloc[:,-1-numUC:-1].to_numpy(), tessellation)
+    # orderedang = np.zeros([TotSimul,numUC*4])
+    # for i in np.arange(TotSimul):
+    #     for j in np.arange(numUC):
+    #         orderedang[i,j*4:j*4+4] = allData.iloc[i,-(2+5*numUC)+angord[i,j]*4:-(2+5*numUC)+angord[i,j]*4+4]
+    # allData.iloc[:,-(2+5*numUC):-(2+numUC)] = orderedang
             
             
-    allData['Curvature'] = allData.iloc[:,9:9+numUC].mean(axis = 1)
-    allData['minFace'] = allData.iloc[:,9+numUC:-(3+5*numUC)].min(axis= 1)
+    allData['Curvature'] = allData.iloc[:,10:10+numUC].mean(axis = 1)
+    allData['minFace'] = allData.iloc[:,10+numUC:-(2+4*numUC)].min(axis= 1)
     
-    colloc = np.concatenate(([1,4,7],np.arange(-(4+5*numUC),-(4+numUC)),[-2,-1]))
+    colloc = np.concatenate(([1,4,7],np.arange(-(3+4*numUC),-3),[-2,-1]))
     kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates').apply(lambda _df: _df.iloc[:,colloc].mean()))
     
     # kappasStSt['amountSym'] = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['Symmetry']].nunique())
     # kappasStSt['Symetries'] = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates').apply(lambda x: str(np.sort(x.Symmetry.unique()))))
     
-    kappasStSt['Hinge Number'] =  allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['Hinge Number']].apply(lambda _df2: _df2.sample(1, random_state = 0))).to_numpy()
+    kappasStSt['Hinge Number'] =  allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['Hinge Number']].apply(lambda _df2: _df2.sample(1, random_state = 2))).to_numpy()
   
     kappasStSt['restang'] = np.ones(np.shape(kappasStSt)[0])*restang
     
@@ -315,14 +348,10 @@ restangles = allDesigns.restang.drop_duplicates().values
 #%%
 posStSt = np.shape(allDesigns)[0]
 allUCang = np.resize(allDesigns.iloc[:,5:5+numUC*4].values,(posStSt*numUC,4))
-matUCStSt = countStableStates(allUCang, 0.5, 'centroid',True)
+matUCStSt = countStableStates(allUCang, 1, 'centroid')
+matUCStSt = np.reshape(matUCStSt, (posStSt, numUC))
 
-[allDesigns['StableStateAll'], angord] = getStableStatesMat(np.resize(matUCStSt,(posStSt,numUC)), tessellation)
-orderedang = np.zeros([posStSt,numUC*4])
-for i in np.arange(posStSt):
-    for j in np.arange(numUC):
-        orderedang[i,j*4:j*4+4] = allDesigns.iloc[i,5+angord[i,j]*4:5+angord[i,j]*4+4]
-allDesigns.iloc[:,5:5+numUC*4] = orderedang
+allDesigns['StableStateAll'] = countStableStates(allDesigns.iloc[:,5:5+numUC*4].values, 3, 'centroid',True)
 
 stst = np.unique(allDesigns['StableStateAll'])
 ststUC = np.unique(matUCStSt)
@@ -466,10 +495,11 @@ ax3.set_xlim([-np.pi,np.pi])
 ax3.set_ylim([-np.pi,np.pi])
 ax3.set_zlim([-np.pi,np.pi])
     
-order = [5,6,7,8]
+ststmatforUC = np.array([allDesigns['StableStateAll'].values,allDesigns['StableStateAll'].values]).flatten('F')
 
-for i  in np.arange(posStSt*numUC):
-    ax3.scatter(allUCang[i,3],allUCang[i,1],allUCang[i,2], c = [colorsUC[matUCStSt[i]-1]])
+# ax3.scatter(allUCang[:,3],allUCang[:,1],allUCang[:,2], c = colorsUC[matUCStSt.flatten()-1])
+ax3.scatter(allUCang[:,3],allUCang[:,1],allUCang[:,2], c = colors[ststmatforUC.flatten()-1])
+
 for i in ststUC:
     ax3.scatter(-400,-400,-400, c = [colorsUC[i-1]], label = i)
 
