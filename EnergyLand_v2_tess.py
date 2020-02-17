@@ -281,7 +281,7 @@ plt.close('all')
 kappas = np.logspace(-3,1,81)
 #kappas = np.logspace(-3,1,13)#23
 
-Folder_name = "Results/Tessellation4/25/2CFF/09-Jan-2020_5_5_"
+Folder_name = "Results/Tessellation4/25/2CFF/09-Jan-2020_2_1_"
 file_name1 = "/EnergyData.csv" 
 file_name2 = "/Hinges.csv"
 file_name3 = "/PosStad.csv"
@@ -343,12 +343,12 @@ for subdir in os.listdir(Folder_name):
     TotSimul = allData.shape[0]
     
     
-    minFaceFlag = (allData.iloc[:,10+numUC:-(4*numUC)]<0.11).any(axis = 1)
+    minFaceFlag = (allData.iloc[:,10+numUC:-(4*numUC)]<=0.11).any(axis = 1)
     allData['Flags'][minFaceFlag] = -5
     
     print(allData['Flags'].value_counts())
     exfl = allData.Flags.values.reshape(TotSimul,1)
-    flagmask = (exfl !=1) & (exfl !=2)
+    flagmask = (exfl !=1) & (exfl !=2) &(exfl !=0)
     flagmask = ~flagmask.any(axis= 1)
     allData['Mask'] = flagmask
     allData = allData.iloc[flagmask,:]
