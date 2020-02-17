@@ -25,23 +25,23 @@ def cm2inch(value):
 
 def orderAngles(angles, ucsize, simulations):
     
-    nunitcells = np.int(np.size(angles,1)/ucsize)
     symetries = ["" for x in range(simulations)]
     finalAngles = np.zeros((simulations,np.size(angles,1)))
     for sim in np.arange(simulations):
         sym = ''
-        for hinge in np.arange(nunitcells):
-            ver = angles[sim,hinge*ucsize:(hinge+1)*ucsize]
-            if np.sum(np.sign(np.around(ver, decimals = 4))) < 0: ### sort to have mayority positive angles
-                ver = ver[::-1]*(-1)
-                sym = sym + 'm'
-                
-            ver= np.roll(ver,np.argmin(ver))         ### sort from smallest to highest angles
-            if np.argmin(ver) != 0:
-                sym = sym+'r'+ str(np.argmin(ver))
-                
-            finalAngles[sim,hinge*ucsize:(hinge+1)*ucsize] = ver
-            sym = sym +'_'
+        ver = np.array(angles[sim,:])
+        if np.sum(np.sign(np.around(ver, decimals = 4))) < 0: ### sort to have mayority positive angles
+            # ver = ver[::-1]*(-1)
+            ver = ver*(-1)
+            sym = sym + 'm'
+            
+        rolnum = 4-np.argmin(ver)
+        ver= np.roll(ver,rolnum)         ### sort from smallest to highest angles
+        if rolnum != 4:
+            sym = sym+'r'+ str(rolnum)
+            
+        finalAngles[sim,:] = ver
+        sym = sym +'_'
         symetries[sim] = sym
         
     return [finalAngles, symetries]
