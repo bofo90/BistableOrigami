@@ -138,6 +138,33 @@ def getStableStatesMat(data, tessellation):
         
     return stst, order
 
+def standarizeStableStates(matUCStSt, allUCang, onlysign = False):
+    
+    standstst = np.round(np.array([[0,np.sqrt(2),0,np.sqrt(2)],[1,1,1,1],[-1,1,-1,1],[-1,1,1,1]])/2,1)
+    
+    ststUC = np.unique(matUCStSt)
+    if onlysign:
+        allUCang = np.sign(np.round(allUCang, 1))
+    magangvec = np.sqrt(np.sum(allUCang*allUCang, 1))
+    angvecunit = np.round(allUCang / magangvec[:,None],1)
+    
+    matUCstandStSt = np.zeros((np.size(allUCang,0),4))
+    for i in np.arange(np.size(standstst,0)):
+        ststloc = (angvecunit == standstst[i,:]).all(axis=1)
+        oldStSt = np.unique(matUCStSt[ststloc])
+        if (ststUC[oldStSt-1]<0).any():
+            print("\n\nError: double standarizing!!!!! you need to check the standarization of stable states!!!\n\n")
+        ststUC[oldStSt-1] = -i-1
+    
+    oldSS = np.unique(matUCStSt)
+    [i, notdelSS, newSS] = np.unique(ststUC, return_index=True, return_inverse=True)
+    newSS = newSS+1
+    newStSt = np.zeros(np.shape(matUCStSt))
+    for old,new in zip(oldSS, newSS):
+        newStSt[matUCStSt == old] = new
+        
+    return newStSt.astype(int)
+
 def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.NaN, np.NaN], divisions = [np.NaN, np.NaN],
                 buffer = [0.0, 0.0, 0.0]):
     gray = '0.2'
@@ -353,25 +380,15 @@ restangles = allDesigns.restang.drop_duplicates().values
 #%%
 posStSt = np.shape(allDesigns)[0]
 allUCang = np.resize(allDesigns.iloc[:,5:5+numUC*4].values,(posStSt*numUC,4))
-matUCStSt = countStableStates(allUCang, 1, 'centroid')
+[allUCang,sym] = orderAngles(allUCang, 4, posStSt*numUC)
+matUCStSt = countStableStates(allUCang, 0.7, 'centroid')
+matUCStSt = standarizeStableStates(matUCStSt, allUCang, onlysign = True)
 matUCStSt = np.reshape(matUCStSt, (posStSt, numUC))
 
-allDesigns['StableStateAll'] = countStableStates(allDesigns.iloc[:,5:5+numUC*4].values, 3, 'centroid',True)
+allDesigns['StableStateAll'] = countStableStates(allDesigns.iloc[:,5:5+numUC*4].values, 1, 'centroid',True)
 
 stst = np.unique(allDesigns['StableStateAll'])
 ststUC = np.unique(matUCStSt)
-############################################# TO make SS consistence between plots (its done manualy)
-# newSS = np.array([4,4,4,4,2,2,1,1,3,1,3,3])
-# invmask_copy = allDesigns['StableStateAll'].to_numpy()
-# newStSt = np.zeros(np.shape(invmask_copy))
-
-# for old,new in zip(stst, newSS):
-#     newStSt[invmask_copy == old] = new
-
-# allDesigns['StableStateAll'] = newStSt.astype(int)
-# delSS = np.array([5,6,7,8,9,10,11,12])
-# stst = np.delete(stst, delSS-1)
-#####################################################################################################
 
 #### Mask results out from the specified range of kappas
 # kappasrange = [10**-3,10**0]
@@ -382,9 +399,9 @@ ststUC = np.unique(matUCStSt)
 cmap2 = matl.cm.get_cmap('jet',np.size(stst))
 colors = cmap2(np.linspace(0,1,np.size(stst)))
 
-cmapUC = matl.cm.get_cmap('Set2',np.size(ststUC))
-# cmap2 = matl.cm.get_cmap('jet',np.size(stst))
-colorsUC = cmap2(np.linspace(0,1,np.size(ststUC)))
+# cmapUC = matl.cm.get_cmap('Set2',np.size(ststUC))
+cmapUC = matl.cm.get_cmap('jet',np.size(ststUC))
+colorsUC = cmapUC(np.linspace(0,1,np.size(ststUC)))
 
 
 #%%
