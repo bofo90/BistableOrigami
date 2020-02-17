@@ -327,11 +327,16 @@ for subdir in os.listdir(Folder_name):
          
     TotSimul = allData.shape[0]
     
+    
+    minFaceFlag = (allData.iloc[:,10+numUC:-(4*numUC)]<0.11).any(axis = 1)
+    allData['Flags'][minFaceFlag] = -5
+    
     print(allData['Flags'].value_counts())
     exfl = allData.Flags.values.reshape(TotSimul,1)
     flagmask = (exfl !=1) & (exfl !=2)
     flagmask = ~flagmask.any(axis= 1)
     allData['Mask'] = flagmask
+    allData = allData.iloc[flagmask,:]
     
     allData.reset_index(level=0, drop=True)
     
