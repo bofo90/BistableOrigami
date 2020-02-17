@@ -52,10 +52,10 @@ def orderAnglesMat(angles, ucsize, tessellation):
     nunitcells = np.prod(tessellation)
     simulations = np.size(angles,0)
     
-    finalAngles = np.reshape(np.sum(np.reshape(angles,(simulations*nunitcells,4)),axis = 1),(simulations,nunitcells))
-    mirror = (np.sum(np.sign(np.around(finalAngles, decimals = 4)),axis = 1) < 0)
-    
+    mirror = (np.sum(np.sign(np.around(angles, decimals = 4)),axis = 1) < 0)
     angles[mirror,:] = angles[mirror,:]*-1
+    
+    finalAngles = np.reshape(np.sum(np.reshape(angles,(simulations*nunitcells,4)),axis = 1),(simulations,nunitcells))
     
     orderedang = np.zeros(np.shape(angles))
     order = np.zeros([simulations, nunitcells]).astype(int)
@@ -73,8 +73,13 @@ def orderAnglesMat(angles, ucsize, tessellation):
         ststs = ststs.flatten()
         finalAngles[i,:] = ststs
         order[i,:] = locorder.flatten().astype(int)
+        
         for j in np.arange(nunitcells):
-            orderedang[i,j*4:j*4+4] = angles[i,order[i,j]*4:order[i,j]*4+4]
+            tempang = angles[i,order[i,j]*4:order[i,j]*4+4]
+            tempang = np.roll(tempang, rot)
+            if mir[1]> mir[2]:
+                tempang = tempang[[1,0,3,2]]
+            orderedang[i,j*4:j*4+4] = tempang
            
     return orderedang
         
