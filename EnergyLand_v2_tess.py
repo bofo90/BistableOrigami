@@ -505,7 +505,7 @@ for i in np.arange(np.size(restangles)):
     minCurv = np.floor(thisang['Curvature'].min())
     
 #    NiceGraph2D(ax1, r'$\kappa$', r'$E_\mathrm{tot}$')
-    NiceGraph2D(ax1, r'$\kappa$', r'$K$')#, mincoord=[np.log10(kappas[0]),-3], maxcoord=[np.log10(kappas[-1]),3], divisions=[5, 5], buffer=[0.1, 1])
+    NiceGraph2D(ax1, r'$\kappa$', r'$K$')
     
 # #    ax1.set_yticks(np.linspace(0, maxTotEn,5))
 # #    ax1.set_ylim([-0.005, maxTotEn+0.005])
@@ -514,22 +514,19 @@ for i in np.arange(np.size(restangles)):
 #     ax1.set_ylim(ylim[i])
 # #    ax1.yaxis.set_major_formatter(matl.ticker.FormatStrFormatter('%.1f'))
     ax1.set_xscale('log')
-#     ax1.set_xticks([0.001,0.01,0.1,1])
-#     ax1.set_xlim([0.0007,1.5])
+    ax1.set_xticks([0.001,0.01,0.1,1])
+    ax1.set_xlim([0.0007,1.5])
         
-    for j in stst:
-        thisstst = thisang[thisang.StableStateAll == j]
-#    plt.close('all')
-
-#        ax1.scatter(thisstst['kappa'], thisstst['TotalEnergy'], c = colors[thisstst['StableStateAll'].values.astype('int')-1], s = 10)
-        ax1.scatter(thisstst['kappa'], thisstst['Curvature'], c = colors[thisstst['StableStateAll']-1], s = 1)#,
-#                s = 5, marker = markers[i])#, linestyle = lines[i], lw = 2.5)
-
-#leg = ax1.legend(loc = 2, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False) 
-##           borderpad = 0.3, labelspacing = 0.1, handlelength = 0.4, handletextpad = 0.4)
-#plt.setp(leg.get_texts(), color='0.2')
-#leg.get_frame().set_linewidth(0.4)
-    
+#     for j in stst:
+#         thisstst = thisang[thisang.StableStateAll == j]
+# #        ax1.scatter(thisstst['kappa'], thisstst['TotalEnergy'], c = colors[thisstst['StableStateAll'].values.astype('int')-1], s = 10)
+#         ax1.scatter(thisstst['kappa'], thisstst['Curvature'], c = colors[thisstst['StableStateAll']-1], s = 10)
+        
+    for j in ststfUC:
+        thisstst = thisang[thisang.StableStateFromUC == j]
+#        ax1.scatter(thisstst['kappa'], thisstst['TotalEnergy'], c = colorsfUC[thisstst['StableStateFromUC'].values.astype('int')-1], s = 10)
+        ax1.scatter(thisstst['kappa'], thisstst['Curvature'], c = colorsfUC[thisstst['StableStateFromUC']-1], s = 10)
+ 
     fig1.show()
 #    fig1.savefig(Folder_name + '/Images/Energy_Restang_' + str(i.astype(float))+'.pdf', transparent = True)
 #    fig1.savefig(Folder_name + '/Images/Energy_Restang_' + str(i.astype(float))+ '.png', transparent = True)
@@ -549,11 +546,17 @@ markers = np.array(['o', 'v', '^', '<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 
 # for i in ststUC:
 #     ax3.scatter(-400,-400,-400, c = [colorsUC[i-1]], label = i)
 
-for i, j in zip(np.arange(numUC), markers):
+# for i, j in zip(np.arange(numUC), markers):
+#     ax3.scatter(allUCang[i::numUC,0],allUCang[i::numUC,1],allUCang[i::numUC,2], 
+#                 c = colors[allDesigns['StableStateAll'].values-1], marker = j)
+# for i in stst:
+#     ax3.scatter(-400,-400,-400, c = [colors[i-1]], label = i)
+    
+for i in np.arange(numUC):
     ax3.scatter(allUCang[i::numUC,0],allUCang[i::numUC,1],allUCang[i::numUC,2], 
-                c = colors[allDesigns['StableStateAll'].values-1], marker = j)
-for i in stst:
-    ax3.scatter(-400,-400,-400, c = [colors[i-1]], label = i)
+                c = colorsfUC[allDesigns['StableStateFromUC'].values-1])
+for i in ststfUC:
+    ax3.scatter(-400,-400,-400, c = [colorsfUC[i-1]], label = i)
 
 plt.legend()
 
