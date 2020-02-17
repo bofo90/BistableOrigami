@@ -516,19 +516,23 @@ for i in np.arange(np.size(restangles)):
 #     fig1.savefig(Folder_name + '/Images/Restang_' + str(restangles[i].astype(float))+ '.png', transparent = True)
 
 #%%
-fig3 = plt.figure(figsize=(cm2inch(17.8), cm2inch(7)))
+fig3 = plt.figure(figsize=(cm2inch(10), cm2inch(7)))
 ax3 = plt.subplot(111,projection='3d')
 ax3.set_xlim([-np.pi,np.pi])
 ax3.set_ylim([-np.pi,np.pi])
 ax3.set_zlim([-np.pi,np.pi])
+
+markers = np.array(['o', 'v', '^', '<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 'd', 'P', 'X'])
     
-ststmatforUC = np.array([allDesigns['StableStateAll'].values,allDesigns['StableStateAll'].values]).flatten('F')
+# ax3.scatter(allUCang[:,0],allUCang[:,1],allUCang[:,2], c = colorsUC[matUCStSt.flatten()-1])
+# for i in ststUC:
+#     ax3.scatter(-400,-400,-400, c = [colorsUC[i-1]], label = i)
 
-# ax3.scatter(allUCang[:,3],allUCang[:,1],allUCang[:,2], c = colorsUC[matUCStSt.flatten()-1])
-ax3.scatter(allUCang[:,3],allUCang[:,1],allUCang[:,2], c = colors[ststmatforUC.flatten()-1])
-
-for i in ststUC:
-    ax3.scatter(-400,-400,-400, c = [colorsUC[i-1]], label = i)
+for i, j in zip(np.arange(numUC), markers):
+    ax3.scatter(allUCang[i::numUC,0],allUCang[i::numUC,1],allUCang[i::numUC,2], 
+                c = colors[allDesigns['StableStateAll'].values-1], marker = j)
+for i in stst:
+    ax3.scatter(-400,-400,-400, c = [colors[i-1]], label = i)
 
 plt.legend()
 
