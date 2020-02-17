@@ -30,7 +30,7 @@ def orderAngles(angles, ucsize, simulations):
     for sim in np.arange(simulations):
         sym = ''
         ver = np.array(angles[sim,:])
-        if np.sum(np.sign(np.around(ver, decimals = 4))) < 0: ### sort to have mayority positive angles
+        if np.sum(np.sign(np.around(ver, decimals = 0))) < 0: ### sort to have mayority positive angles
             # ver = ver[::-1]*(-1)
             ver = ver*(-1)
             sym = sym + 'm'
@@ -44,9 +44,9 @@ def orderAngles(angles, ucsize, simulations):
         sym = sym +'_'
         symetries[sim] = sym
         
+    # return [angles, symetries]    
     return [finalAngles, symetries]
-    # return [angles, symetries]
-
+    
 def orderAnglesMat(angles, ucsize, tessellation):
     
     nunitcells = np.prod(tessellation)
@@ -81,8 +81,7 @@ def orderAnglesMat(angles, ucsize, tessellation):
                 tempang = tempang[[1,0,3,2]]
             orderedang[i,j*4:j*4+4] = tempang
            
-    return orderedang
-        
+    return orderedang 
         
 def countStableStates(finalAngles, distance, method, plot = False):
     
@@ -108,7 +107,7 @@ def countStableStates(finalAngles, distance, method, plot = False):
             leaf_rotation=90.,  # rotates the x axis labels
             leaf_font_size=8.,  # font size for the x axis labels
             show_contracted=True,
-        )
+            )
         plt.show()
 
     
@@ -165,8 +164,24 @@ def standarizeStableStates(matUCStSt, allUCang, onlysign = False):
         
     return newStSt.astype(int)
 
-def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.NaN, np.NaN], divisions = [np.NaN, np.NaN],
-                buffer = [0.0, 0.0, 0.0]):
+def extractStableStates(matUCStSt):
+    
+    simulations = np.size(matUCStSt,0)
+    
+    tempStSt = np.arange(simulations)
+    
+    for sim in np.arange(simulations):
+        unstst = np.unique(matUCStSt[sim,:])
+        colstst = np.array2string(unstst, separator='')
+        tempStSt[sim] = np.int(colstst[1:-1])
+        
+    [i, newSS] = np.unique(tempStSt, return_inverse=True)
+    newSS = newSS+1
+    
+    return newSS, tempStSt
+
+def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.NaN, np.NaN], divisions = [np.NaN, np.NaN],buffer = [0.0, 0.0, 0.0]):
+    
     gray = '0.2'
     matl.rcParams.update({'font.size': 9})
 
@@ -205,8 +220,8 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
         
     return
 
-def NiceGraph2Dlog(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.NaN, np.NaN], divisions = [np.NaN, np.NaN],
-                buffer = [0.0, 0.0, 0.0]):
+def NiceGraph2Dlog(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.NaN, np.NaN], divisions = [np.NaN, np.NaN],buffer = [0.0, 0.0, 0.0]):
+    
     gray = '0.2'
     matl.rcParams.update({'font.size': 9})
 
@@ -386,13 +401,15 @@ restangles = allDesigns.restang.drop_duplicates().values
 posStSt = np.shape(allDesigns)[0]
 allUCang = np.resize(allDesigns.iloc[:,5:5+numUC*4].values,(posStSt*numUC,4))
 [allUCang,sym] = orderAngles(allUCang, 4, posStSt*numUC)
-matUCStSt = countStableStates(allUCang, 0.7, 'centroid')
-matUCStSt = standarizeStableStates(matUCStSt, allUCang, onlysign = True)
+matUCStSt = countStableStates(allUCang, 0.7, 'centroid',True)
+matUCStSt = standarizeStableStates(matUCStSt, allUCang, onlysign = False)
 matUCStSt = np.reshape(matUCStSt, (posStSt, numUC))
 
-allDesigns['StableStateAll'] = countStableStates(allDesigns.iloc[:,5:5+numUC*4].values, 1, 'centroid',True)
+allDesigns['StableStateAll'] = countStableStates(allDesigns.iloc[:,5:5+numUC*4].values, 1, 'centroid')
+[allDesigns['StableStateFromUC'],allDesigns['StableStatefUCName']] = extractStableStates(matUCStSt)
 
 stst = np.unique(allDesigns['StableStateAll'])
+ststfUC = np.unique(allDesigns['StableStateFromUC'])
 ststUC = np.unique(matUCStSt)
 
 #### Mask results out from the specified range of kappas
@@ -403,6 +420,10 @@ ststUC = np.unique(matUCStSt)
 # cmap2 = matl.cm.get_cmap('Set2',np.size(stst))
 cmap2 = matl.cm.get_cmap('jet',np.size(stst))
 colors = cmap2(np.linspace(0,1,np.size(stst)))
+
+cmapfUC = matl.cm.get_cmap('Set2',np.size(ststfUC))
+# cmapfUC = matl.cm.get_cmap('jet',np.size(ststfUC))
+colorsfUC = cmapfUC(np.linspace(0,1,np.size(ststfUC)))
 
 # cmapUC = matl.cm.get_cmap('Set2',np.size(ststUC))
 cmapUC = matl.cm.get_cmap('jet',np.size(ststUC))
