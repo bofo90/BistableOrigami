@@ -33,12 +33,14 @@ def orderAngles(angles, steps, simulations):
     for hinge in np.arange(simulations):
         sym = ''
         if np.sum(np.sign(np.around(angles[hinge,:], decimals = 4))) < 0: ### sort to have mayority positive angles
-            angles[hinge,:] = angles[hinge,::-1]*(-1)
+            # angles[hinge,:] = angles[hinge,::-1]*(-1)
+            angles[hinge,:] = angles[hinge,:]*(-1)
             sym = sym + 'm'
             
-        angles[hinge,:]= np.roll(angles[hinge,:],np.argmin(angles[hinge,:]))         ### sort from smallest to highest angles
-        if np.argmin(angles[hinge,:]) != 0:
-            sym = sym+'r'+ str(np.argmin(angles[hinge,:]))
+        rolnum = 4-np.argmin(angles[hinge,:])
+        angles[hinge,:]= np.roll(angles[hinge,:],rolnum)         ### sort from smallest to highest angles
+        if rolnum != 4:
+            sym = sym+'r'+ str(rolnum)
             
         finalAngles[hinge,:] = angles[hinge,:]
         symetries[hinge] = sym
