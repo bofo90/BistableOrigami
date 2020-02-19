@@ -9,6 +9,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as matl
+from matplotlib.colors import from_levels_and_colors
 from mpl_toolkits import mplot3d
 import configparser
 import os.path
@@ -532,6 +533,28 @@ for i in np.arange(np.size(restangles)):
 #    fig1.savefig(Folder_name + '/Images/Energy_Restang_' + str(i.astype(float))+ '.png', transparent = True)
     fig1.savefig(Folder_name + '/Images/Restang_' + str(restangles[i].astype(float))+'.pdf', transparent = True)
     fig1.savefig(Folder_name + '/Images/Restang_' + str(restangles[i].astype(float))+ '.png', transparent = True)
+
+
+cmapfig, normfig = from_levels_and_colors(np.arange(np.size(ststfUC)+1),matl.cm.Set3(np.linspace(0, 1,np.size(ststfUC))))
+
+fig1b = plt.figure(figsize=(cm2inch(8.8), cm2inch(1.5)))
+fig1b.subplots_adjust(top=0.884,
+bottom=0.116,
+left=0.039,
+right=0.961)
+ax1b = plt.subplot(111)
+cbar2 = plt.colorbar(matl.cm.ScalarMappable(norm=normfig, cmap=cmapfig), ax = ax1b, fraction=0.99, pad=0.01, orientation='horizontal')#, extend = 'max'
+cbar2.set_ticks(ststfUC-0.5)
+cbar2.ax.set_xticklabels(ststfUCname.astype(str))
+cbar2.set_label('Stable State', fontsize = 9, color = '0.2',labelpad = 0)
+cbar2.ax.tick_params(colors='0.2', pad=2)
+cbar2.outline.set_edgecolor('0.2')
+cbar2.outline.set_linewidth(0.4)
+ax1b.remove()   
+
+fig1b.savefig(Folder_name + '/Images/Restang_CB.pdf', transparent = True)
+fig1b.savefig(Folder_name + '/Images/Restang_CB.png', transparent = True)
+
 
 #%%
 fig3 = plt.figure(figsize=(cm2inch(10), cm2inch(7)))
