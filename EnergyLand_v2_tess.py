@@ -282,7 +282,7 @@ plt.close('all')
 kappas = np.logspace(-3,1,81)
 #kappas = np.logspace(-3,1,13)#23
 
-Folder_name = "Results/Tessellation4/25/2CFF/09-Jan-2020_2_1_"
+Folder_name = "Results/Tessellation4/25/2CFF/09-Jan-2020_5_5_"
 file_name1 = "/EnergyData.csv" 
 file_name2 = "/Hinges.csv"
 file_name3 = "/PosStad.csv"
@@ -331,7 +331,7 @@ for subdir in os.listdir(Folder_name):
         # [dataAnglesOrd, dataSym] = orderAngles(dataAngles, 4, simLen)
         dataAnglesOrd = orderAnglesMat(dataAngles, 4, tessellation)
         # dataStSt = countStableStates(np.resize(dataAnglesOrd,(simLen*numUC,4)), 0.8, 'centroid',True)
-        dataEnergy['StableStates'] = countStableStates(dataAnglesOrd, 0.6, 'centroid')
+        # dataEnergy['StableStates'] = countStableStates(dataAnglesOrd, 0.6, 'centroid')
         # dataStSt = np.resize(dataStSt,(simLen,numUC))
                 
         allAngles = np.concatenate((dataCurv,dataLen,dataAnglesOrd),1)
@@ -344,7 +344,7 @@ for subdir in os.listdir(Folder_name):
     TotSimul = allData.shape[0]
     
     
-    minFaceFlag = (allData.iloc[:,10+numUC:-(4*numUC)]<=0.11).any(axis = 1)
+    minFaceFlag = (allData.iloc[:,9+numUC:-(4*numUC)]<=0.11).any(axis = 1)
     allData['Flags'][minFaceFlag] = -5
     
     print(allData['Flags'].value_counts())
@@ -356,6 +356,8 @@ for subdir in os.listdir(Folder_name):
     
     allData.reset_index(level=0, drop=True)
     
+    allData['StableStates'] = countStableStates(allData.iloc[:,-(1+4*numUC):-1], 0.6, 'centroid')
+    
     # [allData['StableStates'], angord] = getStableStatesMat(allData.iloc[:,-1-numUC:-1].to_numpy(), tessellation)
     # orderedang = np.zeros([TotSimul,numUC*4])
     # for i in np.arange(TotSimul):
@@ -364,10 +366,10 @@ for subdir in os.listdir(Folder_name):
     # allData.iloc[:,-(2+5*numUC):-(2+numUC)] = orderedang
             
             
-    allData['Curvature'] = allData.iloc[:,10:10+numUC].mean(axis = 1)
-    allData['minFace'] = allData.iloc[:,10+numUC:-(2+4*numUC)].min(axis= 1)
+    allData['Curvature'] = allData.iloc[:,9:9+numUC].mean(axis = 1)
+    allData['minFace'] = allData.iloc[:,9+numUC:-(3+4*numUC)].min(axis= 1)
     
-    colloc = np.concatenate(([1,4,7],np.arange(-(3+4*numUC),-3),[-2,-1]))
+    colloc = np.concatenate(([1,4,7],np.arange(-(4+4*numUC),-4),[-2,-1]))
     kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates').apply(lambda _df: _df.iloc[:,colloc].mean()))
     
     # kappasStSt['amountSym'] = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['Symmetry']].nunique())
