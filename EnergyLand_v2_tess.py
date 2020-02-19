@@ -410,7 +410,8 @@ allDesigns['StableStateAll'] = countStableStates(allDesigns.iloc[:,5:5+numUC*4].
 [allDesigns['StableStateFromUC'],allDesigns['StableStatefUCName']] = extractStableStates(matUCStSt)
 
 stst = np.unique(allDesigns['StableStateAll'])
-ststfUC = np.unique(allDesigns['StableStateFromUC'])
+[ststfUC, nameloc] = np.unique(allDesigns['StableStateFromUC'], return_index = True)
+ststfUCname = allDesigns['StableStatefUCName'][nameloc]
 ststUC = np.unique(matUCStSt)
 
 #### Mask results out from the specified range of kappas
@@ -422,7 +423,7 @@ ststUC = np.unique(matUCStSt)
 cmap2 = matl.cm.get_cmap('jet',np.size(stst))
 colors = cmap2(np.linspace(0,1,np.size(stst)))
 
-cmapfUC = matl.cm.get_cmap('Set2',np.size(ststfUC))
+cmapfUC = matl.cm.get_cmap('Set3',np.size(ststfUC))
 # cmapfUC = matl.cm.get_cmap('jet',np.size(ststfUC))
 colorsfUC = cmapfUC(np.linspace(0,1,np.size(ststfUC)))
 
@@ -565,9 +566,9 @@ ax3.set_zlim([-np.pi,np.pi])
 
 markers = np.array(['o', 'v', '^', '<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 'd', 'P', 'X'])
     
-# ax3.scatter(allUCang[:,0],allUCang[:,1],allUCang[:,2], c = colorsUC[matUCStSt.flatten()-1])
-# for i in ststUC:
-#     ax3.scatter(-400,-400,-400, c = [colorsUC[i-1]], label = i)
+ax3.scatter(allUCang[:,0],allUCang[:,1],allUCang[:,2], c = colorsUC[matUCStSt.flatten()-1])
+for i in ststUC:
+    ax3.scatter(-400,-400,-400, c = [colorsUC[i-1]], label = i)
 
 # for i, j in zip(np.arange(numUC), markers):
 #     ax3.scatter(allUCang[i::numUC,0],allUCang[i::numUC,1],allUCang[i::numUC,2], 
@@ -575,14 +576,14 @@ markers = np.array(['o', 'v', '^', '<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 
 # for i in stst:
 #     ax3.scatter(-400,-400,-400, c = [colors[i-1]], label = i)
     
-for i in np.arange(numUC):
-    ax3.scatter(allUCang[i::numUC,0],allUCang[i::numUC,1],allUCang[i::numUC,2], 
-                c = colorsfUC[allDesigns['StableStateFromUC'].values-1])
-for i in ststfUC:
-    ax3.scatter(-400,-400,-400, c = [colorsfUC[i-1]], label = i)
+# for i in np.arange(numUC):
+#     ax3.scatter(allUCang[i::numUC,0],allUCang[i::numUC,1],allUCang[i::numUC,2], 
+#                 c = colorsfUC[allDesigns['StableStateFromUC'].values-1])
+# for i in ststfUC:
+#     ax3.scatter(-400,-400,-400, c = [colorsfUC[i-1]], label = i)
 
 plt.legend()
 
 #%%
-allDesigns[['kappa','Hinge Number','StableStateAll','restang','Curvature']].to_csv(Folder_name + '/Images/InfoforAllImages.csv', index = False)
-allDesigns.groupby('StableStateAll').apply(lambda df: df.sample(1, random_state = 0))[['kappa','Hinge Number','StableStateAll','restang','Curvature']].to_csv(Folder_name + '/Images/InfoforStableStatesImages.csv', index = False)
+allDesigns[['kappa','Hinge Number','StableStatefUCName','restang','Curvature']].to_csv(Folder_name + '/Images/InfoforAllImages.csv', index = False)
+allDesigns.groupby('StableStateAll').apply(lambda df: df.sample(1, random_state = 0))[['kappa','Hinge Number','StableStatefUCName','restang','Curvature']].to_csv(Folder_name + '/Images/InfoforStableStatesImages.csv', index = False)
