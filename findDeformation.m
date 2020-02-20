@@ -43,7 +43,7 @@ for a = ang
             opt.file = strcat(pwd,'/Results/',opt.template,num2str(opt.numVert),'/',opt.vertexType,file,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge));
         end
         
-        fprintf('Start folding...\n');
+        fprintf('Start folding: %f\t %f\n', a, k);
         metadataFile(opt, extrudedUnitCell);
         if strcmp(opt.periodic, 'on')
             opt.Khinge = ones(size(extrudedUnitCell.nodeHingeEx,1),1)*opt.Khinge;

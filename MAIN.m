@@ -13,8 +13,8 @@ tic
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-opt=initOpt('template','Tessellation','numVert', 4,'vertexType', "2CFF",...
-            'tessellationType', '25','xrep', 1, 'yrep', 1, 'periodic', 'on',...
+opt=initOpt('template','SingleVertex','numVert', 4,'vertexType', "2CFF",...
+            'tessellationType', '25','xrep', 5, 'yrep', 5, 'periodic', 'off',...
             'restang', 2.356, 'angDesign', [0.00 90 180.00 270]*pi/180,...
             'analysis','result','analysisType','randomPert',...
             'numIterations', 1000,'RandstDev', 0.2,...
@@ -34,7 +34,7 @@ opt.options=optimoptions('fmincon','GradConstr','off','GradObj','off',...
                          'Algorithm', opt.folAlgor, 'OutputFcn',@outfun,...               
                          'RelLineSrchBnd', 0.01, 'RelLineSrchBndDuration', 5000);
                      
-opt.file = '/11-Feb-2020_';
+opt.file = '/20-Feb-2020_';
 switch opt.analysis
     case{'info'}
         [extrudedUnitCell,opt]=obtainOrigami(opt);
@@ -43,10 +43,10 @@ switch opt.analysis
         %when using des = 'non' the opt.angDes need to be specified
         %possible des ["2C", "GFF", "2OFF","3S", "2OM1", "2OM2", "2NM1", "2NM2", "2OL", "2NL", "2OS", "2NS", "Z1", "Z2", "Y1", "Y2", "X2"];
         des = opt.vertexType;
-        ang = linspace(0,pi,5);
-        ang = ang(2:4);
-        kap = logspace(-3,0,4); %opt.Khinge;
-        xrep = [1,2];%opt.xrep; %only used when having tessellations
+        ang = linspace(0,pi,20);
+        ang = ang(2:end-1);
+        kap = logspace(-1,1,3); %opt.Khinge;
+        xrep = opt.xrep; %only used when having tessellations
         yrep = opt.yrep; %only used when having tessellations
         findDeformation(opt, des, xrep, yrep, ang, kap)
     case{'savedata'}
