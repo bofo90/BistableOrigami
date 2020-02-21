@@ -14,6 +14,7 @@ from mpl_toolkits import mplot3d
 import configparser
 import os.path
 import copy
+import ReadAndAnalyze as raa
 matl.rcParams['pdf.fonttype'] = 42
 matl.rcParams['ps.fonttype'] = 42
 matl.rcParams['font.family'] = 'sans-serif'
@@ -23,163 +24,6 @@ matl.rcParams['mathtext.fontset'] = 'cm'
 
 def cm2inch(value):
     return value/2.54
-
-def orderAngles(angles, ucsize, simulations):
-    
-    symetries = ["" for x in range(simulations)]
-    finalAngles = np.zeros((simulations,np.size(angles,1)))
-    for sim in np.arange(simulations):
-        sym = ''
-        ver = np.array(angles[sim,:])
-        if np.sum(np.sign(np.around(ver, decimals = 0))) < 0: ### sort to have mayority positive angles
-            # ver = ver[::-1]*(-1)
-            ver = ver*(-1)
-            sym = sym + 'm'
-            
-        rolnum = 4-np.argmin(ver)
-        ver= np.roll(ver,rolnum)         ### sort from smallest to highest angles
-        if rolnum != 4:
-            sym = sym+'r'+ str(rolnum)
-            
-        finalAngles[sim,:] = ver
-        sym = sym +'_'
-        symetries[sim] = sym
-        
-    # return [angles, symetries]    
-    return [finalAngles, symetries]
-    
-def orderAnglesMat(angles, ucsize, tessellation):
-    
-    nunitcells = np.prod(tessellation)
-    simulations = np.size(angles,0)
-    
-    mirror = (np.sum(np.sign(np.around(angles, decimals = 4)),axis = 1) < 0)
-    angles[mirror,:] = angles[mirror,:]*-1
-    
-    finalAngles = np.reshape(np.sum(np.reshape(angles,(simulations*nunitcells,4)),axis = 1),(simulations,nunitcells))
-    
-    orderedang = np.zeros(np.shape(angles))
-    order = np.zeros([simulations, nunitcells]).astype(int)
-    for i in np.arange(simulations):
-        locorder = np.reshape(np.arange(nunitcells),tessellation)
-        ststs = finalAngles[i,:]
-        ststs = np.reshape(ststs, tessellation)
-        rot = np.argmin([ststs[0,0], ststs[0,-1],ststs[-1,-1],ststs[-1,0]])
-        ststs = np.rot90(ststs,rot)
-        locorder = np.rot90(locorder,rot)
-        mir = np.argsort([ststs[0,0], ststs[0,-1],ststs[-1,-1],ststs[-1,0]])
-        if mir[1]> mir[2]:
-            ststs = ststs.transpose()
-            locorder = locorder.transpose()
-        ststs = ststs.flatten()
-        finalAngles[i,:] = ststs
-        order[i,:] = locorder.flatten().astype(int)
-        
-        for j in np.arange(nunitcells):
-            tempang = angles[i,order[i,j]*4:order[i,j]*4+4]
-            tempang = np.roll(tempang, rot)
-            if mir[1]> mir[2]:
-                tempang = tempang[[1,0,3,2]]
-            orderedang[i,j*4:j*4+4] = tempang
-           
-    return orderedang 
-        
-def countStableStates(finalAngles, distance, method, plot = False):
-    
-    import scipy.cluster.hierarchy as hierarch
-    from scipy.spatial.distance import pdist
-                                       
-    Z = hierarch.linkage(finalAngles, method)
-    inverse = hierarch.fcluster(Z, distance, criterion='distance')
-    c = hierarch.cophenet(Z, pdist(finalAngles))
-
-    if plot:
-        
-        print('this is the cophenet of the hierarchical linkage', c[0])
-        
-        plt.figure(0,figsize=(10, 5))
-        plt.title('Hierarchical Clustering Dendrogram')
-        plt.xlabel('sample index')
-        plt.ylabel('distance')
-        hierarch.dendrogram(
-            Z,
-            truncate_mode='lastp',  # show only the last p merged clusters
-            p=50,  # show only the last p merged clusters
-            leaf_rotation=90.,  # rotates the x axis labels
-            leaf_font_size=8.,  # font size for the x axis labels
-            show_contracted=True,
-            )
-        plt.show()
-
-    
-    return inverse
-
-def getStableStatesMat(data, tessellation):
-    
-    numsim = np.size(data,0)
-    stst = np.zeros(numsim)
-    order = np.zeros([numsim, np.prod(tessellation)]).astype(int)
-    
-    for i in np.arange(numsim):
-        locorder = np.reshape(np.arange(np.prod(tessellation)),tessellation)
-        ststs = data[i,:]
-        ststs = np.reshape(ststs, tessellation)
-        rot = np.argmin([ststs[0,0], ststs[0,-1],ststs[-1,-1],ststs[-1,0]])
-        ststs = np.rot90(ststs,rot)
-        locorder = np.rot90(locorder,rot)
-        mir = np.argsort([ststs[0,0], ststs[0,-1],ststs[-1,-1],ststs[-1,0]])
-        if mir[1]> mir[2]:
-            ststs = ststs.transpose()
-            locorder = locorder.transpose()
-        ststs = ststs.flatten().astype(int)
-        colstst = np.array2string(ststs, separator='')
-        stst[i] = colstst[1:-1]
-        order[i,:] = locorder.flatten().astype(int)
-        
-    return stst, order
-
-def standarizeStableStates(matUCStSt, allUCang, onlysign = False):
-    
-    standstst = np.round(np.array([[0,np.sqrt(2),0,np.sqrt(2)],[1,1,1,1],[-1,1,-1,1],[-1,1,1,1]])/2,1)
-    
-    ststUC = np.unique(matUCStSt)
-    if onlysign:
-        allUCang = np.sign(np.round(allUCang, 1))
-    magangvec = np.sqrt(np.sum(allUCang*allUCang, 1))
-    angvecunit = np.round(allUCang / magangvec[:,None],1)
-    
-    matUCstandStSt = np.zeros((np.size(allUCang,0),4))
-    for i in np.arange(np.size(standstst,0)):
-        ststloc = (angvecunit == standstst[i,:]).all(axis=1)
-        oldStSt = np.unique(matUCStSt[ststloc])
-        if (ststUC[oldStSt-1]<0).any():
-            print("\n\nError: double standarizing!!!!! you need to check the standarization of stable states!!!\n\n")
-        ststUC[oldStSt-1] = -i-1
-    
-    oldSS = np.unique(matUCStSt)
-    [i, notdelSS, newSS] = np.unique(ststUC, return_index=True, return_inverse=True)
-    newSS = newSS+1
-    newStSt = np.zeros(np.shape(matUCStSt))
-    for old,new in zip(oldSS, newSS):
-        newStSt[matUCStSt == old] = new
-        
-    return newStSt.astype(int)
-
-def extractStableStates(matUCStSt):
-    
-    simulations = np.size(matUCStSt,0)
-    
-    tempStSt = np.arange(simulations)
-    
-    for sim in np.arange(simulations):
-        unstst = np.unique(matUCStSt[sim,:])
-        colstst = np.array2string(unstst, separator='')
-        tempStSt[sim] = np.int(colstst[1:-1])
-        
-    [i, newSS] = np.unique(tempStSt, return_inverse=True)
-    newSS = newSS+1
-    
-    return newSS, tempStSt
 
 def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.NaN, np.NaN], divisions = [np.NaN, np.NaN],buffer = [0.0, 0.0, 0.0]):
     
@@ -264,32 +108,12 @@ def NiceGraph2Dlog(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [
     return
 
 #%%
-def ReadMetadata(file):
-    
-    if os.path.isfile(file):
-        metadata = configparser.RawConfigParser(allow_no_value=True)
-        metadata.read(file)
-    
-        restang = float(metadata.get('options','restang'))
-        designang = np.array(metadata.get('options','angDesign').split(),dtype = float)
-    else:
-        raise FileNotFoundError('No metafile found at the given directory. Changes to the script to put manually the variables are needed\n') 
-
-    return restang, designang
-
 plt.close('all')
 
-kappas = np.logspace(-3,1,81)
-#kappas = np.logspace(-3,1,13)#23
-
-Folder_name = "Results/Tessellation4/25/2CFF/09-Jan-2020_2_1_"
-file_name1 = "/EnergyData.csv" 
-file_name2 = "/Hinges.csv"
-file_name3 = "/PosStad.csv"
-file_name4 = "/Angles.csv"
+Folder_name = "Results/Tessellation4/25/2CFF/09-Jan-2020_5_5_"
 
 allDesigns = pd.DataFrame()
-allKappasAnalysis = pd.DataFrame()
+# allKappasAnalysis = pd.DataFrame()
 
 if not os.path.isdir(Folder_name + '/Images/'):
     os.mkdir(Folder_name + '/Images/')
@@ -300,114 +124,43 @@ numUC = np.prod(tessellation)
 for subdir in os.listdir(Folder_name):
     if subdir == 'Images':
         continue    
-    
-    allData = pd.DataFrame()
-    
-    plt.close('all')
-    
+        
     for subdir2 in os.listdir(Folder_name+'/'+subdir):
-
         folder_name = Folder_name+'/'+subdir+'/'+subdir2+'/energy'
-    
-        dataEnergy = pd.read_csv(folder_name+file_name1)
-        simLen = np.size(dataEnergy['Hinge Number'])
         
-        dataEnergy['TotalEnergy'] = dataEnergy['EdgeEnergy']+dataEnergy['DiagonalEnergy']+dataEnergy['HingeEnergy']
-        dataEnergy['HingeEnergy'] = dataEnergy['HingeEnergy']
-        dataEnergy['kappa'] = np.ones(simLen)*np.float(subdir2.split('_')[1])  ### '/4' due to error in the computation of the energy
+        ThisData, simLen = raa.ReadFile(folder_name)
+        ThisData = raa.maskBadResults(ThisData)  
         
-        dataCurv = np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', dtype = np.float64)
-        dataCurv = np.delete(dataCurv, 0, 1)
-        # dataEnergy['Curvature'] = dataHinges['Curvature']
+        ThisData.iloc[:,-numUC*4::] = raa.orderAnglesMat(ThisData.iloc[:,-numUC*4::].to_numpy(), 4, tessellation)
+        ThisData['StableStates'] = raa.countStableStates(ThisData.iloc[:,-numUC*4::], 0.6, 'centroid')
         
-        dataLen = np.loadtxt(folder_name+file_name3,skiprows=1, delimiter = ',', dtype = np.float64)
-        dataLen = np.delete(dataLen, 0, 1)
-        # dataPos = dataPos.reset_index()
-        # dataPos = dataPos.rename(columns={'level_0':'Hinge Number', 'level_1':'face1', 'level_2':'face2', 'Hinge Number':'face3', 'Face Areas':'face4'})
-        # dataEnergy[['face1','face2','face3','face4']] = dataPos[['face1','face2','face3','face4']]
-    
-        dataAngles = np.loadtxt(folder_name+file_name4,skiprows=1, delimiter = ',', dtype = np.float64)
-        dataAngles = np.delete(dataAngles, 0, 1)
-        # [dataAnglesOrd, dataSym] = orderAngles(dataAngles, 4, simLen)
-        dataAnglesOrd = orderAnglesMat(dataAngles, 4, tessellation)
-        # dataStSt = countStableStates(np.resize(dataAnglesOrd,(simLen*numUC,4)), 0.8, 'centroid',True)
-        dataEnergy['StableStates'] = countStableStates(dataAnglesOrd, 0.6, 'centroid')
-        # dataStSt = np.resize(dataStSt,(simLen,numUC))
-                
-        allAngles = np.concatenate((dataCurv,dataLen,dataAnglesOrd),1)
-        allAngles = pd.DataFrame(allAngles)
-        dataEnergy = pd.concat([dataEnergy, allAngles], axis=1, sort=False)
-        allData = allData.append(dataEnergy)
+        selData = raa.makeSelectionPerStSt(ThisData, simLen*0.05)
         
-    restang = np.float(subdir.split('_')[1])
-         
-    TotSimul = allData.shape[0]
-    
-    
-    minFaceFlag = (allData.iloc[:,10+numUC:-(4*numUC)]<=0.11).any(axis = 1)
-    allData['Flags'][minFaceFlag] = -5
-    
-    print(allData['Flags'].value_counts())
-    exfl = allData.Flags.values.reshape(TotSimul,1)
-    flagmask = (exfl !=1) & (exfl !=2) &(exfl !=0)
-    flagmask = ~flagmask.any(axis= 1)
-    allData['Mask'] = flagmask
-    allData = allData.iloc[flagmask,:]
-    
-    allData.reset_index(level=0, drop=True)
-    
-    # [allData['StableStates'], angord] = getStableStatesMat(allData.iloc[:,-1-numUC:-1].to_numpy(), tessellation)
-    # orderedang = np.zeros([TotSimul,numUC*4])
-    # for i in np.arange(TotSimul):
-    #     for j in np.arange(numUC):
-    #         orderedang[i,j*4:j*4+4] = allData.iloc[i,-(2+5*numUC)+angord[i,j]*4:-(2+5*numUC)+angord[i,j]*4+4]
-    # allData.iloc[:,-(2+5*numUC):-(2+numUC)] = orderedang
-            
-            
-    allData['Curvature'] = allData.iloc[:,10:10+numUC].mean(axis = 1)
-    allData['minFace'] = allData.iloc[:,10+numUC:-(2+4*numUC)].min(axis= 1)
-    
-    colloc = np.concatenate(([1,4,7],np.arange(-(3+4*numUC),-3),[-2,-1]))
-    kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates').apply(lambda _df: _df.iloc[:,colloc].mean()))
-    
-    # kappasStSt['amountSym'] = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['Symmetry']].nunique())
-    # kappasStSt['Symetries'] = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates').apply(lambda x: str(np.sort(x.Symmetry.unique()))))
-    
-    kappasStSt['Hinge Number'] =  allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['Hinge Number']].apply(lambda _df2: _df2.sample(1, random_state = 2))).to_numpy()
-  
-    kappasStSt['restang'] = np.ones(np.shape(kappasStSt)[0])*restang
-    
-    ####Only select stable states that have more than 10% appearance in each simulation
-    kappasStSt['amountStSt'] = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['DiagonalEnergy']].count())
-    more10percent = kappasStSt['amountStSt']>simLen*0.05
-    kappasStSt = kappasStSt[more10percent]
-    
-    kappasStSt = kappasStSt.reset_index(level=0)
-    kappasStSt = kappasStSt.reset_index(level=0)#, drop=True)
-#    kappasStSt['StableState'] = countStableStates(kappasStSt[['ang1','ang2','ang3','ang4']],1, 'centroid')
-#    kappasStSt['StableState'] = countStableStates(kappasStSt[['ang1','ang2','ang3']],0.45, 'centroid')
+        allDesigns = allDesigns.append(selData)
+        
+       
+    # kappasnumStSt = kappasStSt.groupby('kappa')['StableStates'].nunique()
+    # kappasnumStSt = kappasnumStSt.reset_index()
+    # kappasnumStSt['restang'] = np.ones(np.shape(kappasnumStSt)[0])*restang
 
-    kappasnumStSt = kappasStSt.groupby('kappa')['StableStates'].nunique()
-    kappasnumStSt = kappasnumStSt.reset_index()
-    kappasnumStSt['restang'] = np.ones(np.shape(kappasnumStSt)[0])*restang
+    # allKappasAnalysis = allKappasAnalysis.append(kappasnumStSt)
 
-    allKappasAnalysis = allKappasAnalysis.append(kappasnumStSt)
-    allDesigns = allDesigns.append(kappasStSt)    
-      
 allDesigns = allDesigns.reset_index(level=0, drop =True)
+allDesigns = allDesigns.round(8)
 restangles = allDesigns.restang.drop_duplicates().values
+kappas = allDesigns.kappa.drop_duplicates().values
 
 
 #%%
 posStSt = np.shape(allDesigns)[0]
-allUCang = np.resize(allDesigns.iloc[:,5:5+numUC*4].values,(posStSt*numUC,4))
-[allUCang,sym] = orderAngles(allUCang, 4, posStSt*numUC)
-matUCStSt = countStableStates(allUCang, 0.7, 'centroid',True)
-matUCStSt = standarizeStableStates(matUCStSt, allUCang, onlysign = False)
+allUCang = np.resize(allDesigns.iloc[:,8:8+numUC*4].values,(posStSt*numUC,4))
+[allUCang,sym] = raa.orderAngles(allUCang, 4, posStSt*numUC)
+matUCStSt = raa.countStableStates(allUCang, 0.7, 'centroid',True)
+matUCStSt = raa.standarizeStableStates(matUCStSt, allUCang, onlysign = False)
 matUCStSt = np.reshape(matUCStSt, (posStSt, numUC))
 
-allDesigns['StableStateAll'] = countStableStates(allDesigns.iloc[:,5:5+numUC*4].values, 1, 'centroid')
-[allDesigns['StableStateFromUC'],allDesigns['StableStatefUCName']] = extractStableStates(matUCStSt)
+allDesigns['StableStateAll'] = raa.countStableStates(allDesigns.iloc[:,5:5+numUC*4].values, 1, 'centroid')
+[allDesigns['StableStateFromUC'],allDesigns['StableStatefUCName']] = raa.extractStableStates(matUCStSt)
 
 stst = np.unique(allDesigns['StableStateAll'])
 [ststfUC, nameloc] = np.unique(allDesigns['StableStateFromUC'], return_index = True)
