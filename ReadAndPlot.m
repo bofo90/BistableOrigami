@@ -37,14 +37,14 @@ elseif strcmp(opt.template,'SingleVertex')
 end
 [extrudedUnitCell,opt]=obtainOrigami(opt);
 
-angles = linspace(0,pi,5);
-for j = angles(2:4)
-    opt.restang = j;
+allFiles = dir(file);
+for j = 3:length(allFiles)
+    opt.restang = getParam(allFiles(j).name);
     extrudedUnitCell.theta = ones(size(extrudedUnitCell.theta,1),1)*opt.restang;
 
     allFiles2 = dir(strcat(file, sprintf('/RestAng_%.3f', opt.restang)));
     for k = 3:length(allFiles2)
-        opt.Khinge = getKappa(allFiles2(k).name);
+        opt.Khinge = getParam(allFiles2(k).name);
         opt.file = strcat(file,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge));
         temp = char(opt.file);
         fprintf(strcat('Saving data: ', temp(end-65:end), '\n'))
@@ -64,7 +64,7 @@ parsedName = strsplit(fileName(1:end), '_');
 x = str2double(parsedName{end-2});
 y = str2double(parsedName{end-1});
     
-function kappa = getKappa(fileName)
+function kappa = getParam(fileName)
 parsedName = strsplit(fileName(1:end), '_');
 kappa = str2double(parsedName{2});
 
