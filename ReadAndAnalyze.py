@@ -210,7 +210,6 @@ def standarizeStableStates(matUCStSt, allUCang, onlysign = False):
     magangvec = np.sqrt(np.sum(allUCang*allUCang, 1))
     angvecunit = np.round(allUCang / magangvec[:,None],1)
     
-    matUCstandStSt = np.zeros((np.size(allUCang,0),4))
     for i in np.arange(np.size(standstst,0)):
         ststloc = (angvecunit == standstst[i,:]).all(axis=1)
         oldStSt = np.unique(matUCStSt[ststloc])
@@ -231,12 +230,12 @@ def extractStableStates(matUCStSt):
     
     simulations = np.size(matUCStSt,0)
     
-    tempStSt = np.arange(simulations)
+    tempStSt = np.arange(simulations).astype(float)
     
     for sim in np.arange(simulations):
         unstst = np.unique(matUCStSt[sim,:])
         colstst = np.array2string(unstst, separator='')
-        tempStSt[sim] = np.int(colstst[1:-1])
+        tempStSt[sim] = np.int(colstst[1:-1].replace(" ", ""))
         
     [i, newSS] = np.unique(tempStSt, return_inverse=True)
     newSS = newSS+1

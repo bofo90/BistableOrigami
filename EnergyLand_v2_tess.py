@@ -110,7 +110,7 @@ def NiceGraph2Dlog(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [
 #%%
 plt.close('all')
 
-Folder_name = "Results/Tessellation4/25/2CFF/09-Jan-2020_5_5_"
+Folder_name = "Results/Tessellation4/25/2CFF/09-Jan-2020_5_1_"
 
 allDesigns = pd.DataFrame()
 # allKappasAnalysis = pd.DataFrame()
@@ -134,7 +134,7 @@ for subdir in os.listdir(Folder_name):
         ThisData.iloc[:,-numUC*4::] = raa.orderAnglesMat(ThisData.iloc[:,-numUC*4::].to_numpy(), 4, tessellation)
         ThisData['StableStates'] = raa.countStableStates(ThisData.iloc[:,-numUC*4::], 0.6, 'centroid')
         
-        selData = raa.makeSelectionPerStSt(ThisData, simLen*0.05)
+        selData = raa.makeSelectionPerStSt(ThisData, simLen*0.0)
         
         allDesigns = allDesigns.append(selData)
         
@@ -164,7 +164,7 @@ allDesigns['StableStateAll'] = raa.countStableStates(allDesigns.iloc[:,5:5+numUC
 
 stst = np.unique(allDesigns['StableStateAll'])
 [ststfUC, nameloc] = np.unique(allDesigns['StableStateFromUC'], return_index = True)
-ststfUCname = allDesigns['StableStatefUCName'][nameloc]
+ststfUCname = allDesigns['StableStatefUCName'][nameloc].astype(int)
 ststUC = np.unique(matUCStSt)
 
 #### Mask results out from the specified range of kappas
