@@ -8,238 +8,18 @@ Created on Tue May 21 18:04:51 2019
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib as matl
-from mpl_toolkits import mplot3d
-import xarray as xr
-import configparser
 import os.path
-import ternary #from https://github.com/marcharper/python-ternary
-import itertools
-import copy
-matl.rcParams['pdf.fonttype'] = 42
-matl.rcParams['ps.fonttype'] = 42
-matl.rcParams['font.family'] = 'sans-serif'
-matl.rcParams['font.sans-serif'] = 'Arial'
-matl.rcParams['mathtext.fontset'] = 'cm'
+import ReadAndAnalyze as raa
+import Plotting as plot
 
-
-def cm2inch(value):
-    return value/2.54
-
-def orderAngles(angles, steps, simulations):
-    
-    symetries = ["" for x in range(simulations)]
-    finalAngles = np.zeros((simulations,np.size(angles,1)))
-    for hinge in np.arange(simulations):
-        sym = ''
-        if np.sum(np.sign(np.around(angles[hinge,:], decimals = 4))) < 0: ### sort to have mayority positive angles
-            # angles[hinge,:] = angles[hinge,::-1]*(-1)
-            angles[hinge,:] = angles[hinge,:]*(-1)
-            sym = sym + 'm'
-            
-        rolnum = 4-np.argmin(angles[hinge,:])
-        angles[hinge,:]= np.roll(angles[hinge,:],rolnum)         ### sort from smallest to highest angles
-        if rolnum != 4:
-            sym = sym+'r'+ str(rolnum)
-            
-        finalAngles[hinge,:] = angles[hinge,:]
-        symetries[hinge] = sym
-        
-    return [finalAngles, symetries]
-        
-        
-def countStableStates(finalAngles, distance, method, plot = False):
-    
-    import scipy.cluster.hierarchy as hierarch
-    from scipy.spatial.distance import pdist
-                                       
-    Z = hierarch.linkage(finalAngles, method)
-    inverse = hierarch.fcluster(Z, distance, criterion='distance')
-    c = hierarch.cophenet(Z, pdist(finalAngles))
-
-    if plot:
-        
-        print('this is the cophenet of the hierarchical linkage', c[0])
-        
-        plt.figure(0,figsize=(25, 10))
-        plt.title('Hierarchical Clustering Dendrogram')
-        plt.xlabel('sample index')
-        plt.ylabel('distance')
-        hierarch.dendrogram(
-            Z,
-            truncate_mode='lastp',  # show only the last p merged clusters
-            p=50,  # show only the last p merged clusters
-            leaf_rotation=90.,  # rotates the x axis labels
-            leaf_font_size=8.,  # font size for the x axis labels
-            show_contracted=True,
-        )
-        plt.show()
-
-    
-    return inverse
-
-def standarizeStableStates(matUCStSt, allUCang, onlysign = False):
-    
-    standstst = np.round(np.array([[0,np.sqrt(2),0,np.sqrt(2)],[1,1,1,1],[-1,1,-1,1],[-1,1,1,1]])/2,1)
-    
-    ststUC = np.unique(matUCStSt)
-    if onlysign:
-        allUCang = np.sign(np.round(allUCang, 1))
-    magangvec = np.sqrt(np.sum(allUCang*allUCang, 1))
-    angvecunit = np.round(allUCang / magangvec[:,None],1)
-    
-    matUCstandStSt = np.zeros((np.size(allUCang,0),4))
-    for i in np.arange(np.size(standstst,0)):
-        ststloc = (angvecunit == standstst[i,:]).all(axis=1)
-        oldStSt = np.unique(matUCStSt[ststloc])
-        if (ststUC[oldStSt-1]<0).any():
-            print("\n\nError: double standarizing!!!!! you need to check the standarization of stable states!!!\n\n")
-        ststUC[oldStSt-1] = -i-1
-    
-    oldSS = np.unique(matUCStSt)
-    [i, notdelSS, newSS] = np.unique(ststUC, return_index=True, return_inverse=True)
-    newSS = newSS+1
-    newStSt = np.zeros(np.shape(matUCStSt))
-    for old,new in zip(oldSS, newSS):
-        newStSt[matUCStSt == old] = new
-        
-    return newStSt.astype(int)
-
-def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.NaN, np.NaN], divisions = [np.NaN, np.NaN],
-                buffer = [0.0, 0.0, 0.0]):
-    gray = '0.2'
-    matl.rcParams.update({'font.size': 9})
-
-    if ~np.isnan(mincoord[0]) and ~np.isnan(maxcoord[0]):
-        axes.set_xlim([mincoord[0]-buffer[0], maxcoord[0]+buffer[0]])
-        if isinstance(divisions[0], (list, tuple, np.ndarray)):
-            if ~np.isnan(divisions[0]).any():
-                axes.set_xticks(divisions[0])
-        else:
-            if ~np.isnan(divisions[0]):
-                axes.set_xticks(np.linspace(mincoord[0],maxcoord[0],divisions[0]))
-    axes.set_xlabel(nameX,labelpad=-3, color = gray)
-    
-    if ~np.isnan(mincoord[1]) and ~np.isnan(maxcoord[1]):
-        axes.set_ylim([mincoord[1]-buffer[1], maxcoord[1]+buffer[1]])
-        if isinstance(divisions[1], (list, tuple, np.ndarray)):
-            if ~np.isnan(divisions[1]).any():
-                axes.set_yticks(divisions[1])
-        else:
-            if ~np.isnan(divisions[1]):
-                axes.set_yticks(np.linspace(mincoord[1],maxcoord[1],divisions[1]))
-    axes.set_ylabel(nameY,labelpad=-3, color = gray)
-   
-    axes.xaxis.label.set_color(gray)
-    axes.tick_params(axis='x', colors=gray, direction = 'in', width = 0.4)
-    axes.yaxis.label.set_color(gray)
-    axes.tick_params(axis='y', colors=gray, direction = 'in', width = 0.4)
-    axes.tick_params(pad = 2)
-    
-    axes.tick_params(axis='y', which='minor', colors=gray, direction = 'in', width = 0.4)
-    axes.tick_params(axis='x', which='minor', colors=gray, direction = 'in', width = 0.4)
-    
-    for axis in ['top','bottom','left','right']:
-        axes.spines[axis].set_linewidth(0.4)
-        axes.spines[axis].set_color(gray)
-        
-    return
-
-def NiceGraph2Dlog(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.NaN, np.NaN], divisions = [np.NaN, np.NaN],
-                buffer = [0.0, 0.0, 0.0]):
-    gray = '0.2'
-    matl.rcParams.update({'font.size': 9})
-
-    if ~np.isnan(mincoord[0]) and ~np.isnan(maxcoord[0]):
-        axes.set_xlim([mincoord[0]*((buffer[0])**(-1)), maxcoord[0]*(buffer[0])])
-        if isinstance(divisions[0], (list, tuple, np.ndarray)):
-            if ~np.isnan(divisions[0]).any():
-                axes.set_xticks(divisions[0])
-        else:
-            if ~np.isnan(divisions[0]):
-                axes.set_xticks(np.logspace(np.log10(mincoord[0]),np.log10(maxcoord[0]),divisions[0]))
-#    axes.set_xscale('log')
-            
-    axes.set_xlabel(nameX)
-    if ~np.isnan(mincoord[1]) and ~np.isnan(maxcoord[1]):
-        axes.set_ylim([mincoord[1]-buffer[1], maxcoord[1]+buffer[1]])
-        if isinstance(divisions[1], (list, tuple, np.ndarray)):
-            if ~np.isnan(divisions[1]).any():
-                axes.set_yticks(divisions[1])
-        else:
-            if ~np.isnan(divisions[1]):
-                axes.set_yticks(np.linspace(mincoord[1],maxcoord[1],divisions[1]))
-                            
-    axes.set_ylabel(nameY)
-   
-    axes.xaxis.label.set_color(gray)
-    axes.tick_params(axis='x',colors=gray)
-    axes.spines['bottom'].set_color(gray)
-    axes.spines['top'].set_color(gray)
-    axes.yaxis.label.set_color(gray)
-    axes.tick_params(axis='y', colors=gray)
-    axes.spines['left'].set_color(gray)
-    axes.spines['right'].set_color(gray)
-    axes.tick_params(pad = 2)
-    
-    for axis in ['top','bottom','left','right']:
-        axes.spines[axis].set_linewidth(0.4)
-        
-    return
 
 #%%
-def NiceTerciaryGraph(ax, name, scale, divisions):
-    
-    ax.axis('off')
-    tax = ternary.TernaryAxesSubplot(ax=ax, scale = scale)
-    
-    fontsize = 9
-    matl.rcParams.update({'font.size': 9})
-    gray = '0.2'
-    linewidth = 0.4
-    mult = scale/divisions
-    
-    tax.boundary(linewidth=linewidth)
-    tax.gridlines(color=gray, multiple=mult)
-    
-    tax.set_title(name, fontsize=fontsize, color = gray, pad = 15)
-    tax.left_axis_label("Angle1", fontsize=fontsize, color = gray, offset = 0.3)
-    tax.right_axis_label("Angle2", fontsize=fontsize, color = gray, offset = 0.3)
-    tax.bottom_axis_label("Angle3", fontsize=fontsize, color = gray, offset = 0.3)
-    
-    tax.ticks(axis='lbr', linewidth=linewidth, axes_colors = {'l': gray, 'r':gray, 'b': gray},fontsize = fontsize,
-              ticks = [180,150,120,90,60,30,0], clockwise = True, offset = 0.05)
-    tax.clear_matplotlib_ticks()
-    
-    return tax
-
-#%%
-def ReadMetadata(file):
-    
-    if os.path.isfile(file):
-        metadata = configparser.RawConfigParser(allow_no_value=True)
-        metadata.read(file)
-    
-        restang = float(metadata.get('options','restang'))
-        designang = np.array(metadata.get('options','angDesign').split(),dtype = float)
-    else:
-        raise FileNotFoundError('No metafile found at the given directory. Changes to the script to put manually the variables are needed\n') 
-
-    return restang, designang
-
 plt.close('all')
 
-kappas = np.logspace(-3,1,81)
-#kappas = np.logspace(-3,1,13)#23
-
 Folder_name = "Results/SingleVertex4/2CFF/02-Dec-2019_0.00_90.00_180.00_270.00_"
-file_name1 = "/EnergyData.csv" 
-file_name2 = "/Hinges.csv"
-file_name3 = "/PosStad.csv"
-file_name4 = "/Angles.csv"
 
 allDesigns = pd.DataFrame()
-allKappasAnalysis = pd.DataFrame()
+# allKappasAnalysis = pd.DataFrame()
 
 if not os.path.isdir(Folder_name + '/Images/'):
     os.mkdir(Folder_name + '/Images/')
@@ -248,89 +28,37 @@ designang = np.array(Folder_name.split('_')[1:-1]).astype(float)
   
 for subdir in os.listdir(Folder_name):
     if subdir == 'Images':
-        continue    
-    
-    allData = pd.DataFrame()
-    allAngles = np.empty((0,4))
-#    allAngles = np.empty((0,3))    
+        continue      
     
     for subdir2 in os.listdir(Folder_name+'/'+subdir):
 
         folder_name = Folder_name+'/'+subdir+'/'+subdir2+'/energy'
-    
-        dataEnergy = pd.read_csv(folder_name+file_name1)
-        simLen = np.size(dataEnergy['Hinge Number'])
         
-        dataEnergy['TotalEnergy'] = dataEnergy['EdgeEnergy']+dataEnergy['DiagonalEnergy']+dataEnergy['HingeEnergy']
-        dataEnergy['HingeEnergy'] = dataEnergy['HingeEnergy']
-        dataEnergy['kappa'] = np.ones(simLen)*np.float(subdir2.split('_')[1])/4  ### '/4' due to error in the computation of the energy
+        ThisData, simLen = raa.ReadFile(folder_name)
+        ThisData = raa.maskBadResults(ThisData, True) 
         
-        dataHinges = pd.read_csv(folder_name+file_name2)
-        dataEnergy['Curvature'] = dataHinges['Curvature']
+        simLen = np.size(ThisData,0)
+        ThisData.iloc[:,-4::],sym = raa.orderAngles(ThisData.iloc[:,-4::].to_numpy(), 4, simLen)
+        ThisData['StableStates'] = raa.countStableStates(ThisData.iloc[:,-4::], 0.6, 'centroid')
         
-        dataPos = pd.read_csv(folder_name+file_name3)
-        dataPos = dataPos.reset_index()
-        dataPos = dataPos.rename(columns={'level_0':'Hinge Number', 'level_1':'face1', 'level_2':'face2', 'Hinge Number':'face3', 'Face Areas':'face4'})
-        dataEnergy[['face1','face2','face3','face4']] = dataPos[['face1','face2','face3','face4']]
-    
-        dataAngles = np.loadtxt(folder_name+file_name4,skiprows=1, delimiter = ',', dtype = np.float64)
-        dataAngles = np.delete(dataAngles, 0, 1)
-        [dataAnglesOrd, anglesSym] = orderAngles(dataAngles, 2, simLen)
-        dataEnergy['StableStates'] = np.zeros((simLen,1))
-        dataEnergy['StableStates'] = countStableStates(dataAnglesOrd, 10, 'ward')
-#        dataEnergy['StableStates'] = countStableStates(dataAnglesOrd, 0.5, 'centroid')
-        dataEnergy[['ang1','ang2','ang3','ang4']] = pd.DataFrame(dataAnglesOrd)
-#        dataEnergy[['ang1','ang2','ang3']] = pd.DataFrame(dataAnglesOrd)
-        dataEnergy['Symmetry'] = anglesSym
+        selData = raa.makeSelectionPerStSt(ThisData, simLen*0.0)
         
-        allAngles = np.append(allAngles, dataAngles, axis = 0)
-        allData = allData.append(dataEnergy)
+        allDesigns = allDesigns.append(selData)
         
-    restang = np.float(subdir.split('_')[1])
+    # kappasStSt['amountSym'] = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['Symmetry']].nunique())
+    # kappasStSt['Symetries'] = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates').apply(lambda x: str(np.sort(x.Symmetry.unique()))))
     
-     
-    TotSimul = allData.shape[0]
-    
-    print(allData['Flags'].value_counts())
-    exfl = allData.Flags.values.reshape(TotSimul,1)
-    flagmask = (exfl !=1) & (exfl !=2)
-    flagmask = ~flagmask.any(axis= 1)
-    allData['Mask'] = flagmask
-    
-    allData.reset_index(level=0, drop=True)
-    # allData.set_index(['kappa','Hinge Number'], inplace = True)
-    # allData.sort_index(inplace=True)
-    
-    kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['EdgeEnergy', 'HingeEnergy', 'TotalEnergy','ang1','ang2','ang3','ang4', 'Curvature','face1','face2','face3','face4']].mean())
-#    kappasStSt = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['EdgeEnergy', 'HingeEnergy', 'TotalEnergy','ang1','ang2','ang3', 'Curvature']].mean())
-    
-    kappasStSt['amountSym'] = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['Symmetry']].nunique())
-    kappasStSt['Symetries'] = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates').apply(lambda x: str(np.sort(x.Symmetry.unique()))))
-    
-    kappasStSt['Hinge Number'] =  allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['Hinge Number']].apply(lambda _df2: _df2.sample(1, random_state = 0))).to_numpy()
-  
-    kappasStSt['restang'] = np.ones(np.shape(kappasStSt)[0])*restang
-    
-    ####Only select stable states that have more than 10% appearance in each simulation
-    kappasStSt['amountStSt'] = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['DiagonalEnergy']].count())
-    more10percent = kappasStSt['amountStSt']>simLen*0.1
-    kappasStSt = kappasStSt[more10percent]
-    
-    kappasStSt = kappasStSt.reset_index(level=0)
-    kappasStSt = kappasStSt.reset_index(level=0)#, drop=True)
-#    kappasStSt['StableState'] = countStableStates(kappasStSt[['ang1','ang2','ang3','ang4']],1, 'centroid')
-#    kappasStSt['StableState'] = countStableStates(kappasStSt[['ang1','ang2','ang3']],0.45, 'centroid')
 
-    kappasnumStSt = kappasStSt.groupby('kappa')['StableStates'].nunique()
-    kappasnumStSt = kappasnumStSt.reset_index()
-    kappasnumStSt['restang'] = np.ones(np.shape(kappasnumStSt)[0])*restang
+    # kappasnumStSt = kappasStSt.groupby('kappa')['StableStates'].nunique()
+    # kappasnumStSt = kappasnumStSt.reset_index()
+    # kappasnumStSt['restang'] = np.ones(np.shape(kappasnumStSt)[0])*restang
 
-    allKappasAnalysis = allKappasAnalysis.append(kappasnumStSt)
-    allDesigns = allDesigns.append(kappasStSt)    
-      
+    # allKappasAnalysis = allKappasAnalysis.append(kappasnumStSt)
+    
 allDesigns = allDesigns.reset_index(level=0, drop =True)
+allDesigns = allDesigns.round(8)
 restangles = allDesigns.restang.drop_duplicates().values
-
+kappas = allDesigns.kappa.drop_duplicates().values
 
 #%%
 allDesignsang = allDesigns[['ang1','ang2','ang3','ang4']].to_numpy() #allDesigns[['ang1','ang2','ang3']]
