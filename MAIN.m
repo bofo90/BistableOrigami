@@ -16,7 +16,7 @@ tic
 opt=initOpt('template','SingleVertex','numVert', 4,'vertexType', "2CFF",...
             'tessellationType', '25','xrep', 5, 'yrep', 5, 'periodic', 'off',...
             'restang', 2.356, 'angDesign', [0.00 90 180.00 270]*pi/180,...
-            'analysis','result','analysisType','randomPert',...
+            'analysis','savedata','analysisType','randomPert',...
             'numIterations', 1000,'RandstDev', 0.2,...
             'figDPI',200, 'saveMovie', 'off', 'safeMovieAntiAlias', 0,...
             'folAlgor', 'sqp','relAlgor', 'sqp',...
@@ -34,7 +34,7 @@ opt.options=optimoptions('fmincon','GradConstr','off','GradObj','off',...
                          'Algorithm', opt.folAlgor, 'OutputFcn',@outfun,...               
                          'RelLineSrchBnd', 0.01, 'RelLineSrchBndDuration', 5000);
                      
-opt.file = '/24-Feb-2020_';
+opt.file = '/20-Feb-2020_0.00_ 90.00_180.00_270.00_';
 switch opt.analysis
     case{'info'}
         [extrudedUnitCell,opt]=obtainOrigami(opt);
@@ -42,11 +42,11 @@ switch opt.analysis
     case{'result'}
         %when using des = 'non' the opt.angDes need to be specified
         %possible des ["2C", "GFF", "2OFF","3S", "2OM1", "2OM2", "2NM1", "2NM2", "2OL", "2NL", "2OS", "2NS", "Z1", "Z2", "Y1", "Y2", "X2"];
-        des = linspace(0.05, 0.5,10);% opt.vertexType;
-        ang = linspace(0,pi,5);
+        des = opt.vertexType;
+        ang = linspace(0,pi,20);
         ang = ang(2:end-1);
-        kap = logspace(-3,0,4); %opt.Khinge;
-        xrep = [3,4]; %opt.xrep; %only used when having tessellations
+        kap = 10;%logspace(-1,1,3); %opt.Khinge;
+        xrep = opt.xrep; %only used when having tessellations
         yrep = opt.yrep; %only used when having tessellations
         findDeformation(opt, des, xrep, yrep, ang, kap)
     case{'savedata'}

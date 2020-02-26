@@ -1,7 +1,7 @@
 function findDeformation(opt, des, xrep, yrep, ang, kap)
 file = opt.file;
 for d = des
-    opt.RandstDev = d;
+    opt.vertexType = d;
     
     if strcmp(opt.template, 'SingleVertex')
         xrep = 1;
@@ -17,7 +17,7 @@ for d = des
             if strcmp(opt.template, 'Tessellation')
                 opt.file = strcat(file,num2str([opt.xrep,opt.yrep],'%d_'));
             elseif strcmp(opt.template, 'SingleVertex')
-                opt.file = strcat(file,num2str(opt.RandstDev,'%.2f_'),'StDev');
+                opt.file = strcat(file,num2str(opt.angDesign*180/pi,'%.2f_'));
             end
             
             ChangeParam(extrudedUnitCell,opt, ang, kap);
