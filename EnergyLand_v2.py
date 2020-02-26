@@ -25,21 +25,21 @@ if not os.path.isdir(Folder_name + '/Images/'):
     os.mkdir(Folder_name + '/Images/')
     
 designang = np.array(Folder_name.split('_')[1:-1]).astype(float)
+numvertex = np.int(Folder_name.split('/')[1][-1])
   
 for subdir in os.listdir(Folder_name):
     if subdir == 'Images':
         continue      
     
     for subdir2 in os.listdir(Folder_name+'/'+subdir):
-
         folder_name = Folder_name+'/'+subdir+'/'+subdir2+'/energy'
         
         ThisData, simLen = raa.ReadFile(folder_name)
         ThisData = raa.maskBadResults(ThisData, True) 
         
         simLen = np.size(ThisData,0)
-        ThisData.iloc[:,-4::],sym = raa.orderAngles(ThisData.iloc[:,-4::].to_numpy(), 4, simLen)
-        ThisData['StableStates'] = raa.countStableStates(ThisData.iloc[:,-4::], 0.6, 'centroid')
+        ThisData.iloc[:,-numvertex::],sym = raa.orderAngles(ThisData.iloc[:,-numvertex::].to_numpy(), numvertex, simLen)
+        ThisData['StableStates'] = raa.countStableStates(ThisData.iloc[:,-numvertex::], 0.6, 'centroid')
         
         selData = raa.makeSelectionPerStSt(ThisData, simLen*0.0)
         
@@ -48,7 +48,6 @@ for subdir in os.listdir(Folder_name):
     # kappasStSt['amountSym'] = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates')[['Symmetry']].nunique())
     # kappasStSt['Symetries'] = allData.groupby('kappa').apply(lambda _df: _df.groupby('StableStates').apply(lambda x: str(np.sort(x.Symmetry.unique()))))
     
-
     # kappasnumStSt = kappasStSt.groupby('kappa')['StableStates'].nunique()
     # kappasnumStSt = kappasnumStSt.reset_index()
     # kappasnumStSt['restang'] = np.ones(np.shape(kappasnumStSt)[0])*restang
