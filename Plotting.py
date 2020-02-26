@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib as matl
 from matplotlib.colors import from_levels_and_colors
 from mpl_toolkits import mplot3d
+import ternary #from https://github.com/marcharper/python-ternary
 matl.rcParams['pdf.fonttype'] = 42
 matl.rcParams['ps.fonttype'] = 42
 matl.rcParams['font.family'] = 'sans-serif'
@@ -100,6 +101,31 @@ def NiceGraph2Dlog(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [
         axes.spines[axis].set_linewidth(0.4)
         
     return
+
+def NiceTerciaryGraph(ax, name, scale, divisions):
+    
+    ax.axis('off')
+    tax = ternary.TernaryAxesSubplot(ax=ax, scale = scale)
+    
+    fontsize = 9
+    matl.rcParams.update({'font.size': 9})
+    gray = '0.2'
+    linewidth = 0.4
+    mult = scale/divisions
+    
+    tax.boundary(linewidth=linewidth)
+    tax.gridlines(color=gray, multiple=mult)
+    
+    tax.set_title(name, fontsize=fontsize, color = gray, pad = 15)
+    tax.left_axis_label("Angle1", fontsize=fontsize, color = gray, offset = 0.3)
+    tax.right_axis_label("Angle2", fontsize=fontsize, color = gray, offset = 0.3)
+    tax.bottom_axis_label("Angle3", fontsize=fontsize, color = gray, offset = 0.3)
+    
+    tax.ticks(axis='lbr', linewidth=linewidth, axes_colors = {'l': gray, 'r':gray, 'b': gray},fontsize = fontsize,
+              ticks = [180,150,120,90,60,30,0], clockwise = True, offset = 0.05)
+    tax.clear_matplotlib_ticks()
+    
+    return tax
 
 def getcolormap(allDesigns, colormap):
     
