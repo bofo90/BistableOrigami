@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import configparser
 import os.path
+from datetime import datetime
 
 def ReadFile(folder_name):
     
@@ -23,12 +24,12 @@ def ReadFile(folder_name):
     
     dataEnergy['TotalEnergy'] = dataEnergy['EdgeEnergy']+dataEnergy['DiagonalEnergy']+dataEnergy['HingeEnergy']
     dataEnergy = dataEnergy.drop(['DiagonalEnergy','FaceEnergy','TargetAngleEnergy'], axis = 1)
-    #Here needs to be an adjustment for old simulations
-    dataEnergy['HingeEnergy'] = dataEnergy['HingeEnergy']
     
     metadata = pd.DataFrame()
     [ang, kap] = ReadMetadata(folder_name+file_metadata)
     metadata['kappa'] = np.ones(simLen)*kap
+    if oldSample(folder_name):
+        metadata['kappa'] = metadata['kappa']/4
     metadata['restang'] = np.ones(simLen)*ang
     
     dataCurv = np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', dtype = np.float64)
@@ -46,6 +47,25 @@ def ReadFile(folder_name):
     dataEnergy = pd.concat([metadata, dataEnergy, allAngles], axis=1, sort=False)
 
     return dataEnergy, simLen
+
+def oldSample(folder_name):
+    
+    splitfolder = folder_name.split('/')
+    
+    if splitfolder[1][:-1] == 'SingleVertex':
+        date = splitfolder[3].split('_')[0]
+    if splitfolder[1][:-1] == 'Tessellation':
+        date = splitfolder[4].split('_')[0]
+    
+    simdate = datetime.strptime(date, '%d-%b-%Y').date()
+    changedate = datetime(2020,1,8).date()
+    
+    if simdate <= changedate:
+        # print('\nMaking change of kappa due to old results\n\n')
+        return True
+    else:
+        return False
+        
 
 def maskBadResults(ThisData, printFlags = False):
     
