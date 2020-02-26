@@ -60,21 +60,21 @@ restangles = allDesigns.restang.drop_duplicates().values
 kappas = allDesigns.kappa.drop_duplicates().values
 
 #%%
-allDesignsang = allDesigns[['ang1','ang2','ang3','ang4']].to_numpy() #allDesigns[['ang1','ang2','ang3']]
-allDesigns['StableStateAll'] = countStableStates(allDesignsang, 0.9, 'centroid', True)
-allDesigns['StableStateAll'] = standarizeStableStates(allDesigns['StableStateAll'], allDesignsang, onlysign = False)
+allDesAng = allDesigns.iloc[:,8:8+numvertex].values
+allDesigns['StableStateAll'] = raa.countStableStates(allDesAng, 0.9, 'centroid', True)
+allDesigns['StableStateAll'] = raa.standarizeStableStates(allDesigns['StableStateAll'], allDesAng, onlysign = False)
 
 stst = np.unique(allDesigns['StableStateAll'])
+cmap2 = matl.cm.get_cmap('Set2',np.size(stst))
+# cmap2 = matl.cm.get_cmap('jet',np.size(stst))
+colors = cmap2(np.linspace(0,1,np.size(stst)))
 
 #### Mask results out from the specified range of kappas
-
 kappasrange = [10**-3,10**0]
 dropers = ~((allDesigns.kappa < kappasrange[0]) | (allDesigns.kappa > kappasrange[-1]))
 allDesigns = allDesigns[dropers]
 
-cmap2 = matl.cm.get_cmap('Set2',np.size(stst))
-# cmap2 = matl.cm.get_cmap('jet',np.size(stst))
-colors = cmap2(np.linspace(0,1,np.size(stst)))
+
 
 #%%
 

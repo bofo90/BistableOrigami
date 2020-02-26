@@ -43,7 +43,6 @@ for subdir in os.listdir(Folder_name):
         
         allDesigns = allDesigns.append(selData)
         
-       
     # kappasnumStSt = kappasStSt.groupby('kappa')['StableStates'].nunique()
     # kappasnumStSt = kappasnumStSt.reset_index()
     # kappasnumStSt['restang'] = np.ones(np.shape(kappasnumStSt)[0])*restang
@@ -54,7 +53,6 @@ allDesigns = allDesigns.reset_index(level=0, drop =True)
 allDesigns = allDesigns.round(8)
 restangles = allDesigns.restang.drop_duplicates().values
 kappas = allDesigns.kappa.drop_duplicates().values
-
 
 #%%
 #### Get stable states from material
