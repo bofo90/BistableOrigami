@@ -7,12 +7,8 @@ Created on Fri Feb 21 11:48:23 2020
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib as matl
-from matplotlib.colors import from_levels_and_colors
-from mpl_toolkits import mplot3d
 import configparser
 import os.path
-import copy
 
 def ReadFile(folder_name):
     
@@ -54,7 +50,7 @@ def ReadFile(folder_name):
 def maskBadResults(ThisData, printFlags = False):
     
     minFaceFlag = ThisData['minFace']<=0.11
-    ThisData['Flags'][minFaceFlag] = -5
+    ThisData.loc[minFaceFlag,'Flags'] = -5
     
     if printFlags:
         print(ThisData['Flags'].value_counts())
