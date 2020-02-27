@@ -18,19 +18,23 @@ def ReadFile(folder_name):
     file_name3 = "/PosStad.csv"
     file_name4 = "/Angles.csv"
     file_metadata = "/metadata.txt"
-
-    dataEnergy = pd.read_csv(folder_name+file_name1)
-    simLen = np.size(dataEnergy['Hinge Number'])
     
-    dataEnergy['TotalEnergy'] = dataEnergy['EdgeEnergy']+dataEnergy['DiagonalEnergy']+dataEnergy['HingeEnergy']
-    dataEnergy = dataEnergy.drop(['DiagonalEnergy','FaceEnergy','TargetAngleEnergy'], axis = 1)
+    dataEnergy = pd.read_csv(folder_name+file_name1)
+    simLen = np.size(dataEnergy['Hinge Number'])   
     
     metadata = pd.DataFrame()
     [ang, kap] = getRAandK(folder_name)
     metadata['kappa'] = np.ones(simLen)*kap
     if oldSample(folder_name):
         metadata['kappa'] = metadata['kappa']/4
-    metadata['restang'] = np.ones(simLen)*ang
+    metadata['restang'] = np.ones(simLen)*ang   
+    
+    numhin, numedg = ReadMetadata(folder_name+file_metadata)
+        
+    dataEnergy['TotalEnergy'] = dataEnergy['EdgeEnergy']+dataEnergy['DiagonalEnergy']+dataEnergy['HingeEnergy']
+    dataEnergy = dataEnergy.drop(['DiagonalEnergy','FaceEnergy','TargetAngleEnergy'], axis = 1)
+    dataEnergy['HingeEnergy'] = dataEnergy['HingeEnergy']/kap/numhin
+    dataEnergy['EdgeEnergy'] = dataEnergy['EdgeEnergy']/numedg
     
     dataCurv = np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', dtype = np.float64)
     dataCurv = np.delete(dataCurv, 0, 1)
@@ -278,32 +282,34 @@ def ReadMetadata(file):
         metadata = configparser.RawConfigParser(allow_no_value=True)
         metadata.read(file)
     
-        restang = float(metadata.get('options','restang'))
-        kappa = float(metadata.get('options','Khinge'))
+        hing = float(metadata.get('extUnitCell','hinges'))
+        edge = float(metadata.get('extUnitCell','edges'))
     else:
         raise FileNotFoundError('No metafile found at the given directory. Changes to the script to put manually the variables are needed\n') 
 
-    return restang, kappa
+    return hing, edge
 
 def getRAandK(folder_name):
     
     splited = folder_name.split('/')
     
-    kappa_name = folder_name.split('/')[-2]
-    restang_name = folder_name.split('/')[-3]
+    kappa_name = splited[-2]
+    restang_name = splited[-3]
     
     kap = np.float(kappa_name.split('_')[-1])
     ang = np.float(restang_name.split('_')[-1])
     
     return ang, kap
 
-def SaveForPlot(allDesigns, Folder_name):
+def SaveForPlot(s, Folder_name):
+    
+    des = s.copy()
     
     if oldSample(Folder_name):
-        allDesigns['kappa'] = allDesigns['kappa']*4
+        des['kappa'] = des['kappa']*4
     
-    allDesigns[['kappa','Hinge Number','StableStateAll','restang','Curvature']].to_csv(Folder_name + '/Images/InfoforAllImages.csv', index = False)
-    allDesigns.groupby('StableStateAll').apply(lambda df: df.sample(1, random_state = 0))[['kappa','Hinge Number','StableStateAll','restang','Curvature']].to_csv(Folder_name + '/Images/InfoforStableStatesImages.csv', index = False)
+    des[['kappa','Hinge Number','StableStateAll','restang','Curvature']].to_csv(Folder_name + '/Images/InfoforAllImages.csv', index = False)
+    des.groupby('StableStateAll').apply(lambda df: df.sample(1, random_state = 0))[['kappa','Hinge Number','StableStateAll','restang','Curvature']].to_csv(Folder_name + '/Images/InfoforStableStatesImages.csv', index = False)
        
     return
 
