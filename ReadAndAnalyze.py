@@ -26,7 +26,7 @@ def ReadFile(folder_name):
     dataEnergy = dataEnergy.drop(['DiagonalEnergy','FaceEnergy','TargetAngleEnergy'], axis = 1)
     
     metadata = pd.DataFrame()
-    [ang, kap] = ReadMetadata(folder_name+file_metadata)
+    [ang, kap] = getRAandK(folder_name)
     metadata['kappa'] = np.ones(simLen)*kap
     if oldSample(folder_name):
         metadata['kappa'] = metadata['kappa']/4
@@ -270,3 +270,15 @@ def ReadMetadata(file):
         raise FileNotFoundError('No metafile found at the given directory. Changes to the script to put manually the variables are needed\n') 
 
     return restang, kappa
+
+def getRAandK(folder_name):
+    
+    splited = folder_name.split('/')
+    
+    kappa_name = folder_name.split('/')[-2]
+    restang_name = folder_name.split('/')[-3]
+    
+    kap = np.float(kappa_name.split('_')[-1])
+    ang = np.float(restang_name.split('_')[-1])
+    
+    return ang, kap
