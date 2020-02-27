@@ -35,7 +35,7 @@ for subdir in os.listdir(Folder_name):
         folder_name = Folder_name+'/'+subdir+'/'+subdir2+'/energy'
         
         ThisData, simLen = raa.ReadFile(folder_name)
-        ThisData = raa.maskBadResults(ThisData, True) 
+        ThisData = raa.maskBadResults(ThisData) 
         
         simLen = np.size(ThisData,0)
         ThisData.iloc[:,-numvertex::],sym = raa.orderAngles(ThisData.iloc[:,-numvertex::].to_numpy(), numvertex, simLen)
@@ -98,7 +98,15 @@ ststcol = -1
 plot.XYperZ(allDesigns, 0, r'$\kappa$', 6, r'$K$', 1, ststcol, colormap, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
 plot.CreatLegend(allDesigns.iloc[:,ststcol], colormap, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
 
+#%%
+plt.close('all')   
 
+##### Plotting the Curvature of each stable state
+ststcol = -1
+plot.NormEnergy(allDesigns, 0, r'$\kappa$', 1, ststcol, colormap, save = True, Folder_name = Folder_name, NameFig = 'TotEnergyNorm')
+plot.CreatLegend(allDesigns.iloc[:,ststcol], colormap, save = True, Folder_name = Folder_name, NameFig = 'TotEnergy')
+
+plot.XmultYperZ(allDesigns, 0, r'$\kappa$', [3,4], 1, save = True, Folder_name = Folder_name, NameFig = 'Energies')
 #%%
 plt.close('all')  
 

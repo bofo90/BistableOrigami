@@ -179,6 +179,86 @@ def XYperZ(allDesigns, x, xname, y, yname, z, stst_col, colormap, save = False, 
     
     return
 
+def NormEnergy(allDesigns, x, xname, z, stst_col, colormap, save = False, Folder_name = '', NameFig = ''):
+    
+    allDesigns = allDesigns.round(8)
+    
+    stst, color = getcolormap(allDesigns.iloc[:,stst_col].values, colormap)
+    
+    variables = np.unique(allDesigns.iloc[:,z])
+    
+    for i in np.arange(np.size(variables)):
+    
+        fig1 = plt.figure(figsize=(cm2inch(4.3), cm2inch(3.1)))
+        ax1 = plt.subplot(111)
+        fig1.subplots_adjust(top=0.982,
+        bottom=0.23,
+        left=0.225,
+        right=0.940)
+        
+        thisDesBool = allDesigns.iloc[:,z] == variables[i]
+        thisDes = allDesigns[thisDesBool]    
+        
+        NiceGraph2D(ax1, xname, r'$E_{tot/norm}$')
+                 
+        if xname == r'$\kappa$':
+            ax1.set_xscale('log')
+            ax1.set_xticks([0.001,0.01,0.1,1])
+            ax1.set_xlim([0.0007,1.5])
+            
+        for k in np.arange(np.size(stst)):
+            thisstst = thisDes[thisDes.iloc[:, stst_col] == stst[k]]
+            
+            ax1.scatter(thisstst.iloc[:,x], thisstst.iloc[:,3]+thisstst.iloc[:,4], c = [color[k]], s = 8)
+        
+        fig1.show()
+        if save:
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.3f' %variables[i] +'.pdf', transparent = True)
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.3f' %variables[i] +'.png', transparent = True)
+            print(Folder_name + '/Images/' + NameFig + '_' + '%.3f' %variables[i])
+    
+    return
+
+def XmultYperZ(allDesigns, x, xname, y, z, save = False, Folder_name = '', NameFig = ''):
+    
+    allDesigns = allDesigns.round(8)
+    
+    # stst, color = getcolormap(allDesigns.iloc[:,stst_col].values, colormap)
+    
+    variables = np.unique(allDesigns.iloc[:,z])
+    
+    for i in np.arange(np.size(variables)):
+    
+        fig1 = plt.figure(figsize=(cm2inch(4.3), cm2inch(3.1)))
+        ax1 = plt.subplot(111)
+        fig1.subplots_adjust(top=0.982,
+        bottom=0.23,
+        left=0.225,
+        right=0.940)
+        
+        thisDesBool = allDesigns.iloc[:,z] == variables[i]
+        thisDes = allDesigns[thisDesBool]    
+        
+        NiceGraph2D(ax1, xname, '')
+                    
+        if xname == r'$\kappa$':
+            ax1.set_xscale('log')
+            ax1.set_xticks([0.001,0.01,0.1,1])
+            ax1.set_xlim([0.0007,1.5])
+            
+        for k in y:
+            ax1.scatter(thisDes.iloc[:,x], thisDes.iloc[:,k], s = 8, label = allDesigns.columns[k])
+        
+        plt.legend()
+        fig1.show()
+               
+        if save:
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.3f' %variables[i] +'.pdf', transparent = True)
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.3f' %variables[i] +'.png', transparent = True)
+            print(Folder_name + '/Images/' + NameFig + '_' + '%.3f' %variables[i])
+    
+    return
+
 def Angles3D(angles, angStSt, colormap, save = False, Folder_name = ''):
         
     stst, color = getcolormap(angStSt, colormap)
