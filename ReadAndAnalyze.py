@@ -223,7 +223,7 @@ def getStableStatesMat(data, tessellation):
 
 def standarizeStableStates(matUCStSt, allUCang, onlysign = False):
     
-    standstst = np.round(np.array([[0,np.sqrt(2),0,np.sqrt(2)],[1,1,1,1],[-1,1,-1,1],[-1,1,1,1]])/2,1)
+    standstst = np.round(np.array([[0,np.sqrt(2),0,np.sqrt(2)],[1,1,1,1],[-1,1,-1,1],[-1,1,1,1],[-1,-1,1,1]])/2,1)
     
     ststUC = np.unique(matUCStSt)
     if onlysign:
@@ -232,11 +232,20 @@ def standarizeStableStates(matUCStSt, allUCang, onlysign = False):
     angvecunit = np.round(allUCang / magangvec[:,None],1)
     
     for i in np.arange(np.size(standstst,0)):
-        ststloc = (angvecunit == standstst[i,:]).all(axis=1)
+        projection = np.sqrt(np.absolute(np.sum(angvecunit*standstst[i,:],1)))
+        ststloc = (projection > 0.98) & (magangvec > 0.4)
         oldStSt = np.unique(matUCStSt[ststloc])
         if (ststUC[oldStSt-1]<0).any():
-            print("\n\nError: double standarizing!!!!! you need to check the standarization of stable states!!!\n\n")
+            print("\nError: double standarizing!!!!! you need to check the standarization of the typical stable states!!!\n")
         ststUC[oldStSt-1] = -i-1
+        
+    ##### get stable states around the the flat configuration
+    ststloc = magangvec <= 0.4
+    oldStSt = np.unique(matUCStSt[ststloc])
+    if (ststUC[oldStSt-1]<0).any():
+        print("\nError: double standarizing!!!!! you need to check the standarization of the flat stable states!!!\n")
+    ststUC[oldStSt-1] = -np.size(standstst,0)-1
+        
     
     oldSS = np.unique(matUCStSt)
     [i, notdelSS, newSS] = np.unique(ststUC, return_index=True, return_inverse=True)
