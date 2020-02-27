@@ -60,7 +60,7 @@ allDesigns = allDesigns.reset_index(level=0, drop =True)
 
 ### Get stable states of vertices
 allDesAng = allDesigns.iloc[:,8:8+numvertex].values
-allDesigns['StableStateAll'] = raa.countStableStates(allDesAng, 0.9, 'centroid', True)
+allDesigns['StableStateAll'] = raa.countStableStates(allDesAng, 0.7, 'centroid', True)
 allDesigns['StableStateAll'] = raa.standarizeStableStates(allDesigns['StableStateAll'], allDesAng, onlysign = False)
 
 colormap = 'Set2'
@@ -70,8 +70,6 @@ colormap = 'Set2'
 # dropers = ~((allDesigns.kappa < kappasrange[0]) | (allDesigns.kappa > kappasrange[-1]))
 # allDesigns = allDesigns[dropers]
 # allDesAng = allDesAng[dropers]
-
-
 
 #%%
 
