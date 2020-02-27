@@ -102,11 +102,11 @@ plot.CreatLegend(allDesigns.iloc[:,ststcol], colormap, save = True, Folder_name 
 
 
 #%%
+plt.close('all')  
 
 ##### Plot first three angles of all vertices with different colors representing the stable state
-    
 plot.Angles3D(allDesAng, allDesigns['StableStateAll'].values, colormap)
 
 #%%
-allDesigns[['kappa','Hinge Number','StableStateAll','restang','Curvature']].to_csv(Folder_name + '/Images/InfoforAllImages.csv', index = False)
-allDesigns.groupby('StableStateAll').apply(lambda df: df.sample(1, random_state = 0))[['kappa','Hinge Number','StableStateAll','restang','Curvature']].to_csv(Folder_name + '/Images/InfoforStableStatesImages.csv', index = False)
+raa.SaveForPlot(allDesigns, Folder_name)
+

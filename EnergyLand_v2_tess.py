@@ -96,5 +96,5 @@ plot.Angles3D(allUCang, matUCStSt.flatten(), colormapUC)
 # plot.Angles3D(allUCang, np.tile(allDesigns['StableStateFromUC'].values,(numUC,1)).transpose().flatten(), colormapfUC)
 
 #%%
-allDesigns[['kappa','Hinge Number','StableStatefUCName','restang','Curvature']].to_csv(Folder_name + '/Images/InfoforAllImages.csv', index = False)
-allDesigns.groupby('StableStateAll').apply(lambda df: df.sample(1, random_state = 0))[['kappa','Hinge Number','StableStatefUCName','restang','Curvature']].to_csv(Folder_name + '/Images/InfoforStableStatesImages.csv', index = False)
+raa.SaveForPlot(allDesigns, Folder_name)
+

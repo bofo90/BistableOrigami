@@ -282,3 +282,14 @@ def getRAandK(folder_name):
     ang = np.float(restang_name.split('_')[-1])
     
     return ang, kap
+
+def SaveForPlot(allDesigns, Folder_name):
+    
+    if oldSample(Folder_name):
+        allDesigns['kappa'] = allDesigns['kappa']*4
+    
+    allDesigns[['kappa','Hinge Number','StableStateAll','restang','Curvature']].to_csv(Folder_name + '/Images/InfoforAllImages.csv', index = False)
+    allDesigns.groupby('StableStateAll').apply(lambda df: df.sample(1, random_state = 0))[['kappa','Hinge Number','StableStateAll','restang','Curvature']].to_csv(Folder_name + '/Images/InfoforStableStatesImages.csv', index = False)
+       
+    return
+
