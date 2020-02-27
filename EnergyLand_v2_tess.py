@@ -15,7 +15,7 @@ import Plotting as plot
 #%%
 plt.close('all')
 
-Folder_name = "Results/Tessellation4/25/2CFF/09-Jan-2020_2_1_"
+Folder_name = "Results/Tessellation4/25/2CFF/11-Feb-2020_1_1_"
 
 allDesigns = pd.DataFrame()
 # allKappasAnalysis = pd.DataFrame()
