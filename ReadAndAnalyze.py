@@ -96,10 +96,15 @@ def orderAngles(angles, ucsize, simulations):
             ver = ver*(-1)
             sym = sym + 'm'
             
-        rolnum = 4-np.argmin(ver)
+        rolnum = np.size(angles,1)-np.argmin(ver)
         ver= np.roll(ver,rolnum)         ### sort from smallest to highest angles
-        if rolnum != 4:
+        if rolnum != np.size(angles,1):
             sym = sym+'r'+ str(rolnum)
+            
+        mirr2 = np.argsort(ver)
+        if mirr2[1]>mirr2[3]:
+            ver[[1,3]]= ver[[3,1]]
+            sym = sym+'am'
             
         finalAngles[sim,:] = ver
         sym = sym +'_'
