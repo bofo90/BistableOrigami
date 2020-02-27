@@ -137,6 +137,8 @@ def getcolormap(allDesigns, colormap):
 
 def XYperZ(allDesigns, x, xname, y, yname, z, stst_col, colormap, save = False, Folder_name = '', NameFig = ''):
     
+    allDesigns = allDesigns.round(8)
+    
     stst, color = getcolormap(allDesigns.iloc[:,stst_col].values, colormap)
     
     variables = np.unique(allDesigns.iloc[:,z])
@@ -178,7 +180,7 @@ def XYperZ(allDesigns, x, xname, y, yname, z, stst_col, colormap, save = False, 
     return
 
 def Angles3D(angles, angStSt, colormap, save = False, Folder_name = ''):
-    
+        
     stst, color = getcolormap(angStSt, colormap)
     
     fig1 = plt.figure(figsize=(cm2inch(10), cm2inch(7)))

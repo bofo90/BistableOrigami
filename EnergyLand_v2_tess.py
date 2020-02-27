@@ -50,9 +50,6 @@ for subdir in os.listdir(Folder_name):
     # allKappasAnalysis = allKappasAnalysis.append(kappasnumStSt)
 
 allDesigns = allDesigns.reset_index(level=0, drop =True)
-allDesigns = allDesigns.round(8)
-restangles = allDesigns.restang.drop_duplicates().values
-kappas = allDesigns.kappa.drop_duplicates().values
 
 #%%
 #### Get stable states from material
