@@ -33,6 +33,7 @@ def ReadFile(folder_name):
         
     dataEnergy['TotalEnergy'] = dataEnergy['EdgeEnergy']+dataEnergy['DiagonalEnergy']+dataEnergy['HingeEnergy']
     dataEnergy = dataEnergy.drop(['DiagonalEnergy','FaceEnergy','TargetAngleEnergy'], axis = 1)
+    dataEnergy['TotalEnergy'] = dataEnergy['TotalEnergy'] /(kap*numhin+numedg)
     dataEnergy['HingeEnergy'] = dataEnergy['HingeEnergy']/kap/numhin
     dataEnergy['EdgeEnergy'] = dataEnergy['EdgeEnergy']/numedg
     

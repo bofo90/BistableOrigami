@@ -103,8 +103,8 @@ plt.close('all')
 
 ##### Plotting the Curvature of each stable state
 ststcol = -1
-plot.NormEnergy(allDesigns, 0, r'$\kappa$', 1, ststcol, colormap, save = True, Folder_name = Folder_name, NameFig = 'TotEnergyNorm')
-plot.CreateColorbar(allDesigns.iloc[:,ststcol], colormap, save = True, Folder_name = Folder_name, NameFig = 'TotEnergy')
+plot.XYperZ(allDesigns, 0, r'$\kappa$', 5, r'$E_{tot}$', 1, ststcol, colormap, save = True, Folder_name = Folder_name, NameFig = 'TotEnergyNorm')
+plot.CreateColorbar(allDesigns.iloc[:,ststcol], colormap, save = True, Folder_name = Folder_name, NameFig = 'TotEnergyNorm')
 
 plot.XmultYperZ(allDesigns, 0, r'$\kappa$', [3,4], r'$E_{norm}$', 1, save = True, Folder_name = Folder_name, NameFig = 'Energies')
 #%%
