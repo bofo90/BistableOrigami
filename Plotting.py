@@ -219,7 +219,7 @@ def NormEnergy(allDesigns, x, xname, z, stst_col, colormap, save = False, Folder
     
     return
 
-def XmultYperZ(allDesigns, x, xname, y, z, save = False, Folder_name = '', NameFig = ''):
+def XmultYperZ(allDesigns, x, xname, y, yname, z, save = False, Folder_name = '', NameFig = ''):
     
     allDesigns = allDesigns.round(8)
     
@@ -239,7 +239,7 @@ def XmultYperZ(allDesigns, x, xname, y, z, save = False, Folder_name = '', NameF
         thisDesBool = allDesigns.iloc[:,z] == variables[i]
         thisDes = allDesigns[thisDesBool]    
         
-        NiceGraph2D(ax1, xname, '')
+        NiceGraph2D(ax1, xname, yname)
                     
         if xname == r'$\kappa$':
             ax1.set_xscale('log')
@@ -249,7 +249,7 @@ def XmultYperZ(allDesigns, x, xname, y, z, save = False, Folder_name = '', NameF
         for k in y:
             ax1.scatter(thisDes.iloc[:,x], thisDes.iloc[:,k], s = 8, label = allDesigns.columns[k])
         
-        plt.legend()
+        CreateLegend(ax1)
         fig1.show()
                
         if save:
@@ -274,7 +274,7 @@ def Angles3D(angles, angStSt, colormap, save = False, Folder_name = ''):
     for i in stst:
         ax1.scatter(-400,-400,-400, c = [color[i-1]], label = i)
     
-    plt.legend()
+    CreateLegend(ax1)
     
     if save:
         fig1.savefig(Folder_name + '/Images/Angles3D.pdf', transparent = True)
@@ -283,7 +283,7 @@ def Angles3D(angles, angStSt, colormap, save = False, Folder_name = ''):
     
     return
 
-def CreatLegend(StableStates, cmap, save = False, Folder_name = '', NameFig = ''):
+def CreateColorbar(StableStates, cmap, save = False, Folder_name = '', NameFig = ''):
     
     
     stst, nameloc = np.unique(StableStates, return_index = True)
@@ -311,4 +311,13 @@ def CreatLegend(StableStates, cmap, save = False, Folder_name = '', NameFig = ''
         fig1.savefig(Folder_name + '/Images/' + NameFig + '_CB.pdf', transparent = True)
         fig1.savefig(Folder_name + '/Images/' + NameFig + '_CB.png', transparent = True)
     
+    return
+
+def CreateLegend(ax, location = 0):
+    
+    leg = ax.legend(loc = location, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False, 
+               borderpad = 0.3, labelspacing = 0.1, handlelength = 0.4, handletextpad = 0.4)
+    plt.setp(leg.get_texts(), color='0.2')
+    leg.get_frame().set_linewidth(0.4)
+
     return

@@ -81,7 +81,7 @@ plt.close('all')
 ##### Plotting the Curvature of each stable state
 ststcol = -2
 plot.XYperZ(allDesigns, 0, r'$\kappa$', 6, r'$K$', 1, ststcol, colormapfUC, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
-plot.CreatLegend(allDesigns.iloc[:,ststcol+1], colormapfUC, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
+plot.CreateColorbar(allDesigns.iloc[:,ststcol+1], colormapfUC, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
 
 #%%
 plt.close('all')   
@@ -91,7 +91,7 @@ ststcol = -2
 plot.NormEnergy(allDesigns, 0, r'$\kappa$', 1, ststcol, colormapfUC, save = True, Folder_name = Folder_name, NameFig = 'TotEnergyNorm')
 plot.CreatLegend(allDesigns.iloc[:,ststcol+1], colormapfUC, save = True, Folder_name = Folder_name, NameFig = 'TotEnergy')
 
-plot.XmultYperZ(allDesigns, 0, r'$\kappa$', [3,4], 1, save = True, Folder_name = Folder_name, NameFig = 'Energies')
+plot.XmultYperZ(allDesigns, 0, r'$\kappa$', [3,4], r'$E_{norm}$' , 1, save = True, Folder_name = Folder_name, NameFig = 'Energies')
 
 #%%
 ##### Plot first three angles of all vertices with different colors
