@@ -39,6 +39,10 @@ end
 
 allFiles = dir(file);
 for j = 3:length(allFiles)
+    if strcmp(allFiles(j).name,'Images')
+        continue;
+    end
+    
     opt.restang = getParam(allFiles(j).name);
     extrudedUnitCell.theta = ones(size(extrudedUnitCell.theta,1),1)*opt.restang;
 
