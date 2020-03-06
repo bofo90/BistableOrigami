@@ -72,22 +72,35 @@ def oldSample(folder_name):
         return False
         
 
-def maskBadResults(ThisData, printFlags = False):
+def maskBadResults(ThisData, printFlags = False, returnStad = False):
     
     minFaceFlag = ThisData['minFace']<=0.11
     ThisData.loc[minFaceFlag,'Flags'] = -5
     
     if printFlags:
         print(ThisData['Flags'].value_counts())
-    
+         
     exfl = ThisData.Flags.values
     flagmask = (exfl !=1) & (exfl !=2) & (exfl !=0)
     # flagmask = ~flagmask.any(axis= 1)
-    ThisData = ThisData.iloc[~flagmask,:]
     
-    ThisData = ThisData.drop(['Flags'], axis = 1)
-        
-    return ThisData
+    MaskedData = ThisData.iloc[~flagmask,:]
+    MaskedData = MaskedData.drop(['Flags'], axis = 1)
+    
+    ThisData.iloc[~flagmask, 5] = 1
+    flagmask2 = flagmask & (exfl != -5)
+    ThisData.iloc[flagmask2, 5] = -1
+    
+    flagStad = ThisData['Flags'].value_counts()
+    flagStad = flagStad.reset_index(level=0)
+    flagStad = flagStad.rename(columns={"index": "Flags", "Flags": "amountFlags"})
+    flagStad['kappa'] = np.ones((np.size(flagStad,0),1))*ThisData.iloc[0,0]
+    flagStad['restang'] = np.ones((np.size(flagStad,0),1))*ThisData.iloc[0,1]
+    
+    if returnStad:
+        return MaskedData, flagStad
+    else:
+        return MaskedData
 
 def orderAngles(angles, ucsize, simulations):
     
@@ -238,7 +251,7 @@ def standarizeStableStates(matUCStSt, allUCang, onlysign = False):
     
     for i in np.arange(np.size(standstst,0)):
         projection = np.sqrt(np.absolute(np.sum(angvecunit*standstst[i,:],1)))
-        ststloc = (projection > 0.98) & (magangvec > 0.4)
+        ststloc = (projection > 0.97) & (magangvec > 0.4)
         oldStSt = np.unique(matUCStSt[ststloc])
         if (ststUC[oldStSt-1]<0).any():
             print("\nError: double standarizing!!!!! you need to check the standarization of the typical stable states!!!\n")
