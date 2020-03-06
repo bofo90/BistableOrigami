@@ -284,3 +284,55 @@ def CreateLegend(ax, location = 0):
     leg.get_frame().set_linewidth(0.4)
 
     return
+
+def ConvSim(redDesign,redFlags, colormap):
+    
+    flags = np.unique(redFlags['Flags'])
+    flags = flags[flags < 0]
+    
+    stst = np.unique(redDesign['StableStateAll'])
+    
+    stddev = np.unique(redDesign['StdDev'])
+    
+    totsim = np.zeros((np.size(stddev), np.size(flags)+np.size(stst)))
+    
+    for sd, i in zip(stddev, np.arange(np.size(stddev))):
+        j = 0
+        for f in flags:
+            hereFlag = (redFlags['StdDev'] == sd) & (redFlags['Flags'] == f)
+            hereFlag = hereFlag.to_numpy()
+            if np.sum(hereFlag)>1:
+                print('\nError with uniquenes of flag and stddev\n')
+            elif np.sum(hereFlag)== 1:
+                totsim[i,j] = redFlags.loc[hereFlag,'amountFlags'].values
+            j += 1
+        for s in stst:
+            hereStSt = (redDesign['StdDev'] == sd) & (redDesign['StableStateAll'] == s)
+            hereStSt = hereStSt.to_numpy()
+            if np.sum(hereStSt) >= 1:
+                totsim[i,j] = np.sum(redDesign.loc[hereStSt,'amountStSt'].values)
+            j += 1
+    
+    allStates = np.concatenate((flags,stst))
+    
+    cmap = matl.cm.get_cmap(colormap,np.size(allStates))
+    color = cmap(np.linspace(0,1,np.size(allStates)))   
+    
+    fig = plt.figure(figsize=(cm2inch(4.3), cm2inch(3.1)))
+    ax1 = plt.subplot(111)
+    fig.subplots_adjust(top=0.982,
+bottom=0.19,
+left=0.25,
+right=0.98)
+    
+    NiceGraph2D(ax1, 'Std.Dev.', 'Sim. Amount')
+    
+    for i in np.arange(np.size(totsim,1)):
+        ax1.bar(stddev, totsim[:,i],bottom=np.sum(totsim[:,:i],axis = 1), width = 0.05,
+                color = color[i], label = allStates[i], align = 'center')
+    
+    CreateLegend(ax1, location = 0)
+    
+    
+    return
+
