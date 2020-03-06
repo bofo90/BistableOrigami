@@ -103,7 +103,17 @@ for ct = 1:length(allFiles)
 
     curv = getCurvature(extrudedUnitCell, opt, lofile.result);
     areas = getAreas(extrudedUnitCell, lofile.result);
-
+    
+    if ~isreal(curv)
+        curv = 0;
+        lofile.result.exfl(2,end)= -10;
+    end
+    
+    if ~isreal(areas)
+        areas = zeros(size(areas));
+        lofile.result.exfl(2,end)= -10;
+    end
+    
     Energies(ct-dirs,:) = [sim, lofile.result.Eedge(2,end),...
         lofile.result.Ediag(2,end), lofile.result.Eface(2,end), lofile.result.Ehinge(2,end),...
         lofile.result.EtargetAngle(2,end), lofile.result.exfl(2,end)];
