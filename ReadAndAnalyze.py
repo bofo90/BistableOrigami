@@ -74,8 +74,7 @@ def oldSample(folder_name):
 
 def maskBadResults(ThisData, printFlags = False, returnStad = False):
     
-    minFaceFlag = ThisData['minFace']<=0.11
-    ThisData.loc[minFaceFlag,'Flags'] = -5
+    minFaceFlag = (ThisData['minFace']<=0.11).values
     
     if printFlags:
         print(ThisData['Flags'].value_counts())
@@ -84,11 +83,16 @@ def maskBadResults(ThisData, printFlags = False, returnStad = False):
     flagmask = (exfl !=1) & (exfl !=2) & (exfl !=0)
     # flagmask = ~flagmask.any(axis= 1)
     
-    MaskedData = ThisData.iloc[~flagmask,:]
-    MaskedData = MaskedData.drop(['Flags'], axis = 1)
+    onlyminArea = minFaceFlag & ~flagmask  
+    ThisData.loc[onlyminArea,'Flags'] = -5
     
-    ThisData.iloc[~flagmask, 5] = 1
-    flagmask2 = flagmask & (exfl != -5)
+    MaskedData = ThisData.iloc[~(flagmask | minFaceFlag),:]
+    MaskedData = MaskedData.drop(['Flags'], axis = 1)
+    # MaskedData = ThisData
+    
+    ThisData.iloc[~(flagmask | minFaceFlag), 5] = 1
+    flagmask2 = (flagmask | minFaceFlag) & ~onlyminArea
+    # flagmask2 = (flagmask & ~minFaceFlag)
     ThisData.iloc[flagmask2, 5] = -1
     
     flagStad = ThisData['Flags'].value_counts()
