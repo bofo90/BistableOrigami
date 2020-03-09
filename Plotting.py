@@ -285,7 +285,7 @@ def CreateLegend(ax, location = 0):
 
     return
 
-def ConvSim(redDesign,redFlags, colormap):
+def ConvSim(redDesign,redFlags, colormap, save = False, Folder_name = '', NameFig = ''):
     
     flags = np.unique(redFlags['Flags'])
     flags = flags[flags < 0]
@@ -318,12 +318,12 @@ def ConvSim(redDesign,redFlags, colormap):
     cmap = matl.cm.get_cmap(colormap,np.size(allStates))
     color = cmap(np.linspace(0,1,np.size(allStates)))   
     
-    fig = plt.figure(figsize=(cm2inch(4.3), cm2inch(3.1)))
+    fig = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
     ax1 = plt.subplot(111)
-    fig.subplots_adjust(top=0.982,
-bottom=0.19,
-left=0.25,
-right=0.98)
+    fig.subplots_adjust(top=0.968,
+bottom=0.099,
+left=0.136,
+right=0.982)
     
     NiceGraph2D(ax1, 'Std.Dev.', 'Sim. Amount')
     
@@ -331,7 +331,12 @@ right=0.98)
         ax1.bar(stddev, totsim[:,i],bottom=np.sum(totsim[:,:i],axis = 1), width = 0.05,
                 color = color[i], label = allStates[i], align = 'center')
     
-    CreateLegend(ax1, location = 0)
+    CreateLegend(ax1, location = 2)
+    
+    if save: 
+        fig.savefig(Folder_name + '/Images/' + NameFig + '_CB.pdf', transparent = True)
+        fig.savefig(Folder_name + '/Images/' + NameFig + '_CB.png', transparent = True)
+    return
     
     
     return

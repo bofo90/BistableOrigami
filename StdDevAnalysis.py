@@ -13,14 +13,14 @@ import Plotting as plot
 
 plt.close('all')
 
-possibleStDv = np.arange(0.05,0.55,0.05)
+possibleStDv = np.arange(0.05,2.05,0.05)
 
 allDesigns = pd.DataFrame()
 allFlags = pd.DataFrame()
 
 for stddev in possibleStDv:
 
-    Folder_name = "Results/SingleVertex4/2CFF/28-Feb-2020_%.2f_StDev" %stddev
+    Folder_name = "Results/SingleVertex4/2CFF/24-Feb-2020_%.2f_StDev" %stddev
     
     if not os.path.isdir(Folder_name + '/Images/'):
         os.mkdir(Folder_name + '/Images/')
@@ -52,36 +52,40 @@ for stddev in possibleStDv:
 allDesigns = allDesigns.reset_index(level=0, drop =True)
 allFlags = allFlags.reset_index(level=0, drop =True)
 #%%
-cutkappa = 0.1
-cutang = 1.571#2.356#0.785
+# for cutkappa in np.array([0.001,0.01,0.1,1]):
+#     for cutang in np.array([0.785,1.571,2.356]):
+plt.close('all')
+cutkappa = 0.001
+cutang = 0.785#2.356#0.785
 redDesignsMask = (np.round(allDesigns['kappa'],3)==cutkappa) & (np.round(allDesigns['restang'],3)==cutang)
 redFlagsMask = (np.round(allFlags['kappa'],3)==cutkappa) & (np.round(allFlags['restang'],3)==cutang)
 redDesign = allDesigns.iloc[redDesignsMask.to_numpy(),:]
 redFlags = allFlags.iloc[redFlagsMask.to_numpy(),:]
 
-#%%
+saveName = 'kappa_%.3f_restang_%.3f/' %(cutkappa, cutang)
+saveFolder = Folder_name + '/Images/' + saveName
+if not os.path.isdir(saveFolder):
+    os.mkdir(saveFolder)
+
 redDesAng = redDesign.iloc[:,8:8+numvertex].values
-redDesign['StableStateAll'] = raa.countStableStates(redDesAng, 0.7, 'centroid')
+redDesign['StableStateAll'] = raa.countStableStates(redDesAng, 0.5, 'centroid')
 redDesign['StableStateAll'] = raa.standarizeStableStates(redDesign['StableStateAll'], redDesAng, onlysign = False)
 redDesign.iloc[(redDesign['StableStateAll'] > 6).to_numpy(),-1] = 7
 
 colormap = 'Set2'
-#%%
+
 ##### Plot first three angles of all vertices with different colors representing the stable state
 plot.Angles3D(redDesAng, redDesign['StableStateAll'].values, colormap)
 
-#%%
 ##### Plotting the standard deviation against the stable states to see when does it appears
 plot.XYperZ(redDesign, -2, r'$StdDev$', -1, r'$StableState$', 1, -1, colormap, save = False, Folder_name = Folder_name, NameFig = 'AreaFaces')
 
-
-#%%
 ###### Plotting the Std Dev against the amount of stable state per stable state and against the amount of flags per flag
 # plot.XYperZ(redDesign, -2, r'$StdDev$', -3, r'$AmountStSt$', -1, -1, colormap, save = False, Folder_name = Folder_name, NameFig = 'AreaFaces')
 # plot.XYperZ(redFlags, -1, r'$StdDev$', 1, r'$AmountFLags$', 0, 0, 'jet', save = False, Folder_name = Folder_name, NameFig = 'AreaFaces')
 
 # plot.ConvSim(redDesign,redFlags, 'jet')
-plot.ConvSim(redDesign,redFlags, 'Set3')
+plot.ConvSim(redDesign,redFlags, 'Set3', save = False, Folder_name = Folder_name, NameFig = saveName + 'ConvSim')
 
 
 
