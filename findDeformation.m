@@ -235,7 +235,7 @@ if ~exist(folderName, 'dir')
 end
     
 opt.KtargetAngle = 0;
-parfor i = 1:opt.numIterations
+for i = 1:opt.numIterations
     
     %%%%%% Folding part %%%%%%
     %Perturb the structure
@@ -294,6 +294,7 @@ for anglestep = 2:steps+1
     % t1 = toc;
     %Determine new equilibrium
     [V(:,2),~,exfltemp,output]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
+%     [V(:,2),~,exfltemp,output]= fsolve(@(u) Energy(u,extrudedUnitCell,opt),u0);
     u0 = V(:,2);
     if exfltemp ~= 1
         exfl(2,1) = exfltemp;
@@ -388,13 +389,8 @@ end
 
 %ENERGY ASSOCIATED TO HINGE BENDING
 [theta, Jhinge]=getHinge(extrudedUnitCell, extrudedUnitCellPrev);
-ThetaVar = theta-extrudedUnitCell.theta;%*
-Ehinge=4/(opt.restang^4)*sum(opt.Khinge.*(0.25*ThetaVar.^4+...
-    ThetaVar.^3.*extrudedUnitCell.theta+...
-    ThetaVar.^2.*extrudedUnitCell.theta.^2));
-dE=dE+4/(opt.restang^4)*Jhinge'*(opt.Khinge.*(ThetaVar.^3+...
-    3*ThetaVar.^2.*extrudedUnitCell.theta+...
-    2*ThetaVar.*extrudedUnitCell.theta.^2));
+Ehinge = opt.Khinge/(opt.restang^4)*sum((theta.^2-extrudedUnitCell.theta.^2).^2);
+dE = dE + 4*opt.Khinge/(opt.restang^4)*Jhinge'*(theta.^3-extrudedUnitCell.theta.^2.*theta);
 
 %ENERGY ASSOCIATED TO TARGET HINGE ANGLES
 if size(extrudedUnitCell.angleConstr,1)==0
@@ -417,7 +413,7 @@ E=Eedge+Ediag+Eface+Ehinge+EtargetAngle;
 function [C,Ceq,DC,DCeq]=nonlinearConstr(u,extrudedUnitCell,opt)
 
 C1=[]; C2=[]; C3=[];
-DC1=[]; DC2=[];
+DC1=[]; DC2=[]; DC3 = [];
 Ceq1=[]; Ceq2=[]; Ceq3=[]; Ceq4=[];
 DCeq1=[]; DCeq2=[]; DCeq3=[]; DCeq4=[];
 
