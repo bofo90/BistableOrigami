@@ -442,12 +442,13 @@ if strcmp(opt.constrEdge,'off') && ~isnan(opt.maxStretch)
 end
 %MINIMUM FACE AREA
 if ~isnan(opt.maxArea)
-    dFace = getFace2(extrudedUnitCell);
+    [dFace, DdFace] = getFace2(extrudedUnitCell);
     C3 = [opt.maxArea-dFace];
+    DC3 = [-DdFace];
 end
 
 C = [C1; C2; C3];
-DC = [DC1; DC2]';
+DC = [DC1; DC2; DC3]';
 
 
 %%%%%%%%%%%%%%%%%%%%%%
@@ -609,16 +610,55 @@ for i=1:length(extrudedUnitCell.face)
     end
 end
 
-function dFace=getFace2(extrudedUnitCell)
-
+function [dFace, Jface] =getFace2(extrudedUnitCell)
 dFace=zeros(length(extrudedUnitCell.face),1);
+Jface=zeros(length(extrudedUnitCell.face),size(extrudedUnitCell.node,1)*3);
+
 for i=1:length(extrudedUnitCell.face)
-    coor1=extrudedUnitCell.node(extrudedUnitCell.face{i}(1),:);
-    coor2=extrudedUnitCell.node(extrudedUnitCell.face{i}(2),:);
-    coor3=extrudedUnitCell.node(extrudedUnitCell.face{i}(3),:);
-    a=cross(coor2-coor1,coor3-coor1);
-    dFace(i) = 1/2*sqrt(a*a');
+    positions = extrudedUnitCell.face{i}(1:3);
+    p = [positions*3-2;positions*3-1;positions*3];
+    [J, a] = getFace2Jacobian(extrudedUnitCell.node(positions,:));
+    dFace(i) = a;
+    Jface(i,p(:)) = J;
 end
+
+function [J, area] = getFace2Jacobian(pos)
+u1 = pos(1,:);
+u2 = pos(2,:);
+u3 = pos(3,:);
+
+da=[-1 0 0
+    0 -1 0
+    0 0 -1
+    1 0 0
+    0 1 0
+    0 0 1
+    0 0 0
+    0 0 0
+    0 0 0];
+db=[-1 0  0
+     0  -1 0
+     0  0 -1
+     0  0  0
+     0  0  0
+     0  0  0
+     1  0  0
+     0  1  0
+     0  0  1];
+ 
+ a = u2-u1;
+ b = u3-u1;
+ 
+ n = crossvector(a',b');
+ mag_n = sqrt(n'*n);
+ area = 0.5*mag_n;
+ 
+ dn = crossvector(da',b')+crossvector(a',db');
+ J = 0.5*n'*dn/mag_n;
+
+
+function w=crossvector(u,v)
+w = [u(2,:).*v(3,:)-u(3,:).*v(2,:);-u(1,:).*v(3,:)+u(3,:).*v(1,:);u(1,:)*v(2,:)-u(2,:)*v(1,:)];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
