@@ -235,7 +235,7 @@ if ~exist(folderName, 'dir')
 end
     
 opt.KtargetAngle = 0;
-for i = 1:opt.numIterations
+parfor i = 1:opt.numIterations
     
     %%%%%% Folding part %%%%%%
     %Perturb the structure
@@ -606,15 +606,18 @@ for i=1:length(extrudedUnitCell.face)
 end
 
 function [dFace, Jface] =getFace2(extrudedUnitCell)
-dFace=zeros(length(extrudedUnitCell.face),1);
-Jface=zeros(length(extrudedUnitCell.face),size(extrudedUnitCell.node,1)*3);
+dFace=zeros(length(extrudedUnitCell.center)*4,1);
+Jface=zeros(length(extrudedUnitCell.center)*4,size(extrudedUnitCell.node,1)*3);
 
-for i=1:length(extrudedUnitCell.face)
-    positions = extrudedUnitCell.face{i}(1:3);
-    p = [positions*3-2;positions*3-1;positions*3];
-    [J, a] = getFace2Jacobian(extrudedUnitCell.node(positions,:));
-    dFace(i) = a;
-    Jface(i,p(:)) = J;
+for i=1:length(extrudedUnitCell.center)
+    allnodes_pos = [1:4,1]+(i-1)*4;
+    for j = 1:4
+        positions = [extrudedUnitCell.center(i), extrudedUnitCell.allnodes(allnodes_pos(j)), extrudedUnitCell.allnodes(allnodes_pos(j+1))]
+        p = [positions*3-2;positions*3-1;positions*3];
+        [J, a] = getFace2Jacobian(extrudedUnitCell.node(positions,:));
+        dFace((i-1)*4+j) = a;
+        Jface((i-1)*4+j,p(:)) = J;
+    end
 end
 
 function [J, area] = getFace2Jacobian(pos)
