@@ -13,7 +13,7 @@ tic
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-opt=initOpt('template','Tessellation','numVert', 4,'vertexType', "2CFF",...
+opt=initOpt('template','SingleVertex','numVert', 4,'vertexType', "2CFF",...
             'tessellationType', '25','xrep', 2, 'yrep', 2, 'periodic', 'off',...
             'restang', 2.356, 'angDesign', [0.00 90 180.00 270]*pi/180,...
             'analysis','result','analysisType','randomPert',...
@@ -34,7 +34,7 @@ opt.options=optimoptions('fmincon','GradConstr','on','GradObj','on',...
                          'Algorithm', opt.folAlgor, 'OutputFcn',@outfun,...               
                          'RelLineSrchBnd', 0.01, 'RelLineSrchBndDuration', 5000);
                      
-opt.file = '/19-Mar-2020_temp';
+opt.file = '/19-Mar-2020_';
 switch opt.analysis
     case{'info'}
         [extrudedUnitCell,opt]=obtainOrigami(opt);
@@ -43,9 +43,9 @@ switch opt.analysis
         %when using des = 'non' the opt.angDes need to be specified
         %possible des ["2C", "GFF", "2OFF","3S", "2OM1", "2OM2", "2NM1", "2NM2", "2OL", "2NL", "2OS", "2NS", "Z1", "Z2", "Y1", "Y2", "X2"];
         des = opt.vertexType;
-        ang = linspace(0,pi,5);
+        ang = linspace(0,pi,27);
         ang = ang(2:end-1);
-        kap = logspace(-3,0,4); %opt.Khinge;
+        kap = [10^-3, logspace(-1,0,2)]; %opt.Khinge;
         xrep = opt.xrep; %only used when having tessellations
         yrep = opt.yrep; %only used when having tessellations
         findDeformation(opt, des, xrep, yrep, ang, kap)
