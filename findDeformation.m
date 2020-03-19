@@ -294,7 +294,6 @@ for anglestep = 2:steps+1
     % t1 = toc;
     %Determine new equilibrium
     [V(:,2),~,exfltemp,output]=fmincon(@(u) Energy(u,extrudedUnitCell,opt),u0,[],[],Aeq,Beq,[],[],@(u) nonlinearConstr(u,extrudedUnitCell,opt),opt.options);
-%     [V(:,2),~,exfltemp,output]= fsolve(@(u) Energy(u,extrudedUnitCell,opt),u0);
     u0 = V(:,2);
     if exfltemp ~= 1
         exfl(2,1) = exfltemp;
