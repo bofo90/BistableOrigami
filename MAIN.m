@@ -16,7 +16,7 @@ tic
 opt=initOpt('template','SingleVertex','numVert', 4,'vertexType', "2CFF",...
             'tessellationType', '25','xrep', 2, 'yrep', 2, 'periodic', 'off',...
             'restang', 2.356, 'angDesign', [0.00 90 180.00 270]*pi/180,...
-            'analysis','savedata','analysisType','randomPert',...
+            'analysis','savedata','analysisType','toRestAng',...
             'numIterations', 1000,'RandstDev', 0.2,...
             'figDPI',200, 'saveMovie', 'off', 'safeMovieAntiAlias', 0,...
             'folAlgor', 'sqp','relAlgor', 'sqp',...
@@ -34,7 +34,7 @@ opt.options=optimoptions('fmincon','GradConstr','on','GradObj','on',...
                          'Algorithm', opt.folAlgor, 'OutputFcn',@outfun,...               
                          'RelLineSrchBnd', 0.01, 'RelLineSrchBndDuration', 5000);
                      
-opt.file = '/19-Mar-2020_0.00_ 90.00_180.00_270.00_';
+opt.file = '/20-Mar-2020_0.00_ 90.00_180.00_270.00_';
 switch opt.analysis
     case{'info'}
         [extrudedUnitCell,opt]=obtainOrigami(opt);
@@ -44,8 +44,8 @@ switch opt.analysis
         %possible des ["2C", "GFF", "2OFF","3S", "2OM1", "2OM2", "2NM1", "2NM2", "2OL", "2NL", "2OS", "2NS", "Z1", "Z2", "Y1", "Y2", "X2"];
         des = opt.vertexType;
         ang = linspace(0,pi,27);
-        ang = ang(2:end-1);
-        kap = [10^-3, logspace(-1,0,2)]; %opt.Khinge;
+        ang = ang(2:end-1);%opt.restang; %
+        kap = [10^-3, logspace(-1,0,2)];%opt.Khinge; %
         xrep = opt.xrep; %only used when having tessellations
         yrep = opt.yrep; %only used when having tessellations
         findDeformation(opt, des, xrep, yrep, ang, kap)
@@ -55,7 +55,7 @@ switch opt.analysis
         ReadAndPlot(opt,'oneDes', des) %other option is 'allDes', 'oneDes'
     case{'plot'}
         opt.sim =1;   %only used when selecting option 'oneRes'
-        PlotResults(opt,'allRes') %other options is 'allRes','ststRes','oneRes'
+        PlotResults(opt,'everyRes') %other options is 'allRes','ststRes','oneRes','everyRes'
 end
 
 

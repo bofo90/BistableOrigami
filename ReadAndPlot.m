@@ -88,6 +88,7 @@ PosStad = zeros(length(allFiles)-4,size(extrudedUnitCell.face,2)+1);
 Hinges = zeros(length(allFiles)-4,size(extrudedUnitCell.allnodes,2)/4+1);
 AllAngles = zeros(length(allFiles)-4,size(extrudedUnitCell.allhinges,2)+1);
 dirs = 0;
+sim = 0;
 for ct = 1:length(allFiles)
     if allFiles(ct).isdir || strcmp(allFiles(ct).name(1:end-4), 'metadata')
         % skip all directories and metadata file
@@ -99,7 +100,12 @@ for ct = 1:length(allFiles)
     lofile = load(strcat(folderResults,'/', allFiles(ct).name));
 %             fprintf('Saving data %d\n', ct);
 
-    sim = getSimulation(allFiles(ct).name);
+    temp_sim = getSimulation(allFiles(ct).name);
+    if isnan(temp_sim)
+        sim = sim +1;
+    else
+        sim = temp_sim;
+    end
 
     curv = getCurvature(extrudedUnitCell, opt, lofile.result);
     areas = getAreas(extrudedUnitCell, lofile.result);
@@ -195,6 +201,10 @@ fclose(fid) ;                                          % Closes file.
 function hingeSet = getSimulation(fileName)
 
 parsedName = strsplit(fileName(1:end-4), '_');
+if size(parsedName,2)<2
+    hingeSet = nan;
+    return 
+end
 Angl1 = parsedName{2};
 hingeSet = str2double(Angl1);
 
