@@ -172,7 +172,7 @@ def XYperZ(allDesigns, x, xname, y, yname, z, stst_col, colormap, save = False, 
         for k in np.arange(np.size(stst)):
             thisstst = thisDes[thisDes.iloc[:, stst_col] == stst[k]]
             
-            ax1.scatter(thisstst.iloc[:,x], thisstst.iloc[:,y], c = [color[k]], s = 8)
+            ax1.scatter(thisstst.iloc[:,x], thisstst.iloc[:,y], c = matl.colors.rgb2hex(color[k]), s = 8)
         
         fig1.show()
         if save:

@@ -16,7 +16,7 @@ import Plotting as plot
 #%%
 plt.close('all')
 
-Folder_name = "Results/SingleVertex4/2CFF/19-Mar-2020_0.00_ 90.00_180.00_270.00_"
+Folder_name = "Results/SingleVertex4/2CFF/20-Mar-2020_0.00_ 90.00_180.00_270.00_"
 
 allDesigns = pd.DataFrame()
 allFlags = pd.DataFrame()
@@ -61,7 +61,7 @@ colormap = 'Set2'
 plt.close('all')    
     
 ##### Plotting the minFace of each stable state to make sure we are inside the constraint
-plot.XYperZ(allDesigns, 1, r'$\theta_0$', 7, r'$Area$', 0, -3, colormap, save = True, Folder_name = Folder_name, NameFig = 'AreaFaces')
+plot.XYperZ(allDesigns, 1, r'$\theta_0$', 7, r'$Area$', 0, -1, colormap, save = True, Folder_name = Folder_name, NameFig = 'AreaFaces')
 
 
 #%%
