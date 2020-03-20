@@ -58,6 +58,12 @@ for a = ang
                 nonlinearFoldingMulti(extrudedUnitCell, opt, opt.angleConstrFinal(1).val);
             case 'randomPert'
                 nonlinearFoldingRand(extrudedUnitCell, opt, opt.RandstDev);
+            case 'toRestAng'
+                %%%%% This is only valid for single vertices
+                possibleComb = [1 1 1 1; 1 -1 1 -1; 1 1 1 -1; 1 1 -1 -1; 1 1 0 0];
+                for comb = 1:size(possibleComb,1)
+                    nonlinearFoldingOne(extrudedUnitCell, opt, [1:4;possibleComb(comb,:)*opt.restang]');
+                end
         end
         
     end
@@ -180,8 +186,10 @@ extrudedUnitCell.angleConstr=[];
 result = [];
 E=[];
 exfl= [];
-u0=zeros(3*size(extrudedUnitCell.node,1),1);
-theta0=zeros(size(extrudedUnitCell.theta));
+u0 = randn(3*size(extrudedUnitCell.node,1),1)*opt.RandstDev^2;
+theta0 = getSimpleAngle(u0, extrudedUnitCell);
+% u0=zeros(3*size(extrudedUnitCell.node,1),1);
+% theta0=zeros(size(extrudedUnitCell.theta));
 
 %Create file for saving the results
 folderName = strcat(opt.file,'/mat');
