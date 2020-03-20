@@ -27,7 +27,7 @@ def ReadFile(folder_name):
     metadata['kappa'] = np.ones(simLen)*kap
     if oldSample(folder_name):
         metadata['kappa'] = metadata['kappa']/4
-    metadata['restang'] = np.ones(simLen)*ang   
+    metadata['restang'] = np.ones(simLen)*ang/np.pi   
     
     numhin, numedg = ReadMetadata(folder_name+file_metadata)
         
@@ -74,7 +74,7 @@ def oldSample(folder_name):
 
 def maskBadResults(ThisData, printFlags = False, returnStad = False):
     
-    minFaceFlag = (ThisData['minFace']<=0.11).values
+    minFaceFlag = (ThisData['minFace']<=0.105).values
     
     if printFlags:
         print(ThisData['Flags'].value_counts())
@@ -113,7 +113,7 @@ def orderAngles(angles, ucsize, simulations):
     for sim in np.arange(simulations):
         sym = ''
         ver = np.array(angles[sim,:])
-        if np.sum(np.sign(np.around(ver, decimals = 0))) < 0: ### sort to have mayority positive angles
+        if np.sum(np.sign(np.around(ver, decimals = 1))) < 0: ### sort to have mayority positive angles
             # ver = ver[::-1]*(-1)
             ver = ver*(-1)
             sym = sym + 'm'
@@ -262,11 +262,11 @@ def standarizeStableStates(matUCStSt, allUCang, onlysign = False):
         ststUC[oldStSt-1] = -i-1
         
     ##### get stable states around the the flat configuration
-    ststloc = magangvec <= 0.4
-    oldStSt = np.unique(matUCStSt[ststloc])
-    if (ststUC[oldStSt-1]<0).any():
-        print("\nError: double standarizing!!!!! you need to check the standarization of the flat stable states!!!\n")
-    ststUC[oldStSt-1] = -np.size(standstst,0)-1
+    # ststloc = magangvec <= 0.4
+    # oldStSt = np.unique(matUCStSt[ststloc])
+    # if (ststUC[oldStSt-1]<0).any():
+    #     print("\nError: double standarizing!!!!! you need to check the standarization of the flat stable states!!!\n")
+    # ststUC[oldStSt-1] = -np.size(standstst,0)-1
         
     
     oldSS = np.unique(matUCStSt)
