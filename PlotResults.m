@@ -29,16 +29,21 @@ switch flag
             opt.restang = allFiles(j,4);
             opt.sim = allFiles(j,2);
             opt.StSt = allFiles(j,3);
-            SelectResult(extrudedUnitCell, opt);
+            SelectResult(extrudedUnitCell, opt, true);
         end
 
     case {'oneRes'}
         opt.StSt = 0;       
-        SelectResult(extrudedUnitCell, opt)
+        SelectResult(extrudedUnitCell, opt, true)
+        
+    case {'everyRes'}  
+        opt.StSt = 0;
+        opt.sim = 0;
+        SelectResult(extrudedUnitCell, opt, false)
 end
 
 
-function SelectResult(extrudedUnitCell,opt)
+function SelectResult(extrudedUnitCell,opt, check)
 %get file of results
 
 fileResults = strcat(opt.file,sprintf('/RestAng_%.3f/kappa_%2.5f', opt.restang, opt.Khinge));
@@ -56,8 +61,12 @@ for ct = 1:length(allFiles)
     end
     
     resfilename = allFiles(ct).name;
-    hingeSet = getSimulation(resfilename);
-    if hingeSet ~= opt.sim
+    if check
+        hingeSet = getSimulation(resfilename);
+    else
+        hingeSet = 0;
+    end
+    if (hingeSet ~= opt.sim)
         continue;
     end
 
