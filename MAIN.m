@@ -45,7 +45,9 @@ switch opt.analysis
         des = opt.vertexType;
         ang = linspace(0,pi,27);
         ang = ang(2:end-1);%opt.restang; %
-        kap = opt.Khinge; %[10^-3, logspace(-1,0,2)];%
+        kap = logspace(-3,-2,9);
+        kap = kap(2:end-1);
+        kap = [kap kap*10 kap*100]; %[10^-3, logspace(-1,0,2)];% opt.Khinge
         xrep = opt.xrep; %only used when having tessellations
         yrep = opt.yrep; %only used when having tessellations
         findDeformation(opt, des, xrep, yrep, ang, kap)
