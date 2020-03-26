@@ -95,7 +95,7 @@ plt.close('all')
 
 ##### Plotting the Curvature of each stable state
 ststcol = -1
-plot.XYperZ(allDesigns, 0, r'$\kappa$', 6, r'$K$', 1, ststcol, colormap, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
+plot.XYperZ(allDesigns, 0, r'$\kappa$', 6, r'$K_\mathregular{G}$', 1, ststcol, colormap, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
 plot.CreateColorbar(allDesigns.iloc[:,ststcol], colormap, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
 
 #%%

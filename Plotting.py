@@ -149,7 +149,7 @@ def XYperZ(allDesigns, x, xname, y, yname, z, stst_col, colormap, save = False, 
         ax1 = plt.subplot(111)
         fig1.subplots_adjust(top=0.982,
         bottom=0.23,
-        left=0.225,
+        left=0.280,
         right=0.940)
         
         thisDesBool = allDesigns.iloc[:,z] == variables[i]

@@ -113,3 +113,28 @@ fig1.show()
 fig1.savefig('D:/Documents/Git Programs/nonlinear-bas_Origami/Results/Bistability.pdf', transparent = True)
 fig1.savefig('D:/Documents/Git Programs/nonlinear-bas_Origami/Results/Bistability.png', transparent = True)
 
+
+#%%
+
+fig2 = plt.figure(figsize=(cm2inch(7), cm2inch(5)))
+ax2 = plt.subplot(111)
+fig2.subplots_adjust(top=0.98,
+bottom=0.145,
+left=0.015,
+right=0.98)
+
+NiceGraph2DCenter(ax2, r'$\theta$', r'$E_\mathregular{H}$', mincoord = [-1.6*np.max(restangles),0], maxcoord = [1.6*np.max(restangles),1.5*kappa], 
+            divisions = [[-0.5,0,0.5],[kappa]], buffer = [0, 0])
+
+ax2.set_xticklabels([r"$-\theta_0$",r"$0$",r"$\theta_0$"])
+ax2.set_yticklabels([r"$k_\mathregular{H}$"])
+ax2.xaxis.set_label_coords(0.97, 0.13)
+ax2.yaxis.set_label_coords(0.57, 0.85)
+
+i = 1
+restang = restangles[i]
+    
+ax2.plot(angle, force(angle, kappa, restang), color = '#36648B', linewidth = 1)
+
+fig2.savefig('D:/Documents/Git Programs/nonlinear-bas_Origami/Results/BistabilitySingle.pdf', transparent = True)
+fig2.savefig('D:/Documents/Git Programs/nonlinear-bas_Origami/Results/BistabilitySingle.png', transparent = True)

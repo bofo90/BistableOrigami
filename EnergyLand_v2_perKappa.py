@@ -16,7 +16,7 @@ import Plotting as plot
 #%%
 plt.close('all')
 
-Folder_name = "Results/SingleVertex4/2CFF/20-Mar-2020_0.00_ 90.00_180.00_270.00_"
+Folder_name = "Results/SingleVertex4/2CFF/19-Mar-2020_0.00_ 90.00_180.00_270.00_"
 
 allDesigns = pd.DataFrame()
 allFlags = pd.DataFrame()
@@ -69,7 +69,7 @@ plt.close('all')
 
 ##### Plotting the Curvature of each stable state
 ststcol = -1
-plot.XYperZ(allDesigns,  1, r'$\theta_0$', 6, r'$k_\mathregular{G}$', 0, ststcol, colormap, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
+plot.XYperZ(allDesigns,  1, r'$\theta_0$', 6, r'$K_\mathregular{G}$', 0, ststcol, colormap, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
 plot.CreateColorbar(allDesigns.iloc[:,ststcol], colormap, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
 
 #%%
