@@ -307,14 +307,20 @@ def countstandardStableStates(allUCang, onlysign = False):
     if onlysign:
         allUCang = np.sign(np.round(allUCang, 1))
     magangvec = np.sqrt(np.sum(allUCang*allUCang, 1))
-    angvecunit = np.round(allUCang / magangvec[:,None],1)
+    angvecunit = np.round(allUCang / magangvec[:,None],3)
     
-    for i in np.arange(np.size(standstst,0)):
-        projection = np.sqrt(np.absolute(np.sum(angvecunit*standstst[i,:],1)))
-        ststloc = (projection > 0.97)
-        if (newStSt[ststloc] != 0).any():
-            print("\nError: double standarizing!!!!! you need to check the standarization of the typical stable states!!!\n")
-        newStSt[ststloc] = i+1
+    # for i in np.arange(np.size(standstst,0)):
+    #     projection = np.sqrt(np.absolute(np.sum(angvecunit*standstst[i,:],1)))
+    #     ststloc = (projection > 0.9612)
+    #     if (newStSt[ststloc] != 0).any():
+    #         print("\nError: double standarizing!!!!! you need to check the standarization of the typical stable states!!!\n")
+    #     newStSt[ststloc] = i+1
+    
+    for i in np.arange(np.size(allUCang,0)):
+        projection = np.sqrt(np.absolute(np.sum(angvecunit[i,:]*standstst,1)))
+        ststloc = np.argmax(projection)
+        if (projection[ststloc] > 0.95):
+            newStSt[i] = ststloc+1
         
     ##### get stable states around the the flat configuration
     # ststloc = magangvec <= 0.4
@@ -326,6 +332,22 @@ def countstandardStableStates(allUCang, onlysign = False):
     newSSnames = np.arange(np.size(i))+1
         
     return newSSnames[newSS].astype(int)  
+
+def getAng4D(angles):
+    
+    angles = np.roll(angles, 0,axis = 1)
+    
+    magangvec = np.sqrt(np.sum(angles*angles, 1))
+    angvecunit = angles / magangvec[:,None]
+    
+    ang_4D = np.zeros((np.size(angles,0),3))
+    
+    for i in np.arange(2):
+        ang_4D[:,i] = np.arctan(np.sqrt(np.sum(angvecunit[:,i+1:]**2,1))/angvecunit[:,i])+np.pi/2
+        
+    ang_4D[:,-1] = 2*np.arctan(angvecunit[:,-1]/np.sqrt(np.sum(angvecunit[:,-2:]**2,1))+angvecunit[:,-2])+np.pi
+    
+    return ang_4D
 
 def extractStableStates(matUCStSt):
     
