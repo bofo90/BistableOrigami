@@ -204,6 +204,26 @@ def countStableStates(finalAngles, distance, method, plot = False):
     
     return inverse
 
+def countStableStatesKmean(finalAngles, dis):
+    
+    from sklearn.cluster import KMeans
+    
+    N = np.size(finalAngles,0)
+    
+    if N <= 1:
+        return [1]
+    
+    for i in np.arange(500)+1:        
+        kmeans = KMeans(n_clusters=i, max_iter=1000, verbose = False, random_state = 0 )
+        kmeans.fit_transform(finalAngles)
+        if np.sqrt(kmeans.inertia_/(N-1)) < dis: ### the stad. dev. of angles in one cluster should not be more than dis
+            break
+
+    if i == 500:
+        print('The clustering has reached its maximum\n')
+    inverse = kmeans.labels_
+    return inverse
+
 def makeSelectionPerStSt(allData, simBound):
     
     
@@ -277,6 +297,35 @@ def standarizeStableStates(matUCStSt, allUCang, onlysign = False):
         newStSt[matUCStSt == old] = new
         
     return newStSt.astype(int)
+
+def countstandardStableStates(allUCang, onlysign = False):
+    
+    standstst = np.round(np.array([[0,np.sqrt(2),0,np.sqrt(2)],[1,1,1,1],[-1,1,-1,1],[-1,1,1,1],[-1,-1,1,1]])/2,1)
+    
+    newStSt = np.zeros(np.size(allUCang,0))
+    
+    if onlysign:
+        allUCang = np.sign(np.round(allUCang, 1))
+    magangvec = np.sqrt(np.sum(allUCang*allUCang, 1))
+    angvecunit = np.round(allUCang / magangvec[:,None],1)
+    
+    for i in np.arange(np.size(standstst,0)):
+        projection = np.sqrt(np.absolute(np.sum(angvecunit*standstst[i,:],1)))
+        ststloc = (projection > 0.97)
+        if (newStSt[ststloc] != 0).any():
+            print("\nError: double standarizing!!!!! you need to check the standarization of the typical stable states!!!\n")
+        newStSt[ststloc] = i+1
+        
+    ##### get stable states around the the flat configuration
+    # ststloc = magangvec <= 0.4
+    # if (newStSt[ststloc] != 0).any():
+    #     print("\nError: double standarizing!!!!! you need to check the standarization of the flat stable states!!!\n")
+    # newStSt[ststloc] = i+2
+        
+    [i, notdelSS, newSS] = np.unique(newStSt, return_index=True, return_inverse=True)
+    newSSnames = np.arange(np.size(i))+1
+        
+    return newSSnames[newSS].astype(int)  
 
 def extractStableStates(matUCStSt):
     
