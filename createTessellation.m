@@ -7,6 +7,7 @@ extrudedUnitCell = removeDuplicateHinges(extrudedUnitCell,opt);
 extrudedUnitCell = makeSquareFaces(extrudedUnitCell);
 extrudedUnitCell = addDiagonals(extrudedUnitCell);
 extrudedUnitCell = calculateLength(extrudedUnitCell);
+extrudedUnitCell.alledges = getAllEdges(extrudedUnitCell);
 extrudedUnitCell.theta = ones(size(extrudedUnitCell.nodeHingeEx,1),1)*opt.restang;
 if strcmp(opt.periodic,'on')
     extrudedUnitCell = getPeriodicity(extrudedUnitCell,unitCell,opt);
@@ -210,6 +211,30 @@ for i = 1:length(extrudedUnitCell.face)
 end
 
 extrudedUnitCell.edge = sort(extrudedUnitCell.edge,2);
+
+function edgesOrd = getAllEdges(extrudedUnitCell)
+
+edgesOrd = zeros(1,size(extrudedUnitCell.center,2)*8);
+alledges = zeros(size(extrudedUnitCell.center,2)*8,2);
+
+k = 1;
+j = 1;
+for i = 1:size(extrudedUnitCell.center,2)
+    alledges(k:k+3,1) = extrudedUnitCell.center(i);
+    alledges(k:k+3,2) = extrudedUnitCell.allnodes(j:j+3);
+    k = k+4;
+    alledges(k:k+3,1) = extrudedUnitCell.allnodes(j:j+3);
+    alledges(k:k+3,2) = circshift(extrudedUnitCell.allnodes(j:j+3),1);
+    k = k+4;
+    j = j+4;
+end
+
+alledges = sort(alledges,2);
+
+for i = 1:size(extrudedUnitCell.edge,1)
+    loc = ismember(alledges,extrudedUnitCell.edge(i,:),'rows');
+    edgesOrd(loc) = i;
+end
 
 function extrudedUnitCell = getPeriodicity(extrudedUnitCell,unitCell,opt)
 
