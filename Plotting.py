@@ -168,6 +168,10 @@ def XYperZ(allDesigns, x, xname, y, yname, z, stst_col, colormap, save = False, 
             ax1.set_xscale('log')
             ax1.set_xticks([0.001,0.01,0.1,1])
             ax1.set_xlim([0.0007,1.5])
+        
+        if xname == r'$\theta_0/\pi$':
+            ax1.set_xticks([0,0.5,1])
+            ax1.set_xlim([-0.01,1.1])
             
         for k in np.arange(np.size(stst)):
             thisstst = thisDes[thisDes.iloc[:, stst_col] == stst[k]]
@@ -176,9 +180,9 @@ def XYperZ(allDesigns, x, xname, y, yname, z, stst_col, colormap, save = False, 
         
         fig1.show()
         if save:
-            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.3f' %variables[i] +'.pdf', transparent = True)
-            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.3f' %variables[i] +'.png', transparent = True)
-            print(Folder_name + '/Images/' + NameFig + '_' + '%.3f' %variables[i])
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i] +'.pdf', transparent = True)
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i] +'.png', transparent = True)
+            print(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i])
     
     return
 
@@ -216,9 +220,9 @@ def XmultYperZ(allDesigns, x, xname, y, yname, z, save = False, Folder_name = ''
         fig1.show()
                
         if save:
-            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.3f' %variables[i] +'.pdf', transparent = True)
-            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.3f' %variables[i] +'.png', transparent = True)
-            print(Folder_name + '/Images/' + NameFig + '_' + '%.3f' %variables[i])
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i] +'.pdf', transparent = True)
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i] +'.png', transparent = True)
+            print(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i])
     
     return
 
@@ -337,7 +341,55 @@ right=0.982)
         fig.savefig(Folder_name + '/Images/' + NameFig + '_CB.pdf', transparent = True)
         fig.savefig(Folder_name + '/Images/' + NameFig + '_CB.png', transparent = True)
     return
+
+def TotEnergyperZ(allDesigns, x, xname, z, stst_col, colormap, save = False, Folder_name = ''):
     
+    allDesigns = allDesigns.round(8)
+    
+    numhinge = 4
+    numedge = 8
+    
+    stst, color = getcolormap(allDesigns.iloc[:,stst_col].values, colormap)
+    
+    variables = np.unique(allDesigns.iloc[:,z])
+    
+    for i in np.arange(np.size(variables)):
+    
+        fig1 = plt.figure(figsize=(cm2inch(4.3), cm2inch(3.1)))
+        ax1 = plt.subplot(111)
+        fig1.subplots_adjust(top=0.982,
+        bottom=0.23,
+        left=0.280,
+        right=0.940)
+        
+        thisDesBool = allDesigns.iloc[:,z] == variables[i]
+        thisDes = allDesigns[thisDesBool]    
+        
+        NiceGraph2D(ax1, xname, r'$E_{tot}$')
+        
+        Energy_flatSt = thisDes.iloc[:,0]*numhinge#/(thisDes.iloc[:,0]*numhinge+numedge)
+        Energy_foldSt = (2*thisDes.iloc[:,0])#/(thisDes.iloc[:,0]*numhinge+numedge)
+        
+        ax1.set_ylim([-np.max(Energy_flatSt)*0.3, np.max(Energy_flatSt)*1.07])
+            
+        if xname == r'$\kappa$':
+            ax1.set_xscale('log')
+            ax1.set_xticks([0.001,0.01,0.1,1])
+            ax1.set_xlim([0.0007,1.5])
+            
+        ax1.plot(thisDes.iloc[:,x], Energy_flatSt, c = '#36648B', label = 'Flat')
+        ax1.plot(thisDes.iloc[:,x], Energy_foldSt, c = '#D75D4A', label = 'Flat')
+           
+        for k in np.arange(np.size(stst)):
+            thisstst = thisDes[thisDes.iloc[:, stst_col] == stst[k]]
+            
+            ax1.scatter(thisstst.iloc[:,x], thisstst.iloc[:,5], c = matl.colors.rgb2hex(color[k]), s = 8)
+            
+            
+        fig1.show()
+        if save:
+            fig1.savefig(Folder_name + '/Images/' + 'TotEnergyNorm' + '_' + '%.4f' %variables[i] +'.pdf', transparent = True)
+            fig1.savefig(Folder_name + '/Images/' + 'TotEnergyNorm' + '_' + '%.4f' %variables[i] +'.png', transparent = True)
+            print(Folder_name + '/Images/' + 'TotEnergyNorm' + '_' + '%.4f' %variables[i])
     
     return
-

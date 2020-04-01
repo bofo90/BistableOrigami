@@ -39,7 +39,7 @@ for subdir in os.listdir(Folder_name):
         
         simLen = np.size(ThisData,0)
         ThisData.iloc[:,-numvertex::],sym = raa.orderAngles(ThisData.iloc[:,-numvertex::].to_numpy(), numvertex, simLen)
-        ThisData['StableStates'] = raa.countStableStates(ThisData.iloc[:,-numvertex::], 0.6, 'centroid')
+        ThisData['StableStates'] = raa.countStableStatesKmean(ThisData.iloc[:,-numvertex::], 0.1)
         
         selData = raa.makeSelectionPerStSt(ThisData, simLen*0.0)
         
@@ -52,8 +52,12 @@ allFlags = allFlags.reset_index(level=0, drop =True)
 
 ### Get stable states of vertices
 allDesAng = allDesigns.iloc[:,8:8+numvertex].values
-allDesigns['StableStateAll'] = raa.countStableStates(allDesAng, 0.7, 'centroid', True)
-allDesigns['StableStateAll'] = raa.standarizeStableStates(allDesigns['StableStateAll'], allDesAng, onlysign = False)
+# allDesigns['StableStateAll'] = raa.countstandardStableStates(allDesAng, onlysign = False)
+# allDesigns['StableStateAll'] = raa.standarizeStableStates(allDesigns['StableStateAll'], allDesAng, onlysign = False)
+
+ang_4D = raa.getAng4D(allDesAng)
+ang_4D_wpbc = np.concatenate((np.sin(ang_4D/[np.pi, np.pi, np.pi*2]*np.pi*2),np.cos(ang_4D/[np.pi, np.pi, np.pi*2]*np.pi*2)), axis = 1)
+allDesigns['StableStateAll'] = raa.countStableStatesKmean(ang_4D_wpbc, 0.07)
 
 colormap = 'Set2'
         
@@ -61,7 +65,7 @@ colormap = 'Set2'
 plt.close('all')    
     
 ##### Plotting the minFace of each stable state to make sure we are inside the constraint
-plot.XYperZ(allDesigns, 1, r'$\theta_0$', 7, r'$Area$', 0, -1, colormap, save = True, Folder_name = Folder_name, NameFig = 'AreaFaces')
+plot.XYperZ(allDesigns, 1, r'$\theta_0/\pi$', 7, r'$Area$', 0, -1, colormap, save = True, Folder_name = Folder_name, NameFig = 'AreaFaces')
 
 
 #%%
@@ -69,24 +73,31 @@ plt.close('all')
 
 ##### Plotting the Curvature of each stable state
 ststcol = -1
-plot.XYperZ(allDesigns,  1, r'$\theta_0$', 6, r'$K_\mathregular{G}$', 0, ststcol, colormap, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
+plot.XYperZ(allDesigns,  1, r'$\theta_0/\pi$', 6, r'$K_\mathregular{G}$', 0, ststcol, colormap, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
 plot.CreateColorbar(allDesigns.iloc[:,ststcol], colormap, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
 
 #%%
+
+plot.XYperZ(allDesigns,  1, r'$\theta_0/\pi$', 8, r'$\theta_1$', 0, -1, colormap, save = False, Folder_name = Folder_name, NameFig = 'Curvature')
+
+
+#%%
 plt.close('all')   
 
 ##### Plotting the Curvature of each stable state
 ststcol = -1
-plot.XYperZ(allDesigns,1, r'$\theta_0$', 5, r'$E_{tot}$', 0, ststcol, colormap, save = True, Folder_name = Folder_name, NameFig = 'TotEnergyNorm')
+plot.TotEnergyperZ(allDesigns,1, r'$\theta_0/\pi$', 0, ststcol, colormap, save = True, Folder_name = Folder_name)
 plot.CreateColorbar(allDesigns.iloc[:,ststcol], colormap, save = True, Folder_name = Folder_name, NameFig = 'TotEnergyNorm')
 
-plot.XmultYperZ(allDesigns, 1, r'$\theta_0$', [3,4], r'$E_{norm}$', 0, save = True, Folder_name = Folder_name, NameFig = 'Energies')
+plot.XmultYperZ(allDesigns, 1, r'$\theta_0/\pi$', [3,4], r'$E_{norm}$', 0, save = True, Folder_name = Folder_name, NameFig = 'Energies')
 #%%
 plt.close('all')  
 
-##### Plot first three angles of all vertices with different colors representing the stable state
+#### Plot first three angles of all vertices with different colors representing the stable state
 plot.Angles3D(allDesAng, allDesigns['StableStateAll'].values, colormap)
 
 #%%
-raa.SaveForPlot(allDesigns, Folder_name)
+# allDes_copy = allDesigns.copy()
+# allDes_copy['restang'] = allDes_copy['restang']*np.pi
+# raa.SaveForPlot(allDes_copy, Folder_name)
 
