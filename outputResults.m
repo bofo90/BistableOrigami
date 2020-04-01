@@ -253,11 +253,28 @@ if strcmp(opt.analysis,'info')
             coor2=extrudedUnitCell.node(extrudedUnitCell.nodeHingeEx(i,2),:);
             coor=coor1/2+coor2/2;
             coorText=[coor(1)*0.85+coorCenter(1)*0.15,coor(2)*0.85+coorCenter(2)*0.15,coor(3)*0.85+coorCenter(3)*0.15];
+            hline{i} = line([coor(1),coorText(1)],[coor(2),coorText(2)],[coor(3),coorText(3)],'color','k','linestyle',':');
+            hmark{i} = plot3(coor(1),coor(2),coor(3),'*k');
+            htext{i} = text(coorText(1),coorText(2),coorText(3),num2str(i),'fontsize',20);
+    end
+    printHigRes(f4,opt,[opt.template,'_extrudedPolyhedraHinges'],nameFolder);
+    
+    for i=1:size(extrudedUnitCell.nodeHingeEx,1)
+        delete(hline{i});
+        delete(hmark{i});
+        delete(htext{i});
+    end
+    
+    for i=1:size(extrudedUnitCell.edge,1)
+            coor1=extrudedUnitCell.node(extrudedUnitCell.edge(i,1),:);
+            coor2=extrudedUnitCell.node(extrudedUnitCell.edge(i,2),:);
+            coor=coor1/2+coor2/2;
+            coorText=[coor(1)*0.85+coorCenter(1)*0.15,coor(2)*0.85+coorCenter(2)*0.15,coor(3)*0.85+coorCenter(3)*0.15];
             line([coor(1),coorText(1)],[coor(2),coorText(2)],[coor(3),coorText(3)],'color','k','linestyle',':')
             plot3(coor(1),coor(2),coor(3),'*k')
             text(coorText(1),coorText(2),coorText(3),num2str(i),'fontsize',20)
     end
-    printHigRes(f4,opt,[opt.template,'_extrudedPolyhedraHinges'],nameFolder);
+    printHigRes(f4,opt,[opt.template,'_extrudedPolyhedraEdges'],nameFolder);
 
 
 end
