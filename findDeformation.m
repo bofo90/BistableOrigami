@@ -10,7 +10,8 @@ for d = des
     
     for x = xrep
         opt.xrep = x;
-        for y = yrep
+        y = x;
+%         for y = yrep
             opt.yrep = y;
 
             [extrudedUnitCell,opt]=obtainOrigami(opt);
@@ -22,7 +23,7 @@ for d = des
             
             ChangeParam(extrudedUnitCell,opt, ang, kap);
             
-        end
+%         end
     end
 end
 
