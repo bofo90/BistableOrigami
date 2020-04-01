@@ -82,11 +82,12 @@ end
 allFiles = dir(folderResults);
 
 %create folder of data with files
-[fMassDist, fHinge, fEnergy, fAngles] = makeFileswHeaders(folderEnergy, folderResults);
+[fMassDist, fHinge, fEnergy, fAngles, fStretch] = makeFileswHeaders(folderEnergy, folderResults);
 Energies = zeros(length(allFiles)-4,7);
 PosStad = zeros(length(allFiles)-4,size(extrudedUnitCell.face,2)+1);
 Hinges = zeros(length(allFiles)-4,size(extrudedUnitCell.allnodes,2)/4+1);
 AllAngles = zeros(length(allFiles)-4,size(extrudedUnitCell.allhinges,2)+1);
+Stretches = zeros(length(allFiles)-4,size(extrudedUnitCell.allnodes,2)*2+1);
 dirs = 0;
 sim = 0;
 for ct = 1:length(allFiles)
@@ -109,6 +110,7 @@ for ct = 1:length(allFiles)
 
     curv = getCurvature(extrudedUnitCell, opt, lofile.result);
     areas = getAreas(extrudedUnitCell, lofile.result);
+    stretch = getStretch(extrudedUnitCell, opt, lofile.result);
     
     if ~isreal(curv)
         curv = 0;
@@ -130,6 +132,7 @@ for ct = 1:length(allFiles)
 %                 AllAnglesTemp(:,iter) = lofile.result.deform(iter).theta;
 %             end
     AllAngles(ct-dirs,:) = [sim lofile.result.deform(end).theta(extrudedUnitCell.allhinges)'];
+    Stretches(ct-dirs,:) = [sim, stretch'];
 
     close all;
     clear lofile;
@@ -139,11 +142,12 @@ dlmwrite(fMassDist, PosStad, 'delimiter', ',', '-append','precision',7);
 dlmwrite(fHinge, Hinges, 'delimiter', ',', '-append','precision',7);
 dlmwrite(fEnergy, Energies, 'delimiter', ',', '-append','precision',7);
 dlmwrite(fAngles, AllAngles, 'delimiter', ',', '-append','precision',7);
+dlmwrite(fStretch,Stretches, 'delimiter', ',', '-append','precision',7);
 fclose('all');
         
 
 
-function [fileMassDist, fileHinge, fileEnergy, fileAngles] = makeFileswHeaders(folderEnergy, folderResults)
+function [fileMassDist, fileHinge, fileEnergy, fileAngles, fileStretch] = makeFileswHeaders(folderEnergy, folderResults)
 
 if ~exist(folderEnergy, 'dir')
     mkdir(folderEnergy);
@@ -177,6 +181,13 @@ if exist(fileAngles, 'file')
 end
 headersAngles = {'HingeNumber'; 'All Angles'};
 writeHeader(fileAngles, headersAngles);
+
+fileStretch = strcat(folderEnergy, '/','Stretch.csv');
+if exist(fileStretch, 'file')
+    delete(fileStretch) % always start with new file
+end
+headersStretch = {'HingeNumber'; 'All Edges'};
+writeHeader(fileStretch, headersStretch);
 
 fileMetadata = strcat(folderEnergy, '/','metadata.txt');
 if exist(fileMetadata, 'file')
@@ -238,6 +249,20 @@ for i = 1: size(extrudedUnitCell.face,2)
     angle = acos(v1*v2'/l1/l2);
     areas(i) = l1*l2*sin(angle)/2;
 end
+
+function stretch = getStretch(extrudedUnitCell, opt, result)
+endPos = extrudedUnitCell.node + result.deform(end).interV(end).V;
+dEdge=zeros(size(extrudedUnitCell.edge,1),1);
+   
+for i=1:size(extrudedUnitCell.edge,1)
+    coor1=endPos(extrudedUnitCell.edge(i,1),:);
+    coor2=endPos(extrudedUnitCell.edge(i,2),:);
+    dx=coor2-coor1;
+    L=sqrt(dx*dx');
+    dEdge(i)=(L-extrudedUnitCell.edgeL(i))/extrudedUnitCell.edgeL(i);            
+end
+
+stretch = dEdge(extrudedUnitCell.alledges);
 
 function [lowerR, upperR] = getData(extrudedUnitCell, opt, result)
 currIter = length(result.deform);
