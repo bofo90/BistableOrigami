@@ -36,9 +36,9 @@ def NiceGraph2DCenter(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord 
     axes.set_ylabel(nameY,labelpad=-3, color = gray,rotation=0)
    
     axes.xaxis.label.set_color(gray)
-    axes.tick_params(axis='x', colors=gray, direction = 'out', width = 0.4)
+    axes.tick_params(axis='x', colors=gray, direction = 'in', width = 0.4)
     axes.yaxis.label.set_color(gray)
-    axes.tick_params(axis='y', colors=gray, direction = 'inout', width = 0.4, length = 15)
+    axes.tick_params(axis='y', colors=gray, direction = 'inout', width = 0.4, length = 0)
     axes.tick_params(pad = 2)
     
     axes.tick_params(axis='y', which='minor', colors=gray, direction = 'in', width = 0.4)
@@ -48,10 +48,10 @@ def NiceGraph2DCenter(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord 
         axes.spines[axis].set_linewidth(0.4)
         axes.spines[axis].set_color(gray)
     
-    axes.spines['left'].set_position(('data', 0.0))
-    axes.spines['bottom'].set_position(('data', 0.0))
-    axes.spines['right'].set_color('none')
-    axes.spines['top'].set_color('none')    
+    # axes.spines['left'].set_position(('data', 0.0))
+    # axes.spines['bottom'].set_position(('data', 0.0))
+    # axes.spines['right'].set_color('none')
+    # axes.spines['top'].set_color('none')    
     return
 
 def force(x, kappa, restang):
@@ -79,62 +79,66 @@ restang = 0.5
 restangles = np.array([0.25,0.5,0.75])
 kappa = 1
 
-fig1 = plt.figure(figsize=(cm2inch(3.8), cm2inch(3.3)))
-ax1 = plt.subplot(111)
-fig1.subplots_adjust(top=0.995,
-bottom=0.22,
-left=0.020,
-right=0.985)
+# fig1 = plt.figure(figsize=(cm2inch(3.8), cm2inch(3.3)))
+# ax1 = plt.subplot(111)
+# fig1.subplots_adjust(top=0.995,
+# bottom=0.22,
+# left=0.020,
+# right=0.985)
 
-NiceGraph2DCenter(ax1, r'$\theta$', r'$E_\mathregular{h}$', mincoord = [-1.6*np.max(restangles),0], maxcoord = [1.6*np.max(restangles),1.5*kappa], 
-            divisions = [[-1,-0.5,0,0.5,1],[kappa]], buffer = [0, 0])
+# NiceGraph2DCenter(ax1, r'$\theta$', r'$E_\mathregular{h}$', mincoord = [-1.6*np.max(restangles),0], maxcoord = [1.6*np.max(restangles),1.5*kappa], 
+#             divisions = [[-1,-0.5,0,0.5,1],[kappa]], buffer = [0, 0])
 
-ax1.set_xticklabels([r"-180°",r"-90°",r"0°",r"90°",r"180°"])
-ax1.set_yticklabels([r"$\kappa$"])
-ax1.xaxis.set_label_coords(0.97, 0.13)
-ax1.yaxis.set_label_coords(0.57, 0.85)
+# ax1.set_xticklabels([r"-180°",r"-90°",r"0°",r"90°",r"180°"])
+# ax1.set_yticklabels([r"$\kappa$"])
+# ax1.xaxis.set_label_coords(0.97, 0.13)
+# ax1.yaxis.set_label_coords(0.57, 0.85)
 
-cmap = matl.cm.get_cmap('summer_r',np.size(restangles)+1)
-colors = cmap(np.linspace(0,1,np.size(restangles)+1))
+# cmap = matl.cm.get_cmap('summer_r',np.size(restangles)+1)
+# colors = cmap(np.linspace(0,1,np.size(restangles)+1))
 
-labels = [r"45°", r"90°",r"135°"]
+# labels = [r"45°", r"90°",r"135°"]
 
-for restang, i in zip(restangles, np.arange(np.size(restangles))):
-# for kappa in [0.01,0.1, 1]:
+# for restang, i in zip(restangles, np.arange(np.size(restangles))):
+# # for kappa in [0.01,0.1, 1]:
 
-    ax1.plot(angle, force(angle, kappa, restang), color = colors[i+1], label = labels[i], linewidth = 0.7)
+#     ax1.plot(angle, force(angle, kappa, restang), color = colors[i+1], label = labels[i], linewidth = 0.7)
 
-leg = ax1.legend(loc = 1, fontsize = 7, framealpha = 1, edgecolor = 'inherit', fancybox = False, 
-                 labelspacing = 0.1, handlelength = 0.5, handletextpad = 0.5, borderaxespad = 0, borderpad = 0.3)
-plt.setp(leg.get_texts(), color='0.2')
-leg.get_frame().set_linewidth(0)
+# leg = ax1.legend(loc = 1, fontsize = 7, framealpha = 1, edgecolor = 'inherit', fancybox = False, 
+#                  labelspacing = 0.1, handlelength = 0.5, handletextpad = 0.5, borderaxespad = 0, borderpad = 0.3)
+# plt.setp(leg.get_texts(), color='0.2')
+# leg.get_frame().set_linewidth(0)
 
-fig1.show()
-fig1.savefig('D:/Documents/Git Programs/nonlinear-bas_Origami/Results/Bistability.pdf', transparent = True)
-fig1.savefig('D:/Documents/Git Programs/nonlinear-bas_Origami/Results/Bistability.png', transparent = True)
+# fig1.show()
+# fig1.savefig('D:/Documents/Git Programs/nonlinear-bas_Origami/Results/Bistability.pdf', transparent = True)
+# fig1.savefig('D:/Documents/Git Programs/nonlinear-bas_Origami/Results/Bistability.png', transparent = True)
 
 
 #%%
 
-fig2 = plt.figure(figsize=(cm2inch(7), cm2inch(5)))
+fig2 = plt.figure(figsize=(cm2inch(4.1), cm2inch(2.6)))
 ax2 = plt.subplot(111)
-fig2.subplots_adjust(top=0.98,
-bottom=0.145,
-left=0.015,
-right=0.98)
+fig2.subplots_adjust(top=0.989,
+bottom=0.297,
+left=0.214,
+right=0.986)
 
-NiceGraph2DCenter(ax2, r'$\theta$', r'$E_\mathregular{H}$', mincoord = [-1.6*np.max(restangles),0], maxcoord = [1.6*np.max(restangles),1.5*kappa], 
-            divisions = [[-0.5,0,0.5],[kappa]], buffer = [0, 0])
+NiceGraph2DCenter(ax2, r'$\theta$', r'$E_\mathregular{h}$', mincoord = [-1.6*np.max(restangles),0], maxcoord = [1.6*np.max(restangles),1.6*kappa], 
+            divisions = [[-0.75,0,0.75],[kappa]], buffer = [0, 0])
 
 ax2.set_xticklabels([r"$-\theta_0$",r"$0$",r"$\theta_0$"])
-ax2.set_yticklabels([r"$k_\mathregular{H}$"])
-ax2.xaxis.set_label_coords(0.97, 0.13)
-ax2.yaxis.set_label_coords(0.57, 0.85)
+ax2.set_yticklabels([r"$k_\mathregular{h}$"])
+ax2.xaxis.set_label_coords(0.95, 0.2)
+ax2.yaxis.set_label_coords(0.57, 0.75)
 
-i = 1
+ax2.axvline(0, 0, 1.6*kappa, color = '0.2', linewidth = 0.4)
+ax2.axhline(kappa, 0.42,0.58, color = '0.2', linewidth = 0.4)
+ax2.text(-0.5, kappa, r"$k_\mathregular{h}$")
+
+i = -1
 restang = restangles[i]
     
-ax2.plot(angle, force(angle, kappa, restang), color = '#36648B', linewidth = 1)
+ax2.plot(angle, force(angle, kappa, restang), color = '#36648B', linewidth = 1.2)
 
 fig2.savefig('D:/Documents/Git Programs/nonlinear-bas_Origami/Results/BistabilitySingle.pdf', transparent = True)
 fig2.savefig('D:/Documents/Git Programs/nonlinear-bas_Origami/Results/BistabilitySingle.png', transparent = True)
