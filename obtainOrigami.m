@@ -40,6 +40,7 @@ switch opt.template
         extrudedUnitCell.center = 1;
         extrudedUnitCell.allnodes = 2:size(extrudedUnitCell.node,1);
         extrudedUnitCell.allhinges = 1:size(extrudedUnitCell.nodeHingeEx,1);
+        extrudedUnitCell.alledges = 1:size(extrudedUnitCell.edge,1);
         
 %         extrudedUnitCell.node = extrudedUnitCell.node+rand(size(extrudedUnitCell.node))*0.01;
 
