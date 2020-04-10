@@ -16,7 +16,7 @@ import Plotting as plot
 #%%
 plt.close('all')
 
-Folder_name = "Results/SingleVertex4/2CFF/19-Mar-2020_0.00_ 90.00_180.00_270.00_"
+Folder_name = "Results/SingleVertex4/2CFF/06-Apr-2020_0.00_ 90.00_180.00_270.00_"
 
 allDesigns = pd.DataFrame()
 allFlags = pd.DataFrame()
@@ -39,11 +39,14 @@ for subdir in os.listdir(Folder_name):
         
         simLen = np.size(ThisData,0)
         ThisData.iloc[:,-numvertex::],sym = raa.orderAngles(ThisData.iloc[:,-numvertex::].to_numpy(), numvertex, simLen)
-        ThisData['StableStates'] = raa.countStableStatesKmean(ThisData.iloc[:,-numvertex::], 0.1)
+        # ThisData['StableStates'] = raa.countStableStatesKmean(ThisData.iloc[:,-numvertex::], 0.01)
+        ThisData['StableStates'] = raa.countStableStatesDBSCAN(ThisData.iloc[:,-numvertex::], 0.1, 5)
         
         selData = raa.makeSelectionPerStSt(ThisData, simLen*0.0)
+        # selData = ThisData
+        notOutLie = selData['StableStates'] != -1
         
-        allDesigns = allDesigns.append(selData)
+        allDesigns = allDesigns.append(selData.iloc[notOutLie.values,:])
         allFlags = allFlags.append(ThisFlags)
     
 allDesigns = allDesigns.reset_index(level=0, drop =True)
@@ -57,9 +60,14 @@ allDesAng = allDesigns.iloc[:,8:8+numvertex].values
 
 ang_4D = raa.getAng4D(allDesAng)
 ang_4D_wpbc = np.concatenate((np.sin(ang_4D/[np.pi, np.pi, np.pi*2]*np.pi*2),np.cos(ang_4D/[np.pi, np.pi, np.pi*2]*np.pi*2)), axis = 1)
-allDesigns['StableStateAll'] = raa.countStableStatesKmean(ang_4D_wpbc, 0.07)
+# allDesigns['StableStateAll'] = raa.countStableStatesKmean(ang_4D_wpbc, 0.07)
+
+allDesigns['StableStateAll'] = raa.countStableStatesDBSCAN(ang_4D_wpbc, 0.1,5)
 
 colormap = 'Set2'
+
+plot.Angles3D(ang_4D_wpbc, allDesigns['StableStateAll'].values, colormap)
+plot.Angles3D(allDesAng, allDesigns['StableStateAll'].values, colormap)
         
 #%%
 plt.close('all')    
@@ -78,7 +86,7 @@ plot.CreateColorbar(allDesigns.iloc[:,ststcol], colormap, save = True, Folder_na
 
 #%%
 
-plot.XYperZ(allDesigns,  1, r'$\theta_0/\pi$', 8, r'$\theta_1$', 0, -1, colormap, save = False, Folder_name = Folder_name, NameFig = 'Curvature')
+# plot.XYperZ(allDesigns,  1, r'$\theta_0/\pi$', 8, r'$\theta_1$', 0, -1, colormap, save = False, Folder_name = Folder_name, NameFig = 'Curvature')
 
 
 #%%
