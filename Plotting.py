@@ -230,16 +230,18 @@ def Angles3D(angles, angStSt, colormap, save = False, Folder_name = ''):
         
     stst, color = getcolormap(angStSt, colormap)
     
+    stst, inverse = np.unique(angStSt, return_inverse = True)
+    
     fig1 = plt.figure(figsize=(cm2inch(10), cm2inch(7)))
     ax1 = plt.subplot(111,projection='3d')
     ax1.set_xlim([-np.pi,np.pi])
     ax1.set_ylim([-np.pi,np.pi])
     ax1.set_zlim([-np.pi,np.pi])
             
-    ax1.scatter(angles[:,0],angles[:,1],angles[:,2], c = color[angStSt-1])
+    ax1.scatter(angles[:,0],angles[:,1],angles[:,2], c = color[inverse])
         
-    for i in stst:
-        ax1.scatter(-400,-400,-400, c = [color[i-1]], label = i)
+    for i in np.arange(np.size(stst)):
+        ax1.scatter(-400,-400,-400, c = [color[i]], label = stst[i])
     
     CreateLegend(ax1)
     
