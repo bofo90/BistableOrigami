@@ -80,7 +80,7 @@ def maskBadResults(ThisData, printFlags = False, returnStad = False):
         print(ThisData['Flags'].value_counts())
          
     exfl = ThisData.Flags.values
-    flagmask = (exfl !=1) & (exfl !=2) & (exfl !=0)
+    flagmask = (exfl !=1) & (exfl !=2) & (exfl !=5) #& (exfl !=0)
     # flagmask = ~flagmask.any(axis= 1)
     
     onlyminArea = minFaceFlag & ~flagmask  
@@ -222,6 +222,23 @@ def countStableStatesKmean(finalAngles, dis):
     if i == 500:
         print('The clustering has reached its maximum\n')
     inverse = kmeans.labels_
+    return inverse
+
+def countStableStatesDBSCAN(finalAngles, dis = 0.05, minpoints = 20):
+    
+    from sklearn.cluster import DBSCAN
+    
+    N = np.size(finalAngles,0)
+    
+    if N <= 1:
+        return [1]
+    
+    db = DBSCAN(eps=dis, min_samples=minpoints).fit(finalAngles)
+    
+    inverse = db.labels_
+    # if (inverse == -1).any():
+    #     inverse = inverse+1
+    
     return inverse
 
 def makeSelectionPerStSt(allData, simBound):
