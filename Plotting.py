@@ -367,8 +367,8 @@ def TotEnergyperZ(allDesigns, x, xname, z, stst_col, colormap, save = False, Fol
         
         NiceGraph2D(ax1, xname, r'$E_{tot}$')
         
-        Energy_flatSt = thisDes.iloc[:,0]*numhinge#/(thisDes.iloc[:,0]*numhinge+numedge)
-        Energy_foldSt = (2*thisDes.iloc[:,0])#/(thisDes.iloc[:,0]*numhinge+numedge)
+        Energy_flatSt = thisDes.iloc[:,0]*numhinge/(thisDes.iloc[:,0]*numhinge+numedge)
+        Energy_foldSt = (2*thisDes.iloc[:,0])/(thisDes.iloc[:,0]*numhinge+numedge)
         
         ax1.set_ylim([-np.max(Energy_flatSt)*0.3, np.max(Energy_flatSt)*1.07])
             
