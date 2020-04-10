@@ -240,15 +240,31 @@ end
 
 function areas = getAreas(extrudedUnitCell, result)
 endPos = extrudedUnitCell.node + result.deform(end).interV(end).V;
-areas = zeros(size(extrudedUnitCell.face'));
-for i = 1: size(extrudedUnitCell.face,2)
-    v1 = endPos(extrudedUnitCell.face{i}(2),:)-endPos(extrudedUnitCell.face{i}(1),:);
-    v2 = endPos(extrudedUnitCell.face{i}(3),:)-endPos(extrudedUnitCell.face{i}(1),:);
-    l1 = sqrt(v1*v1');
-    l2 = sqrt(v2*v2');
-    angle = acos(v1*v2'/l1/l2);
-    areas(i) = l1*l2*sin(angle)/2;
+areas=zeros(length(extrudedUnitCell.center)*4,1);
+
+for i=1:length(extrudedUnitCell.center)
+    allnodes_pos = [1:4,1]+(i-1)*4;
+    for j = 1:4
+        positions = [extrudedUnitCell.center(i), extrudedUnitCell.allnodes(allnodes_pos(j)), extrudedUnitCell.allnodes(allnodes_pos(j+1))];
+        p = [positions*3-2;positions*3-1;positions*3];
+        areas((i-1)*4+j) = getFace2Jacobian(endPos(positions,:));
+    end
 end
+
+function area = getFace2Jacobian(pos)
+u1 = pos(1,:);
+u2 = pos(2,:);
+u3 = pos(3,:);
+ 
+a = u2-u1;
+b = u3-u1;
+
+n = crossvector(a',b');
+mag_n = sqrt(n'*n);
+area = 0.5*mag_n;
+
+function w=crossvector(u,v)
+w = [u(2,:).*v(3,:)-u(3,:).*v(2,:);-u(1,:).*v(3,:)+u(3,:).*v(1,:);u(1,:)*v(2,:)-u(2,:)*v(1,:)];
 
 function stretch = getStretch(extrudedUnitCell, opt, result)
 endPos = extrudedUnitCell.node + result.deform(end).interV(end).V;
