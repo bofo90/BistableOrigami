@@ -65,6 +65,12 @@ for a = ang
                 for comb = 1:size(possibleComb,1)
                     nonlinearFoldingOne(extrudedUnitCell, opt, [1:4;possibleComb(comb,:)*opt.restang]');
                 end
+            case 'restAngScan'
+                %%% Idea is to start with random perturbation and then
+                %%% increase the restang slowly in order to stay in same
+                %%% branch. This would show the branches until where they
+                %%% go.They can also be saved as steps in a single result
+                %%% file.
         end
         
     end
