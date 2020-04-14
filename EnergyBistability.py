@@ -23,7 +23,7 @@ def NiceGraph2DCenter(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord 
         else:
             if ~np.isnan(divisions[0]):
                 axes.set_xticks(np.linspace(mincoord[0],maxcoord[0],divisions[0]))
-    axes.set_xlabel(nameX,labelpad=-3, color = gray)
+    axes.set_xlabel(nameX,labelpad=0, color = gray)
     
     if ~np.isnan(mincoord[1]) and ~np.isnan(maxcoord[1]):
         axes.set_ylim([mincoord[1]-buffer[1], maxcoord[1]+buffer[1]])
@@ -33,7 +33,7 @@ def NiceGraph2DCenter(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord 
         else:
             if ~np.isnan(divisions[1]):
                 axes.set_yticks(np.linspace(mincoord[1],maxcoord[1],divisions[1]))
-    axes.set_ylabel(nameY,labelpad=-3, color = gray,rotation=0)
+    axes.set_ylabel(nameY,labelpad=0, color = gray)#,rotation=0)
    
     axes.xaxis.label.set_color(gray)
     axes.tick_params(axis='x', colors=gray, direction = 'in', width = 0.4)
@@ -126,14 +126,14 @@ right=0.986)
 NiceGraph2DCenter(ax2, r'$\theta$', r'$E_\mathregular{h}$', mincoord = [-1.6*np.max(restangles),0], maxcoord = [1.6*np.max(restangles),1.6*kappa], 
             divisions = [[-0.75,0,0.75],[kappa]], buffer = [0, 0])
 
-ax2.set_xticklabels([r"$-\theta_0$",r"$0$",r"$\theta_0$"])
-ax2.set_yticklabels([r"$k_\mathregular{h}$"])
-ax2.xaxis.set_label_coords(0.95, 0.2)
-ax2.yaxis.set_label_coords(0.57, 0.75)
+ax2.set_xticklabels([r"$-\Theta$",r"$0$",r"$\Theta$"])
+ax2.set_yticklabels([r""])
+# ax2.xaxis.set_label_coords(0.95, 0.2)
+# ax2.yaxis.set_label_coords(0.57, 0.75)
 
 ax2.axvline(0, 0, 1.6*kappa, color = '0.2', linewidth = 0.4)
 ax2.axhline(kappa, 0.42,0.58, color = '0.2', linewidth = 0.4)
-ax2.text(-0.5, kappa, r"$k_\mathregular{h}$")
+ax2.text(-0.5, kappa, r"$k_\mathregular{h}$", color = '0.2')
 
 i = -1
 restang = restangles[i]
