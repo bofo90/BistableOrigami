@@ -17,6 +17,7 @@ import Plotting as plot
 plt.close('all')
 
 Folder_name = "Results/SingleVertex4/2CFF/06-Apr-2020_0.00_ 90.00_180.00_270.00_"
+# Folder_name = "Results/SingleVertex4/2CFF/19-Mar-2020_0.00_ 90.00_180.00_270.00_"
 
 allDesigns = pd.DataFrame()
 allFlags = pd.DataFrame()
@@ -62,7 +63,7 @@ ang_4D = raa.getAng4D(allDesAng)
 ang_4D_wpbc = np.concatenate((np.sin(ang_4D/[np.pi, np.pi, np.pi*2]*np.pi*2),np.cos(ang_4D/[np.pi, np.pi, np.pi*2]*np.pi*2)), axis = 1)
 # allDesigns['StableStateAll'] = raa.countStableStatesKmean(ang_4D_wpbc, 0.07)
 
-allDesigns['StableStateAll'] = raa.countStableStatesDBSCAN(ang_4D_wpbc, 0.1,5)
+allDesigns['StableStateAll'] = raa.countStableStatesDBSCAN(ang_4D_wpbc, 0.1,7)
 
 colormap = 'Set2'
 
@@ -83,6 +84,15 @@ plt.close('all')
 ststcol = -1
 plot.XYperZ(allDesigns,  1, r'$\theta_0/\pi$', 6, r'$K_\mathregular{G}$', 0, ststcol, colormap, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
 plot.CreateColorbar(allDesigns.iloc[:,ststcol], colormap, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
+
+#%%
+
+# plt.close('all')   
+
+# ##### Plotting the Curvature of each stable state
+# ststcol = -1
+# plot.XYperZ(allDesigns, 0, r'$\kappa$', 6, r'$K_\mathregular{G}$', 1, ststcol, colormap, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
+# plot.CreateColorbar(allDesigns.iloc[:,ststcol], colormap, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
 
 #%%
 
