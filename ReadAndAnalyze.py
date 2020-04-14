@@ -113,7 +113,7 @@ def orderAngles(angles, ucsize, simulations):
     for sim in np.arange(simulations):
         sym = ''
         ver = np.array(angles[sim,:])
-        if np.sum(np.sign(np.around(ver, decimals = 1))) < 0: ### sort to have mayority positive angles
+        if np.sum(np.around(ver, decimals = 1)) < 0: ### sort to have mayority positive angles
             # ver = ver[::-1]*(-1)
             ver = ver*(-1)
             sym = sym + 'm'
