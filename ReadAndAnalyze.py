@@ -11,6 +11,67 @@ import configparser
 import os.path
 from datetime import datetime
 
+def ReadFileMat(folder_name):
+    
+    file_name1 = "/EnergyData.csv" 
+    file_name2 = "/Hinges.csv"
+    file_name3 = "/PosStad.csv"
+    file_name4 = "/Angles.csv"
+    file_name5 = "/Stretch.csv"
+    file_metadata = "/metadata.txt"
+    
+    numhin, numedg, restang, numUC = ReadMetadataMat(folder_name+file_metadata)
+    
+    dataParam = pd.read_csv(folder_name+file_name1)
+    simLen = np.size(dataParam['Hinge Number'])   
+    
+    metadata = pd.DataFrame()
+    [ang, kap] = getRAandK(folder_name)
+    metadata['kappa'] = np.ones(simLen)*kap
+    if oldSample(folder_name):
+        metadata['kappa'] = metadata['kappa']/4
+    metadata['restang'] = np.ones(simLen)*ang/np.pi
+    metadata['tes'] = np.int(np.sqrt(numUC))
+        
+    dataParam['TotalEnergy'] = dataParam['EdgeEnergy']+dataParam['DiagonalEnergy']+dataParam['HingeEnergy']
+    dataParam = dataParam.drop(['DiagonalEnergy','FaceEnergy','TargetAngleEnergy'], axis = 1)
+    dataParam['TotalEnergy'] = dataParam['TotalEnergy'] /(kap*numhin+numedg)
+    dataParam['HingeEnergy'] = dataParam['HingeEnergy']/kap/numhin
+    dataParam['EdgeEnergy'] = dataParam['EdgeEnergy']/numedg
+    
+    dataCurv = np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', dtype = np.float64)
+    dataCurv = np.delete(dataCurv, 0, 1)
+    dataParam['Curvature'] = np.mean(dataCurv,axis = 1)
+    
+    dataArea = np.loadtxt(folder_name+file_name3,skiprows=1, delimiter = ',', dtype = np.float64)
+    dataArea = np.delete(dataArea, 0, 1)
+    dataParam['minFace'] = np.min(dataArea,axis = 1)
+
+    dataAngles = np.loadtxt(folder_name+file_name4,skiprows=1, delimiter = ',', dtype = np.float64)
+    dataAngles = np.delete(dataAngles, 0, 1)
+    
+    dataLen = np.loadtxt(folder_name+file_name5,skiprows=1, delimiter = ',', dtype = np.float64)
+    dataLen = np.delete(dataLen,0,1)
+    
+    dataLen = np.reshape(dataLen, (simLen,numUC,8))
+    dataAng = np.reshape(dataAngles, (simLen,numUC,4))
+    dataEnergy = calculateEnergy(dataLen, dataAng, kap, restang)
+
+    # allAngles = pd.DataFrame(dataAngles)
+    # dataEnergy = pd.concat([metadata, dataEnergy, allAngles], axis=1, sort=False)
+    dataParam = pd.concat([metadata, dataParam], axis=1, sort=False)
+
+    return dataEnergy, dataAngles, dataCurv, dataParam, simLen
+
+def calculateEnergy(Len, Ang, kap, restang):
+    
+    LenEnergy = 0.5*Len**2
+    AngEnergy = kap/(restang**4)*(Ang**2-restang**2)**2
+    
+    Energy = np.sum(LenEnergy, axis = 2)+np.sum(AngEnergy, axis = 2)
+    
+    return Energy
+
 def ReadFile(folder_name):
     
     file_name1 = "/EnergyData.csv" 
@@ -72,7 +133,7 @@ def oldSample(folder_name):
         return False
         
 
-def maskBadResults(ThisData, printFlags = False, returnStad = False):
+def maskBadResults(ThisData, printFlags = False, returnStad = False, returnMask = False):
     
     minFaceFlag = (ThisData['minFace']<=0.105).values
     
@@ -100,6 +161,9 @@ def maskBadResults(ThisData, printFlags = False, returnStad = False):
     flagStad = flagStad.rename(columns={"index": "Flags", "Flags": "amountFlags"})
     flagStad['kappa'] = np.ones((np.size(flagStad,0),1))*ThisData.iloc[0,0]
     flagStad['restang'] = np.ones((np.size(flagStad,0),1))*ThisData.iloc[0,1]
+    
+    if returnMask:
+        return MaskedData, ~(flagmask | minFaceFlag)
     
     if returnStad:
         return MaskedData, flagStad
@@ -255,6 +319,49 @@ def makeSelectionPerStSt(allData, simBound):
    
     return kappasStSt
 
+def makeSelectionVertMat(matstst, allData, Energy, Angles, Curv, tess):
+    
+    allSpec = pd.DataFrame()
+    
+    pos = [0,np.int(np.floor(tess[0]/2)),np.int(np.floor(tess[0]/2)),np.int(np.floor(np.prod(tess)/2))]
+    
+    for j in np.arange(3):
+        i = pos[j]
+        specData = SelectPerVertex(matstst[:,i], allData, Energy[:,i], Angles[:,i*4:(i+1)*4], Curv[:,i])
+        specData["VertexType"] = j
+        
+        allSpec = allSpec.append(specData)
+   
+    return allSpec
+
+def SelectPerVertex(VertStSt, allData_or, VertEnergy, VertAngles, VertCurv):
+    
+    allData = allData_or.copy()
+    allData = allData.reset_index(level=0, drop =True)
+    
+    allData['StableStates'] = VertStSt
+    allData['VertEnergy'] = VertEnergy
+    allData['VertCurv'] = VertCurv
+    
+    VertAngles = pd.DataFrame(VertAngles)
+    allData = pd.concat([allData, VertAngles], axis=1, sort=False)
+    
+    
+    selStSt = allData.groupby('StableStates').apply(lambda _df: _df.mean())
+    
+    error = allData.groupby('StableStates').apply(lambda _df: _df.std())
+    selStSt['StdVertEnergy'] = error['VertEnergy'].values
+    selStSt['StdVertCurv'] = error['VertCurv'].values
+        
+    selStSt['Hinge Number'] =  allData.groupby('StableStates')[['Hinge Number']].apply(lambda _df2: _df2.sample(1, random_state = 0)).to_numpy()
+    
+    ####Only select stable states that have more than 10% appearance in each simulation
+    selStSt['amountStSt'] = allData.groupby('StableStates')[['Hinge Number']].count()
+    # more10percent = kappasStSt['amountStSt']>simBound
+    # kappasStSt = kappasStSt[more10percent]
+    
+    
+    return selStSt
 
 def getStableStatesMat(data, tessellation):
     
@@ -395,6 +502,22 @@ def ReadMetadata(file):
 
     return hing, edge
 
+def ReadMetadataMat(file):
+    
+    if os.path.isfile(file):
+        metadata = configparser.RawConfigParser(allow_no_value=True)
+        metadata.read(file)
+    
+        hing = float(metadata.get('extUnitCell','hinges'))
+        edge = float(metadata.get('extUnitCell','edges'))
+        restang = float(metadata.get('options','restang'))
+        x = float(metadata.get('options','xrep'))
+        y = float(metadata.get('options','yrep'))
+    else:
+        raise FileNotFoundError('No metafile found at the given directory. Changes to the script to put manually the variables are needed\n') 
+
+    return hing, edge, restang, np.int(x*y)
+
 def getRAandK(folder_name):
     
     splited = folder_name.split('/')
@@ -419,3 +542,8 @@ def SaveForPlot(s, Folder_name):
        
     return
 
+def SaveForPlotMatt(allDesigns, folder):
+    
+    SaveForPlot(thisDesign, thisfolder)
+    
+    return

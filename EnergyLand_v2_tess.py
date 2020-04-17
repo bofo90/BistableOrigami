@@ -15,96 +15,83 @@ import Plotting as plot
 #%%
 plt.close('all')
 
-Folder_name = "Results/Tessellation4/25/2CFF/09-Jan-2020_5_5_"
-
 allDesigns = pd.DataFrame()
-# allKappasAnalysis = pd.DataFrame()
+allFlags = pd.DataFrame()
 
-if not os.path.isdir(Folder_name + '/Images/'):
-    os.mkdir(Folder_name + '/Images/')
+for i in np.arange(2,5)[::-1]:
+
+    Folder_name = "Results/Tessellation4/25/2CFF/01-Apr-2020_%d_%d_" %(i,i)
     
-tessellation = np.array(Folder_name.split('_')[1:-1]).astype(int)
-numUC = np.prod(tessellation)
-  
-for subdir in os.listdir(Folder_name):
-    if subdir == 'Images':
-        continue    
+    if not os.path.isdir(Folder_name + '/Images/'):
+        os.mkdir(Folder_name + '/Images/')
         
-    for subdir2 in os.listdir(Folder_name+'/'+subdir):
-        folder_name = Folder_name+'/'+subdir+'/'+subdir2+'/energy'
+    tessellation = np.array(Folder_name.split('_')[1:-1]).astype(int)
+    numUC = np.prod(tessellation)
+    numvertex = np.int(Folder_name.split('/')[1][-1])
+      
+    for subdir in os.listdir(Folder_name):
+        if subdir == 'Images':
+            continue    
+            
+        for subdir2 in os.listdir(Folder_name+'/'+subdir):
+            folder_name = Folder_name+'/'+subdir+'/'+subdir2+'/energy'
+            
+            ThisEnergy, ThisAngles, ThisCurv, ThisData, simLen = raa.ReadFileMat(folder_name)
+            ThisData, ThisMask = raa.maskBadResults(ThisData, returnMask = True)  
+            
+            ThisEnergy = ThisEnergy[ThisMask]
+            ThisAngles = ThisAngles[ThisMask]
+            ThisCurv = ThisCurv[ThisMask]
+            
+            simLen = np.size(ThisData,0)
+            allAngles = np.resize(ThisAngles,(simLen*numUC,numvertex))
+            allAngles,sym = raa.orderAngles(allAngles, numvertex, simLen*numUC)
+            ThisAngles = np.resize(allAngles, (simLen,numUC*numvertex))
+            vertexStSt = raa.countStableStatesDBSCAN(allAngles, 0.26)
+            simStSt = np.resize(vertexStSt, (simLen,numUC))
+            
+            # plot.Angles3D(allAngles, vertexStSt, 'jet')
+            
+            
+            selData = raa.makeSelectionVertMat(simStSt, ThisData, ThisEnergy, ThisAngles, ThisCurv, tessellation)
+            notOutLie = selData['StableStates'] != -1
+            
+            allDesigns = allDesigns.append(selData.iloc[notOutLie.values,:])
         
-        ThisData, simLen = raa.ReadFile(folder_name)
-        ThisData = raa.maskBadResults(ThisData, True)  
-        
-        ThisData.iloc[:,-numUC*4::] = raa.orderAnglesMat(ThisData.iloc[:,-numUC*4::].to_numpy(), 4, tessellation)
-        ThisData['StableStates'] = raa.countStableStates(ThisData.iloc[:,-numUC*4::], 0.6, 'centroid')
-        
-        selData = raa.makeSelectionPerStSt(ThisData, simLen*0.0)
-        
-        allDesigns = allDesigns.append(selData)
-        
-    # kappasnumStSt = kappasStSt.groupby('kappa')['StableStates'].nunique()
-    # kappasnumStSt = kappasnumStSt.reset_index()
-    # kappasnumStSt['restang'] = np.ones(np.shape(kappasnumStSt)[0])*restang
-
-    # allKappasAnalysis = allKappasAnalysis.append(kappasnumStSt)
-
 allDesigns = allDesigns.reset_index(level=0, drop =True)
 
 #%%
-#### Get stable states from material
-allDesigns['StableStateAll'] = raa.countStableStates(allDesigns.iloc[:,5:5+numUC*4].values, 1, 'centroid')
-colormap = 'jet'
+### Get stable states from material
+allDesAng = allDesigns.iloc[:,12:16].values
+ang_4D = raa.getAng4D(allDesAng)
+ang_4D_wpbc = np.concatenate((np.sin(ang_4D/[np.pi, np.pi, np.pi*2]*np.pi*2),np.cos(ang_4D/[np.pi, np.pi, np.pi*2]*np.pi*2)), axis = 1)
+allDesigns['StableStateAll'] = raa.countStableStatesDBSCAN(ang_4D_wpbc, 0.1,7)
 
-### Get stable states of individual vertices
-posStSt = np.shape(allDesigns)[0]
-allUCang = np.resize(allDesigns.iloc[:,8:8+numUC*4].values,(posStSt*numUC,4))
-[allUCang,sym] = raa.orderAngles(allUCang, 4, posStSt*numUC)
-matUCStSt = raa.countStableStates(allUCang, 0.7, 'centroid',True)
-matUCStSt = raa.standarizeStableStates(matUCStSt, allUCang, onlysign = False)
-matUCStSt = np.reshape(matUCStSt, (posStSt, numUC))
-colormapUC = 'jet'
+colormap = 'Set2'
 
-#### Get stable states from types of vertex
-[allDesigns['StableStateFromUC'],allDesigns['StableStatefUCName']] = raa.extractStableStates(matUCStSt)
-colormapfUC = 'Set3'
+plot.Angles3D(allDesAng, allDesigns['StableStateAll'], colormap)
+
+# ### Get stable states of individual vertices
+# posStSt = np.shape(allDesigns)[0]
+# allUCang = np.resize(allDesigns.iloc[:,8:8+numUC*4].values,(posStSt*numUC,4))
+# [allUCang,sym] = raa.orderAngles(allUCang, 4, posStSt*numUC)
+# matUCStSt = raa.countStableStates(allUCang, 0.7, 'centroid',True)
+# matUCStSt = raa.standarizeStableStates(matUCStSt, allUCang, onlysign = False)
+# matUCStSt = np.reshape(matUCStSt, (posStSt, numUC))
+# colormapUC = 'jet'
+
+# #### Get stable states from types of vertex
+# [allDesigns['StableStateFromUC'],allDesigns['StableStatefUCName']] = raa.extractStableStates(matUCStSt)
+# colormapfUC = 'Set3'
 
 #%%
 plt.close('all')   
     
-##### Plotting the minFace of each stable state to make sure we are inside the constraint
-plot.XYperZ(allDesigns, 0, r'$\kappa$', 7, r'$Area$', 1, -3, colormap, save = True, Folder_name = Folder_name, NameFig = 'AreaFaces')
+##### Plotting the Curvature and Energy against tess for the different vertex
+plot.XYperZ(allDesigns, 2, r'$x-rep$', 11, r'$K_\mathregular{G}$', -2, -1, colormap, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
+plot.XYperZ(allDesigns, 2, r'$x-rep$', 10, r'$E_{norm}$', -2, -1, colormap, save = True, Folder_name = Folder_name, NameFig = 'Energy')
+plot.CreateColorbar(allDesigns.iloc[:,-1], colormap, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
 
 #%%
-plt.close('all')   
-
-##### Plotting the Curvature of each stable state
-ststcol = -2
-plot.XYperZ(allDesigns, 0, r'$\kappa$', 6, r'$K$', 1, ststcol, colormapfUC, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
-plot.CreateColorbar(allDesigns.iloc[:,ststcol+1], colormapfUC, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
-
-#%%
-plt.close('all')   
-
-##### Plotting the Curvature of each stable state
-ststcol = -2
-plot.NormEnergy(allDesigns, 0, r'$\kappa$', 1, ststcol, colormapfUC, save = True, Folder_name = Folder_name, NameFig = 'TotEnergyNorm')
-plot.CreatLegend(allDesigns.iloc[:,ststcol+1], colormapfUC, save = True, Folder_name = Folder_name, NameFig = 'TotEnergy')
-
-plot.XmultYperZ(allDesigns, 0, r'$\kappa$', [3,4], r'$E_{norm}$' , 1, save = True, Folder_name = Folder_name, NameFig = 'Energies')
-
-#%%
-##### Plot first three angles of all vertices with different colors
-
-##### Colors indicating the type of vertex
-plot.Angles3D(allUCang, matUCStSt.flatten(), colormapUC)
-
-# ##### Colors indicating the stable state of material
-# plot.Angles3D(allUCang, np.tile(allDesigns['StableStateAll'].values,(numUC,1)).transpose().flatten(), colormap)
-
-# ##### Colors indicating the stable state from types of vertex
-# plot.Angles3D(allUCang, np.tile(allDesigns['StableStateFromUC'].values,(numUC,1)).transpose().flatten(), colormapfUC)
-
-#%%
-raa.SaveForPlot(allDesigns, Folder_name)
+# raa.SaveForPlotMatt(allDesigns, Folder_name[:42])
 
