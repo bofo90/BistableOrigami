@@ -395,3 +395,158 @@ def TotEnergyperZ(allDesigns, x, xname, z, stst_col, colormap, save = False, Fol
             print(Folder_name + '/Images/' + 'TotEnergyNorm' + '_' + '%.4f' %variables[i])
     
     return
+
+def XYperZwError(allDesigns, x, xname, y, yname, z, stst_col, colormap, yerror, save = False, Folder_name = '', NameFig = ''):
+    
+    allDesigns = allDesigns.round(8)
+    
+    stst, color = getcolormap(allDesigns.iloc[:,stst_col].values, colormap)
+    
+    variables = np.unique(allDesigns.iloc[:,z])
+    
+    for i in np.arange(np.size(variables)):
+    
+        fig1 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
+        ax1 = plt.subplot(111)
+        fig1.subplots_adjust(top=0.942,
+bottom=0.176,
+left=0.165,
+right=0.957)
+        
+        thisDesBool = allDesigns.iloc[:,z] == variables[i]
+        thisDes = allDesigns[thisDesBool]    
+        
+        NiceGraph2D(ax1, xname, yname)
+        
+        if yname == r'$E_{tot}$':
+            ax1.set_ylim([-0.005, np.max(thisDes.iloc[:,y])+0.005])
+        
+        if yname == r'$Area$':
+            ax1.set_ylim([0, 0.8])
+            ax1.axhline(y=0.1, color='r', linestyle='-', linewidth = '0.4')
+            
+        if xname == r'$\kappa$':
+            ax1.set_xscale('log')
+            ax1.set_xticks([0.001,0.01,0.1,1])
+            ax1.set_xlim([0.0007,1.5])
+        
+        if xname == r'$\theta_0/\pi$':
+            ax1.set_xticks([0,0.5,1])
+            ax1.set_xlim([-0.01,1.1])
+            
+        for k in np.arange(np.size(stst)):
+            thisstst = thisDes[thisDes.iloc[:, stst_col] == stst[k]]
+            
+            ax1.errorbar(thisstst.iloc[:,x], thisstst.iloc[:,y], yerr = thisstst.iloc[:,yerror], 
+                         fmt='o', c = matl.colors.rgb2hex(color[k]), ms = 3, capsize = 3)
+        
+        fig1.show()
+        if save:
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i] +'.pdf', transparent = True)
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i] +'.png', transparent = True)
+            print(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i])
+    
+    return
+
+def XYperZwDoubleError(allDesigns, x, xname, y, yname, z, stst_col, colormap, xerror, yerror, save = False, Folder_name = '', NameFig = ''):
+    
+    allDesigns = allDesigns.round(8)
+    
+    stst, color = getcolormap(allDesigns.iloc[:,stst_col].values, colormap)
+    
+    variables = np.unique(allDesigns.iloc[:,z])
+    
+    for i in np.arange(np.size(variables)):
+    
+        fig1 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
+        ax1 = plt.subplot(111)
+        fig1.subplots_adjust(top=0.942,
+bottom=0.176,
+left=0.165,
+right=0.957)
+        
+        thisDesBool = allDesigns.iloc[:,z] == variables[i]
+        thisDes = allDesigns[thisDesBool]    
+        
+        NiceGraph2D(ax1, xname, yname)
+        
+        if yname == r'$E_{tot}$':
+            ax1.set_ylim([-0.005, np.max(thisDes.iloc[:,y])+0.005])
+        
+        if yname == r'$Area$':
+            ax1.set_ylim([0, 0.8])
+            ax1.axhline(y=0.1, color='r', linestyle='-', linewidth = '0.4')
+            
+        if xname == r'$\kappa$':
+            ax1.set_xscale('log')
+            ax1.set_xticks([0.001,0.01,0.1,1])
+            ax1.set_xlim([0.0007,1.5])
+        
+        if xname == r'$\theta_0/\pi$':
+            ax1.set_xticks([0,0.5,1])
+            ax1.set_xlim([-0.01,1.1])
+            
+        for k in np.arange(np.size(stst)):
+            thisstst = thisDes[thisDes.iloc[:, stst_col] == stst[k]]
+            
+            ax1.errorbar(thisstst.iloc[:,x], thisstst.iloc[:,y], xerr = thisstst.iloc[:,xerror],yerr = thisstst.iloc[:,yerror], 
+                         fmt='o', c = matl.colors.rgb2hex(color[k]), ms = 3, capsize = 3)
+        
+        fig1.show()
+        if save:
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i] +'.pdf', transparent = True)
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i] +'.png', transparent = True)
+            print(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i])
+    
+    return
+
+def XYperZline(allDesigns, x, xname, y, yname, z, stst_col, colormap, save = False, Folder_name = '', NameFig = ''):
+    
+    allDesigns = allDesigns.round(8)
+    
+    stst, color = getcolormap(allDesigns.iloc[:,stst_col].values, colormap)
+    
+    variables = np.unique(allDesigns.iloc[:,z])
+    
+    for i in np.arange(np.size(variables)):
+    
+        fig1 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
+        ax1 = plt.subplot(111)
+        fig1.subplots_adjust(top=0.942,
+bottom=0.176,
+left=0.165,
+right=0.957)
+        
+        thisDesBool = allDesigns.iloc[:,z] == variables[i]
+        thisDes = allDesigns[thisDesBool]    
+        
+        NiceGraph2D(ax1, xname, yname)
+        
+        if yname == r'$E_{tot}$':
+            ax1.set_ylim([-0.005, np.max(thisDes.iloc[:,y])+0.005])
+        
+        if yname == r'$Area$':
+            ax1.set_ylim([0, 0.8])
+            ax1.axhline(y=0.1, color='r', linestyle='-', linewidth = '0.4')
+            
+        if xname == r'$\kappa$':
+            ax1.set_xscale('log')
+            ax1.set_xticks([0.001,0.01,0.1,1])
+            ax1.set_xlim([0.0007,1.5])
+        
+        if xname == r'$\theta_0/\pi$':
+            ax1.set_xticks([0,0.5,1])
+            ax1.set_xlim([-0.01,1.1])
+            
+        for k in np.arange(np.size(stst)):
+            thisstst = thisDes[thisDes.iloc[:, stst_col] == stst[k]]
+            
+            ax1.plot(thisstst.iloc[:,x], thisstst.iloc[:,y], c = matl.colors.rgb2hex(color[k]), linewidth = 0.4)
+        
+        fig1.show()
+        if save:
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i] +'.pdf', transparent = True)
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i] +'.png', transparent = True)
+            print(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i])
+    
+    return

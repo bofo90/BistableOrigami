@@ -69,6 +69,7 @@ def calculateEnergy(Len, Ang, kap, restang):
     AngEnergy = kap/(restang**4)*(Ang**2-restang**2)**2
     
     Energy = np.sum(LenEnergy, axis = 2)+np.sum(AngEnergy, axis = 2)
+    Energy = Energy/(kap*4+8)
     
     return Energy
 
@@ -169,6 +170,15 @@ def maskBadResults(ThisData, printFlags = False, returnStad = False, returnMask 
         return MaskedData, flagStad
     else:
         return MaskedData
+    
+def selectSpecialVertex(ThisAngles, simLen, tess, numvertex):
+    
+    angles = np.reshape(ThisAngles,(simLen,np.prod(tess), numvertex))
+    pos = [0,np.int(np.floor(tess[0]/2)),np.int(np.floor(np.prod(tess)/2))]
+    
+    angVertex = np.reshape(angles[:,pos,:],(3*simLen,numvertex))
+    
+    return angVertex
 
 def orderAngles(angles, ucsize, simulations):
     
@@ -288,7 +298,7 @@ def countStableStatesKmean(finalAngles, dis):
     inverse = kmeans.labels_
     return inverse
 
-def countStableStatesDBSCAN(finalAngles, dis = 0.05, minpoints = 20):
+def countStableStatesDBSCAN(finalAngles, dis = 0.05, minpoints = 20, reduceFit = False):
     
     from sklearn.cluster import DBSCAN
     
@@ -297,13 +307,40 @@ def countStableStatesDBSCAN(finalAngles, dis = 0.05, minpoints = 20):
     if N <= 1:
         return [1]
     
-    db = DBSCAN(eps=dis, min_samples=minpoints).fit(finalAngles)
+    numFit = 5000
     
-    inverse = db.labels_
-    # if (inverse == -1).any():
-    #     inverse = inverse+1
+    if reduceFit and (N>numFit):
+        np.random.seed(0)
+        fittingsamples = np.random.randint(np.size(finalAngles,0), size = numFit)
+        
+        db = DBSCAN(eps=dis, min_samples=minpoints).fit(finalAngles[fittingsamples,:])
+        
+        inverse = dbscan_predict(db, finalAngles)
+        
+    else:
+        db = DBSCAN(eps=dis, min_samples=minpoints).fit(finalAngles)
+        
+        inverse = db.labels_
     
     return inverse
+
+def dbscan_predict(model, X):
+
+    nr_samples = X.shape[0]
+
+    y_new = np.ones(shape=nr_samples, dtype=int) * -1
+
+    for i in range(nr_samples):
+        diff = model.components_ - X[i, :]  # NumPy broadcasting
+
+        dist = np.linalg.norm(diff, axis=1)  # Euclidean distance
+
+        shortest_dist_idx = np.argmin(dist)
+
+        if dist[shortest_dist_idx] < model.eps:
+            y_new[i] = model.labels_[model.core_sample_indices_[shortest_dist_idx]]
+
+    return y_new
 
 def getFlatStates(angles, inverse):
     
@@ -314,6 +351,64 @@ def getFlatStates(angles, inverse):
     inverse[magn<0.1] = maxStSt+1
     
     return inverse
+
+def getPureMat(simStSt, ThisData, ThisEnergy, ThisAngles, ThisCurv, tessellation):
+    
+    purity = np.zeros(np.size(simStSt,0))
+    candidate = np.zeros(np.size(simStSt,0))
+    
+    stst = np.unique(simStSt)
+    if stst[0] == -1:
+        stst = np.delete(stst,0)
+        
+    #checkerboard pattern
+    x = np.zeros(tessellation, dtype = int) 
+    x[1::2, ::2] = 1
+    x[::2, 1::2] = 2
+    x[1::2,1::2] = 3
+    x = x.flatten()
+    
+    #lines
+    yh = np.zeros(tessellation, dtype = int) 
+    yv = np.zeros(tessellation, dtype = int) 
+    yh[::2,:] = 1
+    yv[:,::2] = 1
+    yh = yh.flatten()
+    yv = yv.flatten()
+    
+    
+    for i in stst:
+        here = (simStSt[:,x == 0] == i).all(axis = 1)
+        candidate[here] = candidate[here] + 0.25
+        here = (simStSt[:,x == 1] == i).all(axis = 1)
+        candidate[here] = candidate[here] + 0.25
+        here = (simStSt[:,x == 2] == i).all(axis = 1)
+        candidate[here] = candidate[here] + 0.25
+        here = (simStSt[:,x == 3] == i).all(axis = 1)
+        candidate[here] = candidate[here] + 0.25
+        
+        here = (simStSt[:,yh == 0] == i).all(axis = 1)
+        candidate[here] = candidate[here] + 0.5
+        here = (simStSt[:,yh == 1] == i).all(axis = 1)
+        candidate[here] = candidate[here] + 0.5
+        
+        here = (simStSt[:,yv == 0] == i).all(axis = 1)
+        candidate[here] = candidate[here] + 0.5
+        here = (simStSt[:,yv == 1] == i).all(axis = 1)
+        candidate[here] = candidate[here] + 0.5
+    
+    purity = np.floor(candidate).astype(bool)
+    
+    print('Not pure materials ', np.sum(~purity))
+    
+    simStSt = simStSt[purity,:]
+    ThisData = ThisData.iloc[purity,:]
+    ThisEnergy = ThisEnergy[purity,:]
+    ThisAngles = ThisAngles[purity,:]
+    ThisCurv = ThisCurv[purity,:]
+    
+    return simStSt, ThisData, ThisEnergy, ThisAngles, ThisCurv
+
 def makeSelectionPerStSt(allData, simBound):
     
     
@@ -332,12 +427,22 @@ def makeSelectionVertMat(matstst, allData, Energy, Angles, Curv, tess):
     
     allSpec = pd.DataFrame()
     
-    pos = [0,np.int(np.floor(tess[0]/2)),np.int(np.floor(tess[0]/2)),np.int(np.floor(np.prod(tess)/2))]
+    pos = [0,np.int(np.floor(tess[0]/2)),np.int(np.floor(np.prod(tess)/2))]
     
-    for j in np.arange(3):
+    if tess[0]%2 ==0:
+        types = [0]
+    else:
+        types = np.arange(3)
+    
+    for j in types:
         i = pos[j]
+        # specData = SelectPerVertex(matstst[:,j], allData, Energy[:,i], Angles[:,j*4:(j+1)*4], Curv[:,i])
         specData = SelectPerVertex(matstst[:,i], allData, Energy[:,i], Angles[:,i*4:(i+1)*4], Curv[:,i])
         specData["VertexType"] = j
+        if j == 0:
+            specData["Neighbours"] = tess[0]-1
+        else:
+            specData["Neighbours"] = (tess[0]-1)/2
         
         allSpec = allSpec.append(specData)
    
@@ -361,6 +466,8 @@ def SelectPerVertex(VertStSt, allData_or, VertEnergy, VertAngles, VertCurv):
     error = allData.groupby('StableStates').apply(lambda _df: _df.std())
     selStSt['StdVertEnergy'] = error['VertEnergy'].values
     selStSt['StdVertCurv'] = error['VertCurv'].values
+    selStSt['StdMatEnergy'] = error['TotalEnergy'].values
+    selStSt['StdMatCurv'] = error['Curvature'].values
         
     selStSt['Hinge Number'] =  allData.groupby('StableStates')[['Hinge Number']].apply(lambda _df2: _df2.sample(1, random_state = 0)).to_numpy()
     
