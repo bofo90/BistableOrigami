@@ -84,7 +84,7 @@ allFiles = dir(folderResults);
 %create folder of data with files
 [fMassDist, fHinge, fEnergy, fAngles, fStretch] = makeFileswHeaders(folderEnergy, folderResults);
 Energies = zeros(length(allFiles)-4,7);
-PosStad = zeros(length(allFiles)-4,size(extrudedUnitCell.face,2)+1);
+PosStad = zeros(length(allFiles)-4,4*size(extrudedUnitCell.center,2)+1);
 Hinges = zeros(length(allFiles)-4,size(extrudedUnitCell.allnodes,2)/4+1);
 AllAngles = zeros(length(allFiles)-4,size(extrudedUnitCell.allhinges,2)+1);
 Stretches = zeros(length(allFiles)-4,size(extrudedUnitCell.allnodes,2)*2+1);
