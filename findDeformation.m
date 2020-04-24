@@ -250,7 +250,7 @@ if ~exist(folderName, 'dir')
 end
     
 opt.KtargetAngle = 0;
-parfor i = 1:opt.numIterations
+for i = 1:opt.numIterations
     
     %%%%%% Folding part %%%%%%
     %Perturb the structure
@@ -403,8 +403,8 @@ end
 
 %ENERGY ASSOCIATED TO HINGE BENDING
 [theta, Jhinge]=getHinge(extrudedUnitCell, extrudedUnitCellPrev);
-Ehinge = opt.Khinge/(opt.restang^4)*sum((theta.^2-extrudedUnitCell.theta.^2).^2);
-dE = dE + 4*opt.Khinge/(opt.restang^4)*Jhinge'*(theta.^3-extrudedUnitCell.theta.^2.*theta);
+Ehinge = 1/(opt.restang^4)*sum(opt.Khinge.*(theta.^2-extrudedUnitCell.theta.^2).^2);
+dE = dE + 4/(opt.restang^4)*Jhinge'*(opt.Khinge.*(theta.^3-extrudedUnitCell.theta.^2.*theta));
 
 %ENERGY ASSOCIATED TO TARGET HINGE ANGLES
 if size(extrudedUnitCell.angleConstr,1)==0
