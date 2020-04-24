@@ -16,8 +16,8 @@ import Plotting as plot
 #%%
 plt.close('all')
 
-Folder_name = "Results/SingleVertex4/2CFF/06-Apr-2020_0.00_ 90.00_180.00_270.00_"
-# Folder_name = "Results/SingleVertex4/2CFF/19-Mar-2020_0.00_ 90.00_180.00_270.00_"
+# Folder_name = "Results/SingleVertex4/2CFF/06-Apr-2020_0.00_ 90.00_180.00_270.00_"
+Folder_name = "Results/SingleVertex4/2CFF/19-Mar-2020_0.00_ 90.00_180.00_270.00_"
 
 allDesigns = pd.DataFrame()
 allFlags = pd.DataFrame()
@@ -40,8 +40,8 @@ for subdir in os.listdir(Folder_name):
         
         simLen = np.size(ThisData,0)
         ThisData.iloc[:,-numvertex::],sym = raa.orderAngles(ThisData.iloc[:,-numvertex::].to_numpy(), numvertex, simLen)
-        # ThisData['StableStates'] = raa.countStableStatesKmean(ThisData.iloc[:,-numvertex::], 0.01)
-        ThisData['StableStates'] = raa.countStableStatesDBSCAN(ThisData.iloc[:,-numvertex::], 0.1, 5)
+        ThisData['StableStates'] = raa.countStableStatesKmean(ThisData.iloc[:,-numvertex::], 0.01)
+        # ThisData['StableStates'] = raa.countStableStatesDBSCAN(ThisData.iloc[:,-numvertex::], 0.1, 5)
         
         selData = raa.makeSelectionPerStSt(ThisData, simLen*0.0)
         # selData = ThisData
@@ -64,6 +64,8 @@ ang_4D_wpbc = np.concatenate((np.sin(ang_4D/[np.pi, np.pi, np.pi*2]*np.pi*2),np.
 # allDesigns['StableStateAll'] = raa.countStableStatesKmean(ang_4D_wpbc, 0.07)
 
 allDesigns['StableStateAll'] = raa.countStableStatesDBSCAN(ang_4D_wpbc, 0.1,7)
+allDesigns['StableStateAll'] = raa.getFlatStates(allDesAng, allDesigns['StableStateAll'].values)
+
 
 colormap = 'Set2'
 
@@ -115,7 +117,7 @@ plt.close('all')
 plot.Angles3D(allDesAng, allDesigns['StableStateAll'].values, colormap)
 
 #%%
-# allDes_copy = allDesigns.copy()
-# allDes_copy['restang'] = allDes_copy['restang']*np.pi
-# raa.SaveForPlot(allDes_copy, Folder_name)
+allDes_copy = allDesigns.copy()
+allDes_copy['restang'] = allDes_copy['restang']*np.pi
+raa.SaveForPlot(allDes_copy, Folder_name)
 

@@ -305,6 +305,15 @@ def countStableStatesDBSCAN(finalAngles, dis = 0.05, minpoints = 20):
     
     return inverse
 
+def getFlatStates(angles, inverse):
+    
+    magn = np.sqrt(np.sum(angles**2,axis = 1))
+    
+    maxStSt = np.max(inverse)
+    
+    inverse[magn<0.1] = maxStSt+1
+    
+    return inverse
 def makeSelectionPerStSt(allData, simBound):
     
     
