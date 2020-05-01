@@ -14,8 +14,8 @@ tic
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 opt=initOpt('template','Tessellation','numVert', 4,'vertexType', "2CFF",...
-            'tessellationType', '25','xrep', 1, 'yrep', 1, 'periodic', 'on',...
-            'restang', 2.356, 'angDesign', [0.00 90 180.00 270]*pi/180,...
+            'tessellationType', '25','xrep', 5, 'yrep', 5, 'periodic', 'on',...
+            'restang', 0.785, 'angDesign', [0.00 90 180.00 270]*pi/180,...%0.785%2.356
             'analysis','result','analysisType','randomPert',...
             'numIterations', 1000,'RandstDev', 0.2,...
             'figDPI',200, 'saveMovie', 'off', 'safeMovieAntiAlias', 0,...
@@ -48,19 +48,19 @@ switch opt.analysis
 %         kap = logspace(-3,0,25);
 %         kap([9,17,25]) = [];
         kap = opt.Khinge; %[kap kap*10 kap*100]; %[10^-3, logspace(-1,0,2)];% 
-        xrep = [1:15];% opt.xrep; %only used when having tessellations
+        xrep = [14:15];% opt.xrep; %only used when having tessellations
         yrep = opt.yrep; %only used when having tessellations
         findDeformation(opt, des, xrep, yrep, ang, kap)
     case{'savedata'}
         %!!!When tessellation, the design angles need to be given!!!!!
-%         for i = 2:14
-%         opt.file = sprintf('/01-Apr-2020_%d_%d_', [i,i]);
+%         for i = 2:13
+%         opt.file = sprintf('/24-Apr-2020_%d_%d_', [i,i]);
         des = ["2CFF"];
         ReadAndPlot(opt,'oneDes', des) %other option is 'allDes', 'oneDes'
 %         end
     case{'plot'}
-        opt.sim =1;   %only used when selecting option 'oneRes'
-        PlotResults(opt,'allRes') %other options is 'allRes','ststRes','oneRes','everyRes'
+        opt.sim =122;   %only used when selecting option 'oneRes'
+        PlotResults(opt,'oneRes') %other options is 'allRes','ststRes','oneRes','everyRes'
 end
 
 
