@@ -324,6 +324,40 @@ def countStableStatesDBSCAN(finalAngles, dis = 0.05, minpoints = 20, reduceFit =
     
     return inverse
 
+def countStableStatesDistance(finalAngles, dis = 0.05):
+    
+    startVect = np.zeros((14,4))
+    startVect[10,:] = [np.pi, 0, np.pi, 0]
+    startVect[11,:] = [-np.pi, 0, -np.pi, 0]
+    startVect[12,:] = [0, np.pi, 0, np.pi]
+    startVect[13,:] = [0, -np.pi, 0, -np.pi]
+    
+    direction = np.array([[1,1,1,1], [1,-1,1,-1],[1,1,1,-1],[1,1,-1,1],[1,-1,1,1],[-1,1,1,1],[1,1,-1,-1],[1,-1,-1,1],[1,0,1,0],[0,1,0,1],[0,-1,0,1],[0,-1,0,1],[-1,0,1,0],[-1,0,1,0]]).astype(float)
+    direction = (direction.T/np.linalg.norm(direction,axis = 1)).T
+    
+    ba = direction
+    magn_ba = np.linalg.norm(ba, axis = 1)
+    
+    N = np.size(finalAngles,0)
+    # if N <= 1:
+    #     return [1]
+    
+    distances = np.zeros((N,14))
+    for i in np.arange(14):
+        pa = finalAngles - startVect[i,:]
+        t = np.sum(pa*ba[i,:],axis = 1)/magn_ba[i]**2
+        distances[:,i] = np.linalg.norm(pa-np.array([t]).T*ba[i,:], axis = 1)
+        
+    inverse = np.argmin(distances,axis = 1)
+    
+    no_state = np.min(distances,axis = 1) > dis
+    inverse[no_state] = -1
+    
+    magn = np.sqrt(np.sum(finalAngles**2,axis = 1))
+    inverse[magn<0.1] = 14
+    
+    return inverse
+
 def dbscan_predict(model, X):
 
     nr_samples = X.shape[0]
@@ -361,14 +395,15 @@ def getPureMat(simStSt, ThisData, ThisEnergy, ThisAngles, ThisCurv, tessellation
     if stst[0] == -1:
         stst = np.delete(stst,0)
         
-    #checkerboard pattern
+    #checkerboard pattern (dome-saddle)
     x = np.zeros(tessellation, dtype = int) 
     x[1::2, ::2] = 1
-    x[::2, 1::2] = 2
-    x[1::2,1::2] = 3
+    x[::2, 1::2] = 1
+    # x[::2, 1::2] = 2
+    # x[1::2, 1::2] = 3
     x = x.flatten()
     
-    #lines
+    #lines (miura)
     yh = np.zeros(tessellation, dtype = int) 
     yv = np.zeros(tessellation, dtype = int) 
     yh[::2,:] = 1
@@ -376,26 +411,31 @@ def getPureMat(simStSt, ThisData, ThisEnergy, ThisAngles, ThisCurv, tessellation
     yh = yh.flatten()
     yv = yv.flatten()
     
+    #all same (fold)
+    z = np.zeros(tessellation, dtype = int) 
+    z = z.flatten()
     
     for i in stst:
         here = (simStSt[:,x == 0] == i).all(axis = 1)
-        candidate[here] = candidate[here] + 0.25
-        here = (simStSt[:,x == 1] == i).all(axis = 1)
-        candidate[here] = candidate[here] + 0.25
-        here = (simStSt[:,x == 2] == i).all(axis = 1)
-        candidate[here] = candidate[here] + 0.25
-        here = (simStSt[:,x == 3] == i).all(axis = 1)
-        candidate[here] = candidate[here] + 0.25
+        orhere = (simStSt[:,x == 1] == i).all(axis = 1)
+        defhere = np.logical_xor(here, orhere)
+        # orhere2 = (simStSt[:,x == 2] == i).all(axis = 1)
+        # orhere3 = (simStSt[:,x == 3] == i).all(axis = 1)
+        # defhere = np.logical_xor(np.logical_xor(here, orhere),np.logical_xor(orhere2, orhere3))
+        candidate[defhere] = candidate[defhere] + 0.5
         
         here = (simStSt[:,yh == 0] == i).all(axis = 1)
-        candidate[here] = candidate[here] + 0.5
-        here = (simStSt[:,yh == 1] == i).all(axis = 1)
-        candidate[here] = candidate[here] + 0.5
+        orhere = (simStSt[:,yh == 1] == i).all(axis = 1)
+        defhere = np.logical_xor(here, orhere)
+        candidate[defhere] = candidate[defhere] + 0.5
         
         here = (simStSt[:,yv == 0] == i).all(axis = 1)
-        candidate[here] = candidate[here] + 0.5
-        here = (simStSt[:,yv == 1] == i).all(axis = 1)
-        candidate[here] = candidate[here] + 0.5
+        orhere = (simStSt[:,yv == 1] == i).all(axis = 1)
+        defhere = np.logical_xor(here, orhere)
+        candidate[defhere] = candidate[defhere] + 0.5
+        
+        here = (simStSt[:,z == 0] == i).all(axis = 1)
+        candidate[here] = candidate[here] + 1
     
     purity = np.floor(candidate).astype(bool)
     
