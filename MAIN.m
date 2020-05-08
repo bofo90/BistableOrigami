@@ -14,7 +14,7 @@ tic
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 opt=initOpt('template','Tessellation','numVert', 4,'vertexType', "2CFF",...
-            'tessellationType', '25','xrep', 5, 'yrep', 5, 'periodic', 'on',...
+            'tessellationType', '25','xrep', 5, 'yrep', 5, 'periodic', 'off',...
             'restang', 0.785, 'angDesign', [0.00 90 180.00 270]*pi/180,...%0.785%2.356
             'analysis','result','analysisType','randomPert',...
             'numIterations', 1000,'RandstDev', 0.2,...
@@ -22,7 +22,7 @@ opt=initOpt('template','Tessellation','numVert', 4,'vertexType', "2CFF",...
             'folAlgor', 'sqp','relAlgor', 'sqp',...
             'gethistory', 'off', 'plotAll', 'off',...
             'constrEdge','off','constrFace','on','constAnglePerc',0.99,... 
-            'Khinge',10^-1.5,'Kedge',1,'Kdiag',1,'Kface',100,'KtargetAngle',1000,...
+            'Khinge',10^-0.5,'Kedge',1,'Kdiag',1,'Kface',100,'KtargetAngle',1000,...
             'maxStretch', nan,'steps',3,...
             'maxArea', 0.1);    
 
@@ -34,7 +34,7 @@ opt.options=optimoptions('fmincon','GradConstr','on','GradObj','on',...
                          'Algorithm', opt.folAlgor, 'OutputFcn',@outfun,...               
                          'RelLineSrchBnd', 0.01, 'RelLineSrchBndDuration', 5000);
                      
-opt.file = '/24-Apr-2020_';
+opt.file = '/08-May-2020_';
 switch opt.analysis
     case{'info'}
         [extrudedUnitCell,opt]=obtainOrigami(opt);
@@ -48,16 +48,16 @@ switch opt.analysis
 %         kap = logspace(-3,0,25);
 %         kap([9,17,25]) = [];
         kap = opt.Khinge; %[kap kap*10 kap*100]; %[10^-3, logspace(-1,0,2)];% 
-        xrep = [14:15];% opt.xrep; %only used when having tessellations
+        xrep = [1:15];% opt.xrep; %only used when having tessellations
         yrep = opt.yrep; %only used when having tessellations
         findDeformation(opt, des, xrep, yrep, ang, kap)
     case{'savedata'}
         %!!!When tessellation, the design angles need to be given!!!!!
-%         for i = 2:13
-%         opt.file = sprintf('/24-Apr-2020_%d_%d_', [i,i]);
+        for i = 14:15
+        opt.file = sprintf('/24-Apr-2020_%d_%d_', [i,i]);
         des = ["2CFF"];
         ReadAndPlot(opt,'oneDes', des) %other option is 'allDes', 'oneDes'
-%         end
+        end
     case{'plot'}
         opt.sim =122;   %only used when selecting option 'oneRes'
         PlotResults(opt,'oneRes') %other options is 'allRes','ststRes','oneRes','everyRes'
