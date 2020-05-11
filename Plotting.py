@@ -33,7 +33,7 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
         else:
             if ~np.isnan(divisions[0]):
                 axes.set_xticks(np.linspace(mincoord[0],maxcoord[0],divisions[0]))
-    axes.set_xlabel(nameX,labelpad=-3, color = gray)
+    axes.set_xlabel(nameX,labelpad=0, color = gray)
     
     if ~np.isnan(mincoord[1]) and ~np.isnan(maxcoord[1]):
         axes.set_ylim([mincoord[1]-buffer[1], maxcoord[1]+buffer[1]])
@@ -43,7 +43,7 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
         else:
             if ~np.isnan(divisions[1]):
                 axes.set_yticks(np.linspace(mincoord[1],maxcoord[1],divisions[1]))
-    axes.set_ylabel(nameY,labelpad=-3, color = gray)
+    axes.set_ylabel(nameY,labelpad=0, color = gray)
    
     axes.xaxis.label.set_color(gray)
     axes.tick_params(axis='x', colors=gray, direction = 'in', width = 0.4)
@@ -542,6 +542,44 @@ right=0.957)
             thisstst = thisDes[thisDes.iloc[:, stst_col] == stst[k]]
             
             ax1.plot(thisstst.iloc[:,x], thisstst.iloc[:,y], c = matl.colors.rgb2hex(color[k]), linewidth = 0.4)
+        
+        fig1.show()
+        if save:
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i] +'.pdf', transparent = True)
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i] +'.png', transparent = True)
+            print(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i])
+    
+    return
+
+def CurvaturePaper(allDesigns, x, xname, y, yname, z, stst_col, colormap, save = False, Folder_name = '', NameFig = ''):
+    
+    allDesigns = allDesigns.round(8)
+    
+    stst, color = getcolormap(allDesigns.iloc[:,stst_col].values, colormap)
+    
+    variables = np.unique(allDesigns.iloc[:,z])
+    
+    for i in np.arange(np.size(variables)):
+    
+        fig1 = plt.figure(figsize=(cm2inch(4.4), cm2inch(3.1)))
+        ax1 = plt.subplot(111)
+        fig1.subplots_adjust(top=0.982,
+        bottom=0.23,
+        left=0.280,
+        right=0.940)
+        
+        thisDesBool = allDesigns.iloc[:,z] == variables[i]
+        thisDes = allDesigns[thisDesBool]    
+        
+        NiceGraph2D(ax1, xname, yname)
+        
+        ax1.set_xticks([0,0.5,1])
+        ax1.set_xlim([-0.01,1.01])
+            
+        for k in np.arange(np.size(stst))[::-1]:
+            thisstst = thisDes[thisDes.iloc[:, stst_col] == stst[k]]
+            
+            ax1.scatter(thisstst.iloc[:,x], thisstst.iloc[:,y], c = matl.colors.rgb2hex(color[k]), s = 8)
         
         fig1.show()
         if save:

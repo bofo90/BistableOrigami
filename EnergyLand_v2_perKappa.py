@@ -66,6 +66,8 @@ ang_4D_wpbc = np.concatenate((np.sin(ang_4D/[np.pi, np.pi, np.pi*2]*np.pi*2),np.
 
 allDesigns['StableStateAll'] = raa.countStableStatesDBSCAN(ang_4D_wpbc, 0.1,7)
 allDesigns['StableStateAll'] = raa.getFlatStates(allDesAng, allDesigns['StableStateAll'].values)
+mask = (allDesigns['StableStateAll'] != -1) & (allDesigns['StableStateAll'] != 4)
+allDesigns = allDesigns.iloc[mask.values,:]
 
 
 colormap = 'Set2'
@@ -77,7 +79,7 @@ plot.Angles3D(allDesAng, allDesigns['StableStateAll'].values, colormap)
 plt.close('all')    
     
 ##### Plotting the minFace of each stable state to make sure we are inside the constraint
-plot.XYperZ(allDesigns, 1, r'$\theta_0/\pi$', 7, r'$Area$', 0, -1, colormap, save = True, Folder_name = Folder_name, NameFig = 'AreaFaces')
+plot.XYperZ(allDesigns, 1, r'$\Theta/\pi$', 7, r'$Area$', 0, -1, colormap, save = True, Folder_name = Folder_name, NameFig = 'AreaFaces')
 
 
 #%%
@@ -85,7 +87,7 @@ plt.close('all')
 
 ##### Plotting the Curvature of each stable state
 ststcol = -1
-plot.XYperZ(allDesigns,  1, r'$\theta_0/\pi$', 6, r'$K_\mathregular{G}$', 0, ststcol, colormap, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
+plot.CurvaturePaper(allDesigns,  1, r'$\Theta/\pi$', 6, r'$K_\mathregular{G}$', 0, ststcol, colormap, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
 plot.CreateColorbar(allDesigns.iloc[:,ststcol], colormap, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
 
 #%%
