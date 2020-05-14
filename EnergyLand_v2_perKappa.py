@@ -18,6 +18,7 @@ plt.close('all')
 
 Folder_name = "Results/SingleVertex4/2CFF/06-Apr-2020_0.00_ 90.00_180.00_270.00_"
 # Folder_name = "Results/SingleVertex4/2CFF/19-Mar-2020_0.00_ 90.00_180.00_270.00_"
+# Folder_name = "Results/SingleVertex4/2CFF/13-May-2020_d_0.00_ 90.00_180.00_270.00_"
 
 allDesigns = pd.DataFrame()
 allFlags = pd.DataFrame()
@@ -25,7 +26,7 @@ allFlags = pd.DataFrame()
 if not os.path.isdir(Folder_name + '/Images/'):
     os.mkdir(Folder_name + '/Images/')
     
-designang = np.array(Folder_name.split('_')[1:-1]).astype(float)
+designang = np.array(Folder_name.split('_')[-5:-1]).astype(float)
 numvertex = np.int(Folder_name.split('/')[1][-1])
   
 for subdir in os.listdir(Folder_name):
@@ -46,10 +47,10 @@ for subdir in os.listdir(Folder_name):
         
         selData = raa.makeSelectionPerStSt(ThisData, simLen*0.0)
         # selData = ThisData
-        notOutLie = selData['StableStates'] != -1
+        clusData, clusFlags = raa.deleteNonClustered(selData,ThisFlags)
         
-        allDesigns = allDesigns.append(selData.iloc[notOutLie.values,:])
-        allFlags = allFlags.append(ThisFlags)
+        allDesigns = allDesigns.append(clusData)
+        allFlags = allFlags.append(clusFlags)
     
 allDesigns = allDesigns.reset_index(level=0, drop =True)
 allFlags = allFlags.reset_index(level=0, drop =True)
@@ -66,20 +67,23 @@ ang_4D_wpbc = np.concatenate((np.sin(ang_4D/[np.pi, np.pi, np.pi*2]*np.pi*2),np.
 
 allDesigns['StableStateAll'] = raa.countStableStatesDBSCAN(ang_4D_wpbc, 0.1,7)
 allDesigns['StableStateAll'] = raa.getFlatStates(allDesAng, allDesigns['StableStateAll'].values)
-mask = (allDesigns['StableStateAll'] != -1) & (allDesigns['StableStateAll'] != 4)
-allDesigns = allDesigns.iloc[mask.values,:]
+
+mask, allFlags = raa.deleteNonClustered2(allDesigns, allFlags)
+
+# allDesigns = allDesigns.iloc[mask,:]
+# allDesAng = allDesAng[mask,:]
 
 
 colormap = 'Set2'
 
-plot.Angles3D(ang_4D_wpbc, allDesigns['StableStateAll'].values, colormap)
+# plot.Angles3D(ang_4D_wpbc, allDesigns['StableStateAll'].values, colormap)
 plot.Angles3D(allDesAng, allDesigns['StableStateAll'].values, colormap)
         
 #%%
-plt.close('all')    
+# plt.close('all')    
     
 ##### Plotting the minFace of each stable state to make sure we are inside the constraint
-plot.XYperZ(allDesigns, 1, r'$\Theta/\pi$', 7, r'$Area$', 0, -1, colormap, save = True, Folder_name = Folder_name, NameFig = 'AreaFaces')
+# plot.XYperZ(allDesigns, 1, r'$\Theta/\pi$', 7, r'$Area$', 0, -1, colormap, save = True, Folder_name = Folder_name, NameFig = 'AreaFaces')
 
 
 #%%
@@ -87,8 +91,8 @@ plt.close('all')
 
 ##### Plotting the Curvature of each stable state
 ststcol = -1
-plot.CurvaturePaper(allDesigns,  1, r'$\Theta/\pi$', 6, r'$K_\mathregular{G}$', 0, ststcol, colormap, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
-plot.CreateColorbar(allDesigns.iloc[:,ststcol], colormap, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
+# plot.CurvaturePaper(allDesigns,  1, r'$\Theta/\pi$', 6, r'$K_\mathregular{G}$', 0, ststcol, colormap, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
+# plot.CreateColorbar(allDesigns.iloc[:,ststcol], colormap, save = True, Folder_name = Folder_name, NameFig = 'Curvature')
 
 #%%
 
@@ -105,22 +109,41 @@ plot.CreateColorbar(allDesigns.iloc[:,ststcol], colormap, save = True, Folder_na
 
 
 #%%
-plt.close('all')   
+# plt.close('all')   
 
-##### Plotting the Curvature of each stable state
-ststcol = -1
-plot.TotEnergyperZ(allDesigns,1, r'$\theta_0/\pi$', 0, ststcol, colormap, save = True, Folder_name = Folder_name)
-plot.CreateColorbar(allDesigns.iloc[:,ststcol], colormap, save = True, Folder_name = Folder_name, NameFig = 'TotEnergyNorm')
+# ##### Plotting the Curvature of each stable state
+# ststcol = -1
+# plot.TotEnergyperZ(allDesigns,1, r'$\theta_0/\pi$', 0, ststcol, colormap, save = True, Folder_name = Folder_name)
+# plot.CreateColorbar(allDesigns.iloc[:,ststcol], colormap, save = True, Folder_name = Folder_name, NameFig = 'TotEnergyNorm')
 
-plot.XmultYperZ(allDesigns, 1, r'$\theta_0/\pi$', [3,4], r'$E_{norm}$', 0, save = True, Folder_name = Folder_name, NameFig = 'Energies')
+# plot.XmultYperZ(allDesigns, 1, r'$\theta_0/\pi$', [3,4], r'$E_{norm}$', 0, save = True, Folder_name = Folder_name, NameFig = 'Energies')
+
 #%%
-plt.close('all')  
+plt.close('all')
+
+###ploting scatter points of the presence of each stabel state
+colormap = 'coolwarm'
+plot.StableStatesCounturPlot(allDesigns,1, r'$\Theta/\pi$', 0, r'$\kappa$', -1, 6, r'$K_\mathregular{G}$', colormap, [-3,3], save = True, Folder_name = Folder_name, NameFig = 'StStAppearance')
+colormap = 'Set2'
+
+#%%
+plt.close('all')
+
+###ploting scatter points of the presence of each stabel state
+colormap = 'jet'
+plot.StableStatesCounturPlot(allFlags,3, r'$\Theta/\pi$', 2, r'$\kappa$', 0, 1, r'$AmountFlags$', colormap, [0,1000], save = True, Folder_name = Folder_name, NameFig = 'FlagsAppearance')
+plot.StableStatesCounturPlot(allDesigns,1, r'$\Theta/\pi$', 0, r'$\kappa$', -1, -2, r'$AmountSimulations$', colormap, [0,1000], save = True, Folder_name = Folder_name, NameFig = 'StStNumSim')
+
+colormap = 'Set2'
+
+#%%
+# plt.close('all')  
 
 #### Plot first three angles of all vertices with different colors representing the stable state
 plot.Angles3D(allDesAng, allDesigns['StableStateAll'].values, colormap)
 
 #%%
-allDes_copy = allDesigns.copy()
-allDes_copy['restang'] = allDes_copy['restang']*np.pi
-raa.SaveForPlot(allDes_copy, Folder_name)
+# allDes_copy = allDesigns.copy()
+# allDes_copy['restang'] = allDes_copy['restang']*np.pi
+# raa.SaveForPlot(allDes_copy, Folder_name)
 
