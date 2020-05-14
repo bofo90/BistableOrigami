@@ -519,6 +519,50 @@ def SelectPerVertex(VertStSt, allData_or, VertEnergy, VertAngles, VertCurv):
     
     return selStSt
 
+def deleteNonClustered(selData,ThisFlags):
+    
+    converg = (selData['StableStates'] != -1).values
+    
+    clusData = selData.iloc[converg,:]
+    
+    if (~converg).any():
+        non_clustered = selData.iloc[~converg,[-2,-1,0,1]].values.flatten()
+        non_clustered[0] = -4
+        
+        ThisFlags.iloc[(ThisFlags['Flags']==1).values,1] -= non_clustered[1]
+        ThisFlags.loc[len(ThisFlags)]=non_clustered
+    
+    return clusData, ThisFlags
+
+def deleteNonClustered2(allDesigns, allFlags):
+    
+    mask = ((allDesigns['StableStateAll'] != -1) & (allDesigns['StableStateAll'] != 4)).values
+    
+    allDesigns = allDesigns.round(8)
+    allFlags = allFlags.round(8)
+    kappas = np.unique(allDesigns['kappa'])
+    thetas = np.unique(allDesigns['restang'])
+    
+    for k in kappas:
+        for t in thetas:
+            thisDesBool = (allDesigns['kappa']==k) & (allDesigns['restang']==t)
+            thisConvFlag = (allFlags['kappa']==k) & (allFlags['restang']==t) & (allFlags['Flags'] == 1)
+            
+            thisDes = allDesigns[thisDesBool]
+            
+            herenonconv = (thisDes['StableStateAll'] == -1).values
+            
+            if (herenonconv).any():
+                non_clustered = thisDes.iloc[herenonconv,[-1,-2,0,1]].values.flatten()
+                non_clustered[0] = -4
+                
+                if np.sum(thisConvFlag) != 1:
+                    print('Theres a problem with the flag counting\n')
+                allFlags.iloc[thisConvFlag.values,1] -= non_clustered[1]
+                allFlags.loc[len(allFlags)]=non_clustered
+    
+    return mask, allFlags
+
 def getStableStatesMat(data, tessellation):
     
     numsim = np.size(data,0)
