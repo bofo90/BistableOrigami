@@ -73,15 +73,15 @@ NiceGraph2D(ax1, r'$\theta_1/\pi$', r'$\theta_2/\pi$', mincoord = [-1,-1], maxco
             divisions = [3,3], buffer = [0.1, 0.1])
 
 #Branch 1
-ax1.plot([0,0],[-1,1], color = '#543E94', linewidth = 1)
+ax1.plot([0,0],[-1,1], color = '#B3B3B3', linewidth = 1)
 #Sub branches 1a and 1b
-ax1.plot([-1+shift,1-shift],[1,1], '--', color = '#0C770C', linewidth = 1)
-ax1.plot([-1+shift,1-shift],[-1,-1], '--', color = '#0C770C', linewidth = 1)
+ax1.plot([-1+shift,1-shift],[1,1], '--', color = '#FFD92F', linewidth = 1)
+ax1.plot([-1+shift,1-shift],[-1,-1], '--', color = '#FFD92F', linewidth = 1)
 #Branch 2
-ax1.plot([-1,1],[0,0], color = '#543E94', linewidth = 1)
+ax1.plot([-1,1],[0,0], color = '#B3B3B3', linewidth = 1)
 #Sub branches 2a and 2b
-ax1.plot([1,1],[-1+shift,1-shift], '--', color = '#0C770C', linewidth = 1)
-ax1.plot([-1,-1],[-1+shift,1-shift], '--', color = '#0C770C', linewidth = 1)
+ax1.plot([1,1],[-1+shift,1-shift], '--', color = '#FFD92F', linewidth = 1)
+ax1.plot([-1,-1],[-1+shift,1-shift], '--', color = '#FFD92F', linewidth = 1)
 
 #Dome State
 ax1.scatter([das, -das],[das, -das], color = '#66C2A5', marker = 's', s = 20)
@@ -105,14 +105,14 @@ NiceGraph2D(ax2, r'$\theta_1/\pi$', r'$\theta_3/\pi$', mincoord = [-1,-1], maxco
             divisions = [3,3], buffer = [0.1, 0.1])
 
 #Branch 1
-ax2.plot([-1,1],[-1,1], color = '#543E94', linewidth = 1, zorder = 10)
+ax2.plot([-1,1],[-1,1], color = '#B3B3B3', linewidth = 1, zorder = 10)
 #Sub branches 1a and 1b
-ax2.scatter([-1,1],[-1,1], marker = 'x', color = '#0C770C', s = 20)
+ax2.scatter([-1,1],[-1,1], marker = 'x', color = '#FFD92F', s = 20)
 #Branch 2
-ax2.scatter([0],[0], marker = 'o', color = '#543E94', s = 20, zorder = 14)
+ax2.scatter([0],[0], marker = 'o', color = '#B3B3B3', s = 20, zorder = 14)
 #Sub branches 2a and 2b
-ax2.plot([-1+shift/np.sqrt(2)/2,1+shift/np.sqrt(2)/2],[1+shift/np.sqrt(2)/2,-1+shift/np.sqrt(2)/2], '--', color = '#0C770C', linewidth = 1, zorder = 11)
-ax2.plot([-1-shift/np.sqrt(2)/2,1-shift/np.sqrt(2)/2],[1-shift/np.sqrt(2)/2,-1-shift/np.sqrt(2)/2], '--', color = '#0C770C', linewidth = 1, zorder = 12)
+ax2.plot([-1+shift/np.sqrt(2)/2,1+shift/np.sqrt(2)/2],[1+shift/np.sqrt(2)/2,-1+shift/np.sqrt(2)/2], '--', color = '#FFD92F', linewidth = 1, zorder = 11)
+ax2.plot([-1-shift/np.sqrt(2)/2,1-shift/np.sqrt(2)/2],[1-shift/np.sqrt(2)/2,-1-shift/np.sqrt(2)/2], '--', color = '#FFD92F', linewidth = 1, zorder = 12)
 
 #Dome State
 ax2.scatter([das, -das],[das, -das], color = '#66C2A5', marker = 's', s = 20, zorder = 15)
