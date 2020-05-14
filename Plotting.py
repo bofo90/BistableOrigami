@@ -282,6 +282,35 @@ def CreateColorbar(StableStates, cmap, save = False, Folder_name = '', NameFig =
     
     return
 
+def CreateContColorbar(Data, Name, cmap, save = False, Folder_name = '', NameFig = ''):
+    
+    minDat = np.min(Data)
+    maxDat = np.max(Data)
+    
+    cmaptemp = matl.cm.get_cmap(cmap)
+    cmapfig, normfig = from_levels_and_colors(np.linspace(minDat, maxDat, 1001),cmaptemp(np.linspace(0, 1,1000)))
+
+    fig1 = plt.figure(figsize=(cm2inch(8.8), cm2inch(1.5)))
+    fig1.subplots_adjust(top=0.884,
+    bottom=0.116,
+    left=0.059,
+    right=0.951)
+    ax1 = plt.subplot(111)
+    cbar = plt.colorbar(matl.cm.ScalarMappable(norm=normfig, cmap=cmapfig), ax = ax1, fraction=0.99, pad=0.01, orientation='horizontal')
+    cbar.set_ticks(np.linspace(minDat,maxDat,5))
+    # cbar.ax.set_xticklabels(ststname.astype(int))
+    cbar.set_label(Name, fontsize = 9, color = '0.2',labelpad = 0)
+    cbar.ax.tick_params(colors='0.2', pad=2)
+    cbar.outline.set_edgecolor('0.2')
+    cbar.outline.set_linewidth(0.4)
+    ax1.remove()   
+    
+    if save: 
+        fig1.savefig(Folder_name + '/Images/' + NameFig + '_CB.pdf', transparent = True)
+        fig1.savefig(Folder_name + '/Images/' + NameFig + '_CB.png', transparent = True)
+    
+    return
+
 def CreateLegend(ax, location = 0):
     
     leg = ax.legend(loc = location, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False, 
@@ -586,5 +615,72 @@ def CurvaturePaper(allDesigns, x, xname, y, yname, z, stst_col, colormap, save =
             fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i] +'.pdf', transparent = True)
             fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i] +'.png', transparent = True)
             print(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i])
+    
+    return
+
+def StableStatesCounturPlot(allDesigns,x, xname, y, yname, z, color, colorName, colormap, minmax, save = False, Folder_name = '', NameFig = ''):
+    
+    allDesigns = allDesigns.round(8)
+    
+    # stst, color = getcolormap(allDesigns.iloc[:,z].values, colormap)
+    # cmaptemp = matl.cm.get_cmap(colormap)
+    # cmaptemp.set_over('r')
+    # cmaptemp.set_under('b')
+    stst = np.unique(allDesigns.iloc[:,z])
+    
+    minCol = minmax[0]#np.min(allDesigns.iloc[:,color])
+    maxCol = minmax[1]#np.max(allDesigns.iloc[:,color])
+
+    for i in np.arange(np.size(stst)):
+        
+        fig1 = plt.figure(figsize=(cm2inch(4.4), cm2inch(4)))
+        ax1 = plt.subplot(111)
+        fig1.subplots_adjust(top=0.982,
+        bottom=0.23,
+        left=0.280,
+        right=0.940)
+        
+        thisDesBool = allDesigns.iloc[:,z] == stst[i]
+        thisDes = allDesigns[thisDesBool]    
+        
+        NiceGraph2D(ax1, xname, yname)
+        
+        ax1.set_xticks([0,0.5,1])
+        ax1.set_xlim([-0.01,1.01])
+        
+        ax1.set_yscale('log')
+        ax1.set_yticks([0.001,0.01,0.1,1])
+        ax1.set_ylim([0.0007,1.5])
+            
+        ax1.scatter(thisDes.iloc[:,x], thisDes.iloc[:,y], marker = 's', cmap = colormap, c = thisDes.iloc[:, color], 
+                    vmin = minCol, vmax = maxCol, s = 4.6)
+    
+        fig1.show()
+        if save:
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %stst[i] +'.pdf', transparent = True)
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %stst[i] +'.png', transparent = True)
+            print(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %stst[i])
+            
+    cmaptemp = matl.cm.get_cmap(colormap)
+    cmapfig, normfig = from_levels_and_colors(np.linspace(minCol, maxCol, 1000),cmaptemp(np.linspace(0, 1,1001)), extend = 'both')
+    
+    fig1 = plt.figure(figsize=(cm2inch(8.8), cm2inch(1.5)))
+    fig1.subplots_adjust(top=0.884,
+    bottom=0.116,
+    left=0.059,
+    right=0.951)
+    ax1 = plt.subplot(111)
+    cbar = plt.colorbar(matl.cm.ScalarMappable(norm=normfig, cmap=cmapfig), ax = ax1, fraction=0.99, pad=0.01, orientation='horizontal')
+    cbar.set_ticks(np.linspace(minCol,maxCol,5))
+    # cbar.ax.set_xticklabels(ststname.astype(int))
+    cbar.set_label(colorName, fontsize = 9, color = '0.2',labelpad = 0)
+    cbar.ax.tick_params(colors='0.2', pad=2)
+    cbar.outline.set_edgecolor('0.2')
+    cbar.outline.set_linewidth(0.4)
+    ax1.remove()   
+    
+    if save: 
+        fig1.savefig(Folder_name + '/Images/' + NameFig + '_CB.pdf', transparent = True)
+        fig1.savefig(Folder_name + '/Images/' + NameFig + '_CB.png', transparent = True)
     
     return
