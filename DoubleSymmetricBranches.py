@@ -62,12 +62,12 @@ shift = 0.08
 das = 0.2
 mo = 1-das
 #%%
-fig1 = plt.figure(figsize=(cm2inch(4.4), cm2inch(3.1)))
+fig1 = plt.figure(figsize=(cm2inch(3.3), cm2inch(3.1)))
 ax1 = plt.subplot(111)
-fig1.subplots_adjust(top=0.982,
-bottom=0.23,
-left=0.280,
-right=0.940)
+fig1.subplots_adjust(top=0.992,
+bottom=0.255,
+left=0.27,
+right=0.98)
 
 NiceGraph2D(ax1, r'$\theta_1/\pi$', r'$\theta_2/\pi$', mincoord = [-1,-1], maxcoord = [1,1], 
             divisions = [3,3], buffer = [0.1, 0.1])
