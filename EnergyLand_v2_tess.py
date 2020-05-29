@@ -19,11 +19,11 @@ allDesigns = pd.DataFrame()
 allCountMat = pd.DataFrame()
 allMat = pd.DataFrame()
 
-for i in np.arange(2,16)[::-1]:
+for i in np.arange(2,12)[::-1]:
 
-    Folder_name = "Results/Tessellation4/25/2CFF/01-Apr-2020_%d_%d_" %(i,i) #with no B.C.
+    # Folder_name = "Results/Tessellation4/25/2CFF/01-Apr-2020_%d_%d_" %(i,i) #with no B.C.
     # Folder_name = "Results/Tessellation4/25/2CFF/24-Apr-2020_%d_%d_" %(i,i) #with B.C.
-    # Folder_name = "Results/Tessellation4/25/2CFF/08-May-2020_%d_%d_" %(i,i) #higher kappa
+    Folder_name = "Results/Tessellation4/25/2CFF/08-May-2020_%d_%d_" %(i,i) #higher kappa
     
     if not os.path.isdir(Folder_name + '/Images/'):
         os.mkdir(Folder_name + '/Images/')
@@ -132,7 +132,7 @@ plot.Angles3D(allDesAng, allDesigns['StableStateAll'], colormap)
 #%%
 plt.close('all') 
 
-plot.ColorbarPerZ(allCountMat,2, np.arange(16)+3, 1, save = True, Folder_name = Folder_name, NameFig = 'SimulationsConvergence')
+plot.ColorbarPerZ(allCountMat,2, np.arange(11)+3, 1, save = True, Folder_name = Folder_name, NameFig = 'SimulationsConvergence')
 
 #%%
 # plt.close('all')   

@@ -347,7 +347,7 @@ def countStableStatesDistance(finalAngles, dis = 0.05):
     startVect[12,:] = [0, np.pi, 0, np.pi]
     startVect[13,:] = [0, -np.pi, 0, -np.pi]
     
-    direction = np.array([[1,1,1,1], [1,-1,1,-1],[1,1,1,-1],[1,1,-1,1],[1,-1,1,1],[-1,1,1,1],[1,1,-1,-1],[1,-1,-1,1],[1,0,1,0],[0,1,0,1],[0,-1,0,1],[0,-1,0,1],[-1,0,1,0],[-1,0,1,0]]).astype(float)
+    direction = np.array([[1,1,1,1], [1,-1,1,-1],[1,1,1,-1],[1,-1,1,1],[1,1,-1,1],[-1,1,1,1],[1,1,-1,-1],[1,-1,-1,1],[1,0,1,0],[0,1,0,1],[0,-1,0,1],[0,-1,0,1],[-1,0,1,0],[-1,0,1,0]]).astype(float)
     direction = (direction.T/np.linalg.norm(direction,axis = 1)).T
     
     ba = direction
@@ -474,40 +474,43 @@ def getPureMatConv(simStSt, tessellation):
     numUCmat = np.prod(tessellation-1)
     simulations = np.size(simStSt,0)
     simStSt = simStSt.reshape((simulations,*tessellation))
-    matType = np.zeros((simulations,7))
+    matType = np.zeros((simulations,4))
     
     #convolution matriz to identify checkerboard pattern
-    convMat1 = np.array([[1,2],[3,4]])
-    convMat2 = np.array([[1,2],[4,3]])
-    convMat3 = np.array([[1,4],[2,3]])
+    convMat1 = np.array([[1,2],[-2,-1]])
+    convMat2 = np.array([[1,2],[-1,-2]])
+    convMat3 = np.array([[1,-1],[2,-2]])
     convMat4 = np.array([[1,1],[1,1]])
     
     for i in np.arange(simulations):
+        sumConMat = signal.convolve2d(simStSt[i,:,:], convMat4, mode = 'valid')
+        
         #check for checkerboar pattern with dome saddle
         convMat = signal.convolve2d(simStSt[i,:,:], convMat1, mode = 'valid')
-        matType[i,0] = np.sum(convMat == 5)/numUCmat
+        matType[i,0] = np.sum((convMat == 0) & (sumConMat == 2))/numUCmat
         
-        #check for vert and horz lines pattern with miura from elastic origami
+        #check for vert lines pattern with miura from elastic origami
         convMat = signal.convolve2d(simStSt[i,:,:], convMat2, mode = 'valid')
-        matType[i,1] = np.sum(convMat == 40)/numUCmat
+        matType[i,1] = np.sum((convMat == 0) & (sumConMat == 18))/numUCmat
+        #check for vert lines pattern with miura from rigid origami
+        matType[i,3] = np.sum((convMat == 0) & (sumConMat == 42))/numUCmat
+        
+        #check for horz lines pattern with miura from elastic origami
         convMat = signal.convolve2d(simStSt[i,:,:], convMat3, mode = 'valid')
-        matType[i,2] = np.sum(convMat == 30)/numUCmat
+        matType[i,1] += np.sum((convMat == 0) & (sumConMat == 10))/numUCmat
+        #check for horz lines pattern with miura from rigid origami
+        matType[i,3] += np.sum((convMat == 0) & (sumConMat == 50))/numUCmat
         
         #check for all same with fold from rigid origami
-        convMat = signal.convolve2d(simStSt[i,:,:], convMat4, mode = 'valid')
-        matType[i,3] = np.sum(convMat == 32)/numUCmat
-        convMat = signal.convolve2d(simStSt[i,:,:], convMat4, mode = 'valid')
-        matType[i,4] = np.sum(convMat == 36)/numUCmat
-        
-        #check for vert and horz lines pattern with miura from rigid origami
-        convMat = signal.convolve2d(simStSt[i,:,:], convMat2, mode = 'valid')
-        matType[i,5] = np.sum(convMat == 105)/numUCmat
-        convMat = signal.convolve2d(simStSt[i,:,:], convMat3, mode = 'valid')
-        matType[i,6] = np.sum(convMat == 125)/numUCmat
-    
+        matType[i,2] = np.sum(sumConMat == 32)/numUCmat
+        matType[i,2] += np.sum(sumConMat == 36)/numUCmat
+   
     purity = np.max(matType, axis = 1) == 1
     matName = np.argmax(matType, axis = 1)+1
-    matName[~purity] += 7
+    matName[~purity] += 4
+    
+    nomat = np.max(matType, axis = 1) == 0
+    matName[nomat] = 0
     
     print('Not pure materials ', np.sum(~purity))
     
@@ -564,12 +567,25 @@ def makeSelectionPureMat(ThisDataPure, ThisFlags, typePureMat):
     selDataMat = ThisFlags.iloc[0,2:5].to_frame().transpose()
     
     matStSt, numMatStSt = np.unique(typePureMat, return_counts= True)
-    for i in np.arange(1,15):
+    for i in np.arange(1,5):
         thisStSt = matStSt == i
         if np.sum(thisStSt) == 0:
             selDataMat['Material %d' %i] = 0
         else:
             selDataMat['Material %d' %i] = numMatStSt[thisStSt]
+            
+    for i in np.arange(5,9):
+        thisStSt = matStSt == i
+        if np.sum(thisStSt) == 0:
+            selDataMat['Non pure material %d' %(i-4)] = 0
+        else:
+            selDataMat['Non pure material %d' %(i-4)] = numMatStSt[thisStSt]
+            
+    thisStSt = matStSt == 0   
+    if np.sum(thisStSt) == 0:
+        selDataMat['Non defined material'] = 0
+    else:
+        selDataMat['Non defined material'] = numMatStSt[thisStSt]
             
     # selDataMat['amountPure'] = np.size(ThisDataPure,0)
     
