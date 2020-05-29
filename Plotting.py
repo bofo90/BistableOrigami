@@ -760,7 +760,10 @@ def ColorbarPerZ(allMat, x, colorbar, z, save = False, Folder_name = '', NameFig
     z_values = np.unique(allMat.iloc[:,z])
     x_values = np.unique(allMat.iloc[:,x])
     
-    color = ['#66C2A5', '#FFD92F', '#E4BB05', '#B3B3B3', '#339568','#D7704A','#414596'] 
+    # color = ['#66C2A5', '#FFD92F', '#E4BB05', '#B3B3B3', '#339568','#D7704A','#414596'] 
+    color = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', 
+             '#aec7e8', '#ffbb78', '#98df8a', '#ff9896', '#c5b0d5', '#c49c94', '#f7b6d2', 
+             '#7f7f7f', '#bcbd22']
     
     for j in z_values:
         fig = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
@@ -778,7 +781,7 @@ right=0.982)
         
         for i in np.arange(np.size(colorbar)):
             ax1.bar(thisMat.iloc[:,x], thisMat.iloc[:,colorbar[i]],bottom=np.sum(thisMat.iloc[:,colorbar[0:i]], axis = 1), width = 1,
-                    color = color[i], label = thisMat.columns[colorbar[i]], align = 'center')
+                    color = color[i], label = thisMat.columns[colorbar[i]], align = 'center') #
             
         CreateLegend(ax1)
         

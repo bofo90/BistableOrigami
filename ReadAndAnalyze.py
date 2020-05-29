@@ -466,6 +466,52 @@ def getPureMat(simStSt, tessellation):
     print('Not pure materials ', np.sum(~purity))
     
     return purity, matName
+
+def getPureMatConv(simStSt, tessellation):
+    
+    from scipy import signal
+    
+    numUCmat = np.prod(tessellation-1)
+    simulations = np.size(simStSt,0)
+    simStSt = simStSt.reshape((simulations,*tessellation))
+    matType = np.zeros((simulations,7))
+    
+    #convolution matriz to identify checkerboard pattern
+    convMat1 = np.array([[1,2],[3,4]])
+    convMat2 = np.array([[1,2],[4,3]])
+    convMat3 = np.array([[1,4],[2,3]])
+    convMat4 = np.array([[1,1],[1,1]])
+    
+    for i in np.arange(simulations):
+        #check for checkerboar pattern with dome saddle
+        convMat = signal.convolve2d(simStSt[i,:,:], convMat1, mode = 'valid')
+        matType[i,0] = np.sum(convMat == 5)/numUCmat
+        
+        #check for vert and horz lines pattern with miura from elastic origami
+        convMat = signal.convolve2d(simStSt[i,:,:], convMat2, mode = 'valid')
+        matType[i,1] = np.sum(convMat == 40)/numUCmat
+        convMat = signal.convolve2d(simStSt[i,:,:], convMat3, mode = 'valid')
+        matType[i,2] = np.sum(convMat == 30)/numUCmat
+        
+        #check for all same with fold from rigid origami
+        convMat = signal.convolve2d(simStSt[i,:,:], convMat4, mode = 'valid')
+        matType[i,3] = np.sum(convMat == 32)/numUCmat
+        convMat = signal.convolve2d(simStSt[i,:,:], convMat4, mode = 'valid')
+        matType[i,4] = np.sum(convMat == 36)/numUCmat
+        
+        #check for vert and horz lines pattern with miura from rigid origami
+        convMat = signal.convolve2d(simStSt[i,:,:], convMat2, mode = 'valid')
+        matType[i,5] = np.sum(convMat == 105)/numUCmat
+        convMat = signal.convolve2d(simStSt[i,:,:], convMat3, mode = 'valid')
+        matType[i,6] = np.sum(convMat == 125)/numUCmat
+    
+    purity = np.max(matType, axis = 1) == 1
+    matName = np.argmax(matType, axis = 1)+1
+    matName[~purity] += 7
+    
+    print('Not pure materials ', np.sum(~purity))
+    
+    return purity, matName
     
 def applyMask(purity, simStSt, ThisData, ThisEnergy, ThisAngles, ThisCurv):
     
@@ -512,37 +558,28 @@ def makeSelectionPerStStMa(allData, simBound = 0):
 
 def makeSelectionPureMat(ThisDataPure, ThisFlags, typePureMat):
     
-    flagsName = ['NonConv', 'AreaConst', 'NonPure']
-    possibleFlags = [-1,-5,1]
+    flagsName = ['NonConv', 'AreaConst']
+    possibleFlags = [-1,-5]
     
     selDataMat = ThisFlags.iloc[0,2:5].to_frame().transpose()
     
-    # means = ThisDataPure[['kappa','restang','tes','TotalEnergy','Curvature']].mean().to_frame().transpose()
-    # means = means.rename(columns = {'TotalEnergy':'MatEnergy','Curvature':'MatCurv'})
-    
-    # stdev = ThisDataPure[['TotalEnergy','Curvature']].std().to_frame().transpose()
-    # stdev = stdev.rename(columns = {'TotalEnergy':'StdMatEnergy','Curvature':'StdMatCurv'})
-    
-    # selDataMat = pd.concat([param, stdev], axis=1, sort=False)
-    selDataMat['amountPure'] = np.size(ThisDataPure,0)
-    
-    for name, flag in zip(flagsName, possibleFlags):
-        numFlags = ThisFlags.iloc[(ThisFlags['Flags'] == flag).values,1].values
-        if flag == 1:
-            numFlags -= np.size(ThisDataPure,0)
-        if np.size(numFlags) == 0:
-            selDataMat[name] = 0
-        else:
-            selDataMat[name] = numFlags
-           
     matStSt, numMatStSt = np.unique(typePureMat, return_counts= True)
-    for i in np.arange(1,5):
+    for i in np.arange(1,15):
         thisStSt = matStSt == i
         if np.sum(thisStSt) == 0:
             selDataMat['Material %d' %i] = 0
         else:
             selDataMat['Material %d' %i] = numMatStSt[thisStSt]
+            
+    # selDataMat['amountPure'] = np.size(ThisDataPure,0)
     
+    for name, flag in zip(flagsName, possibleFlags):
+        numFlags = ThisFlags.iloc[(ThisFlags['Flags'] == flag).values,1].values
+        if np.size(numFlags) == 0:
+            selDataMat[name] = 0
+        else:
+            selDataMat[name] = numFlags
+            
     return  selDataMat
 
 def makeSelectionVertMat(matstst, allData, Energy, Angles, Curv, tess):

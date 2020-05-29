@@ -35,7 +35,7 @@ for i in np.arange(2,16)[::-1]:
     for subdir in os.listdir(Folder_name):
         if subdir == 'Images':
             continue    
-        # if subdir != 'RestAng_0.785': #'RestAng_1.571': #'RestAng_2.356': #
+        # if subdir != 'RestAng_2.356': #'RestAng_0.785': #'RestAng_1.571': #
         #     continue
             
         for subdir2 in os.listdir(Folder_name+'/'+subdir):
@@ -70,7 +70,8 @@ for i in np.arange(2,16)[::-1]:
             vertexStSt = raa.countStableStatesDistance(allAngles, 1)
             simStStMa = np.resize(vertexStSt, (simLen,numUC))
             
-            maskPureMat, typePureMat = raa.getPureMat(simStStMa, tessellation)
+            # maskPureMat, typePureMat = raa.getPureMat(simStStMa, tessellation)
+            maskPureMat, typePureMat = raa.getPureMatConv(simStStMa, tessellation)
             ThisDataMa['StableStateMat'] = typePureMat
 
             selDataMat = raa.makeSelectionPerStStMa(ThisDataMa)
@@ -131,7 +132,7 @@ plot.Angles3D(allDesAng, allDesigns['StableStateAll'], colormap)
 #%%
 plt.close('all') 
 
-plot.ColorbarPerZ(allCountMat,2, [7,8,9,10,6,5,4], 1, save = True, Folder_name = Folder_name, NameFig = 'SimulationsConvergence')
+plot.ColorbarPerZ(allCountMat,2, np.arange(16)+3, 1, save = True, Folder_name = Folder_name, NameFig = 'SimulationsConvergence')
 
 #%%
 # plt.close('all')   
