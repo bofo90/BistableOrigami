@@ -684,3 +684,106 @@ def StableStatesCounturPlot(allDesigns,x, xname, y, yname, z, color, colorName, 
         fig1.savefig(Folder_name + '/Images/' + NameFig + '_CB.png', transparent = True)
     
     return
+
+def StableStatesCounturPlotPaper(allDesigns,x, xname, y, yname, z, color, colorName, colormap, minmax, save = False, Folder_name = '', NameFig = ''):
+    
+    allDesigns = allDesigns.round(8)
+    
+    # stst, color = getcolormap(allDesigns.iloc[:,z].values, colormap)
+    # cmaptemp = matl.cm.get_cmap(colormap)
+    # cmaptemp.set_over('r')
+    # cmaptemp.set_under('b')
+    stst = np.unique(allDesigns.iloc[:,z])
+    
+    minCol = minmax[0]#np.min(allDesigns.iloc[:,color])
+    maxCol = minmax[1]#np.max(allDesigns.iloc[:,color])
+
+    for i in np.arange(np.size(stst)):
+        
+        fig1 = plt.figure(figsize=(cm2inch(3.3), cm2inch(3.0)))
+        ax1 = plt.subplot(111)
+        fig1.subplots_adjust(top=0.962,
+        bottom=0.26,
+        left=0.305,
+        right=0.935)
+        
+        thisDesBool = allDesigns.iloc[:,z] == stst[i]
+        thisDes = allDesigns[thisDesBool]    
+        
+        NiceGraph2D(ax1, xname, yname)
+        
+        ax1.set_xticks([0,0.5,1])
+        ax1.set_xlim([-0.01,1.01])
+        
+        ax1.set_yscale('log')
+        ax1.set_yticks([0.001,0.01,0.1,1])
+        ax1.set_ylim([0.0007,1.5])
+            
+        ax1.scatter(thisDes.iloc[:,x], thisDes.iloc[:,y], marker = 's', cmap = colormap, c = thisDes.iloc[:, color], 
+                    vmin = minCol, vmax = maxCol, s = 2)
+    
+        fig1.show()
+        if save:
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %stst[i] +'.pdf', transparent = True)
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %stst[i] +'.png', transparent = True)
+            print(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %stst[i])
+            
+    cmaptemp = matl.cm.get_cmap(colormap)
+    cmapfig, normfig = from_levels_and_colors(np.linspace(minCol, maxCol, 1000),cmaptemp(np.linspace(0, 1,1001)), extend = 'both')
+    
+    fig1 = plt.figure(figsize=(cm2inch(1.5), cm2inch(2.8)))
+    fig1.subplots_adjust(top=0.984,
+    bottom=0.021,
+    left=0.019,
+    right=0.911)
+    ax1 = plt.subplot(111)
+    cbar = plt.colorbar(matl.cm.ScalarMappable(norm=normfig, cmap=cmapfig), ax = ax1, 
+                        fraction=0.99, pad=0.01, orientation='vertical', aspect=15)
+    cbar.set_ticks(np.linspace(minCol,maxCol,5))
+    # cbar.ax.set_xticklabels(ststname.astype(int))
+    cbar.set_label(colorName, fontsize = 9, color = '0.2',labelpad = 0)
+    cbar.ax.tick_params(colors='0.2', pad=2)
+    cbar.outline.set_edgecolor('0.2')
+    cbar.outline.set_linewidth(0.4)
+    ax1.remove()   
+    
+    if save: 
+        fig1.savefig(Folder_name + '/Images/' + NameFig + '_CB.pdf', transparent = True)
+        fig1.savefig(Folder_name + '/Images/' + NameFig + '_CB.png', transparent = True)
+    
+    return
+
+def ColorbarPerZ(allMat, x, colorbar, z, save = False, Folder_name = '', NameFig = ''):
+    
+    allMat = allMat.round(8)
+    
+    z_values = np.unique(allMat.iloc[:,z])
+    x_values = np.unique(allMat.iloc[:,x])
+    
+    color = ['#66C2A5', '#FFD92F', '#E4BB05', '#B3B3B3', '#339568','#D7704A','#414596'] 
+    
+    for j in z_values:
+        fig = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
+        ax1 = plt.subplot(111)
+        fig.subplots_adjust(top=0.988,
+bottom=0.114,
+left=0.154,
+right=0.982)
+        
+        NiceGraph2D(ax1, 'Material Size', 'Sim. Amount', mincoord = [np.min(x_values),30], 
+                    maxcoord = [np.max(x_values),1000], divisions = [[2,5,10,15],[0,500,1000]], buffer = [0.7, 30])
+    
+        thisMatBool = allMat.iloc[:,z] == j
+        thisMat = allMat[thisMatBool]  
+        
+        for i in np.arange(np.size(colorbar)):
+            ax1.bar(thisMat.iloc[:,x], thisMat.iloc[:,colorbar[i]],bottom=np.sum(thisMat.iloc[:,colorbar[0:i]], axis = 1), width = 1,
+                    color = color[i], label = thisMat.columns[colorbar[i]], align = 'center')
+            
+        CreateLegend(ax1)
+        
+        if save: 
+            fig.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %j + '.pdf', transparent = True)
+            fig.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %j + '.png', transparent = True)
+            
+    return

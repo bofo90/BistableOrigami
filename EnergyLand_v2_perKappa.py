@@ -16,8 +16,8 @@ import Plotting as plot
 #%%
 plt.close('all')
 
-Folder_name = "Results/SingleVertex4/2CFF/06-Apr-2020_0.00_ 90.00_180.00_270.00_"
-# Folder_name = "Results/SingleVertex4/2CFF/19-Mar-2020_0.00_ 90.00_180.00_270.00_"
+# Folder_name = "Results/SingleVertex4/2CFF/06-Apr-2020_0.00_ 90.00_180.00_270.00_"
+Folder_name = "Results/SingleVertex4/2CFF/19-Mar-2020_0.00_ 90.00_180.00_270.00_"
 # Folder_name = "Results/SingleVertex4/2CFF/13-May-2020_d_0.00_ 90.00_180.00_270.00_"
 
 allDesigns = pd.DataFrame()
@@ -68,10 +68,12 @@ ang_4D_wpbc = np.concatenate((np.sin(ang_4D/[np.pi, np.pi, np.pi*2]*np.pi*2),np.
 allDesigns['StableStateAll'] = raa.countStableStatesDBSCAN(ang_4D_wpbc, 0.1,7)
 allDesigns['StableStateAll'] = raa.getFlatStates(allDesAng, allDesigns['StableStateAll'].values)
 
-mask, allFlags = raa.deleteNonClustered2(allDesigns, allFlags)
+clustDes, allFlagsRev = raa.deleteNonClustered2(allDesigns, allFlags)
+mask2 = (allDesigns['amountStSt']>50).values
 
-# allDesigns = allDesigns.iloc[mask,:]
-# allDesAng = allDesAng[mask,:]
+mask = clustDes.values & mask2
+allDesignsRed = allDesigns.iloc[mask,:]
+allDesAngRed = allDesAng[mask,:]
 
 
 colormap = 'Set2'
@@ -123,7 +125,7 @@ plt.close('all')
 
 ###ploting scatter points of the presence of each stabel state
 colormap = 'coolwarm'
-plot.StableStatesCounturPlot(allDesigns,1, r'$\Theta/\pi$', 0, r'$\kappa$', -1, 6, r'$K_\mathregular{G}$', colormap, [-3,3], save = True, Folder_name = Folder_name, NameFig = 'StStAppearance')
+plot.StableStatesCounturPlotPaper(allDesignsRed,1, r'$\Theta/\pi$', 0, r'$\kappa$', -1, 6, r'$K_\mathregular{G}$', colormap, [-3,3], save = True, Folder_name = Folder_name, NameFig = 'StStAppearance')
 colormap = 'Set2'
 
 #%%
@@ -132,7 +134,7 @@ plt.close('all')
 ###ploting scatter points of the presence of each stabel state
 colormap = 'jet'
 plot.StableStatesCounturPlot(allFlags,3, r'$\Theta/\pi$', 2, r'$\kappa$', 0, 1, r'$AmountFlags$', colormap, [0,1000], save = True, Folder_name = Folder_name, NameFig = 'FlagsAppearance')
-plot.StableStatesCounturPlot(allDesigns,1, r'$\Theta/\pi$', 0, r'$\kappa$', -1, -2, r'$AmountSimulations$', colormap, [0,1000], save = True, Folder_name = Folder_name, NameFig = 'StStNumSim')
+plot.StableStatesCounturPlot(allDesignsRed,1, r'$\Theta/\pi$', 0, r'$\kappa$', -1, -2, r'$AmountSimulations$', colormap, [0,1000], save = True, Folder_name = Folder_name, NameFig = 'StStNumSim')
 
 colormap = 'Set2'
 
