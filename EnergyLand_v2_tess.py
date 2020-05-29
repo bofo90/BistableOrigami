@@ -16,12 +16,14 @@ import Plotting as plot
 plt.close('all')
 
 allDesigns = pd.DataFrame()
-allFlags = pd.DataFrame()
+allCountMat = pd.DataFrame()
+allMat = pd.DataFrame()
 
-for i in np.arange(1,14)[::-1]:
+for i in np.arange(2,16)[::-1]:
 
-    # Folder_name = "Results/Tessellation4/25/2CFF/01-Apr-2020_%d_%d_" %(i,i)
-    Folder_name = "Results/Tessellation4/25/2CFF/24-Apr-2020_%d_%d_" %(i,i)
+    Folder_name = "Results/Tessellation4/25/2CFF/01-Apr-2020_%d_%d_" %(i,i) #with no B.C.
+    # Folder_name = "Results/Tessellation4/25/2CFF/24-Apr-2020_%d_%d_" %(i,i) #with B.C.
+    # Folder_name = "Results/Tessellation4/25/2CFF/08-May-2020_%d_%d_" %(i,i) #higher kappa
     
     if not os.path.isdir(Folder_name + '/Images/'):
         os.mkdir(Folder_name + '/Images/')
@@ -33,18 +35,19 @@ for i in np.arange(1,14)[::-1]:
     for subdir in os.listdir(Folder_name):
         if subdir == 'Images':
             continue    
-        # if subdir != 'RestAng_2.356': #'RestAng_0.785': #'RestAng_1.571': #
+        # if subdir != 'RestAng_0.785': #'RestAng_1.571': #'RestAng_2.356': #
         #     continue
             
         for subdir2 in os.listdir(Folder_name+'/'+subdir):
-            if subdir2 =='kappa_0.31623':
-                continue
+            # if subdir2 =='kappa_0.31623':
+            #     continue
             folder_name = Folder_name+'/'+subdir+'/'+subdir2+'/energy'
             print('Analysing: ' + folder_name)
             
             ThisEnergyOR, ThisAnglesOR, ThisCurvOR, ThisDataOR, simLen = raa.ReadFileMat(folder_name)
             ThisDataOR["TotalEnergy"] = np.mean(ThisEnergyOR, axis = 1)
-            ThisDataMa, ThisMask = raa.maskBadResults(ThisDataOR, returnMask = True)  
+            ThisDataMa, ThisMask, ThisFlags = raa.maskBadResults(ThisDataOR, returnMask = True, returnStad = True)  
+            ThisFlags['tes'] = tessellation[0]
             print('Converged simulations',  np.sum(ThisMask))
             
             ThisEnergyMa = ThisEnergyOR[ThisMask]
@@ -62,25 +65,35 @@ for i in np.arange(1,14)[::-1]:
             # allAngles,sym = raa.orderAngles(allAngles, numvertex, simLen*numUC)
             # ThisAngles = np.resize(allAngles, (simLen,numUC*numvertex))
             
+            # vertexStSt = raa.countStableStatesKmean(allAngles, 0.5, reduceFit = True)
             # vertexStSt = raa.countStableStatesDBSCAN(allAngles, 0.26, minpoints = 5, reduceFit = True)
             vertexStSt = raa.countStableStatesDistance(allAngles, 1)
             simStStMa = np.resize(vertexStSt, (simLen,numUC))
             
-            simStStPure, ThisDataPure, ThisEnergyPure, ThisAnglesPure, ThisCurvPure = raa.getPureMat(simStStMa, ThisDataMa, ThisEnergyMa, ThisAnglesMa, ThisCurvMa, tessellation)
+            maskPureMat, typePureMat = raa.getPureMat(simStStMa, tessellation)
+            ThisDataMa['StableStateMat'] = typePureMat
+
+            selDataMat = raa.makeSelectionPerStStMa(ThisDataMa)
+            allMat = allMat.append(selDataMat)
             
             # plot.Angles3D(allAngles, vertexStSt, 'jet')
+            simStStPure, ThisDataPure, ThisEnergyPure, ThisAnglesPure, ThisCurvPure = raa.applyMask(maskPureMat, simStStMa, ThisDataMa, ThisEnergyMa, ThisAnglesMa, ThisCurvMa)
             
+            selCountMat = raa.makeSelectionPureMat(ThisDataPure, ThisFlags, typePureMat)
+            allCountMat = allCountMat.append(selCountMat)
+
             if ThisDataPure.empty:
                 print("No pure material found")
                 continue
+            
             selData = raa.makeSelectionVertMat(simStStPure, ThisDataPure, ThisEnergyPure, ThisAnglesPure, ThisCurvPure, tessellation)
             
             notOutLie = selData['StableStates'] != -1
             allDesigns = allDesigns.append(selData.iloc[notOutLie.values,:])
-            
-            # allDesigns = allDesigns.append(selData)
         
 allDesigns = allDesigns.reset_index(level=0, drop =True)
+allCountMat = allCountMat.reset_index(level = 0, drop = True)
+allMat = allMat.reset_index(level = 0, drop = True)
 
 #%%
 ### Get stable states from material
@@ -94,7 +107,8 @@ allDesAng = allDesigns.iloc[:,12:16].values
 # ang_4D_wpbc = np.concatenate((np.sin(ang_4D/[np.pi, np.pi, np.pi*2]*np.pi*2),np.cos(ang_4D/[np.pi, np.pi, np.pi*2]*np.pi*2)), axis = 1)
 # allDesigns['StableStateVert'] = raa.countStableStatesKmean(ang_4D_wpbc, 0.07)
 
-allDesigns['StableStateAll'] = allDesigns['StableStates']
+allDesigns['StableStateAll'] = allDesigns['StableStates'].astype(int)
+allMat['StableStateAll'] = allMat['StableStateMat'].astype(int)
 
 colormap = 'jet'
 
@@ -115,6 +129,11 @@ plot.Angles3D(allDesAng, allDesigns['StableStateAll'], colormap)
 # colormapfUC = 'Set3'
 
 #%%
+plt.close('all') 
+
+plot.ColorbarPerZ(allCountMat,2, [7,8,9,10,6,5,4], 1, save = True, Folder_name = Folder_name, NameFig = 'SimulationsConvergence')
+
+#%%
 # plt.close('all')   
     
 # ##### Plotting the Curvature and Energy against neighbours for restang
@@ -128,15 +147,15 @@ plot.Angles3D(allDesAng, allDesigns['StableStateAll'], colormap)
 # plot.CreateColorbar(allDesigns.iloc[:,2], colormap, save = True, Folder_name = Folder_name, NameFig = 'MaterialSize')
 # colormap = 'Set2'
 #%%
-plt.close('all')  
+# plt.close('all')  
 
-# colormap = 'jet'
-plot.XYperZline(allDesigns, 2, r'$matSize$', -4, r'$Amount pureStSt$', -3, -1, colormap, save = True, Folder_name = Folder_name, NameFig = 'NeighvsSim_sv')
-plot.XYperZline(allDesigns, 2, r'$matSize$', 10, r'$E_{norm}$', -3, -1, colormap, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergy_sv')
-plot.CreateColorbar(allDesigns.iloc[:,-1], colormap, save = True, Folder_name = Folder_name, NameFig = 'StableStatesAll')
-# colormap = 'Set2'
+colormap = 'jet'
+plot.XYperZline(allDesigns, 2, r'$matSize$', -4, r'$Amount pureStSt$', -3, 9, colormap, save = True, Folder_name = Folder_name, NameFig = 'NeighvsSim_sv')
+plot.XYperZ(allDesigns, 2, r'$matSize$', 11, r'$E_{norm}$', -3, 9, colormap, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergy_sv')
+plot.CreateColorbar(allDesigns.iloc[:,9], colormap, save = True, Folder_name = Folder_name, NameFig = 'StableStatesAll')
+colormap = 'Set2'
 #%%
-plt.close('all')   
+# plt.close('all')   
     
 ##### Plotting the Curvature and Energy against tess for the different vertex
 # plot.XYperZwError(allDesigns, -2, r'$neigh$', 11, r'$K_\mathregular{G}$', -3, -1, colormap, 17, save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvature_sv')
@@ -170,5 +189,7 @@ plt.close('all')
 
 
 #%%
-# raa.SaveForPlotMatt(allDesigns, Folder_name[:42])
+allMat_copy = allMat.copy()
+allMat_copy['restang'] = allMat_copy['restang']*np.pi
+raa.SaveForPlotMat(allMat_copy, Folder_name[:42])
 

@@ -145,17 +145,20 @@ def maskBadResults(ThisData, printFlags = False, returnStad = False, returnMask 
     flagmask = (exfl !=1) & (exfl !=2) & (exfl !=5) #& (exfl !=0)
     # flagmask = ~flagmask.any(axis= 1)
     
+    #### asign -5 to converged results with min area
     onlyminArea = minFaceFlag & ~flagmask  
     ThisData.loc[onlyminArea,'Flags'] = -5
     
+    #### mask the results that either don't have a convered flag or have min area
     MaskedData = ThisData.iloc[~(flagmask | minFaceFlag),:]
     MaskedData = MaskedData.drop(['Flags'], axis = 1)
     # MaskedData = ThisData
     
-    ThisData.iloc[~(flagmask | minFaceFlag), 5] = 1
+    #### asign flag 1 to convered simulations and -1 to non-converged ones
+    ThisData.loc[~(flagmask | minFaceFlag), 'Flags'] = 1
     flagmask2 = (flagmask | minFaceFlag) & ~onlyminArea
     # flagmask2 = (flagmask & ~minFaceFlag)
-    ThisData.iloc[flagmask2, 5] = -1
+    ThisData.loc[flagmask2, 'Flags'] = -1
     
     flagStad = ThisData['Flags'].value_counts()
     flagStad = flagStad.reset_index(level=0)
@@ -163,11 +166,12 @@ def maskBadResults(ThisData, printFlags = False, returnStad = False, returnMask 
     flagStad['kappa'] = np.ones((np.size(flagStad,0),1))*ThisData.iloc[0,0]
     flagStad['restang'] = np.ones((np.size(flagStad,0),1))*ThisData.iloc[0,1]
     
-    if returnMask:
+    if returnMask & ~returnStad:
         return MaskedData, ~(flagmask | minFaceFlag)
-    
-    if returnStad:
+    if returnStad & ~returnMask:
         return MaskedData, flagStad
+    if returnStad & returnMask:
+        return MaskedData, ~(flagmask | minFaceFlag), flagStad
     else:
         return MaskedData
     
@@ -278,7 +282,7 @@ def countStableStates(finalAngles, distance, method, plot = False):
     
     return inverse
 
-def countStableStatesKmean(finalAngles, dis):
+def countStableStatesKmean(finalAngles, dis, reduceFit = False):
     
     from sklearn.cluster import KMeans
     
@@ -287,15 +291,26 @@ def countStableStatesKmean(finalAngles, dis):
     if N <= 1:
         return [1]
     
-    for i in np.arange(500)+1:        
+    numFit = 1000
+    if reduceFit and (N>numFit):
+        np.random.seed(0)
+        fittingsamples = np.random.randint(np.size(finalAngles,0), size = numFit)
+        fitsamples = finalAngles[fittingsamples,:]
+    else:
+        fitsamples = finalAngles
+    
+    for i in np.arange(500)+1: 
+        print('clusters: ',i)
         kmeans = KMeans(n_clusters=i, max_iter=1000, verbose = False, random_state = 0 )
-        kmeans.fit_transform(finalAngles)
+        kmeans.fit(fitsamples)
         if np.sqrt(kmeans.inertia_/(N-1)) < dis: ### the stad. dev. of angles in one cluster should not be more than dis
             break
-
+        
     if i == 500:
         print('The clustering has reached its maximum\n')
-    inverse = kmeans.labels_
+        
+    
+    inverse = kmeans.predict(finalAngles)
     return inverse
 
 def countStableStatesDBSCAN(finalAngles, dis = 0.05, minpoints = 20, reduceFit = False):
@@ -386,10 +401,11 @@ def getFlatStates(angles, inverse):
     
     return inverse
 
-def getPureMat(simStSt, ThisData, ThisEnergy, ThisAngles, ThisCurv, tessellation):
+def getPureMat(simStSt, tessellation):
     
     purity = np.zeros(np.size(simStSt,0))
     candidate = np.zeros(np.size(simStSt,0))
+    matName = np.zeros(np.size(simStSt,0))
     
     stst = np.unique(simStSt)
     if stst[0] == -1:
@@ -422,24 +438,36 @@ def getPureMat(simStSt, ThisData, ThisEnergy, ThisAngles, ThisCurv, tessellation
         # orhere2 = (simStSt[:,x == 2] == i).all(axis = 1)
         # orhere3 = (simStSt[:,x == 3] == i).all(axis = 1)
         # defhere = np.logical_xor(np.logical_xor(here, orhere),np.logical_xor(orhere2, orhere3))
-        candidate[defhere] = candidate[defhere] + 0.5
-        
+        candidate[defhere] = candidate[defhere] + 2*0.5
+       
         here = (simStSt[:,yh == 0] == i).all(axis = 1)
         orhere = (simStSt[:,yh == 1] == i).all(axis = 1)
         defhere = np.logical_xor(here, orhere)
-        candidate[defhere] = candidate[defhere] + 0.5
+        candidate[defhere] = candidate[defhere] + 3*0.5
         
         here = (simStSt[:,yv == 0] == i).all(axis = 1)
         orhere = (simStSt[:,yv == 1] == i).all(axis = 1)
         defhere = np.logical_xor(here, orhere)
-        candidate[defhere] = candidate[defhere] + 0.5
+        candidate[defhere] = candidate[defhere] + 5*0.5
         
         here = (simStSt[:,z == 0] == i).all(axis = 1)
-        candidate[here] = candidate[here] + 1
+        candidate[here] = candidate[here] + 7*1
     
-    purity = np.floor(candidate).astype(bool)
+    match = candidate != 0
+    matchName = matName[match]
+    matchName[(candidate[match] %2) == 0] = 1
+    matchName[(candidate[match] %3) == 0] = 2
+    matchName[(candidate[match] %5) == 0] = 3
+    matchName[(candidate[match] %7) == 0] = 4
+    matName[match] = matchName 
+    
+    purity = matName != 0
     
     print('Not pure materials ', np.sum(~purity))
+    
+    return purity, matName
+    
+def applyMask(purity, simStSt, ThisData, ThisEnergy, ThisAngles, ThisCurv):
     
     simStSt = simStSt[purity,:]
     ThisData = ThisData.iloc[purity,:]
@@ -463,6 +491,60 @@ def makeSelectionPerStSt(allData, simBound):
    
     return kappasStSt
 
+def makeSelectionPerStStMa(allData, simBound = 0):
+    
+    
+    kappasStSt = allData.groupby('StableStateMat').apply(lambda _df: _df.mean())
+    
+    error = allData.groupby('StableStateMat').apply(lambda _df: _df.std())
+    kappasStSt['StdMatEnergy'] = error['TotalEnergy'].values
+    kappasStSt['StdMatCurv'] = error['Curvature'].values
+        
+    kappasStSt['Hinge Number'] =  allData.groupby('StableStateMat')[['Hinge Number']].apply(lambda _df2: _df2.sample(1, random_state = 0)).to_numpy()
+    
+    ####Only select stable states that have more than 10% appearance in each simulation
+    kappasStSt['amountStSt'] = allData.groupby('StableStateMat')[['Hinge Number']].count()
+    
+    more10percent = kappasStSt['amountStSt']>simBound
+    kappasStSt = kappasStSt[more10percent]
+   
+    return kappasStSt
+
+def makeSelectionPureMat(ThisDataPure, ThisFlags, typePureMat):
+    
+    flagsName = ['NonConv', 'AreaConst', 'NonPure']
+    possibleFlags = [-1,-5,1]
+    
+    selDataMat = ThisFlags.iloc[0,2:5].to_frame().transpose()
+    
+    # means = ThisDataPure[['kappa','restang','tes','TotalEnergy','Curvature']].mean().to_frame().transpose()
+    # means = means.rename(columns = {'TotalEnergy':'MatEnergy','Curvature':'MatCurv'})
+    
+    # stdev = ThisDataPure[['TotalEnergy','Curvature']].std().to_frame().transpose()
+    # stdev = stdev.rename(columns = {'TotalEnergy':'StdMatEnergy','Curvature':'StdMatCurv'})
+    
+    # selDataMat = pd.concat([param, stdev], axis=1, sort=False)
+    selDataMat['amountPure'] = np.size(ThisDataPure,0)
+    
+    for name, flag in zip(flagsName, possibleFlags):
+        numFlags = ThisFlags.iloc[(ThisFlags['Flags'] == flag).values,1].values
+        if flag == 1:
+            numFlags -= np.size(ThisDataPure,0)
+        if np.size(numFlags) == 0:
+            selDataMat[name] = 0
+        else:
+            selDataMat[name] = numFlags
+           
+    matStSt, numMatStSt = np.unique(typePureMat, return_counts= True)
+    for i in np.arange(1,5):
+        thisStSt = matStSt == i
+        if np.sum(thisStSt) == 0:
+            selDataMat['Material %d' %i] = 0
+        else:
+            selDataMat['Material %d' %i] = numMatStSt[thisStSt]
+    
+    return  selDataMat
+
 def makeSelectionVertMat(matstst, allData, Energy, Angles, Curv, tess):
     
     allSpec = pd.DataFrame()
@@ -476,7 +558,6 @@ def makeSelectionVertMat(matstst, allData, Energy, Angles, Curv, tess):
     
     for j in types:
         i = pos[j]
-        # specData = SelectPerVertex(matstst[:,j], allData, Energy[:,i], Angles[:,j*4:(j+1)*4], Curv[:,i])
         specData = SelectPerVertex(matstst[:,i], allData, Energy[:,i], Angles[:,i*4:(i+1)*4], Curv[:,i])
         specData["VertexType"] = j
         if j == 0:
@@ -536,7 +617,7 @@ def deleteNonClustered(selData,ThisFlags):
 
 def deleteNonClustered2(allDesigns, allFlags):
     
-    mask = ((allDesigns['StableStateAll'] != -1) & (allDesigns['StableStateAll'] != 4)).values
+    mask = (allDesigns['StableStateAll'] != -1)
     
     allDesigns = allDesigns.round(8)
     allFlags = allFlags.round(8)
@@ -742,8 +823,16 @@ def SaveForPlot(s, Folder_name):
        
     return
 
-def SaveForPlotMatt(allDesigns, folder):
+def SaveForPlotMat(allMat, folder):
     
-    SaveForPlot(thisDesign, thisfolder)
+    possTes = np.unique(allMat['tes'])
+
+    for i in possTes:
+        thisfolder = folder + '%d_%d_' %(i,i)
+        
+        thisMatBool = allMat.iloc[:,2] == i
+        thisMat = allMat[thisMatBool] 
+
+        SaveForPlot(thisMat, thisfolder)
     
     return
