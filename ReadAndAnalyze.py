@@ -478,7 +478,7 @@ def getPureMatConv(simStSt, tessellation):
     numUCmat = np.prod(tessellation-1)
     simulations = np.size(simStSt,0)
     simStSt = simStSt.reshape((simulations,*tessellation))
-    matType = np.zeros((simulations,4))
+    matType = np.zeros((simulations,3))
     
     #convolution matriz to identify checkerboard pattern
     convMat1 = np.array([[1,2],[-2,-1]])
@@ -493,25 +493,21 @@ def getPureMatConv(simStSt, tessellation):
         convMat = signal.convolve2d(simStSt[i,:,:], convMat1, mode = 'valid')
         matType[i,0] = np.sum((convMat == 0) & (sumConMat == 2))/numUCmat
         
-        #check for vert lines pattern with miura from elastic origami
+        #check for vert lines pattern with miura
         convMat = signal.convolve2d(simStSt[i,:,:], convMat2, mode = 'valid')
         matType[i,1] = np.sum((convMat == 0) & (sumConMat == 18))/numUCmat
-        #check for vert lines pattern with miura from rigid origami
-        matType[i,3] = np.sum((convMat == 0) & (sumConMat == 42))/numUCmat
         
-        #check for horz lines pattern with miura from elastic origami
+        #check for horz lines pattern with miura
         convMat = signal.convolve2d(simStSt[i,:,:], convMat3, mode = 'valid')
         matType[i,1] += np.sum((convMat == 0) & (sumConMat == 10))/numUCmat
-        #check for horz lines pattern with miura from rigid origami
-        matType[i,3] += np.sum((convMat == 0) & (sumConMat == 50))/numUCmat
-        
+
         #check for all same with fold from rigid origami
         matType[i,2] = np.sum(sumConMat == 32)/numUCmat
         matType[i,2] += np.sum(sumConMat == 36)/numUCmat
    
     purity = np.max(matType, axis = 1) == 1
     matName = np.argmax(matType, axis = 1)+1
-    matName[~purity] += 4
+    matName[~purity] += 3
     
     nomat = np.max(matType, axis = 1) == 0
     matName[nomat] = 0
@@ -571,19 +567,19 @@ def makeSelectionPureMat(ThisDataPure, ThisFlags, typePureMat):
     selDataMat = ThisFlags.iloc[0,2:5].to_frame().transpose()
     
     matStSt, numMatStSt = np.unique(typePureMat, return_counts= True)
-    for i in np.arange(1,5):
+    for i in np.arange(1,4):
         thisStSt = matStSt == i
         if np.sum(thisStSt) == 0:
             selDataMat['Material %d' %i] = 0
         else:
             selDataMat['Material %d' %i] = numMatStSt[thisStSt]
             
-    for i in np.arange(5,9):
+    for i in np.arange(4,7):
         thisStSt = matStSt == i
         if np.sum(thisStSt) == 0:
-            selDataMat['Non pure material %d' %(i-4)] = 0
+            selDataMat['Non pure material %d' %(i-3)] = 0
         else:
-            selDataMat['Non pure material %d' %(i-4)] = numMatStSt[thisStSt]
+            selDataMat['Non pure material %d' %(i-3)] = numMatStSt[thisStSt]
             
     thisStSt = matStSt == 0   
     if np.sum(thisStSt) == 0:

@@ -765,9 +765,9 @@ def ColorbarPerZ(allMat, x, colorbar, z, save = False, Folder_name = '', NameFig
     #          '#aec7e8', '#ffbb78', '#98df8a', '#ff9896', '#c5b0d5', '#c49c94', '#f7b6d2', 
     #          '#7f7f7f', '#bcbd22']
     # cmap = matl.cm.get_cmap('Set3',np.size(colorbar))
-    # color = cmap(np.linspace(0,1,np.size(colorbar)))   
-    color = ['#41A584', '#E26B3C', '#6177AA', '#D663A9', 
-             '#66c2a5', '#fc8d62', '#8da0cb', '#e78ac3',              
+    # color = cmap(np.linspace(0,1,np.size(colorbar)))   '#D663A9','#e78ac3',  
+    color = ['#41A584', '#E26B3C', '#6177AA',  
+             '#66c2a5', '#fc8d62', '#8da0cb',             
              '#ffd92f', '#e5c494', '#b3b3b3']
     
     for j in z_values:
