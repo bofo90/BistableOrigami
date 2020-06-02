@@ -368,6 +368,10 @@ def countStableStatesDistance(finalAngles, dis = 0.05):
     no_state = np.min(distances,axis = 1) > dis
     inverse[no_state] = -1
     
+    for i in np.arange(10,14):
+        thisstate = inverse == i
+        inverse[thisstate] = np.argmin(distances[thisstate,:10],axis = 1)
+    
     magn = np.sqrt(np.sum(finalAngles**2,axis = 1))
     inverse[magn<0.1] = 14
     

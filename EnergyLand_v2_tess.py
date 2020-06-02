@@ -23,7 +23,8 @@ for i in np.arange(2,12)[::-1]:
 
     # Folder_name = "Results/Tessellation4/25/2CFF/01-Apr-2020_%d_%d_" %(i,i) #with no B.C.
     # Folder_name = "Results/Tessellation4/25/2CFF/24-Apr-2020_%d_%d_" %(i,i) #with B.C.
-    Folder_name = "Results/Tessellation4/25/2CFF/08-May-2020_%d_%d_" %(i,i) #higher kappa
+    # Folder_name = "Results/Tessellation4/25/2CFF/08-May-2020_%d_%d_" %(i,i) #higher kappa
+    Folder_name = "Results/Tessellation4/25/2CFF/29-May-2020_%d_%d_" %(i,i) #higher kappa with P.B.C.
     
     if not os.path.isdir(Folder_name + '/Images/'):
         os.mkdir(Folder_name + '/Images/')
@@ -35,7 +36,7 @@ for i in np.arange(2,12)[::-1]:
     for subdir in os.listdir(Folder_name):
         if subdir == 'Images':
             continue    
-        # if subdir != 'RestAng_2.356': #'RestAng_0.785': #'RestAng_1.571': #
+        # if subdir != 'RestAng_2.356': #'RestAng_1.571': #'RestAng_0.785': #
         #     continue
             
         for subdir2 in os.listdir(Folder_name+'/'+subdir):
@@ -67,7 +68,7 @@ for i in np.arange(2,12)[::-1]:
             
             # vertexStSt = raa.countStableStatesKmean(allAngles, 0.5, reduceFit = True)
             # vertexStSt = raa.countStableStatesDBSCAN(allAngles, 0.26, minpoints = 5, reduceFit = True)
-            vertexStSt = raa.countStableStatesDistance(allAngles, 1)
+            vertexStSt = raa.countStableStatesDistance(allAngles, 1.5)
             simStStMa = np.resize(vertexStSt, (simLen,numUC))
             
             # maskPureMat, typePureMat = raa.getPureMat(simStStMa, tessellation)
@@ -150,11 +151,11 @@ plot.ColorbarPerZ(allCountMat,2, np.arange(11)+3, 1, save = True, Folder_name = 
 #%%
 # plt.close('all')  
 
-colormap = 'jet'
-plot.XYperZline(allDesigns, 2, r'$matSize$', -4, r'$Amount pureStSt$', -3, 9, colormap, save = True, Folder_name = Folder_name, NameFig = 'NeighvsSim_sv')
-plot.XYperZ(allDesigns, 2, r'$matSize$', 11, r'$E_{norm}$', -3, 9, colormap, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergy_sv')
-plot.CreateColorbar(allDesigns.iloc[:,9], colormap, save = True, Folder_name = Folder_name, NameFig = 'StableStatesAll')
-colormap = 'Set2'
+# colormap = 'jet'
+# plot.XYperZline(allDesigns, 2, r'$matSize$', -4, r'$Amount pureStSt$', -3, 9, colormap, save = True, Folder_name = Folder_name, NameFig = 'NeighvsSim_sv')
+# plot.XYperZ(allDesigns, 2, r'$matSize$', 11, r'$E_{norm}$', -3, 9, colormap, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergy_sv')
+# plot.CreateColorbar(allDesigns.iloc[:,9], colormap, save = True, Folder_name = Folder_name, NameFig = 'StableStatesAll')
+# colormap = 'Set2'
 #%%
 # plt.close('all')   
     
