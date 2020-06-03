@@ -239,6 +239,13 @@ end
 function extrudedUnitCell = getPeriodicity(extrudedUnitCell,unitCell,opt)
 
 extrudedUnitCell.latVec = unitCell.latvec.*[opt.xrep;opt.yrep];
+
+cornerNodes = size(extrudedUnitCell.node,1);
+extrudedUnitCell.node = [extrudedUnitCell.node; -1 -1 0; -1 opt.yrep 0; opt.xrep -1 0; opt.xrep opt.yrep 0];
+for i = 1:4
+    extrudedUnitCell.face{i} = [extrudedUnitCell.face{i}([1 2]) i+cornerNodes extrudedUnitCell.face{i}(3)];
+end
+
 extrudedUnitCell.node = [extrudedUnitCell.node; rand(2,3)*0.01];
 extrudedUnitCell.ref = [size(extrudedUnitCell.node,1)-1, size(extrudedUnitCell.node,1)];
 
