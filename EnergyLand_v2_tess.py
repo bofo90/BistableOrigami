@@ -19,12 +19,12 @@ allDesigns = pd.DataFrame()
 allCountMat = pd.DataFrame()
 allMat = pd.DataFrame()
 
-for i in np.arange(2,12)[::-1]:
+for i in np.arange(2,13)[::-1]:
 
-    Folder_name = "Results/Tessellation4/25/2CFF/01-Apr-2020_%d_%d_" %(i,i) #with no B.C.
+    # Folder_name = "Results/Tessellation4/25/2CFF/01-Apr-2020_%d_%d_" %(i,i) #with no B.C.
     # Folder_name = "Results/Tessellation4/25/2CFF/24-Apr-2020_%d_%d_" %(i,i) #with B.C.
     # Folder_name = "Results/Tessellation4/25/2CFF/08-May-2020_%d_%d_" %(i,i) #higher kappa
-    # Folder_name = "Results/Tessellation4/25/2CFF/29-May-2020_%d_%d_" %(i,i) #higher kappa with P.B.C.
+    Folder_name = "Results/Tessellation4/25/2CFF/29-May-2020_%d_%d_" %(i,i) #higher kappa with P.B.C.
     
     if not os.path.isdir(Folder_name + '/Images/'):
         os.mkdir(Folder_name + '/Images/')
@@ -36,7 +36,7 @@ for i in np.arange(2,12)[::-1]:
     for subdir in os.listdir(Folder_name):
         if subdir == 'Images':
             continue    
-        # if subdir != 'RestAng_2.356': #'RestAng_1.571': #'RestAng_0.785': #
+        # if subdir != 'RestAng_1.571': #'RestAng_2.356': #'RestAng_0.785': #
         #     continue
             
         for subdir2 in os.listdir(Folder_name+'/'+subdir):

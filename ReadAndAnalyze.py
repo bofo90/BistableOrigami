@@ -505,11 +505,93 @@ def getPureMatConv(simStSt, tessellation):
         matType[i,2] = np.sum(sumConMat == 32)/numUCmat
         matType[i,2] += np.sum(sumConMat == 36)/numUCmat
    
-    purity = np.max(matType, axis = 1) == 1
-    matName = np.argmax(matType, axis = 1)+1
+    purity = np.max(matType, axis = 1) == 1 
+   
+    matError = np.zeros((simulations,3))
+    
+    convMat5 = np.array([[1,2],[-1,2]])
+    
+    for i in np.arange(simulations):
+        if purity[i]:
+            continue
+        
+        sumConMat = signal.convolve2d(simStSt[i,:,:], convMat4, mode = 'valid')
+        
+        #check for dislocations in mat 1
+        convMat = signal.convolve2d(simStSt[i,:,:], convMat2, mode = 'valid')
+        matError[i, 0] += np.sum((convMat == 0) & (sumConMat == 2))/numUCmat
+        convMat = signal.convolve2d(simStSt[i,:,:], convMat3, mode = 'valid')
+        matError[i, 0] += np.sum((convMat == 0) & (sumConMat == 2))/numUCmat
+        
+        #check for crossing of dislocations in mat 1
+        matError[i,0] += np.sum(sumConMat == 0)/numUCmat
+        matError[i,0] += np.sum(sumConMat == 4)/numUCmat
+        
+        #check for flat state
+        matError[i,2] += np.sum(sumConMat == 56)/numUCmat
+        
+        #check for dislocation in mat 2
+        convMat = signal.convolve2d(simStSt[i,:,:], convMat1, mode = 'valid')
+        matError[i,1] += np.sum((convMat == 0) & (sumConMat == 10))/numUCmat
+        matError[i,1] += np.sum((convMat == 0) & (sumConMat == 18))/numUCmat
+        
+        #check for other type of dislocation in mat 2
+        matError[i,0] += np.sum(sumConMat == 8)/numUCmat
+        matError[i,0] += np.sum(sumConMat == 12)/numUCmat
+        matError[i,0] += np.sum(sumConMat == 16)/numUCmat
+        matError[i,0] += np.sum(sumConMat == 20)/numUCmat
+        
+        #check for change from mat 2 to mat 3 or to mat 2 to another direction
+        convMat = signal.convolve2d(simStSt[i,:,:], convMat5, mode = 'valid')
+        matError[i,1] += np.sum((convMat == 10) & (sumConMat == 23))/numUCmat/2
+        matError[i,2] += np.sum((convMat == 10) & (sumConMat == 23))/numUCmat/2
+        
+        matError[i,1] += np.sum((convMat == 10) & (sumConMat == 15))/numUCmat
+        matError[i,1] += np.sum((convMat == 10) & (sumConMat == 13))/numUCmat
+        
+        convMat = signal.convolve2d(simStSt[i,:,:], np.rot90(convMat5,2), mode = 'valid')
+        matError[i,1] += np.sum((convMat == 10) & (sumConMat == 23))/numUCmat/2
+        matError[i,2] += np.sum((convMat == 10) & (sumConMat == 23))/numUCmat/2
+        
+        matError[i,1] += np.sum((convMat == 10) & (sumConMat == 15))/numUCmat
+        matError[i,1] += np.sum((convMat == 10) & (sumConMat == 13))/numUCmat
+        
+        convMat = signal.convolve2d(simStSt[i,:,:], np.rot90(convMat5,1), mode = 'valid')
+        matError[i,1] += np.sum((convMat == 18) & (sumConMat == 25))/numUCmat/2
+        matError[i,2] += np.sum((convMat == 18) & (sumConMat == 25))/numUCmat/2
+        
+        matError[i,1] += np.sum((convMat == 18) & (sumConMat == 15))/numUCmat
+        matError[i,1] += np.sum((convMat == 18) & (sumConMat == 13))/numUCmat
+        
+        convMat = signal.convolve2d(simStSt[i,:,:], np.rot90(convMat5,3), mode = 'valid')
+        matError[i,1] += np.sum((convMat == 18) & (sumConMat == 25))/numUCmat/2
+        matError[i,2] += np.sum((convMat == 18) & (sumConMat == 25))/numUCmat/2
+        
+        matError[i,1] += np.sum((convMat == 18) & (sumConMat == 15))/numUCmat
+        matError[i,1] += np.sum((convMat == 18) & (sumConMat == 13))/numUCmat
+        
+        convMat = signal.convolve2d(simStSt[i,:,:], convMat2, mode = 'valid')
+        matError[i,1] += np.sum((convMat == 0) & (sumConMat == 28))/numUCmat/2
+        matError[i,2] += np.sum((convMat == 0) & (sumConMat == 28))/numUCmat/2
+        matError[i,1] += np.sum((convMat == 0) & (sumConMat == 26))/numUCmat/2
+        matError[i,2] += np.sum((convMat == 0) & (sumConMat == 26))/numUCmat/2
+        
+        convMat = signal.convolve2d(simStSt[i,:,:], convMat3, mode = 'valid')
+        matError[i,1] += np.sum((convMat == 0) & (sumConMat == 20))/numUCmat/2
+        matError[i,2] += np.sum((convMat == 0) & (sumConMat == 20))/numUCmat/2
+        matError[i,1] += np.sum((convMat == 0) & (sumConMat == 22))/numUCmat/2
+        matError[i,2] += np.sum((convMat == 0) & (sumConMat == 22))/numUCmat/2
+    
+    materials = matType + matError
+    if (np.round(np.sum(materials,axis = 1),5) != 1).any():
+        print('Material detection error')
+        here = np.arange(np.size(materials,0))
+        here = here[np.round(np.sum(materials,axis = 1),5) != 1]
+        
+    matName = np.argmax(materials, axis = 1)+1
     matName[~purity] += 3
     
-    nomat = np.max(matType, axis = 1) == 0
+    nomat = np.max(materials, axis = 1) == 0
     matName[nomat] = 0
     
     print('Not pure materials ', np.sum(~purity))
