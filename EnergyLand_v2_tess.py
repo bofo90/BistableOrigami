@@ -19,17 +19,18 @@ allDesigns = pd.DataFrame()
 allCountMat = pd.DataFrame()
 allMat = pd.DataFrame()
 
-for i in np.arange(2,13)[::-1]:
+for i in np.arange(2,12)[::-1]:
 
     # Folder_name = "Results/Tessellation4/25/2CFF/01-Apr-2020_%d_%d_" %(i,i) #with no B.C.
     # Folder_name = "Results/Tessellation4/25/2CFF/24-Apr-2020_%d_%d_" %(i,i) #with B.C.
-    # Folder_name = "Results/Tessellation4/25/2CFF/08-May-2020_%d_%d_" %(i,i) #higher kappa
-    Folder_name = "Results/Tessellation4/25/2CFF/29-May-2020_%d_%d_" %(i,i) #higher kappa with P.B.C.
+    # Folder_name = "Results/Tessellation4/25/2CFF/03-Jun-2020_%d_%d_" %(i,i) #with new B.C.
+    Folder_name = "Results/Tessellation4/25/2CFF/08-May-2020_%d_%d_" %(i,i) #higher kappa
+    # Folder_name = "Results/Tessellation4/25/2CFF/29-May-2020_%d_%d_" %(i,i) #higher kappa with P.B.C.
     
     if not os.path.isdir(Folder_name + '/Images/'):
         os.mkdir(Folder_name + '/Images/')
         
-    tessellation = np.array(Folder_name.split('_')[1:-1]).astype(int)
+    tessellation = np.array(Folder_name.split('_')[-3:-1]).astype(int)
     numUC = np.prod(tessellation)
     numvertex = np.int(Folder_name.split('/')[1][-1])
       
@@ -134,6 +135,14 @@ plot.Angles3D(allDesAng, allDesigns['StableStateAll'], colormap)
 plt.close('all') 
 
 plot.ColorbarPerZ(allCountMat,2, np.arange(9)+3, 1, save = True, Folder_name = Folder_name, NameFig = 'SimulationsConvergence')
+
+#%%
+# plt.close('all')   
+    
+##### Plotting the Curvature and Energy of materials against neighbours for restang
+plot.XYperZwError(allMat, 2, r'$matSize$', 7, r'$K_\mathregular{G}$', 1, -1, colormap, 11, save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvatureMat_ang')
+plot.XYperZwError(allMat, 2, r'$matSize$', 6, r'$E_{norm}$', 1, -1, colormap, 10, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergyMat_ang')
+plot.CreateColorbar(allMat.iloc[:,-1], colormap, save = True, Folder_name = Folder_name, NameFig = 'StableStates')
 
 #%%
 # plt.close('all')   
