@@ -113,7 +113,7 @@ for ct = 1:length(allFiles)
     stretch = getStretch(extrudedUnitCell, opt, lofile.result);
     
     if ~isreal(curv)
-        curv = 0;
+        curv = zeros(size(curv,1),1);
         lofile.result.exfl(2,end)= -10;
     end
     
