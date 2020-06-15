@@ -19,13 +19,16 @@ allDesigns = pd.DataFrame()
 allCountMat = pd.DataFrame()
 allMat = pd.DataFrame()
 
-for i in np.arange(2,12)[::-1]:
+for i in np.arange(2,16)[::-1]:
 
-    # Folder_name = "Results/Tessellation4/25/2CFF/01-Apr-2020_%d_%d_" %(i,i) #with no B.C.
+    Folder_name = "Results/Tessellation4/25/2CFF/01-Apr-2020_%d_%d_" %(i,i) #with no B.C.
     # Folder_name = "Results/Tessellation4/25/2CFF/24-Apr-2020_%d_%d_" %(i,i) #with B.C.
     # Folder_name = "Results/Tessellation4/25/2CFF/03-Jun-2020_%d_%d_" %(i,i) #with new B.C.
-    Folder_name = "Results/Tessellation4/25/2CFF/08-May-2020_%d_%d_" %(i,i) #higher kappa
+    # Folder_name = "Results/Tessellation4/25/2CFF/08-May-2020_%d_%d_" %(i,i) #higher kappa
     # Folder_name = "Results/Tessellation4/25/2CFF/29-May-2020_%d_%d_" %(i,i) #higher kappa with P.B.C.
+    
+    if not os.path.isdir(Folder_name):
+        continue
     
     if not os.path.isdir(Folder_name + '/Images/'):
         os.mkdir(Folder_name + '/Images/')
@@ -37,6 +40,8 @@ for i in np.arange(2,12)[::-1]:
     for subdir in os.listdir(Folder_name):
         if subdir == 'Images':
             continue    
+        if subdir == 'RestAng_1.571':
+            continue
         # if subdir != 'RestAng_1.571': #'RestAng_2.356': #'RestAng_0.785': #
         #     continue
             
@@ -50,7 +55,7 @@ for i in np.arange(2,12)[::-1]:
             ThisDataOR["TotalEnergy"] = np.mean(ThisEnergyOR, axis = 1)
             ThisDataMa, ThisMask, ThisFlags = raa.maskBadResults(ThisDataOR, returnMask = True, returnStad = True)  
             ThisFlags['tes'] = tessellation[0]
-            print('Converged simulations',  np.sum(ThisMask))
+            # print('Converged simulations',  np.sum(ThisMask))
             
             ThisEnergyMa = ThisEnergyOR[ThisMask]
             ThisAnglesMa = ThisAnglesOR[ThisMask]
@@ -73,8 +78,9 @@ for i in np.arange(2,12)[::-1]:
             simStStMa = np.resize(vertexStSt, (simLen,numUC))
             
             # maskPureMat, typePureMat = raa.getPureMat(simStStMa, tessellation)
-            maskPureMat, typePureMat = raa.getPureMatConv(simStStMa, tessellation)
+            maskPureMat, typePureMat, perPure = raa.getPureMatConv(simStStMa, tessellation)
             ThisDataMa['StableStateMat'] = typePureMat
+            ThisDataMa['Purity'] = perPure
 
             selDataMat = raa.makeSelectionPerStStMa(ThisDataMa)
             allMat = allMat.append(selDataMat)
@@ -89,10 +95,14 @@ for i in np.arange(2,12)[::-1]:
                 print("No pure material found")
                 continue
             
-            selData = raa.makeSelectionVertMat(simStStPure, ThisDataPure, ThisEnergyPure, ThisAnglesPure, ThisCurvPure, tessellation)
+            # selData = ThisDataMa.sample(500, random_state = 10)
+            # allDesigns = allDesigns.append(selData)
+            allDesigns = allDesigns.append(ThisDataMa)
             
-            notOutLie = selData['StableStates'] != -1
-            allDesigns = allDesigns.append(selData.iloc[notOutLie.values,:])
+            # selData = raa.makeSelectionVertMat(simStStPure, ThisDataPure, ThisEnergyPure, ThisAnglesPure, ThisCurvPure, tessellation)
+            
+            # notOutLie = selData['StableStates'] != -1
+            # allDesigns = allDesigns.append(selData.iloc[notOutLie.values,:])
         
 allDesigns = allDesigns.reset_index(level=0, drop =True)
 allCountMat = allCountMat.reset_index(level = 0, drop = True)
@@ -100,7 +110,7 @@ allMat = allMat.reset_index(level = 0, drop = True)
 
 #%%
 ### Get stable states from material
-allDesAng = allDesigns.iloc[:,12:16].values
+# allDesAng = allDesigns.iloc[:,12:16].values
 # ang_4D = raa.getAng4D(allDesAng)
 # ang_4D_wpbc = np.concatenate((np.sin(ang_4D/[np.pi, np.pi, np.pi*2]*np.pi*2),np.cos(ang_4D/[np.pi, np.pi, np.pi*2]*np.pi*2)), axis = 1)
 # allDesigns['StableStateAll'] = raa.countStableStatesDBSCAN(ang_4D_wpbc, 0.1,7)
@@ -110,12 +120,12 @@ allDesAng = allDesigns.iloc[:,12:16].values
 # ang_4D_wpbc = np.concatenate((np.sin(ang_4D/[np.pi, np.pi, np.pi*2]*np.pi*2),np.cos(ang_4D/[np.pi, np.pi, np.pi*2]*np.pi*2)), axis = 1)
 # allDesigns['StableStateVert'] = raa.countStableStatesKmean(ang_4D_wpbc, 0.07)
 
-allDesigns['StableStateAll'] = allDesigns['StableStates'].astype(int)
-allMat['StableStateAll'] = allMat['StableStateMat'].astype(int)
+# allDesigns['StableStateAll'] = allDesigns['StableStates'].astype(int)
+# allMat['StableStateAll'] = allMat['StableStateMat'].astype(int)
 
 colormap = 'jet'
 
-plot.Angles3D(allDesAng, allDesigns['StableStateAll'], colormap)
+# plot.Angles3D(allDesAng, allDesigns['StableStateAll'], colormap)
 # plot.Angles3D(allDesAngOrd, allDesigns['StableStateVert'], colormap)
 
 # ### Get stable states of individual vertices
@@ -137,68 +147,31 @@ plt.close('all')
 plot.ColorbarPerZ(allCountMat,2, np.arange(9)+3, 1, save = True, Folder_name = Folder_name, NameFig = 'SimulationsConvergence')
 
 #%%
-# plt.close('all')   
+plt.close('all')   
+    
+#### Plotting the Curvature and Energy of materials against neighbours for restang
+plot.XSizePlot(allDesigns, 2, r'$matSize$', 7, r'$K_\mathregular{G}$', -2, -2, save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvatureMat_sel')
+plot.XSizePlot(allDesigns, 2, r'$matSize$', 6, r'$E_{norm}$', -2, -2, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergyMat_sel')
+
+
+#%%
+plt.close('all')   
     
 ##### Plotting the Curvature and Energy of materials against neighbours for restang
-plot.XYperZwError(allMat, 2, r'$matSize$', 7, r'$K_\mathregular{G}$', 1, -1, colormap, 11, save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvatureMat_ang')
-plot.XYperZwError(allMat, 2, r'$matSize$', 6, r'$E_{norm}$', 1, -1, colormap, 10, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergyMat_ang')
-plot.CreateColorbar(allMat.iloc[:,-1], colormap, save = True, Folder_name = Folder_name, NameFig = 'StableStates')
+plot.violinPlot(allDesigns, 2, r'$matSize$', 7, r'$K_\mathregular{G}$', -2, -2, save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvatureMat_viol')
+plot.violinPlot(allDesigns, 2, r'$matSize$', 6, r'$E_{norm}$', -2, -2, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergyMat_viol')
 
 #%%
-# plt.close('all')   
-    
-# ##### Plotting the Curvature and Energy against neighbours for restang
-# plot.XYperZwError(allDesigns, 2, r'$matSize$', 11, r'$K_\mathregular{G}$', 1, -1, colormap, 17, save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvature_ang')
-# plot.XYperZwError(allDesigns, 2, r'$matSize$', 10, r'$E_{norm}$', 1, -1, colormap, 16, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergy_ang')
-# plot.CreateColorbar(allDesigns.iloc[:,-1], colormap, save = True, Folder_name = Folder_name, NameFig = 'StableStates')
+plt.close('all')  
+
+plot.violin_scatter(allDesigns, 2, r'$matSize$', 7, r'$K_\mathregular{G}$', -2, save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvatureMat_comb')
+plot.violin_scatter(allDesigns, 2, r'$matSize$', 6, r'$E_{norm}$', -2, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergyMat_comb')
 
 #%%
-# colormap = 'jet'
-# plot.XYperZwDoubleError(allDesigns, 6, r'$E_{norm}^\mathregular{mat}$', 10, r'$E_{norm}$', 1, 2, colormap, 18, 16, save = True, Folder_name = Folder_name, NameFig = 'EnergyMatvsVert_ang')
-# plot.CreateColorbar(allDesigns.iloc[:,2], colormap, save = True, Folder_name = Folder_name, NameFig = 'MaterialSize')
-# colormap = 'Set2'
-#%%
-# plt.close('all')  
+plt.close('all')
 
-# colormap = 'jet'
-# plot.XYperZline(allDesigns, 2, r'$matSize$', -4, r'$Amount pureStSt$', -3, 9, colormap, save = True, Folder_name = Folder_name, NameFig = 'NeighvsSim_sv')
-# plot.XYperZ(allDesigns, 2, r'$matSize$', 11, r'$E_{norm}$', -3, 9, colormap, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergy_sv')
-# plot.CreateColorbar(allDesigns.iloc[:,9], colormap, save = True, Folder_name = Folder_name, NameFig = 'StableStatesAll')
-# colormap = 'Set2'
-#%%
-# plt.close('all')   
-    
-##### Plotting the Curvature and Energy against tess for the different vertex
-# plot.XYperZwError(allDesigns, -2, r'$neigh$', 11, r'$K_\mathregular{G}$', -3, -1, colormap, 17, save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvature_sv')
-# plot.XYperZwError(allDesigns, -2, r'$neigh$', 10, r'$E_{norm}$', -3, -1, colormap, 16, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergy_sv')
-
-#%%
-# plt.close('all')   
-    
-# colormap = 'jet'
-# ##### Plotting the Curvature and Energy against tess for the different vertex
-# plot.XYperZwDoubleError(allDesigns, 7, r'$K_\mathregular{G}^\mathregular{mat}$', 11, r'$K_\mathregular{G}$', -3, -2, colormap, 19, 17,save = True, Folder_name = Folder_name, NameFig = 'CurvatureMatvsVert_sv')
-# plot.XYperZwDoubleError(allDesigns, 6, r'$E_{norm}^\mathregular{mat}$', 10, r'$E_{norm}$', -3, -2, colormap, 18, 16, save = True, Folder_name = Folder_name, NameFig = 'EnergyMatvsVert_sv')
-# plot.CreateColorbar(allDesigns.iloc[:,-2], colormap, save = True, Folder_name = Folder_name, NameFig = 'Neigbourgs')
-# colormap = 'Set2'
-
-#%%
-
-# plot.XYperZwError(allDesigns, 2, r'$matSize$', 11, r'$K_\mathregular{G}$', -1, -3, colormap, 17, save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvature_stst')
-# plot.XYperZwError(allDesigns, 2, r'$matSize$', 10, r'$E_{norm}$', -1, -3, colormap, 16, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergy_stst')
-# plot.CreateColorbar(allDesigns.iloc[:,-3], colormap, save = True, Folder_name = Folder_name, NameFig = 'VertexType')
-
-
-#%%
-# plt.close('all')   
-    
-# colormap = 'jet'
-# ##### Plotting the Curvature and Energy against tess for the different vertex
-# plot.XYperZwDoubleError(allDesigns, 7, r'$K_\mathregular{G}^\mathregular{mat}$', 11, r'$K_\mathregular{G}$', -3, -2, colormap, 19, 17,save = True, Folder_name = Folder_name, NameFig = 'CurvatureMatvsVert_sv')
-# plot.XYperZwDoubleError(allDesigns, 6, r'$E_{norm}^\mathregular{mat}$', 10, r'$E_{norm}$', -3, -2, colormap, 18, 16, save = True, Folder_name = Folder_name, NameFig = 'EnergyMatvsVert_sv')
-# colormap = 'Set2'
-
-
+plot.XYperZ(allDesigns, -1, r'$Purity$', 6, r'$E_{norm}$', 2, -2, colormap, save = True, Folder_name = Folder_name, NameFig = 'PurityvsEnergyMat_size')
+plot.XYperZ(allDesigns, -1, r'$Purity$', 7, r'$K_\mathregular{G}$', 2, -2, colormap, save = True, Folder_name = Folder_name, NameFig = 'PurityvsCurvatureMat_size')
 #%%
 allMat_copy = allMat.copy()
 allMat_copy['restang'] = allMat_copy['restang']*np.pi
