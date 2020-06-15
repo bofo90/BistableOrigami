@@ -145,7 +145,8 @@ def XYperZ(allDesigns, x, xname, y, yname, z, stst_col, colormap, save = False, 
     
     for i in np.arange(np.size(variables)):
     
-        fig1 = plt.figure(figsize=(cm2inch(4.3), cm2inch(3.1)))
+        # fig1 = plt.figure(figsize=(cm2inch(4.3), cm2inch(3.1)))
+        fig1 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
         ax1 = plt.subplot(111)
         fig1.subplots_adjust(top=0.982,
         bottom=0.23,
@@ -253,6 +254,8 @@ def Angles3D(angles, angStSt, colormap, save = False, Folder_name = ''):
     return
 
 def CreateColorbar(StableStates, cmap, save = False, Folder_name = '', NameFig = ''):
+    
+    StableStates = np.round(StableStates,7)
     
     
     stst, nameloc = np.unique(StableStates, return_index = True)
@@ -795,3 +798,148 @@ right=0.982)
             fig.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %j + '.png', transparent = True)
             
     return
+
+def violinPlot(allDesigns, x, xname, y, yname, z, stst_col, save = False, Folder_name = '', NameFig = ''):
+    
+    allDesigns = allDesigns.round(8)
+    
+    color = ['#41A584', '#E26B3C', '#6177AA',  
+             '#66c2a5', '#fc8d62', '#8da0cb',             
+             '#ffd92f', '#e5c494', '#b3b3b3']
+    
+    variables = np.unique(allDesigns.iloc[:,z])
+    xval = np.unique(allDesigns.iloc[:,x])
+    
+    for i in np.arange(np.size(variables)):
+    
+        fig1 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
+        ax1 = plt.subplot(111)
+        fig1.subplots_adjust(top=0.987,
+bottom=0.111,
+left=0.183,
+right=0.987,
+hspace=0.2,
+wspace=0.2)
+        
+        thisDesBool = allDesigns.iloc[:,z] == variables[i]
+        thisDes = allDesigns[thisDesBool]    
+        
+        NiceGraph2D(ax1, xname, yname)
+        
+        ax1.set_xlim([1.3,15.7])
+        ax1.set_xticks([2,5,10,15])
+        
+        for k in np.arange(9):
+            thisstst = thisDes[thisDes.iloc[:, stst_col] == k+1]
+            for j in np.arange(np.size(xval)):
+                thisstst2 = thisstst[thisstst.iloc[:, x] == xval[j]]
+                if np.size(thisstst2,0)<2:
+                    continue
+                vio = ax1.violinplot(thisstst2.iloc[:,y], [xval[j]], widths = 0.9, showextrema = False)#, c = matl.colors.rgb2hex(color[k]), s = 8)
+                for part in vio['bodies']:
+                    part.set_facecolor(color[k])
+                    part.set_edgecolor('0.2')
+                    part.set_alpha(1)
+        
+        
+        fig1.show()
+        if save:
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i] +'.pdf', transparent = True)
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i] +'.png', transparent = True)
+            print(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i])
+    
+    return
+
+def XSizePlot(allDesigns, x, xname, y, yname, z, stst_col, save = False, Folder_name = '', NameFig = ''):
+    
+    allDesigns = allDesigns.round(8)
+    
+    color = ['#41A584', '#E26B3C', '#6177AA',  
+             '#66c2a5', '#fc8d62', '#8da0cb',             
+             '#ffd92f', '#e5c494', '#b3b3b3']
+    
+    variables = np.unique(allDesigns.iloc[:,z])
+    
+    for i in np.arange(np.size(variables)):
+    
+        # fig1 = plt.figure(figsize=(cm2inch(4.3), cm2inch(3.1)))
+        fig1 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
+        ax1 = plt.subplot(111)
+        fig1.subplots_adjust(top=0.987,
+bottom=0.111,
+left=0.183,
+right=0.987,
+hspace=0.2,
+wspace=0.2)
+        
+        thisDesBool = allDesigns.iloc[:,z] == variables[i]
+        thisDes = allDesigns[thisDesBool]    
+        
+        NiceGraph2D(ax1, xname, yname)
+        
+        ax1.set_xlim([1.3,15.7])
+        ax1.set_xticks([2,5,10,15])
+            
+        for k in np.arange(9):
+            thisstst = thisDes[thisDes.iloc[:, stst_col] == k+1]
+            
+            ax1.scatter(thisstst.iloc[:,x], thisstst.iloc[:,y], c = color[k], s = 8)
+        
+        fig1.show()
+        if save:
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i] +'.pdf', transparent = True)
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i] +'.png', transparent = True)
+            print(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i])
+    
+    return
+
+def violin_scatter(allDesigns, x, xname, y, yname, stst_col, save = False, Folder_name = '', NameFig = ''):
+    
+    allDesigns = allDesigns.round(8)
+    
+    color = ['#41A584', '#E26B3C', '#6177AA',  
+             '#66c2a5', '#fc8d62', '#8da0cb']
+    
+    xval = np.unique(allDesigns.iloc[:,x])
+    
+    for k in np.arange(3):
+    
+        fig1 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
+        ax1 = plt.subplot(111)
+        fig1.subplots_adjust(top=0.987,
+bottom=0.111,
+left=0.183,
+right=0.987,
+hspace=0.2,
+wspace=0.2)
+        
+        NiceGraph2D(ax1, xname, yname)
+        
+        ax1.set_xlim([1.3,15.7])
+        ax1.set_xticks([2,5,10,15])
+        
+        
+        thisstst = allDesigns[allDesigns.iloc[:, stst_col] == k+1+3]
+        for j in np.arange(np.size(xval)):
+            thisstst2 = thisstst[thisstst.iloc[:, x] == xval[j]]
+            if np.size(thisstst2,0)<2:
+                continue
+            vio = ax1.violinplot(thisstst2.iloc[:,y], [xval[j]], widths = 0.9, showextrema = False)#, c = matl.colors.rgb2hex(color[k]), s = 8)
+            for part in vio['bodies']:
+                part.set_facecolor(color[k+3])
+                part.set_edgecolor('1')
+                part.set_alpha(0.7)
+          
+        thisstst = allDesigns[allDesigns.iloc[:, stst_col] == k+1]
+        ax1.scatter(thisstst.iloc[:,x], thisstst.iloc[:,y], c = color[k], s = 8)
+        
+        
+        fig1.show()
+        if save:
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %k +'.pdf', transparent = True)
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %k +'.png', transparent = True)
+            print(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %k)
+    
+    return
+    
+    
