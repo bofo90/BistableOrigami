@@ -508,6 +508,7 @@ def getPureMatConv(simStSt, tessellation):
     purity = np.max(matType, axis = 1) == 1 
    
     matError = np.zeros((simulations,3))
+    mat1Error = np.zeros((simulations,1))
     
     convMat5 = np.array([[1,2],[-1,2]])
     
@@ -517,29 +518,36 @@ def getPureMatConv(simStSt, tessellation):
         
         sumConMat = signal.convolve2d(simStSt[i,:,:], convMat4, mode = 'valid')
         
+        
+        #### Material 1 defects
         #check for dislocations in mat 1
         convMat = signal.convolve2d(simStSt[i,:,:], convMat2, mode = 'valid')
+        mat1Error[i] += np.sum((convMat == 0) & (sumConMat == 2))
         matError[i, 0] += np.sum((convMat == 0) & (sumConMat == 2))/numUCmat
         convMat = signal.convolve2d(simStSt[i,:,:], convMat3, mode = 'valid')
+        mat1Error[i] += np.sum((convMat == 0) & (sumConMat == 2))
         matError[i, 0] += np.sum((convMat == 0) & (sumConMat == 2))/numUCmat
         
         #check for crossing of dislocations in mat 1
+        mat1Error[i] += np.sum(sumConMat == 0)*2
         matError[i,0] += np.sum(sumConMat == 0)/numUCmat
+        mat1Error[i] += np.sum(sumConMat == 4)*2
         matError[i,0] += np.sum(sumConMat == 4)/numUCmat
         
         #check for flat state
         matError[i,2] += np.sum(sumConMat == 56)/numUCmat
         
+        #### Material 2 defects
         #check for dislocation in mat 2
         convMat = signal.convolve2d(simStSt[i,:,:], convMat1, mode = 'valid')
         matError[i,1] += np.sum((convMat == 0) & (sumConMat == 10))/numUCmat
         matError[i,1] += np.sum((convMat == 0) & (sumConMat == 18))/numUCmat
         
         #check for other type of dislocation in mat 2
-        matError[i,0] += np.sum(sumConMat == 8)/numUCmat
-        matError[i,0] += np.sum(sumConMat == 12)/numUCmat
-        matError[i,0] += np.sum(sumConMat == 16)/numUCmat
-        matError[i,0] += np.sum(sumConMat == 20)/numUCmat
+        matError[i,1] += np.sum(sumConMat == 8)/numUCmat
+        matError[i,1] += np.sum(sumConMat == 12)/numUCmat
+        matError[i,1] += np.sum(sumConMat == 16)/numUCmat
+        matError[i,1] += np.sum(sumConMat == 20)/numUCmat
         
         #check for change from mat 2 to mat 3 or to mat 2 to another direction
         convMat = signal.convolve2d(simStSt[i,:,:], convMat5, mode = 'valid')
@@ -582,11 +590,17 @@ def getPureMatConv(simStSt, tessellation):
         matError[i,1] += np.sum((convMat == 0) & (sumConMat == 22))/numUCmat/2
         matError[i,2] += np.sum((convMat == 0) & (sumConMat == 22))/numUCmat/2
     
+    mat1Error /= tessellation[0]-1
+    
     materials = matType + matError
-    if (np.round(np.sum(materials,axis = 1),5) < 0.9).any():
+    # if (np.round(np.sum(materials,axis = 1),5) < 0.9).any():
+    if (np.round(np.sum(materials,axis = 1),5) != 1).any():
         print('Material detection error')
         here = np.arange(np.size(materials,0))
         here = here[np.round(np.sum(materials,axis = 1),5) != 1]
+        
+    if (np.round(np.sum(materials,axis = 1),5) > 1).any():
+        print('Over assigning material type')
         
     matName = np.argmax(materials, axis = 1)+1
     matName[~purity] += 3
@@ -596,7 +610,7 @@ def getPureMatConv(simStSt, tessellation):
     
     # print('Not pure materials ', np.sum(~purity))
     
-    return purity, matName, np.max(matType,1)
+    return purity, matName, np.max(matType,1), mat1Error
     
 def applyMask(purity, simStSt, ThisData, ThisEnergy, ThisAngles, ThisCurv):
     

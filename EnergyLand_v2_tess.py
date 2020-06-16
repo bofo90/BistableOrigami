@@ -21,10 +21,10 @@ allMat = pd.DataFrame()
 
 for i in np.arange(2,16)[::-1]:
 
-    Folder_name = "Results/Tessellation4/25/2CFF/01-Apr-2020_%d_%d_" %(i,i) #with no B.C.
+    # Folder_name = "Results/Tessellation4/25/2CFF/01-Apr-2020_%d_%d_" %(i,i) #with no B.C.
     # Folder_name = "Results/Tessellation4/25/2CFF/24-Apr-2020_%d_%d_" %(i,i) #with B.C.
     # Folder_name = "Results/Tessellation4/25/2CFF/03-Jun-2020_%d_%d_" %(i,i) #with new B.C.
-    # Folder_name = "Results/Tessellation4/25/2CFF/08-May-2020_%d_%d_" %(i,i) #higher kappa
+    Folder_name = "Results/Tessellation4/25/2CFF/08-May-2020_%d_%d_" %(i,i) #higher kappa
     # Folder_name = "Results/Tessellation4/25/2CFF/29-May-2020_%d_%d_" %(i,i) #higher kappa with P.B.C.
     
     if not os.path.isdir(Folder_name):
@@ -32,6 +32,9 @@ for i in np.arange(2,16)[::-1]:
     
     if not os.path.isdir(Folder_name + '/Images/'):
         os.mkdir(Folder_name + '/Images/')
+        
+    # if i != 6:
+    #     continue
         
     tessellation = np.array(Folder_name.split('_')[-3:-1]).astype(int)
     numUC = np.prod(tessellation)
@@ -42,8 +45,8 @@ for i in np.arange(2,16)[::-1]:
             continue    
         if subdir == 'RestAng_1.571':
             continue
-        # if subdir != 'RestAng_1.571': #'RestAng_2.356': #'RestAng_0.785': #
-        #     continue
+        if subdir != 'RestAng_0.785': #'RestAng_2.356': #'RestAng_1.571': #
+            continue
             
         for subdir2 in os.listdir(Folder_name+'/'+subdir):
             # if subdir2 =='kappa_0.31623':
@@ -78,9 +81,10 @@ for i in np.arange(2,16)[::-1]:
             simStStMa = np.resize(vertexStSt, (simLen,numUC))
             
             # maskPureMat, typePureMat = raa.getPureMat(simStStMa, tessellation)
-            maskPureMat, typePureMat, perPure = raa.getPureMatConv(simStStMa, tessellation)
+            maskPureMat, typePureMat, perPure, mat1Lines = raa.getPureMatConv(simStStMa, tessellation)
             ThisDataMa['StableStateMat'] = typePureMat
             ThisDataMa['Purity'] = perPure
+            ThisDataMa['LineDefectMat1'] = mat1Lines
 
             selDataMat = raa.makeSelectionPerStStMa(ThisDataMa)
             allMat = allMat.append(selDataMat)
@@ -150,28 +154,28 @@ plot.ColorbarPerZ(allCountMat,2, np.arange(9)+3, 1, save = True, Folder_name = F
 plt.close('all')   
     
 #### Plotting the Curvature and Energy of materials against neighbours for restang
-plot.XSizePlot(allDesigns, 2, r'$matSize$', 7, r'$K_\mathregular{G}$', -2, -2, save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvatureMat_sel')
-plot.XSizePlot(allDesigns, 2, r'$matSize$', 6, r'$E_{norm}$', -2, -2, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergyMat_sel')
+plot.XSizePlot(allDesigns, 2, r'$matSize$', 7, r'$K_\mathregular{G}$', 9, 11, save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvatureMat_sel')
+plot.XSizePlot(allDesigns, 2, r'$matSize$', 6, r'$E_{norm}$', 9, 11, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergyMat_sel')
 
 
 #%%
 plt.close('all')   
     
 ##### Plotting the Curvature and Energy of materials against neighbours for restang
-plot.violinPlot(allDesigns, 2, r'$matSize$', 7, r'$K_\mathregular{G}$', -2, -2, save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvatureMat_viol')
-plot.violinPlot(allDesigns, 2, r'$matSize$', 6, r'$E_{norm}$', -2, -2, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergyMat_viol')
+plot.violinPlot(allDesigns, 2, r'$matSize$', 7, r'$K_\mathregular{G}$', 9, 9, save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvatureMat_viol')
+plot.violinPlot(allDesigns, 2, r'$matSize$', 6, r'$E_{norm}$', 9, 9, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergyMat_viol')
 
 #%%
 plt.close('all')  
 
-plot.violin_scatter(allDesigns, 2, r'$matSize$', 7, r'$K_\mathregular{G}$', -2, save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvatureMat_comb')
-plot.violin_scatter(allDesigns, 2, r'$matSize$', 6, r'$E_{norm}$', -2, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergyMat_comb')
+plot.violin_scatter(allDesigns, 2, r'$matSize$', 7, r'$K_\mathregular{G}$', 9, save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvatureMat_comb')
+plot.violin_scatter(allDesigns, 2, r'$matSize$', 6, r'$E_{norm}$', 9, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergyMat_comb')
 
 #%%
 plt.close('all')
 
-plot.XYperZ(allDesigns, -1, r'$Purity$', 6, r'$E_{norm}$', 2, -2, colormap, save = True, Folder_name = Folder_name, NameFig = 'PurityvsEnergyMat_size')
-plot.XYperZ(allDesigns, -1, r'$Purity$', 7, r'$K_\mathregular{G}$', 2, -2, colormap, save = True, Folder_name = Folder_name, NameFig = 'PurityvsCurvatureMat_size')
+# plot.XYperZ(allDesigns, 10, r'$Purity$', 6, r'$E_{norm}$', 2, 11, colormap, save = True, Folder_name = Folder_name, NameFig = 'PurityvsEnergyMat_size')
+# plot.XYperZ(allDesigns, 10, r'$Purity$', 7, r'$K_\mathregular{G}$', 2, 11, colormap, save = True, Folder_name = Folder_name, NameFig = 'PurityvsCurvatureMat_size')
 #%%
 allMat_copy = allMat.copy()
 allMat_copy['restang'] = allMat_copy['restang']*np.pi
