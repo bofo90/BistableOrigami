@@ -656,7 +656,7 @@ def StableStatesCounturPlot(allDesigns,x, xname, y, yname, z, color, colorName, 
         ax1.set_ylim([0.0007,1.5])
             
         ax1.scatter(thisDes.iloc[:,x], thisDes.iloc[:,y], marker = 's', cmap = colormap, c = thisDes.iloc[:, color], 
-                    vmin = minCol, vmax = maxCol, s = 4.6)
+                    vmin = minCol, vmax = maxCol, s = 5)
     
         fig1.show()
         if save:
@@ -675,7 +675,7 @@ def StableStatesCounturPlot(allDesigns,x, xname, y, yname, z, color, colorName, 
     ax1 = plt.subplot(111)
     cbar = plt.colorbar(matl.cm.ScalarMappable(norm=normfig, cmap=cmapfig), ax = ax1, fraction=0.99, pad=0.01, orientation='horizontal')
     cbar.set_ticks(np.linspace(minCol,maxCol,5))
-    # cbar.ax.set_xticklabels(ststname.astype(int))
+    cbar.ax.set_xticklabels((np.linspace(minCol,maxCol,5)/10).astype(int))
     cbar.set_label(colorName, fontsize = 9, color = '0.2',labelpad = 0)
     cbar.ax.tick_params(colors='0.2', pad=2)
     cbar.outline.set_edgecolor('0.2')

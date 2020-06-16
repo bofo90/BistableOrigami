@@ -133,8 +133,8 @@ plt.close('all')
 
 ###ploting scatter points of the presence of each stabel state
 colormap = 'jet'
-plot.StableStatesCounturPlot(allFlags,3, r'$\Theta/\pi$', 2, r'$\kappa$', 0, 1, r'$AmountFlags$', colormap, [0,1000], save = True, Folder_name = Folder_name, NameFig = 'FlagsAppearance')
-plot.StableStatesCounturPlot(allDesignsRed,1, r'$\Theta/\pi$', 0, r'$\kappa$', -1, -2, r'$AmountSimulations$', colormap, [0,1000], save = True, Folder_name = Folder_name, NameFig = 'StStNumSim')
+plot.StableStatesCounturPlot(allFlags,3, r'$\Theta/\pi$', 2, r'$\kappa$', 0, 1, r'% of Simulations', colormap, [0,1000], save = True, Folder_name = Folder_name, NameFig = 'FlagsAppearance')
+plot.StableStatesCounturPlot(allDesignsRed,1, r'$\Theta/\pi$', 0, r'$\kappa$', -1, -2, r'% of Simulations', colormap, [0,1000], save = True, Folder_name = Folder_name, NameFig = 'StStNumSim')
 
 colormap = 'Set2'
 
