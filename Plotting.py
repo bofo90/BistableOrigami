@@ -854,9 +854,12 @@ def XSizePlot(allDesigns, x, xname, y, yname, z, stst_col, save = False, Folder_
     
     allDesigns = allDesigns.round(8)
     
-    color = ['#41A584', '#E26B3C', '#6177AA',  
-             '#66c2a5', '#fc8d62', '#8da0cb',             
-             '#ffd92f', '#e5c494', '#b3b3b3']
+    # color = ['#41A584', '#E26B3C', '#6177AA',  
+    #          '#66c2a5', '#fc8d62', '#8da0cb',             
+    #          '#ffd92f', '#e5c494', '#b3b3b3']
+    
+    minLine = np.min(allDesigns.iloc[:,stst_col].values)
+    maxLine = np.max(allDesigns.iloc[:,stst_col].values)
     
     variables = np.unique(allDesigns.iloc[:,z])
     
@@ -880,16 +883,35 @@ wspace=0.2)
         ax1.set_xlim([1.3,15.7])
         ax1.set_xticks([2,5,10,15])
             
-        for k in np.arange(9):
-            thisstst = thisDes[thisDes.iloc[:, stst_col] == k+1]
-            
-            ax1.scatter(thisstst.iloc[:,x], thisstst.iloc[:,y], c = color[k], s = 8)
+        ax1.scatter(thisDes.iloc[:,x]+np.random.rand(np.size(thisDes.iloc[:,x]))*0.01, thisDes.iloc[:,y], 
+                    c = thisDes.iloc[:,stst_col],
+                    cmap = 'jet', vmin = minLine, vmax = maxLine, s = 8)
         
         fig1.show()
         if save:
             fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i] +'.pdf', transparent = True)
             fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i] +'.png', transparent = True)
             print(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i])
+    
+    fig1 = plt.figure(figsize=(cm2inch(1.5), cm2inch(2.8)))
+    fig1.subplots_adjust(top=0.984,
+    bottom=0.021,
+    left=0.019,
+    right=0.911)
+    ax1 = plt.subplot(111)
+    
+    cmaptemp = matl.cm.get_cmap('jet')
+    cmapfig, normfig = from_levels_and_colors(np.linspace(minLine, maxLine, 1000),cmaptemp(np.linspace(0, 1,1001)), extend = 'both')
+    
+    cbar = plt.colorbar(matl.cm.ScalarMappable(norm=normfig, cmap=cmapfig), ax = ax1, 
+                        fraction=0.99, pad=0.01, orientation='vertical', aspect=15)
+    cbar.set_ticks(np.linspace(minLine,maxLine,5))
+    # cbar.ax.set_xticklabels(ststname.astype(int))
+    cbar.set_label('Dislocation lines', fontsize = 9, color = '0.2',labelpad = 0)
+    cbar.ax.tick_params(colors='0.2', pad=2)
+    cbar.outline.set_edgecolor('0.2')
+    cbar.outline.set_linewidth(0.4)
+    ax1.remove() 
     
     return
 
