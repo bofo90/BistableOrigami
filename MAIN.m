@@ -46,9 +46,9 @@ switch opt.analysis
         ang = linspace(0,pi,5);
         ang = ang(2:end-1);%ang(2:end-1);%opt.restang; %
 %         kap = logspace(-3,0,7);
-        kap = logspace(-3,0,25);%opt.Khinge; %[kap kap*10 kap*100]; %[10^-3, logspace(-1,0,2)];% 
+        kap = logspace(-1.5,-0.5,2);%opt.Khinge; %[kap kap*10 kap*100]; %[10^-3, logspace(-1,0,2)];% 
         xrep = 1;%opt.xrep;%[1:15];% opt.xrep; %only used when having tessellations
-        yrep = [1:15];%opt.yrep; %only used when having tessellations
+        yrep = [2:15];%opt.yrep; %only used when having tessellations
         findDeformation(opt, des, xrep, yrep, ang, kap)
     case{'savedata'}
         %!!!When tessellation, the design angles need to be given!!!!!
