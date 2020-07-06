@@ -13,16 +13,16 @@ tic
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-opt=initOpt('template','SingleVertex','numVert', 4,'vertexType', "2CFF",...
+opt=initOpt('template','Tessellation','numVert', 4,'vertexType', "2CFF",...
             'tessellationType', '25','xrep', 4, 'yrep', 4, 'periodic', 'off',...
-            'restang', 1.571, 'angDesign', [0.00 90 180.00 270]*pi/180,...%0.785%2.356
+            'restang', 1.571, 'angDesign', [0.00 90 180.00 270]*pi/180,...%2.356 %1.571 %0.785
             'analysis','result','analysisType','randomPert',...
             'numIterations', 1000,'RandstDev', 0.2,...
             'figDPI',200, 'saveMovie', 'off', 'safeMovieAntiAlias', 0,...
             'folAlgor', 'sqp','relAlgor', 'sqp',...
             'gethistory', 'off', 'plotAll', 'off',...
             'constrEdge','off','constrFace','on','constAnglePerc',0.99,... 
-            'Khinge',10^-1.5,'Kedge',1,'Kdiag',1,'Kface',100,'KtargetAngle',1000,...
+            'Khinge',0.1,'Kedge',1,'Kdiag',1,'Kface',100,'KtargetAngle',1000,...%10^-1.5
             'maxStretch', nan,'steps',3,...
             'maxArea', 0.1);    
 
@@ -34,7 +34,7 @@ opt.options=optimoptions('fmincon','GradConstr','on','GradObj','on',...
                          'Algorithm', opt.folAlgor, 'OutputFcn',@outfun,...               
                          'RelLineSrchBnd', 0.01, 'RelLineSrchBndDuration', 5000);
                      
-opt.file = '/24-Jun-2020_';
+opt.file = '/06-Jul-2020_';
 switch opt.analysis
     case{'info'}
         [extrudedUnitCell,opt]=obtainOrigami(opt);
@@ -47,8 +47,8 @@ switch opt.analysis
         ang = ang(2:end-1);%ang(2:end-1);%opt.restang; %
 %         kap = logspace(-3,0,7);
         kap = logspace(-3,0,25);%opt.Khinge; %[kap kap*10 kap*100]; %[10^-3, logspace(-1,0,2)];% 
-        xrep = opt.xrep;%[1:15];% opt.xrep; %only used when having tessellations
-        yrep = opt.yrep; %only used when having tessellations
+        xrep = 1;%opt.xrep;%[1:15];% opt.xrep; %only used when having tessellations
+        yrep = [1:15];%opt.yrep; %only used when having tessellations
         findDeformation(opt, des, xrep, yrep, ang, kap)
     case{'savedata'}
         %!!!When tessellation, the design angles need to be given!!!!!
@@ -58,7 +58,7 @@ switch opt.analysis
         ReadAndPlot(opt,'oneDes', des) %other option is 'allDes', 'oneDes'
 %         end
     case{'plot'}
-        opt.sim = 123;   %only used when selecting option 'oneRes'
+        opt.sim = 707;   %only used when selecting option 'oneRes'
         PlotResults(opt,'oneRes') %other options is 'allRes','ststRes','oneRes','everyRes'
 end
 
