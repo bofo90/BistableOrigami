@@ -16,7 +16,7 @@ tic
 opt=initOpt('template','Tessellation','numVert', 4,'vertexType', "2CFF",...
             'tessellationType', '25','xrep', 4, 'yrep', 4, 'periodic', 'off',...
             'restang', 1.571, 'angDesign', [0.00 90 180.00 270]*pi/180,...%2.356 %1.571 %0.785
-            'analysis','result','analysisType','randomPert',...
+            'analysis','savedata','analysisType','randomPert',...
             'numIterations', 1000,'RandstDev', 0.2,...
             'figDPI',200, 'saveMovie', 'off', 'safeMovieAntiAlias', 0,...
             'folAlgor', 'sqp','relAlgor', 'sqp',...
@@ -52,11 +52,11 @@ switch opt.analysis
         findDeformation(opt, des, xrep, yrep, ang, kap)
     case{'savedata'}
         %!!!When tessellation, the design angles need to be given!!!!!
-%         for i = 1:12
-%         opt.file = sprintf('/29-May-2020_%d_%d_', [i,i]);
+        for i = 1:15
+        opt.file = sprintf('/06-Jul-2020_1_%d_', [i]);
         des = ["2CFF"];
         ReadAndPlot(opt,'oneDes', des) %other option is 'allDes', 'oneDes'
-%         end
+        end
     case{'plot'}
         opt.sim = 707;   %only used when selecting option 'oneRes'
         PlotResults(opt,'oneRes') %other options is 'allRes','ststRes','oneRes','everyRes'
