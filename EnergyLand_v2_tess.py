@@ -18,13 +18,15 @@ plt.close('all')
 allDesigns = pd.DataFrame()
 allCountMat = pd.DataFrame()
 allMat = pd.DataFrame()
+allEne = np.array([[0,0]])
+
 
 for i in np.arange(2,16)[::-1]:
 
-    # Folder_name = "Results/Tessellation4/25/2CFF/01-Apr-2020_%d_%d_" %(i,i) #with no B.C.
+    Folder_name = "Results/Tessellation4/25/2CFF/01-Apr-2020_%d_%d_" %(i,i) #with no B.C.
     # Folder_name = "Results/Tessellation4/25/2CFF/24-Apr-2020_%d_%d_" %(i,i) #with B.C.
     # Folder_name = "Results/Tessellation4/25/2CFF/03-Jun-2020_%d_%d_" %(i,i) #with new B.C.
-    Folder_name = "Results/Tessellation4/25/2CFF/08-May-2020_%d_%d_" %(i,i) #higher kappa
+    # Folder_name = "Results/Tessellation4/25/2CFF/08-May-2020_%d_%d_" %(i,i) #higher kappa
     # Folder_name = "Results/Tessellation4/25/2CFF/29-May-2020_%d_%d_" %(i,i) #higher kappa with P.B.C.
     
     if not os.path.isdir(Folder_name):
@@ -45,8 +47,8 @@ for i in np.arange(2,16)[::-1]:
             continue    
         if subdir == 'RestAng_1.571':
             continue
-        if subdir != 'RestAng_0.785': #'RestAng_2.356': #'RestAng_1.571': #
-            continue
+        # if subdir != 'RestAng_0.785': #'RestAng_2.356': #'RestAng_1.571': #
+        #     continue
             
         for subdir2 in os.listdir(Folder_name+'/'+subdir):
             # if subdir2 =='kappa_0.31623':
@@ -103,6 +105,15 @@ for i in np.arange(2,16)[::-1]:
             # allDesigns = allDesigns.append(selData)
             allDesigns = allDesigns.append(ThisDataMa)
             
+            
+            # pos = [0,np.int(np.floor(tessellation[0]/2)),np.int(np.floor(np.prod(tessellation)/2))]
+            # thisEne = np.concatenate(([np.ones(np.size(ThisEnergyMa.flatten()))*tessellation[0]], [ThisEnergyMa.flatten()]), axis = 0).T
+            # thisEne = np.concatenate(([np.ones(np.size(ThisEnergyPure.flatten()))*tessellation[0]], [ThisEnergyPure.flatten()]), axis = 0).T
+            ThisEnergyNonPure = ThisEnergyMa[~maskPureMat,:]
+            thisEne = np.concatenate(([np.ones(np.size(ThisEnergyNonPure.flatten()))*tessellation[0]], [ThisEnergyNonPure.flatten()]), axis = 0).T
+            # thisEneVert = ThisEnergyPure[:,np.int(np.floor(np.prod(tessellation)/2))]
+            # thisEne = np.concatenate(([np.ones(np.size(thisEneVert))*tessellation[0]], [thisEneVert]), axis = 0).T
+            allEne = np.concatenate((allEne, thisEne ), axis = 0)
             # selData = raa.makeSelectionVertMat(simStStPure, ThisDataPure, ThisEnergyPure, ThisAnglesPure, ThisCurvPure, tessellation)
             
             # notOutLie = selData['StableStates'] != -1
@@ -111,7 +122,7 @@ for i in np.arange(2,16)[::-1]:
 allDesigns = allDesigns.reset_index(level=0, drop =True)
 allCountMat = allCountMat.reset_index(level = 0, drop = True)
 allMat = allMat.reset_index(level = 0, drop = True)
-
+allEne = allEne[1:,:]
 #%%
 ### Get stable states from material
 # allDesAng = allDesigns.iloc[:,12:16].values
@@ -181,3 +192,11 @@ allMat_copy = allMat.copy()
 allMat_copy['restang'] = allMat_copy['restang']*np.pi
 raa.SaveForPlotMat(allMat_copy, Folder_name[:42])
 
+
+x = 9
+a = np.zeros((x,x))
+for i in np.arange(x):
+    a[i,np.arange(i,x-i)] = i
+    a[x-1-i,np.arange(i,x-i)] = i
+    a[np.arange(i+1,x-1-i), i] = i
+    a[np.arange(i+1,x-1-i), x-1-i] = i
