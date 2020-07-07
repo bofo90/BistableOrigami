@@ -515,12 +515,17 @@ def getPureMatConv(simStSt, tessellation):
     
     convMat5 = np.array([[1,2],[-1,2]])
     
+    stableStateVert = np.zeros((simulations, 15))
+    
     for i in np.arange(simulations):
+        
+        stver, numstst = np.unique(simStSt[i,:,:], return_counts = True)
+        stableStateVert[i,stver] = numstst
+        
         if purity[i]:
             continue
-        
+
         sumConMat = signal.convolve2d(simStSt[i,:,:], convMat4, mode = 'valid')
-        
         
         #### Material 1 defects
         #check for dislocations in mat 1
@@ -593,8 +598,6 @@ def getPureMatConv(simStSt, tessellation):
         matError[i,1] += np.sum((convMat == 0) & (sumConMat == 22))/numUCmat/2
         matError[i,2] += np.sum((convMat == 0) & (sumConMat == 22))/numUCmat/2
     
-    mat1Error /= tessellation[0]-1
-    
     materials = matType + matError
     # if (np.round(np.sum(materials,axis = 1),5) < 0.9).any():
     if (np.round(np.sum(materials,axis = 1),5) != 1).any():
@@ -611,7 +614,14 @@ def getPureMatConv(simStSt, tessellation):
     nomat = np.max(materials, axis = 1) == 0
     matName[nomat] = 0
     
-    # print('Not pure materials ', np.sum(~purity))
+    # mat1Error -= 2
+    mat1Error /= (tessellation[0]-1)
+    
+    mat1nopure = (np.sum(stableStateVert[:,:2],axis = 1) != np.prod(tessellation)) & (matName == 4)
+    # mat1Error[mat1nopure] = np.array([np.sum(stableStateVert[mat1nopure,2:],axis = 1)+6]).T
+    mat1Error[mat1nopure] = np.array([np.sum(stableStateVert[mat1nopure,2:],axis = 1) + 9]).T#/(tessellation[0]-1)
+
+    lineError = (1-np.max(matType,1))*numUCmat/(tessellation[0]-1)
     
     return purity, matName, np.max(matType,1), mat1Error
     
