@@ -756,6 +756,54 @@ def StableStatesCounturPlotPaper(allDesigns,x, xname, y, yname, z, color, colorN
     
     return
 
+def ColorbarPerZKappa(allMat, x, colorbar, z, save = False, Folder_name = '', NameFig = ''):
+    
+    allMat = allMat.round(8)
+    
+    z_values = np.unique(allMat.iloc[:,z])
+    x_values = np.log10(np.unique(allMat.iloc[:,x]))
+    
+    # color = ['#66C2A5', '#FFD92F', '#E4BB05', '#B3B3B3', '#339568','#D7704A','#414596'] 
+    # color = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', 
+    #          '#aec7e8', '#ffbb78', '#98df8a', '#ff9896', '#c5b0d5', '#c49c94', '#f7b6d2', 
+    #          '#7f7f7f', '#bcbd22']
+    # cmap = matl.cm.get_cmap('Set3',np.size(colorbar))
+    # color = cmap(np.linspace(0,1,np.size(colorbar)))   '#D663A9','#e78ac3',  
+    color = ['#41A584', '#E26B3C', '#6177AA',  
+             '#66c2a5', '#fc8d62', '#8da0cb',             
+             '#ffd92f', '#e5c494', '#b3b3b3']
+    
+    for j in z_values:
+        fig = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
+        ax1 = plt.subplot(111)
+        fig.subplots_adjust(top=0.988,
+bottom=0.114,
+left=0.154,
+right=0.982)
+        
+        
+        
+        NiceGraph2D(ax1, r'$Log_{10}\kappa$', 'Sim. Amount', mincoord = [np.min(x_values),30], 
+                    maxcoord = [np.max(x_values),1000], divisions = [[-3,-2,-1,0],[0,500,1000]], buffer = [0.2, 30])
+        
+        # ax1.set_xscale('log')
+    
+    
+        thisMatBool = allMat.iloc[:,z] == j
+        thisMat = allMat[thisMatBool]  
+        
+        for i in np.arange(np.size(colorbar)):
+            ax1.bar(np.log10(thisMat.iloc[:,x]), thisMat.iloc[:,colorbar[i]],bottom=np.sum(thisMat.iloc[:,colorbar[0:i]], axis = 1), width = 0.201,
+                    color = color[i], label = thisMat.columns[colorbar[i]], align = 'center') #
+            
+        CreateLegend(ax1)
+        
+        if save: 
+            fig.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %j + '.pdf', transparent = True)
+            fig.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %j + '.png', transparent = True)
+            
+    return
+
 def ColorbarPerZ(allMat, x, colorbar, z, save = False, Folder_name = '', NameFig = ''):
     
     allMat = allMat.round(8)
@@ -852,14 +900,31 @@ wspace=0.2)
 
 def XSizePlot(allDesigns, x, xname, y, yname, z, stst_col, save = False, Folder_name = '', NameFig = ''):
     
+    from matplotlib.colors import LinearSegmentedColormap
+    from matplotlib.colors import ListedColormap
+    
     allDesigns = allDesigns.round(8)
     
     # color = ['#41A584', '#E26B3C', '#6177AA',  
     #          '#66c2a5', '#fc8d62', '#8da0cb',             
     #          '#ffd92f', '#e5c494', '#b3b3b3']
     
-    minLine = np.min(allDesigns.iloc[:,stst_col].values)
-    maxLine = np.max(allDesigns.iloc[:,stst_col].values)
+    # colors = ['#A40A20','#AFA80B','#103D73','#61B53D','#D39C47','#65368E']
+    # #'#C6435A','#365C8A','#D3CD47' pink to blue to yellow, green to yellow to purple
+    # #"#F49CAC", "#860C21", "#ACE693", "#2C7B0B" light pink to dark pinto, light green to dark green
+    # nodes = [0.0, 0.2222, 0.4444, 0.5556, 0.7778, 1.0]
+    # cmap2 = LinearSegmentedColormap.from_list("mycmap", list(zip(nodes, colors)))
+    
+    # top = matl.cm.get_cmap('summer', 128)
+    # bottom = matl.cm.get_cmap('winter', 128)
+    
+    # newcolors = np.vstack((top(np.linspace(0, 1, 128)),
+    #                        bottom(np.linspace(0, 1, 128))))
+    # cmap2 = ListedColormap(newcolors, name='poop')
+    cmap2 = 'gist_rainbow'
+    
+    minLine = 0.5 #np.min(allDesigns.iloc[:,stst_col].values)
+    maxLine = 18.5 #np.max(allDesigns.iloc[:,stst_col].values)
     
     variables = np.unique(allDesigns.iloc[:,z])
     
@@ -882,10 +947,18 @@ wspace=0.2)
         
         ax1.set_xlim([1.3,15.7])
         ax1.set_xticks([2,5,10,15])
+        
+        if xname == r'$\kappa$':
+            ax1.set_xscale('log')
+            ax1.set_xticks([0.001,0.01,0.1,1])
+            ax1.set_xlim([0.0007,1.5])
             
-        ax1.scatter(thisDes.iloc[:,x]+np.random.rand(np.size(thisDes.iloc[:,x]))*0.01, thisDes.iloc[:,y], 
+        if (yname == r'$E_{norm}$'):
+            ax1.set_yscale('log')
+            
+        ax1.scatter(thisDes.iloc[:,x]+np.random.rand(np.size(thisDes.iloc[:,x]))*0.5-0.25, thisDes.iloc[:,y],
                     c = thisDes.iloc[:,stst_col],
-                    cmap = 'jet', vmin = minLine, vmax = maxLine, s = 8)
+                    cmap = cmap2, vmin = minLine, vmax = maxLine, s = 15)
         
         fig1.show()
         if save:
@@ -900,12 +973,13 @@ wspace=0.2)
     right=0.911)
     ax1 = plt.subplot(111)
     
-    cmaptemp = matl.cm.get_cmap('jet')
-    cmapfig, normfig = from_levels_and_colors(np.linspace(minLine, maxLine, 1000),cmaptemp(np.linspace(0, 1,1001)), extend = 'both')
+    cmaptemp = matl.cm.get_cmap(cmap2)
+    # cmaptemp = cmap2
+    cmapfig, normfig = from_levels_and_colors(np.linspace(minLine, maxLine, 19),cmaptemp(np.linspace(0, 1,20)), extend = 'both')
     
     cbar = plt.colorbar(matl.cm.ScalarMappable(norm=normfig, cmap=cmapfig), ax = ax1, 
                         fraction=0.99, pad=0.01, orientation='vertical', aspect=15)
-    cbar.set_ticks(np.linspace(minLine,maxLine,5))
+    cbar.set_ticks(np.linspace(1,19,7))
     # cbar.ax.set_xticklabels(ststname.astype(int))
     cbar.set_label('Dislocation lines', fontsize = 9, color = '0.2',labelpad = 0)
     cbar.ax.tick_params(colors='0.2', pad=2)
@@ -937,9 +1011,11 @@ wspace=0.2)
         
         NiceGraph2D(ax1, xname, yname)
         
+        if (yname == r'$E_{norm}$'):
+            ax1.set_yscale('log')
+        
         ax1.set_xlim([1.3,15.7])
         ax1.set_xticks([2,5,10,15])
-        
         
         thisstst = allDesigns[allDesigns.iloc[:, stst_col] == k+1+3]
         for j in np.arange(np.size(xval)):
@@ -964,4 +1040,151 @@ wspace=0.2)
     
     return
     
+def violin_scatterKappa(allDesigns, x, xname, y, yname, stst_col, save = False, Folder_name = '', NameFig = ''):
     
+    allDesigns = allDesigns.round(8)
+    
+    color = ['#41A584', '#E26B3C', '#6177AA',  
+             '#66c2a5', '#fc8d62', '#8da0cb']
+    
+    xval = np.log10(np.unique(allDesigns.iloc[:,x]))
+    
+    for k in np.arange(3):
+    
+        fig1 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
+        ax1 = plt.subplot(111)
+        fig1.subplots_adjust(top=0.987,
+bottom=0.111,
+left=0.183,
+right=0.987,
+hspace=0.2,
+wspace=0.2)
+        
+        NiceGraph2D(ax1, xname, yname)
+
+        ax1.set_xlim([-3.2,0.2])
+        ax1.set_xticks([-3,-2,-1,0])
+        
+        thisstst = allDesigns[allDesigns.iloc[:, stst_col] == k+1+3]
+        for j in np.arange(np.size(xval)):
+            thisstst2 = thisstst[thisstst.iloc[:, x] == 10**xval[j]]
+            if np.size(thisstst2,0)<2:
+                continue
+            vio = ax1.violinplot(thisstst2.iloc[:,y], [xval[j]], widths = 0.2, showextrema = False)#, c = matl.colors.rgb2hex(color[k]), s = 8)
+            for part in vio['bodies']:
+                part.set_facecolor(color[k+3])
+                part.set_edgecolor('1')
+                part.set_alpha(0.7)
+          
+        thisstst = allDesigns[allDesigns.iloc[:, stst_col] == k+1]
+        ax1.scatter(np.log10(thisstst.iloc[:,x]), thisstst.iloc[:,y], c = color[k], s = 8)
+        
+        
+        fig1.show()
+        if save:
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %k +'.pdf', transparent = True)
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %k +'.png', transparent = True)
+            print(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %k)
+    
+    return
+    
+def XKappawSingleVertPlot(allDesigns, allDesignsSV, x1, x2, xname, y1, y2, yname, stst_col, save = False, Folder_name = '', NameFig = ''):
+    
+    allDesigns = allDesigns.round(8)
+    allDesignsSV = allDesignsSV.round(8)
+    
+    color = ['#41A584', '#E26B3C', '#6177AA',  
+              '#66c2a5', '#fc8d62', '#8da0cb',             
+              '#ffd92f', '#e5c494', '#b3b3b3']
+    colormap = 'gist_rainbow'
+    
+    minLine = 0.5 #np.min(allDesigns.iloc[:,stst_col].values)
+    maxLine = 18.5#np.max(allDesigns.iloc[:,stst_col].values)
+    if maxLine < minLine:
+        maxLine = minLine + 0.1
+    
+    SingleVertexStSt = np.array([0, 5, 9])
+    
+    for i in np.arange(3):
+    
+        # fig1 = plt.figure(figsize=(cm2inch(4.3), cm2inch(3.1)))
+        fig1 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
+        ax1 = plt.subplot(111)
+        fig1.subplots_adjust(top=0.987,
+bottom=0.111,
+left=0.183,
+right=0.987,
+hspace=0.2,
+wspace=0.2)
+        
+        thisPureBool = allDesigns['StableStateMat'] == i+1
+        thisPure = allDesigns[thisPureBool]    
+        
+        thisNonPureBool = allDesigns['StableStateMat'] == i+1+3
+        thisNonPure = allDesigns[thisNonPureBool] 
+        
+        thisSVBool = allDesignsSV['StableStateAll'] == SingleVertexStSt[i]
+        thisSV = allDesignsSV[thisSVBool]
+        
+        NiceGraph2D(ax1, xname, yname)
+        
+        if (yname == r'$E_{norm}$'):
+            ax1.set_yscale('log')
+        
+        ax1.set_xscale('log')
+        ax1.set_xticks([0.001,0.01,0.1,1])
+        ax1.set_xlim([0.0007,1.5])
+        
+        #+np.random.rand(np.size(thisDes.iloc[:,x]))*0.01
+            
+        ax1.scatter(thisPure.iloc[:,x1]*10**(np.random.rand(np.size(thisPure.iloc[:,x1]))*0.1), 
+                    thisPure.iloc[:,y1], c = color[i], s = 8)
+        
+        ax1.scatter(thisNonPure.iloc[:,x1]*10**(np.random.rand(np.size(thisNonPure.iloc[:,x1]))*0.1), 
+                    thisNonPure.iloc[:,y1], c = thisNonPure.iloc[:,stst_col],
+                    cmap = colormap, vmin = minLine, vmax = maxLine, s = 15)
+        
+        ax1.plot(thisSV.iloc[:,x2], thisSV.iloc[:,y2])
+        
+        if i == 0:
+            thisSVBool = allDesignsSV['StableStateAll'] == 1
+            thisSV = allDesignsSV[thisSVBool]
+            ax1.plot(thisSV.iloc[:,x2], thisSV.iloc[:,y2])
+        
+        fig1.show()
+        if save:
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %(i+1) +'.pdf', transparent = True)
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %(i+1) +'.png', transparent = True)
+            print(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %(i+1))
+    
+    fig1 = plt.figure(figsize=(cm2inch(1.5), cm2inch(2.8)))
+    fig1.subplots_adjust(top=0.984,
+    bottom=0.021,
+    left=0.019,
+    right=0.911)
+    ax1 = plt.subplot(111)
+    
+    cmaptemp = matl.cm.get_cmap(colormap)
+    cmapfig, normfig = from_levels_and_colors(np.linspace(minLine, maxLine, 19),cmaptemp(np.linspace(0, 1,20)), extend = 'both')
+    
+    cbar = plt.colorbar(matl.cm.ScalarMappable(norm=normfig, cmap=cmapfig), ax = ax1, 
+                        fraction=0.99, pad=0.01, orientation='vertical', aspect=15)
+    cbar.set_ticks(np.linspace(1,19,7))
+    # cbar.ax.set_xticklabels(ststname.astype(int))
+    cbar.set_label('Dislocation lines', fontsize = 9, color = '0.2',labelpad = 0)
+    cbar.ax.tick_params(colors='0.2', pad=2)
+    cbar.outline.set_edgecolor('0.2')
+    cbar.outline.set_linewidth(0.4)
+    ax1.remove() 
+    
+    if save:
+        fig1.savefig(Folder_name + '/Images/' + NameFig + '_CB.pdf', transparent = True)
+        fig1.savefig(Folder_name + '/Images/' + NameFig + '_CB.png', transparent = True)
+    
+    return
+
+
+
+
+
+

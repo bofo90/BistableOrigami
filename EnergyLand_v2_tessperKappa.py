@@ -15,19 +15,54 @@ import Plotting as plot
 #%%
 plt.close('all')
 
+Folder_name = "Results/SingleVertex4/2CFF/24-Jun-2020_0.00_ 90.00_180.00_270.00_"
+
+allDesignsSingleVer = pd.DataFrame()
+
+if not os.path.isdir(Folder_name + '/Images/'):
+    os.mkdir(Folder_name + '/Images/')
+    
+numvertex = np.int(Folder_name.split('/')[1][-1])
+  
+for subdir in os.listdir(Folder_name):
+    if subdir == 'Images':
+        continue      
+    
+    for subdir2 in os.listdir(Folder_name+'/'+subdir):
+        folder_name = Folder_name+'/'+subdir+'/'+subdir2+'/energy'
+        
+        ThisData, simLen = raa.ReadFile(folder_name)
+        ThisData, ThisFlags = raa.maskBadResults(ThisData, returnStad = True) 
+        
+        simLen = np.size(ThisData,0)
+        ThisData.iloc[:,-numvertex::],sym = raa.orderAngles(ThisData.iloc[:,-numvertex::].to_numpy(), numvertex, simLen)
+        ThisData['StableStates'] = raa.countStableStatesDBSCAN(ThisData.iloc[:,-numvertex::], 0.1, 5)
+        
+        selData = raa.makeSelectionPerStSt(ThisData, simLen*0.0)
+        clusData, clusFlags = raa.deleteNonClustered(selData,ThisFlags)
+        
+        allDesignsSingleVer = allDesignsSingleVer.append(clusData)
+    
+allDesignsSingleVer = allDesignsSingleVer.reset_index(level=0, drop =True)
+allDesignsSingleVer = np.round(allDesignsSingleVer,8)
+
+### Get stable states of vertices
+allDesignsSingleVer['StableStateAll'] =raa.countStableStatesDistance(allDesignsSingleVer.iloc[:,8:8+numvertex].values, 1.5)
+
+colormap = 'Set2'
+plot.Angles3D(allDesignsSingleVer.iloc[:,8:8+numvertex].values, allDesignsSingleVer['StableStateAll'].values, colormap)
+
+
+#%%
 allDesigns = pd.DataFrame()
 allCountMat = pd.DataFrame()
 allMat = pd.DataFrame()
 allEne = np.array([[0,0]])
 
 
-for i in np.arange(2,16)[::-1]:
+for i in np.arange(4,5)[::-1]:
 
-    # Folder_name = "Results/Tessellation4/25/2CFF/01-Apr-2020_%d_%d_" %(i,i) #with no B.C.
-    # Folder_name = "Results/Tessellation4/25/2CFF/24-Apr-2020_%d_%d_" %(i,i) #with B.C.
-    # Folder_name = "Results/Tessellation4/25/2CFF/03-Jun-2020_%d_%d_" %(i,i) #with new B.C.
-    Folder_name = "Results/Tessellation4/25/2CFF/08-May-2020_%d_%d_" %(i,i) #higher kappa
-    # Folder_name = "Results/Tessellation4/25/2CFF/29-May-2020_%d_%d_" %(i,i) #higher kappa with P.B.C.
+    Folder_name = "Results/Tessellation4/25/2CFF/19-Jun-2020_%d_%d_" %(i,i) #with no B.C.
     
     if not os.path.isdir(Folder_name):
         continue
@@ -45,13 +80,13 @@ for i in np.arange(2,16)[::-1]:
     for subdir in os.listdir(Folder_name):
         if subdir == 'Images':
             continue    
-        if subdir == 'RestAng_1.571':
+        if subdir == 'RestAng_2.356': #'RestAng_1.571':
             continue
-        # if subdir != 'RestAng_0.785': #'RestAng_2.356': #'RestAng_1.571': #
+        # if subdir != 'RestAng_2.356': #'RestAng_1.571': #'RestAng_0.785': #
         #     continue
             
         for subdir2 in os.listdir(Folder_name+'/'+subdir):
-            # if subdir2 =='kappa_0.31623':
+            # if subdir2 !='kappa_0.10000':
             #     continue
             folder_name = Folder_name+'/'+subdir+'/'+subdir2+'/energy'
             print('Analysing: ' + folder_name)
@@ -159,44 +194,60 @@ colormap = 'jet'
 #%%
 plt.close('all') 
 
-plot.ColorbarPerZ(allCountMat,2, np.arange(9)+3, 1, save = True, Folder_name = Folder_name, NameFig = 'SimulationsConvergence')
+plot.ColorbarPerZKappa(allCountMat,0, np.arange(9)+3, 1, save = True, Folder_name = Folder_name, NameFig = 'SimulationsConvergence')
 
 #%%
 plt.close('all')   
     
 #### Plotting the Curvature and Energy of materials against neighbours for restang
-plot.XSizePlot(allDesigns, 2, r'$matSize$', 7, r'$K_\mathregular{G}$', 9, 11, save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvatureMat_sel')
-plot.XSizePlot(allDesigns, 2, r'$matSize$', 6, r'$E_{norm}$', 9, 11, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergyMat_sel')
+thetas = np.unique(allDesigns.iloc[:,1])
+for t in thetas:
+    here = (allDesigns.iloc[:,1] == t).values
+    hereSV = (allDesignsSingleVer.iloc[:,1] == np.round(t,8)).values
+    plot.XKappawSingleVertPlot(allDesigns.iloc[here,:], allDesignsSingleVer.iloc[hereSV,:], 
+                               0, 0, r'$\kappa$', 7, 6, r'$K_\mathregular{G}$', 11, 
+                               save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvatureMat_ang%.2f_sel' %t)
+    plot.XKappawSingleVertPlot(allDesigns.iloc[here,:], allDesignsSingleVer.iloc[hereSV,:],
+                               0, 0, r'$\kappa$', 6, 5, r'$E_{norm}$', 11, 
+                               save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergyMat_ang%.2f_sel' %t)
+    plot.XKappawSingleVertPlot(allDesigns.iloc[here,:], allDesignsSingleVer.iloc[hereSV,:],
+                               0, 0, r'$\kappa$', 8, 7, r'$min_Face$', 11, 
+                               save = True, Folder_name = Folder_name, NameFig = 'NeighvsMinFaceMat_ang%.2f_sel' %t)
 
 
 #%%
-plt.close('all')   
+# plt.close('all')   
     
 ##### Plotting the Curvature and Energy of materials against neighbours for restang
-plot.violinPlot(allDesigns, 2, r'$matSize$', 7, r'$K_\mathregular{G}$', 9, 9, save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvatureMat_viol')
-plot.violinPlot(allDesigns, 2, r'$matSize$', 6, r'$E_{norm}$', 9, 9, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergyMat_viol')
+# plot.violinPlot(allDesigns, 2, r'$matSize$', 7, r'$K_\mathregular{G}$', 9, 9, save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvatureMat_viol')
+# plot.violinPlot(allDesigns, 2, r'$matSize$', 6, r'$E_{norm}$', 9, 9, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergyMat_viol')
 
 #%%
-plt.close('all')  
+# plt.close('all')  
 
-plot.violin_scatter(allDesigns, 2, r'$matSize$', 7, r'$K_\mathregular{G}$', 9, save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvatureMat_comb')
-plot.violin_scatter(allDesigns, 2, r'$matSize$', 6, r'$E_{norm}$', 9, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergyMat_comb')
+# thetas = np.unique(allDesigns.iloc[:,1])
+# for t in thetas:
+#     here = (allDesigns.iloc[:,1] == t).values
+#     plot.violin_scatterKappa(allDesigns.iloc[here,:], 0, r'$\kappa$', 7, r'$K_\mathregular{G}$', 9, save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvatureMat_ang%.2f_comb' %t)
+#     plot.violin_scatterKappa(allDesigns.iloc[here,:], 0, r'$\kappa$', 6, r'$E_{norm}$', 9, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergyMat_ang%.2f_comb' %t)
 
 #%%
-plt.close('all')
+# plt.close('all')
 
-# plot.XYperZ(allDesigns, 10, r'$Purity$', 6, r'$E_{norm}$', 2, 11, colormap, save = True, Folder_name = Folder_name, NameFig = 'PurityvsEnergyMat_size')
-# plot.XYperZ(allDesigns, 10, r'$Purity$', 7, r'$K_\mathregular{G}$', 2, 11, colormap, save = True, Folder_name = Folder_name, NameFig = 'PurityvsCurvatureMat_size')
+# thetas = np.unique(allDesigns.iloc[:,1])
+# for t in thetas:
+#     here = (allDesigns.iloc[:,1] == t).values
+#     plot.XYperZ(allDesigns.iloc[here,:], 0, r'$\kappa$',11, r'$Impurity$', 9, 10, colormap, save = True, Folder_name = Folder_name, NameFig = 'KappavsPurity_ang%.2f_size' %t)
 #%%
-allMat_copy = allMat.copy()
-allMat_copy['restang'] = allMat_copy['restang']*np.pi
-raa.SaveForPlotMat(allMat_copy, Folder_name[:42])
+# allMat_copy = allMat.copy()
+# allMat_copy['restang'] = allMat_copy['restang']*np.pi
+# raa.SaveForPlotMat(allMat_copy, Folder_name[:42])
 
 
-x = 9
-a = np.zeros((x,x))
-for i in np.arange(x):
-    a[i,np.arange(i,x-i)] = i
-    a[x-1-i,np.arange(i,x-i)] = i
-    a[np.arange(i+1,x-1-i), i] = i
-    a[np.arange(i+1,x-1-i), x-1-i] = i
+# x = 9
+# a = np.zeros((x,x))
+# for i in np.arange(x):
+#     a[i,np.arange(i,x-i)] = i
+#     a[x-1-i,np.arange(i,x-i)] = i
+#     a[np.arange(i+1,x-1-i), i] = i
+#     a[np.arange(i+1,x-1-i), x-1-i] = i
