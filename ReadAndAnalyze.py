@@ -69,7 +69,9 @@ def calculateEnergy(Len, Ang, kap, restang):
     AngEnergy = kap/(restang**4)*(Ang**2-restang**2)**2
     
     Energy = np.sum(LenEnergy, axis = 2)+np.sum(AngEnergy, axis = 2)
-    Energy = Energy/(kap*4+8)
+    # Energy = Energy/(kap*4+8)
+    
+    # Energy = np.sum(LenEnergy, axis = 2)/8+np.sum(AngEnergy, axis = 2)/(4*kap)
     
     return Energy
 
@@ -95,9 +97,10 @@ def ReadFile(folder_name):
         
     dataEnergy['TotalEnergy'] = dataEnergy['EdgeEnergy']+dataEnergy['DiagonalEnergy']+dataEnergy['HingeEnergy']
     dataEnergy = dataEnergy.drop(['DiagonalEnergy','FaceEnergy','TargetAngleEnergy'], axis = 1)
-    dataEnergy['TotalEnergy'] = dataEnergy['TotalEnergy'] /(kap*numhin+numedg)
+    dataEnergy['TotalEnergy'] = dataEnergy['TotalEnergy']# /(kap*numhin+numedg)
     dataEnergy['HingeEnergy'] = dataEnergy['HingeEnergy']/kap/numhin
     dataEnergy['EdgeEnergy'] = dataEnergy['EdgeEnergy']/numedg
+    # dataEnergy['TotalEnergy'] = dataEnergy['EdgeEnergy']+dataEnergy['HingeEnergy']
     
     dataCurv = np.loadtxt(folder_name+file_name2,skiprows=1, delimiter = ',', dtype = np.float64)
     dataCurv = np.delete(dataCurv, 0, 1)
