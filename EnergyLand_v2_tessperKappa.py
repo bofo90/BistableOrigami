@@ -60,9 +60,10 @@ allMat = pd.DataFrame()
 allEne = np.array([[0,0]])
 
 
-for i in np.arange(4,5)[::-1]:
+for i in np.arange(8,9)[::-1]:
 
-    Folder_name = "Results/Tessellation4/25/2CFF/19-Jun-2020_%d_%d_" %(i,i) #with no B.C.
+    # Folder_name = "Results/Tessellation4/25/2CFF/19-Jun-2020_%d_%d_" %(i,i) #with no B.C.
+    Folder_name = "Results/Tessellation4/25/2CFF/07-Jul-2020_%d_%d_" %(i,i) #with no B.C.
     
     if not os.path.isdir(Folder_name):
         continue
@@ -80,10 +81,10 @@ for i in np.arange(4,5)[::-1]:
     for subdir in os.listdir(Folder_name):
         if subdir == 'Images':
             continue    
-        if subdir == 'RestAng_2.356': #'RestAng_1.571':
-            continue
-        # if subdir != 'RestAng_2.356': #'RestAng_1.571': #'RestAng_0.785': #
+        # if subdir == 'RestAng_2.356': #'RestAng_1.571':
         #     continue
+        if subdir != 'RestAng_0.785': #'RestAng_2.356': #'RestAng_1.571': #
+            continue
             
         for subdir2 in os.listdir(Folder_name+'/'+subdir):
             # if subdir2 !='kappa_0.10000':
