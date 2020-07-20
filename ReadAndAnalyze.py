@@ -20,7 +20,8 @@ def ReadFileMat(folder_name):
     file_name5 = "/Stretch.csv"
     file_metadata = "/metadata.txt"
     
-    numhin, numedg, restang, numUC = ReadMetadataMat(folder_name+file_metadata)
+    numhin, numedg, restang, x, y = ReadMetadataMat(folder_name+file_metadata)
+    numUC = np.int(x*y)
     
     dataParam = pd.read_csv(folder_name+file_name1)
     simLen = np.size(dataParam['Hinge Number'])   
@@ -31,7 +32,7 @@ def ReadFileMat(folder_name):
     if oldSample(folder_name):
         metadata['kappa'] = metadata['kappa']/4
     metadata['restang'] = np.ones(simLen)*ang/np.pi
-    metadata['tes'] = np.int(np.sqrt(numUC))
+    metadata['tes'] = np.int(y)
         
     dataParam['TotalEnergy'] = dataParam['EdgeEnergy']+dataParam['DiagonalEnergy']+dataParam['HingeEnergy']
     dataParam = dataParam.drop(['DiagonalEnergy','FaceEnergy','TargetAngleEnergy'], axis = 1)
@@ -959,7 +960,7 @@ def ReadMetadataMat(file):
     else:
         raise FileNotFoundError('No metafile found at the given directory. Changes to the script to put manually the variables are needed\n') 
 
-    return hing, edge, restang, np.int(x*y)
+    return hing, edge, restang, x, y
 
 def getRAandK(folder_name):
     
