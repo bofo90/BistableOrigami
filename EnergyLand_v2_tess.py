@@ -83,10 +83,10 @@ for i in np.arange(2,16)[::-1]:
             simStStMa = np.resize(vertexStSt, (simLen,numUC))
             
             # maskPureMat, typePureMat = raa.getPureMat(simStStMa, tessellation)
-            maskPureMat, typePureMat, perPure, mat1Lines = raa.getPureMatConv(simStStMa, tessellation)
+            maskPureMat, typePureMat, perPure, mat1Lines = raa.getPureMatComp(simStStMa, tessellation)
             ThisDataMa['StableStateMat'] = typePureMat
             ThisDataMa['Purity'] = perPure
-            ThisDataMa['LineDefectMat1'] = mat1Lines
+            ThisDataMa['LineDefectMat1'] = np.sum(mat1Lines,axis = 1)
 
             selDataMat = raa.makeSelectionPerStStMa(ThisDataMa)
             allMat = allMat.append(selDataMat)

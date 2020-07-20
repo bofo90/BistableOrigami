@@ -682,22 +682,39 @@ def getPureMatConv(simStSt, tessellation):
         matError[i,1] += np.sum(((convMatCorner == 4) | (convMatCorner == 5)) & ((convMat == 2) | (convMat == 3)) & (convMatEqual == 0) & (convMatEqual2 == 0))/numUCmat
         mat2Error[i,5] += np.sum(((convMatCorner == 4) | (convMatCorner == 5)) & ((convMat == 2) | (convMat == 3)) & (convMatEqual == 0) & (convMatEqual2 == 0))
         
-        # #check for change from mat 2 to mat 3
-        # convMat = signal.convolve2d(simStSt[i,:,:], convMat2, mode = 'valid')
-        # matError[i,1] += np.sum((convMat == 0) & (sumConMat == 28))/numUCmat/2
-        # matError[i,2] += np.sum((convMat == 0) & (sumConMat == 28))/numUCmat/2
-        # mat2Error[i,1] += np.sum((convMat == 0) & (sumConMat == 28))
-        # matError[i,1] += np.sum((convMat == 0) & (sumConMat == 26))/numUCmat/2
-        # matError[i,2] += np.sum((convMat == 0) & (sumConMat == 26))/numUCmat/2
-        # mat2Error[i,1] += np.sum((convMat == 0) & (sumConMat == 26))
+        #check for change from mat 2 to mat 3
+        convMatCorner = signal.convolve2d(simStSt[i,:,:], convMat8, mode = 'valid')
+        convMatCorner2 = signal.convolve2d(simStSt[i,:,:], np.rot90(convMat8,2), mode = 'valid')
         
-        # convMat = signal.convolve2d(simStSt[i,:,:], convMat3, mode = 'valid')
-        # matError[i,1] += np.sum((convMat == 0) & (sumConMat == 20))/numUCmat/2
-        # matError[i,2] += np.sum((convMat == 0) & (sumConMat == 20))/numUCmat/2
-        # mat2Error[i,1] += np.sum((convMat == 0) & (sumConMat == 20))
-        # matError[i,1] += np.sum((convMat == 0) & (sumConMat == 22))/numUCmat/2
-        # matError[i,2] += np.sum((convMat == 0) & (sumConMat == 22))/numUCmat/2
-        # mat2Error[i,1] += np.sum((convMat == 0) & (sumConMat == 22))
+        convMatEqual = signal.convolve2d(simStSt[i,:,:], convMat9, mode = 'valid')
+        convMatEqual2 = signal.convolve2d(simStSt[i,:,:], np.rot90(convMat9,2), mode = 'valid')
+        pos = np.sum((convMatEqual == 0) & (convMatEqual2 == 0) & 
+                    ((convMatCorner == 2) | (convMatCorner == 3) | (convMatCorner == 4) | (convMatCorner == 5)) & 
+                    ((convMatCorner2 == 8) | (convMatCorner2 == 9)))
+        matError[i,1] += pos/numUCmat/2
+        matError[i,2] += pos/numUCmat/2
+        mat2Error[i,1] += pos
+        pos = np.sum((convMatEqual == 0) & (convMatEqual2 == 0) & 
+                    ((convMatCorner2 == 2) | (convMatCorner2 == 3) | (convMatCorner2 == 4) | (convMatCorner2 == 5)) & 
+                    ((convMatCorner == 8) | (convMatCorner == 9)))
+        matError[i,1] += pos/numUCmat/2
+        matError[i,2] += pos/numUCmat/2
+        mat2Error[i,1] += pos
+        
+        convMatEqual = signal.convolve2d(simStSt[i,:,:], convMat10, mode = 'valid')
+        convMatEqual2 = signal.convolve2d(simStSt[i,:,:], np.rot90(convMat10,2), mode = 'valid')
+        pos = np.sum((convMatEqual == 0) & (convMatEqual2 == 0) & 
+                    ((convMatCorner == 2) | (convMatCorner == 3) | (convMatCorner == 4) | (convMatCorner == 5)) & 
+                    ((convMatCorner2 == 8) | (convMatCorner2 == 9)))
+        matError[i,1] += pos/numUCmat/2
+        matError[i,2] += pos/numUCmat/2
+        mat2Error[i,1] += pos
+        pos = np.sum((convMatEqual == 0) & (convMatEqual2 == 0) & 
+                    ((convMatCorner2 == 2) | (convMatCorner2 == 3) | (convMatCorner2 == 4) | (convMatCorner2 == 5)) & 
+                    ((convMatCorner == 8) | (convMatCorner == 9)))
+        matError[i,1] += pos/numUCmat/2
+        matError[i,2] += pos/numUCmat/2
+        mat2Error[i,1] += pos
     
     materials = matType + matError
     # if (np.round(np.sum(materials,axis = 1),5) < 0.9).any():
@@ -726,6 +743,119 @@ def getPureMatConv(simStSt, tessellation):
     lineError = (1-np.max(matType,1))*numUCmat/(tessellation[0]-1)
     
     return purity, matName, np.max(matType,1), defects
+
+def getPureMatComp(simStSt, tessellation):
+    
+    numUCmat = np.prod(tessellation-1)
+    simulations = np.size(simStSt,0)
+    simStSt = simStSt.reshape((simulations,*tessellation))
+    simMatAna = np.zeros((simulations, *tessellation-1))
+    
+    matType = np.zeros((simulations,9))
+        
+    stableStateVert = np.zeros((simulations, 15))
+    
+    for i in np.arange(simulations):
+        
+        stver, numstst = np.unique(simStSt[i,:,:], return_counts = True)
+        stableStateVert[i,stver] = numstst
+        
+        unitcellmat = np.zeros((*tessellation-1,4))
+        for x in np.arange(np.size(simStSt[i,:,:],0)-1):
+            for y in np.arange(np.size(simStSt[i,:,:],1)-1):
+                unitcell = simStSt[i,x:x+2,y:y+2]
+                unitcellmat[x,y,:] = orderUnitCell(unitcell).flatten()
+        unitcellmat = unitcellmat.reshape(numUCmat,4)
+        
+        unitcellUn, unitcellLoc = np.unique(unitcellmat, axis = 0, return_inverse = True)
+        
+        materialStableStates = np.zeros(np.size(unitcellUn,0))
+        
+        #check for main materials
+        materialStableStates[(unitcellUn == [0,1,1,0]).all(axis = 1)] = 1
+        materialStableStates[(unitcellUn == [2,2,3,3]).all(axis = 1)] = 2
+        materialStableStates[(unitcellUn == [4,4,5,5]).all(axis = 1)] = 2
+        materialStableStates[(unitcellUn == [8,8,8,8]).all(axis = 1)] = 3
+        materialStableStates[(unitcellUn == [9,9,9,9]).all(axis = 1)] = 3
+        
+        #check for grain boundaries mat1
+        #twin
+        materialStableStates[(unitcellUn == [0,0,1,1]).all(axis = 1)] = 4
+        materialStableStates[(unitcellUn == [1,1,1,1]).all(axis = 1)] = 4
+        materialStableStates[(unitcellUn == [0,0,0,0]).all(axis = 1)] = 4
+        #check for precipitation in mat1 at grain boundaries
+        materialStableStates[(unitcellUn[:,0:2]<2).all(axis = 1) & 
+                             ((unitcellUn[:,2:]>1).all(axis = 1) & (unitcellUn[:,2:]<6).all(axis = 1))] = 5
+        
+        #check for grain boundary mat2
+        #twin
+        materialStableStates[(unitcellUn == [2,2,2,2]).all(axis = 1)] = 6
+        materialStableStates[(unitcellUn == [3,3,3,3]).all(axis = 1)] = 6
+        materialStableStates[(unitcellUn == [4,4,4,4]).all(axis = 1)] = 6
+        materialStableStates[(unitcellUn == [5,5,5,5]).all(axis = 1)] = 6
+        #slip
+        materialStableStates[(unitcellUn == [2,3,3,2]).all(axis = 1)] = 7
+        materialStableStates[(unitcellUn == [4,5,5,4]).all(axis = 1)] = 7
+        #rotation
+        materialStableStates[((unitcellUn[:,:2]>1).all(axis = 1) & (unitcellUn[:,:2]<4).all(axis = 1)) &
+                             ((unitcellUn[:,2:]>3).all(axis = 1) & (unitcellUn[:,2:]<6).all(axis = 1))] = 8   
+        #rotation at corners
+        materialStableStates[((unitcellUn[:,:3]>1).all(axis = 1) & (unitcellUn[:,:3]<4).all(axis = 1)) &
+                             ((unitcellUn[:,3]>3) & (unitcellUn[:,3]<6))] = 8  
+        materialStableStates[((unitcellUn[:,[0,1,3]]>1).all(axis = 1) & (unitcellUn[:,[0,1,3]]<4).all(axis = 1)) &
+                             ((unitcellUn[:,2]>3) & (unitcellUn[:,2]<6))] = 8  
+        materialStableStates[((unitcellUn[:,0]>1) & (unitcellUn[:,0]<4)) &
+                             ((unitcellUn[:,1:]>3).all(axis = 1) & (unitcellUn[:,1:]<6).all(axis = 1))] = 8  
+        
+        #check interface material 2 and 3
+        materialStableStates[((unitcellUn[:,:2]>1).all(axis = 1) & (unitcellUn[:,:2]<6).all(axis = 1)) &
+                             ((unitcellUn[:,2:]>7).all(axis = 1) & (unitcellUn[:,2:]<10).all(axis = 1))] = 9 
+        #interfaces at corners
+        materialStableStates[((unitcellUn[:,:3]>1).all(axis = 1) & (unitcellUn[:,:3]<6).all(axis = 1)) &
+                             ((unitcellUn[:,3]>7) & (unitcellUn[:,3]<10))] = 9 
+        materialStableStates[((unitcellUn[:,[0,1,3]]>1).all(axis = 1) & (unitcellUn[:,[0,1,3]]<6).all(axis = 1)) &
+                             ((unitcellUn[:,2]>7) & (unitcellUn[:,2]<10))] = 9  
+        materialStableStates[((unitcellUn[:,0]>1) & (unitcellUn[:,0]<6)) &
+                             ((unitcellUn[:,1:]>7).all(axis = 1) & (unitcellUn[:,1:]<10).all(axis = 1))] = 9 
+        
+        simMatAna[i,:,:] = materialStableStates[unitcellLoc].reshape(*tessellation-1)
+        
+        types, typescounts = np.unique(simMatAna[i,:,:], return_counts = True)
+        
+        matType[i, types.astype(int)-1] = typescounts/numUCmat
+        
+    
+    if (np.round(np.sum(matType,axis = 1),5) != 1).any():
+        print('Material detection error')
+        here = np.arange(np.size(matType,0))
+        here = here[np.round(np.sum(matType,axis = 1),5) != 1]
+        
+    material = np.zeros((simulations,3))
+    material[:,0] = np.sum(matType[:,[0,3]], axis = 1)+matType[:,4]/2
+    material[:,1] = np.sum(matType[:,[1,5,6,7]], axis = 1)+np.sum(matType[:,[4,8]], axis = 1)/2
+    material[:,2] = matType[:,2]+matType[:,8]/2
+        
+    purity = ~(matType[:,3:]>0).any(axis = 1)
+    matName = np.argmax(material, axis = 1)+1
+    matName[~purity] += 3
+    
+    nomat = np.max(material, axis = 1) == 0
+    matName[nomat] = 0
+    
+    return purity, matName, np.max(matType[:,:3],1), matType[:,3:]
+
+def orderUnitCell(unitcell):
+    
+    shift = np.argmin(unitcell)
+    if shift < 2:
+        unitcell = np.rot90(unitcell,shift)
+    else:
+        unitcell = np.rot90(unitcell,5-shift)
+    
+    if unitcell[1,0] < unitcell[0,1]:
+        unitcell = unitcell.T
+        
+    return unitcell
 
 def getPureMatLine(simStSt, tessellation):
     
