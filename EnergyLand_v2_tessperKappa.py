@@ -49,8 +49,8 @@ allDesignsSingleVer = np.round(allDesignsSingleVer,8)
 ### Get stable states of vertices
 allDesignsSingleVer['StableStateAll'] =raa.countStableStatesDistance(allDesignsSingleVer.iloc[:,8:8+numvertex].values, 1.5)
 
-colormap = 'Set2'
-plot.Angles3D(allDesignsSingleVer.iloc[:,8:8+numvertex].values, allDesignsSingleVer['StableStateAll'].values, colormap)
+# colormap = 'Set2'
+# plot.Angles3D(allDesignsSingleVer.iloc[:,8:8+numvertex].values, allDesignsSingleVer['StableStateAll'].values, colormap)
 
 
 #%%
@@ -60,10 +60,10 @@ allMat = pd.DataFrame()
 allEne = np.array([[0,0]])
 
 
-for i in np.arange(8,9)[::-1]:
+for i in np.arange(4,5)[::-1]:
 
-    # Folder_name = "Results/Tessellation4/25/2CFF/19-Jun-2020_%d_%d_" %(i,i) #with no B.C.
-    Folder_name = "Results/Tessellation4/25/2CFF/07-Jul-2020_%d_%d_" %(i,i) #with no B.C.
+    Folder_name = "Results/Tessellation4/25/2CFF/19-Jun-2020_%d_%d_" %(i,i) #with no B.C.
+    # Folder_name = "Results/Tessellation4/25/2CFF/07-Jul-2020_%d_%d_" %(i,i) #with no B.C.
     
     if not os.path.isdir(Folder_name):
         continue
@@ -83,11 +83,11 @@ for i in np.arange(8,9)[::-1]:
             continue    
         # if subdir == 'RestAng_2.356': #'RestAng_1.571':
         #     continue
-        if subdir != 'RestAng_0.785': #'RestAng_2.356': #'RestAng_1.571': #
+        if subdir != 'RestAng_2.356': #'RestAng_0.785': #'RestAng_1.571': #
             continue
             
         for subdir2 in os.listdir(Folder_name+'/'+subdir):
-            # if subdir2 !='kappa_0.10000':
+            # if subdir2 !='kappa_0.03981':
             #     continue
             folder_name = Folder_name+'/'+subdir+'/'+subdir2+'/energy'
             print('Analysing: ' + folder_name)
