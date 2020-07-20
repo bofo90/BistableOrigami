@@ -23,10 +23,10 @@ allEne = np.array([[0,0]])
 
 for i in np.arange(2,16)[::-1]:
 
-    Folder_name = "Results/Tessellation4/25/2CFF/01-Apr-2020_%d_%d_" %(i,i) #with no B.C.
+    # Folder_name = "Results/Tessellation4/25/2CFF/01-Apr-2020_%d_%d_" %(i,i) #with no B.C.
     # Folder_name = "Results/Tessellation4/25/2CFF/24-Apr-2020_%d_%d_" %(i,i) #with B.C.
     # Folder_name = "Results/Tessellation4/25/2CFF/03-Jun-2020_%d_%d_" %(i,i) #with new B.C.
-    # Folder_name = "Results/Tessellation4/25/2CFF/08-May-2020_%d_%d_" %(i,i) #higher kappa
+    Folder_name = "Results/Tessellation4/25/2CFF/08-May-2020_%d_%d_" %(i,i) #higher kappa
     # Folder_name = "Results/Tessellation4/25/2CFF/29-May-2020_%d_%d_" %(i,i) #higher kappa with P.B.C.
     
     if not os.path.isdir(Folder_name):
@@ -123,38 +123,7 @@ allDesigns = allDesigns.reset_index(level=0, drop =True)
 allCountMat = allCountMat.reset_index(level = 0, drop = True)
 allMat = allMat.reset_index(level = 0, drop = True)
 allEne = allEne[1:,:]
-#%%
-### Get stable states from material
-# allDesAng = allDesigns.iloc[:,12:16].values
-# ang_4D = raa.getAng4D(allDesAng)
-# ang_4D_wpbc = np.concatenate((np.sin(ang_4D/[np.pi, np.pi, np.pi*2]*np.pi*2),np.cos(ang_4D/[np.pi, np.pi, np.pi*2]*np.pi*2)), axis = 1)
-# allDesigns['StableStateAll'] = raa.countStableStatesDBSCAN(ang_4D_wpbc, 0.1,7)
-
-# allDesAngOrd,sym = raa.orderAngles(allDesAng, numvertex, np.size(allDesAng,0))
-# ang_4D = raa.getAng4D(allDesAngOrd)
-# ang_4D_wpbc = np.concatenate((np.sin(ang_4D/[np.pi, np.pi, np.pi*2]*np.pi*2),np.cos(ang_4D/[np.pi, np.pi, np.pi*2]*np.pi*2)), axis = 1)
-# allDesigns['StableStateVert'] = raa.countStableStatesKmean(ang_4D_wpbc, 0.07)
-
-# allDesigns['StableStateAll'] = allDesigns['StableStates'].astype(int)
-# allMat['StableStateAll'] = allMat['StableStateMat'].astype(int)
-
 colormap = 'jet'
-
-# plot.Angles3D(allDesAng, allDesigns['StableStateAll'], colormap)
-# plot.Angles3D(allDesAngOrd, allDesigns['StableStateVert'], colormap)
-
-# ### Get stable states of individual vertices
-# posStSt = np.shape(allDesigns)[0]
-# allUCang = np.resize(allDesigns.iloc[:,8:8+numUC*4].values,(posStSt*numUC,4))
-# [allUCang,sym] = raa.orderAngles(allUCang, 4, posStSt*numUC)
-# matUCStSt = raa.countStableStates(allUCang, 0.7, 'centroid',True)
-# matUCStSt = raa.standarizeStableStates(matUCStSt, allUCang, onlysign = False)
-# matUCStSt = np.reshape(matUCStSt, (posStSt, numUC))
-# colormapUC = 'jet'
-
-# #### Get stable states from types of vertex
-# [allDesigns['StableStateFromUC'],allDesigns['StableStatefUCName']] = raa.extractStableStates(matUCStSt)
-# colormapfUC = 'Set3'
 
 #%%
 plt.close('all') 
