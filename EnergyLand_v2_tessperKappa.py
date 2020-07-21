@@ -82,7 +82,7 @@ for i in np.arange(4,5)[::-1]:
             continue
             
         for subdir2 in os.listdir(Folder_name+'/'+subdir):
-            # if subdir2 !='kappa_0.25119':
+            # if subdir2 !='kappa_1.00000':
             #     continue
             folder_name = Folder_name+'/'+subdir+'/'+subdir2+'/energy'
             print('Analysing: ' + folder_name)
@@ -106,11 +106,13 @@ for i in np.arange(4,5)[::-1]:
             vertexStSt = raa.countStableStatesDistance(allAngles, 1.5)
             simStStMa = np.resize(vertexStSt, (simLen,numUC))
             
-            maskPureMat, typePureMat, perPure, mat1Lines = raa.getPureMatComp(simStStMa, tessellation)
+            maskPureMat, typePureMat, perPure, mat1Lines, grainsize = raa.getPureMatComp(simStStMa, tessellation)
             ThisDataMa['StableStateMat'] = typePureMat
             ThisDataMa['Purity'] = perPure
+            
+            grainsize = pd.DataFrame(grainsize, columns = ['GSMat1', 'GSMat2', 'GSMat3']) 
 
-            ThisDataDef = pd.concat([ThisDataMa.reset_index(level=0, drop =True),pd.DataFrame(mat1Lines)], axis=1, sort = True)
+            ThisDataDef = pd.concat([ThisDataMa.reset_index(level=0, drop =True),pd.DataFrame(mat1Lines), grainsize], axis=1, sort = True)
             selDataMat = raa.makeSelectionPerStStMa(ThisDataDef)
             allMat = allMat.append(selDataMat)
             

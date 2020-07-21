@@ -868,20 +868,75 @@ def getPureMatComp(simStSt, tessellation):
     nomat = (np.max(material, axis = 1) == 0) | (matType[:,10] != 0)
     matName[nomat] = 0
     
-    return purity, matName, np.max(matType[:,:3],1), matType[:,3:-1]
+    grainSizes, grainDis = calculateGrainSize(simMatAna)
+    
+    return purity, matName, np.max(matType[:,:3],1), matType[:,3:-1], grainSizes
 
 def orderUnitCell(unitcell):
     
     shift = np.argmin(unitcell)
-    if shift < 2:
-        unitcell = np.rot90(unitcell,shift)
-    else:
-        unitcell = np.rot90(unitcell,5-shift)
+    if shift > 1:
+        shift = 5-shift
+        
+    unitcell = np.rot90(unitcell,shift)
     
     if unitcell[1,0] < unitcell[0,1]:
         unitcell = unitcell.T
         
     return unitcell
+
+def calculateGrainSize(simMatAna):
+    
+    from sklearn.cluster import DBSCAN
+    
+    simulations = np.size(simMatAna,0)
+    sizes = np.zeros((simulations,3))
+    materials = np.arange(3)
+    
+    x = np.size(simMatAna,1)
+    y = np.size(simMatAna,2)
+    xPos, yPos = np.meshgrid(np.arange(x),np.arange(y))
+    matUCTemp = np.zeros(np.shape(simMatAna[0,:,:]))
+    matGrainDis = np.zeros((simulations,x+1,y+1))
+    
+    for i in np.arange(simulations):
+        for m in materials:
+            hereMat = simMatAna[i,:,:] == m+1
+            
+            if ~hereMat.any():
+                continue
+            
+            points = np.concatenate(([xPos[hereMat].flatten()],[yPos[hereMat].flatten()]), axis = 0).T
+
+            db = DBSCAN(eps = 1, min_samples = 1).fit(points)
+            inverse = db.labels_+1
+            
+            matUCTemp[points[:,1],points[:,0]] = inverse
+            matGrainDis[i,:,:] = convertToMaterial(matUCTemp)
+            matUCTemp = matUCTemp*0
+            
+            grain, grainsize = np.unique(matGrainDis[i,:,:], return_counts = True)
+            if (grain == 0).any():
+                grainsize = np.delete(grainsize, np.where(grain == 0))
+                grain = np.delete(grain, np.where(grain == 0))
+            
+            sizes[i,m] = np.mean(grainsize)
+    
+    return sizes, matGrainDis
+
+def convertToMaterial(matUCTemp):
+    
+    x = np.size(matUCTemp,0)+1
+    y = np.size(matUCTemp,1)+1
+    
+    matSV = np.zeros((x,y))
+    
+    for i in np.arange(x-1):
+        for j in np.arange(y-1):
+            if matUCTemp[i,j] != 0:
+                matSV[i:i+2,j:j+2] = matUCTemp[i,j]
+    
+    return matSV
 
 def getPureMatLine(simStSt, tessellation):
     

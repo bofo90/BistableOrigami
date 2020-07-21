@@ -83,11 +83,13 @@ for i in np.arange(2,16)[::-1]:
             simStStMa = np.resize(vertexStSt, (simLen,numUC))
             
             # maskPureMat, typePureMat = raa.getPureMat(simStStMa, tessellation)
-            maskPureMat, typePureMat, perPure, mat1Lines = raa.getPureMatComp(simStStMa, tessellation)
+            maskPureMat, typePureMat, perPure, mat1Lines, grainsize = raa.getPureMatComp(simStStMa, tessellation)
             ThisDataMa['StableStateMat'] = typePureMat
             ThisDataMa['Purity'] = perPure
+            
+            grainsize = pd.DataFrame(grainsize, columns = ['GSMat1', 'GSMat2', 'GSMat3']) 
 
-            ThisDataDef = pd.concat([ThisDataMa.reset_index(level=0, drop =True),pd.DataFrame(mat1Lines)], axis=1, sort = True)
+            ThisDataDef = pd.concat([ThisDataMa.reset_index(level=0, drop =True),pd.DataFrame(mat1Lines), grainsize], axis=1, sort = True)
             selDataMat = raa.makeSelectionPerStStMa(ThisDataDef)
             allMat = allMat.append(selDataMat)
             
