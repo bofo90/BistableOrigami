@@ -1102,8 +1102,8 @@ def XKappawSingleVertPlot(allDesigns, allDesignsSV, x1, x2, xname, y1, y2, yname
               '#ffd92f', '#e5c494', '#b3b3b3']
     colormap = 'gist_rainbow'
     
-    minLine = 0.5 #np.min(allDesigns.iloc[:,stst_col].values)
-    maxLine = 18.5#np.max(allDesigns.iloc[:,stst_col].values)
+    minLine = 0 # 0.5 #np.min(allDesigns.iloc[:,stst_col].values)
+    maxLine = 5 #18.5 #np.max(allDesigns.iloc[:,stst_col].values)
     if maxLine < minLine:
         maxLine = minLine + 0.1
     
