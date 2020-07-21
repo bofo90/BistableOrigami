@@ -86,10 +86,11 @@ for i in np.arange(2,16)[::-1]:
             maskPureMat, typePureMat, perPure, mat1Lines = raa.getPureMatComp(simStStMa, tessellation)
             ThisDataMa['StableStateMat'] = typePureMat
             ThisDataMa['Purity'] = perPure
-            ThisDataMa['LineDefectMat1'] = np.sum(mat1Lines,axis = 1)
 
-            selDataMat = raa.makeSelectionPerStStMa(ThisDataMa)
+            ThisDataDef = pd.concat([ThisDataMa.reset_index(level=0, drop =True),pd.DataFrame(mat1Lines)], axis=1, sort = True)
+            selDataMat = raa.makeSelectionPerStStMa(ThisDataDef)
             allMat = allMat.append(selDataMat)
+            
             
             # plot.Angles3D(allAngles, vertexStSt, 'jet')
             simStStPure, ThisDataPure, ThisEnergyPure, ThisAnglesPure, ThisCurvPure = raa.applyMask(maskPureMat, simStStMa, ThisDataMa, ThisEnergyMa, ThisAnglesMa, ThisCurvMa)
@@ -103,7 +104,7 @@ for i in np.arange(2,16)[::-1]:
             
             # selData = ThisDataMa.sample(500, random_state = 10)
             # allDesigns = allDesigns.append(selData)
-            allDesigns = allDesigns.append(ThisDataMa)
+            allDesigns = allDesigns.append(ThisDataDef)
             
             
             # pos = [0,np.int(np.floor(tessellation[0]/2)),np.int(np.floor(np.prod(tessellation)/2))]
@@ -130,32 +131,43 @@ plt.close('all')
 
 plot.ColorbarPerZ(allCountMat,2, np.arange(9)+3, 1, save = True, Folder_name = Folder_name, NameFig = 'SimulationsConvergence')
 
-#%%
-plt.close('all')   
+# #%%
+# plt.close('all')   
     
-#### Plotting the Curvature and Energy of materials against neighbours for restang
-plot.XSizePlot(allDesigns, 2, r'$matSize$', 7, r'$K_\mathregular{G}$', 9, 11, save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvatureMat_sel')
-plot.XSizePlot(allDesigns, 2, r'$matSize$', 6, r'$E_{norm}$', 9, 11, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergyMat_sel')
+# #### Plotting the Curvature and Energy of materials against neighbours for restang
+# plot.XSizePlot(allDesigns, 2, r'$matSize$', 7, r'$K_\mathregular{G}$', 9, 10, save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvatureMat_sel')
+# plot.XSizePlot(allDesigns, 2, r'$matSize$', 6, r'$E_{norm}$', 9, 10, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergyMat_sel')
 
 
-#%%
-plt.close('all')   
+# #%%
+# plt.close('all')   
     
-##### Plotting the Curvature and Energy of materials against neighbours for restang
-plot.violinPlot(allDesigns, 2, r'$matSize$', 7, r'$K_\mathregular{G}$', 9, 9, save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvatureMat_viol')
-plot.violinPlot(allDesigns, 2, r'$matSize$', 6, r'$E_{norm}$', 9, 9, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergyMat_viol')
+# ##### Plotting the Curvature and Energy of materials against neighbours for restang
+# plot.violinPlot(allDesigns, 2, r'$matSize$', 7, r'$K_\mathregular{G}$', 9, 9, save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvatureMat_viol')
+# plot.violinPlot(allDesigns, 2, r'$matSize$', 6, r'$E_{norm}$', 9, 9, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergyMat_viol')
 
-#%%
-plt.close('all')  
+# #%%
+# plt.close('all')  
 
-plot.violin_scatter(allDesigns, 2, r'$matSize$', 7, r'$K_\mathregular{G}$', 9, save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvatureMat_comb')
-plot.violin_scatter(allDesigns, 2, r'$matSize$', 6, r'$E_{norm}$', 9, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergyMat_comb')
+# plot.violin_scatter(allDesigns, 2, r'$matSize$', 7, r'$K_\mathregular{G}$', 9, save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvatureMat_comb')
+# plot.violin_scatter(allDesigns, 2, r'$matSize$', 6, r'$E_{norm}$', 9, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergyMat_comb')
+
+# #%%
+# plt.close('all')
+
+# plot.XYperZ(allDesigns, 10, r'$Purity$', 6, r'$E_{norm}$', 2, 11, colormap, save = True, Folder_name = Folder_name, NameFig = 'PurityvsEnergyMat_size')
+# plot.XYperZ(allDesigns, 10, r'$Purity$', 7, r'$K_\mathregular{G}$', 2, 11, colormap, save = True, Folder_name = Folder_name, NameFig = 'PurityvsCurvatureMat_size')
 
 #%%
 plt.close('all')
 
-# plot.XYperZ(allDesigns, 10, r'$Purity$', 6, r'$E_{norm}$', 2, 11, colormap, save = True, Folder_name = Folder_name, NameFig = 'PurityvsEnergyMat_size')
-# plot.XYperZ(allDesigns, 10, r'$Purity$', 7, r'$K_\mathregular{G}$', 2, 11, colormap, save = True, Folder_name = Folder_name, NameFig = 'PurityvsCurvatureMat_size')
+allMat = allMat.round(8)
+thetas = np.unique(allMat.iloc[:,1])
+for t in thetas:
+    here = (allMat.iloc[:,1] == t).values
+    plot.DefectsApperanceKappa(allMat.iloc[here,:], 2, r'$matSize$', save = True, Folder_name = Folder_name, NameFig = 'DefectsvsKappa_ang%.2f_sel' %t)
+
+
 #%%
 allMat_copy = allMat.copy()
 allMat_copy['restang'] = allMat_copy['restang']*np.pi

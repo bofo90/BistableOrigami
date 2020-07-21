@@ -868,7 +868,7 @@ def getPureMatComp(simStSt, tessellation):
     nomat = (np.max(material, axis = 1) == 0) | (matType[:,10] != 0)
     matName[nomat] = 0
     
-    return purity, matName, np.max(matType[:,:3],1), matType[:,3:]
+    return purity, matName, np.max(matType[:,:3],1), matType[:,3:-1]
 
 def orderUnitCell(unitcell):
     

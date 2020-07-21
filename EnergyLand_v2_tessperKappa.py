@@ -174,6 +174,17 @@ plot.ColorbarPerZKappa(allCountMat,0, np.arange(9)+3, 1, save = True, Folder_nam
 #                                save = True, Folder_name = Folder_name, NameFig = 'NeighvsMinFaceMat_ang%.2f_sel' %t)
 
 #%%
+plt.close('all')
+
+#### Plotting kappa against num of simulations for all the different defects
+allMat = allMat.round(8)
+thetas = np.unique(allMat.iloc[:,1])
+for t in thetas:
+    here = (allMat.iloc[:,1] == t).values
+    plot.DefectsApperanceKappa(allMat.iloc[here,:], 0, r'$\kappa$', save = True, Folder_name = Folder_name, NameFig = 'DefectsvsKappa_ang%.2f_sel' %t)
+
+
+#%%
 # allMat_copy = allMat.copy()
 # allMat_copy['restang'] = allMat_copy['restang']*np.pi
 # raa.SaveForPlotMat(allMat_copy, Folder_name[:42])

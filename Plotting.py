@@ -1188,7 +1188,56 @@ wspace=0.2)
     
     return
 
-
+def DefectsApperanceKappa(allMat, x, xname, save = False, Folder_name = '', NameFig = ''):
+    
+    allMat = allMat.round(8)
+    
+    defTypes = [[11,12,17], [13,14,15,16,17],[16,17]]
+    defNames = [['GB Twin', 'Precipitation', 'Interface all'], 
+                ['GB Twin', 'GB Slip', 'GB Rotation', 'Interface fold', 'Interface all'], 
+                ['Interface fold', 'Interface all']]
+    defColors = [[0,1,2],[3,4,5,6,2],[6,2]]
+    
+    color = ['#41A584', '#E26B3C', '#6177AA',  
+              '#66c2a5', '#fc8d62', '#8da0cb',             
+              '#ffd92f', '#e5c494', '#b3b3b3']
+    
+    for i in np.arange(3):
+    
+        # fig1 = plt.figure(figsize=(cm2inch(4.3), cm2inch(3.1)))
+        fig1 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
+        ax1 = plt.subplot(111)
+        fig1.subplots_adjust(top=0.987,
+bottom=0.111,
+left=0.183,
+right=0.987,
+hspace=0.2,
+wspace=0.2)
+        
+        thisStateBool = allMat['StableStateMat'] == i+1+3
+        thisState = allMat[thisStateBool] 
+        
+        NiceGraph2D(ax1, xname, 'Sim. Amount')
+        
+        if (xname == r'$\kappa$'):
+            ax1.set_xscale('log')
+            ax1.set_xticks([0.001,0.01,0.1,1])
+            ax1.set_xlim([0.0007,1.5])
+        
+        for j in np.arange(np.size(defTypes[i])):
+            
+            ax1.scatter(thisState.iloc[:,x], 
+                        thisState.iloc[:,defTypes[i][j]], c = color[defColors[i][j]], s = 8, label = defNames[i][j])
+        
+        CreateLegend(ax1)  
+        
+        fig1.show()
+        if save:
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %(i+1) +'.pdf', transparent = True)
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %(i+1) +'.png', transparent = True)
+            print(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %(i+1))
+            
+    return
 
 
 
