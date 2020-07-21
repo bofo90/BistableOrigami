@@ -111,10 +111,9 @@ for i in np.arange(4,5)[::-1]:
             maskPureMat, typePureMat, perPure, mat1Lines = raa.getPureMatComp(simStStMa, tessellation)
             ThisDataMa['StableStateMat'] = typePureMat
             ThisDataMa['Purity'] = perPure
-            ThisDataMa['LineDefectMat1'] = np.argmax(mat1Lines, axis = 1)
-            allErrors = np.concatenate((allErrors, mat1Lines), axis = 0)
 
-            selDataMat = raa.makeSelectionPerStStMa(ThisDataMa)
+            ThisDataDef = pd.concat([ThisDataMa.reset_index(level=0, drop =True),pd.DataFrame(mat1Lines)], axis=1, sort = True)
+            selDataMat = raa.makeSelectionPerStStMa(ThisDataDef)
             allMat = allMat.append(selDataMat)
             
             # plot.Angles3D(allAngles, vertexStSt, 'jet')
@@ -131,7 +130,7 @@ for i in np.arange(4,5)[::-1]:
             # selData = ThisDataMa.sample(500, random_state = 10)
             # allDesigns = allDesigns.append(selData)
             ### select all simulations per parameter selection
-            allDesigns = allDesigns.append(ThisDataMa)
+            allDesigns = allDesigns.append(ThisDataDef)
             
             
             ### save all energies

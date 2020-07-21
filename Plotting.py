@@ -1102,8 +1102,8 @@ def XKappawSingleVertPlot(allDesigns, allDesignsSV, x1, x2, xname, y1, y2, yname
               '#ffd92f', '#e5c494', '#b3b3b3']
     colormap = 'gist_rainbow'
     
-    minLine = 0 # 0.5 #np.min(allDesigns.iloc[:,stst_col].values)
-    maxLine = 5 #18.5 #np.max(allDesigns.iloc[:,stst_col].values)
+    minLine = np.min(allDesigns.iloc[:,stst_col].values) # 0.5 #
+    maxLine = np.max(allDesigns.iloc[:,stst_col].values) #18.5 #
     if maxLine < minLine:
         maxLine = minLine + 0.1
     
@@ -1169,11 +1169,12 @@ wspace=0.2)
     ax1 = plt.subplot(111)
     
     cmaptemp = matl.cm.get_cmap(colormap)
-    cmapfig, normfig = from_levels_and_colors(np.linspace(minLine, maxLine, 19),cmaptemp(np.linspace(0, 1,20)), extend = 'both')
+    cmapfig, normfig = from_levels_and_colors(np.linspace(minLine, maxLine, 1000),cmaptemp(np.linspace(0, 1,1001)), extend = 'both')
     
     cbar = plt.colorbar(matl.cm.ScalarMappable(norm=normfig, cmap=cmapfig), ax = ax1, 
                         fraction=0.99, pad=0.01, orientation='vertical', aspect=15)
-    cbar.set_ticks(np.linspace(1,19,7))
+    # cbar.set_ticks(np.linspace(1,19,7))
+    cbar.set_ticks(np.linspace(minLine, maxLine, 4))
     # cbar.ax.set_xticklabels(ststname.astype(int))
     cbar.set_label('Dislocation lines', fontsize = 9, color = '0.2',labelpad = 0)
     cbar.ax.tick_params(colors='0.2', pad=2)

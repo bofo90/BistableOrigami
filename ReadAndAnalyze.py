@@ -751,7 +751,7 @@ def getPureMatComp(simStSt, tessellation):
     simStSt = simStSt.reshape((simulations,*tessellation))
     simMatAna = np.zeros((simulations, *tessellation-1))
     
-    matType = np.zeros((simulations,9))
+    matType = np.zeros((simulations,11))
         
     stableStateVert = np.zeros((simulations, 15))
     
@@ -786,6 +786,16 @@ def getPureMatComp(simStSt, tessellation):
         #check for precipitation in mat1 at grain boundaries
         materialStableStates[(unitcellUn[:,0:2]<2).all(axis = 1) & 
                              ((unitcellUn[:,2:]>1).all(axis = 1) & (unitcellUn[:,2:]<6).all(axis = 1))] = 5
+        #precipitation at corners
+        materialStableStates[(unitcellUn[:,:3]<2).all(axis = 1) &
+                             ((unitcellUn[:,3]>1) & (unitcellUn[:,3]<6))] = 5
+        materialStableStates[(unitcellUn[:,[0,1,3]]<2).all(axis = 1) &
+                             ((unitcellUn[:,2]>1) & (unitcellUn[:,2]<6))] = 5  
+        materialStableStates[(unitcellUn[:,0]<2) &
+                             ((unitcellUn[:,1:]>1).all(axis = 1) & (unitcellUn[:,1:]<6).all(axis = 1))] = 5
+        #precipitation at double corner
+        materialStableStates[(unitcellUn[:,[0,3]]<2).all(axis = 1) & 
+                             ((unitcellUn[:,1:3]>1).all(axis = 1) & (unitcellUn[:,1:3]<6).all(axis = 1))] = 5
         
         #check for grain boundary mat2
         #twin
@@ -806,6 +816,10 @@ def getPureMatComp(simStSt, tessellation):
                              ((unitcellUn[:,2]>3) & (unitcellUn[:,2]<6))] = 8  
         materialStableStates[((unitcellUn[:,0]>1) & (unitcellUn[:,0]<4)) &
                              ((unitcellUn[:,1:]>3).all(axis = 1) & (unitcellUn[:,1:]<6).all(axis = 1))] = 8  
+        #rotation at double corners
+        materialStableStates[((unitcellUn[:,[0,3]]>1).all(axis = 1) & (unitcellUn[:,[0,3]]<4).all(axis = 1)) &
+                             ((unitcellUn[:,1:3]>3).all(axis = 1) & (unitcellUn[:,1:3]<6).all(axis = 1))] = 8  
+ 
         
         #check interface material 2 and 3
         materialStableStates[((unitcellUn[:,:2]>1).all(axis = 1) & (unitcellUn[:,:2]<6).all(axis = 1)) &
@@ -818,10 +832,22 @@ def getPureMatComp(simStSt, tessellation):
         materialStableStates[((unitcellUn[:,0]>1) & (unitcellUn[:,0]<6)) &
                              ((unitcellUn[:,1:]>7).all(axis = 1) & (unitcellUn[:,1:]<10).all(axis = 1))] = 9 
         
+        #check interface between material 1, 2 and 3
+        materialStableStates[(unitcellUn < 2).any(axis = 1) & 
+                             ((unitcellUn > 1) & (unitcellUn < 6)).any(axis = 1)  &
+                             ((unitcellUn > 7) & (unitcellUn < 10)).any(axis = 1)] = 10
+        
+        #check if vertex is in impossible state
+        materialStableStates[(unitcellUn == 6).any(axis = 1) | (unitcellUn == 7).any(axis = 1)] = 11
+        
         simMatAna[i,:,:] = materialStableStates[unitcellLoc].reshape(*tessellation-1)
         
         types, typescounts = np.unique(simMatAna[i,:,:], return_counts = True)
         
+        if (types == 0).any():
+            typescounts = np.delete(typescounts, np.where(types == 0))
+            types = np.delete(types, np.where(types == 0))
+
         matType[i, types.astype(int)-1] = typescounts/numUCmat
         
     
@@ -831,15 +857,15 @@ def getPureMatComp(simStSt, tessellation):
         here = here[np.round(np.sum(matType,axis = 1),5) != 1]
         
     material = np.zeros((simulations,3))
-    material[:,0] = np.sum(matType[:,[0,3]], axis = 1)+matType[:,4]/2
-    material[:,1] = np.sum(matType[:,[1,5,6,7]], axis = 1)+np.sum(matType[:,[4,8]], axis = 1)/2
-    material[:,2] = matType[:,2]+matType[:,8]/2
+    material[:,0] = np.sum(matType[:,[0,3]], axis = 1) + matType[:,4]/2 + matType[:,9]/3
+    material[:,1] = np.sum(matType[:,[1,5,6,7]], axis = 1) + np.sum(matType[:,[4,8]], axis = 1)/2 + matType[:,9]/3
+    material[:,2] = matType[:,2]+matType[:,8]/2 + matType[:,9]/3
         
     purity = ~(matType[:,3:]>0).any(axis = 1)
     matName = np.argmax(material, axis = 1)+1
     matName[~purity] += 3
     
-    nomat = np.max(material, axis = 1) == 0
+    nomat = (np.max(material, axis = 1) == 0) | (matType[:,10] != 0)
     matName[nomat] = 0
     
     return purity, matName, np.max(matType[:,:3],1), matType[:,3:]
