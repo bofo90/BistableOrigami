@@ -46,8 +46,8 @@ for subdir in os.listdir(Folder_name):
 allDesignsSingleVer = allDesignsSingleVer.reset_index(level=0, drop =True)
 allDesignsSingleVer = np.round(allDesignsSingleVer,8)
 
-### Get stable states of vertices
-allDesignsSingleVer['StableStateAll'] =raa.countStableStatesDistance(allDesignsSingleVer.iloc[:,8:8+numvertex].values, 1.5)
+# ### Get stable states of vertices
+# allDesignsSingleVer['StableStateAll'] =raa.countStableStatesDistance(allDesignsSingleVer.iloc[:,8:8+numvertex].values, 1.5)
 
 
 #%%
@@ -55,8 +55,6 @@ allDesigns = pd.DataFrame()
 allCountMat = pd.DataFrame()
 allMat = pd.DataFrame()
 allEne = np.array([[0,0]])
-allErrors = np.array([[0,0,0,0,0,0]])
-
 
 for i in np.arange(4,5)[::-1]:
 
@@ -78,13 +76,13 @@ for i in np.arange(4,5)[::-1]:
             continue    
         # if subdir == 'RestAng_2.356': #'RestAng_1.571':
         #     continue
-        # if subdir != 'RestAng_2.356': #'RestAng_0.785': #'RestAng_1.571': #
+        # if subdir != 'RestAng_2.356': #'RestAng_1.571': #'RestAng_0.785': #
         #     continue
         if (subdir != 'RestAng_2.356') & (subdir != 'RestAng_0.785') & (subdir != 'RestAng_1.571'):
             continue
             
         for subdir2 in os.listdir(Folder_name+'/'+subdir):
-            # if subdir2 !='kappa_0.03981':
+            # if subdir2 !='kappa_0.25119':
             #     continue
             folder_name = Folder_name+'/'+subdir+'/'+subdir2+'/energy'
             print('Analysing: ' + folder_name)
@@ -158,22 +156,22 @@ plt.close('all')
 plot.ColorbarPerZKappa(allCountMat,0, np.arange(9)+3, 1, save = True, Folder_name = Folder_name, NameFig = 'SimulationsConvergence')
 
 #%%
-plt.close('all')   
+# plt.close('all')   
     
-#### Plotting the Curvature, Energy and minFace of materials against kappa with color meaning max occurence of defect
-thetas = np.unique(allDesigns.iloc[:,1])
-for t in thetas:
-    here = (allDesigns.iloc[:,1] == t).values
-    hereSV = (allDesignsSingleVer.iloc[:,1] == np.round(t,8)).values
-    plot.XKappawSingleVertPlot(allDesigns.iloc[here,:], allDesignsSingleVer.iloc[hereSV,:], 
-                               0, 0, r'$\kappa$', 7, 6, r'$K_\mathregular{G}$', 11, 
-                               save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvatureMat_ang%.2f_sel' %t)
-    plot.XKappawSingleVertPlot(allDesigns.iloc[here,:], allDesignsSingleVer.iloc[hereSV,:],
-                               0, 0, r'$\kappa$', 6, 5, r'$E_{norm}$', 11, 
-                               save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergyMat_ang%.2f_sel' %t)
-    plot.XKappawSingleVertPlot(allDesigns.iloc[here,:], allDesignsSingleVer.iloc[hereSV,:],
-                               0, 0, r'$\kappa$', 8, 7, r'$min_Face$', 11, 
-                               save = True, Folder_name = Folder_name, NameFig = 'NeighvsMinFaceMat_ang%.2f_sel' %t)
+# #### Plotting the Curvature, Energy and minFace of materials against kappa with color meaning purity
+# thetas = np.unique(allDesigns.iloc[:,1])
+# for t in thetas:
+#     here = (allDesigns.iloc[:,1] == t).values
+#     hereSV = (allDesignsSingleVer.iloc[:,1] == np.round(t,8)).values
+#     plot.XKappawSingleVertPlot(allDesigns.iloc[here,:], allDesignsSingleVer.iloc[hereSV,:], 
+#                                0, 0, r'$\kappa$', 7, 6, r'$K_\mathregular{G}$', 10, 
+#                                save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvatureMat_ang%.2f_sel' %t)
+#     plot.XKappawSingleVertPlot(allDesigns.iloc[here,:], allDesignsSingleVer.iloc[hereSV,:],
+#                                0, 0, r'$\kappa$', 6, 5, r'$E_{norm}$', 10, 
+#                                save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergyMat_ang%.2f_sel' %t)
+#     plot.XKappawSingleVertPlot(allDesigns.iloc[here,:], allDesignsSingleVer.iloc[hereSV,:],
+#                                0, 0, r'$\kappa$', 8, 7, r'$min_Face$', 10, 
+#                                save = True, Folder_name = Folder_name, NameFig = 'NeighvsMinFaceMat_ang%.2f_sel' %t)
 
 #%%
 # allMat_copy = allMat.copy()

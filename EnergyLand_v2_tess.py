@@ -35,7 +35,7 @@ for i in np.arange(2,16)[::-1]:
     if not os.path.isdir(Folder_name + '/Images/'):
         os.mkdir(Folder_name + '/Images/')
         
-    # if i != 6:
+    # if i != 15:
     #     continue
         
     tessellation = np.array(Folder_name.split('_')[-3:-1]).astype(int)
@@ -45,9 +45,9 @@ for i in np.arange(2,16)[::-1]:
     for subdir in os.listdir(Folder_name):
         if subdir == 'Images':
             continue    
-        if subdir == 'RestAng_1.571':
-            continue
-        # if subdir != 'RestAng_0.785': #'RestAng_2.356': #'RestAng_1.571': #
+        # if subdir == 'RestAng_1.571':
+        #     continue
+        # if subdir != 'RestAng_1.571': #'RestAng_0.785': #'RestAng_2.356': #
         #     continue
             
         for subdir2 in os.listdir(Folder_name+'/'+subdir):
