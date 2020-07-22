@@ -1188,7 +1188,7 @@ wspace=0.2)
     
     return
 
-def DefectsApperanceKappa(allMat, x, xname, save = False, Folder_name = '', NameFig = ''):
+def DefectsApperance(allMat, x, xname, save = False, Folder_name = '', NameFig = ''):
     
     allMat = allMat.round(8)
     
@@ -1239,6 +1239,47 @@ wspace=0.2)
             
     return
 
-
+def GrainSize(allMat, x, xname, save = False, Folder_name = '', NameFig = ''):
+    
+    allMat = allMat.round(8)
+    
+    # fig1 = plt.figure(figsize=(cm2inch(4.3), cm2inch(3.1)))
+    fig1 = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
+    ax1 = plt.subplot(111)
+    fig1.subplots_adjust(top=0.987,
+bottom=0.111,
+left=0.183,
+right=0.987,
+hspace=0.2,
+wspace=0.2)
+    
+    NiceGraph2D(ax1, xname, 'Vertex/Grain')
+    
+    MatNames = ['Dome-Saddle','All-Miura-ori', 'All-Fold']
+    color = ['#66c2a5', '#fc8d62', '#8da0cb']
+    
+    if (xname == r'$\kappa$'):
+        ax1.set_xscale('log')
+        ax1.set_xticks([0.001,0.01,0.1,1])
+        ax1.set_xlim([0.0007,1.5])
+        
+        
+    for i in np.arange(3):
+    
+        thisStateBool = allMat['StableStateMat'] == i+1+3
+        thisState = allMat[thisStateBool] 
+            
+        ax1.scatter(thisState.iloc[:,x], 
+                    thisState.iloc[:,18+i], c = color[i], s = 8, label = MatNames[i])
+        
+        CreateLegend(ax1)  
+        
+        fig1.show()
+        if save:
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %(i+1) +'.pdf', transparent = True)
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %(i+1) +'.png', transparent = True)
+            print(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %(i+1))
+            
+    return
 
 

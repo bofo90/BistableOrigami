@@ -23,10 +23,10 @@ allEne = np.array([[0,0]])
 
 for i in np.arange(2,16)[::-1]:
 
-    Folder_name = "Results/Tessellation4/25/2CFF/01-Apr-2020_%d_%d_" %(i,i) #with no B.C.
+    # Folder_name = "Results/Tessellation4/25/2CFF/01-Apr-2020_%d_%d_" %(i,i) #with no B.C.
     # Folder_name = "Results/Tessellation4/25/2CFF/24-Apr-2020_%d_%d_" %(i,i) #with B.C.
     # Folder_name = "Results/Tessellation4/25/2CFF/03-Jun-2020_%d_%d_" %(i,i) #with new B.C.
-    # Folder_name = "Results/Tessellation4/25/2CFF/08-May-2020_%d_%d_" %(i,i) #higher kappa
+    Folder_name = "Results/Tessellation4/25/2CFF/08-May-2020_%d_%d_" %(i,i) #higher kappa
     # Folder_name = "Results/Tessellation4/25/2CFF/29-May-2020_%d_%d_" %(i,i) #higher kappa with P.B.C.
     
     if not os.path.isdir(Folder_name):
@@ -167,8 +167,17 @@ allMat = allMat.round(8)
 thetas = np.unique(allMat.iloc[:,1])
 for t in thetas:
     here = (allMat.iloc[:,1] == t).values
-    plot.DefectsApperanceKappa(allMat.iloc[here,:], 2, r'$matSize$', save = True, Folder_name = Folder_name, NameFig = 'DefectsvsKappa_ang%.2f_sel' %t)
+    plot.DefectsApperance(allMat.iloc[here,:], 2, r'$matSize$', save = True, Folder_name = Folder_name, NameFig = 'DefectsvsMatSize_ang%.2f_sel' %t)
 
+#%%
+plt.close('all')
+
+#### Plotting kappa against num of simulations for all the different defects
+allMat = allMat.round(8)
+thetas = np.unique(allMat.iloc[:,1])
+for t in thetas:
+    here = (allMat.iloc[:,1] == t).values
+    plot.GrainSize(allMat.iloc[here,:], 2, r'$matSize$', save = True, Folder_name = Folder_name, NameFig = 'GrainSizevsMatSize_ang%.2f_sel' %t)
 
 #%%
 allMat_copy = allMat.copy()
