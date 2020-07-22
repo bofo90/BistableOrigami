@@ -47,7 +47,7 @@ for i in np.arange(2,16)[::-1]:
             continue    
         # if subdir == 'RestAng_1.571':
         #     continue
-        # if subdir != 'RestAng_1.571': #'RestAng_0.785': #'RestAng_2.356': #
+        # if subdir != 'RestAng_2.356': #'RestAng_1.571': #'RestAng_0.785': #
         #     continue
             
         for subdir2 in os.listdir(Folder_name+'/'+subdir):

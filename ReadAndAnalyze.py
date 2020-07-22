@@ -751,7 +751,7 @@ def getPureMatComp(simStSt, tessellation):
     simStSt = simStSt.reshape((simulations,*tessellation))
     simMatAna = np.zeros((simulations, *tessellation-1))
     
-    matType = np.zeros((simulations,11))
+    matType = np.zeros((simulations,12))
         
     stableStateVert = np.zeros((simulations, 15))
     
@@ -787,7 +787,8 @@ def getPureMatComp(simStSt, tessellation):
         materialStableStates[(unitcellUn == [0,0,1,1]).all(axis = 1)] = 4
         materialStableStates[(unitcellUn == [1,1,1,1]).all(axis = 1)] = 4
         materialStableStates[(unitcellUn == [0,0,0,0]).all(axis = 1)] = 4
-        #check for precipitation in mat1 at grain boundaries
+        
+        #check for precipitation of mat 2 in mat1 at grain boundaries
         materialStableStates[(unitcellUn[:,0:2]<2).all(axis = 1) & 
                              ((unitcellUn[:,2:]>1).all(axis = 1) & (unitcellUn[:,2:]<6).all(axis = 1))] = 5
         #precipitation at corners
@@ -800,52 +801,67 @@ def getPureMatComp(simStSt, tessellation):
         #precipitation at double corner
         materialStableStates[(unitcellUn[:,[0,3]]<2).all(axis = 1) & 
                              ((unitcellUn[:,1:3]>1).all(axis = 1) & (unitcellUn[:,1:3]<6).all(axis = 1))] = 5
+                
+        #check for precipitation of mat 3 in mat1 at grain boundaries
+        materialStableStates[((unitcellUn[:,:2]<2).all(axis = 1)) &
+                             ((unitcellUn[:,2:]>7).all(axis = 1) & (unitcellUn[:,2:]<10).all(axis = 1))] = 6 
+        #precipitation at corners
+        materialStableStates[((unitcellUn[:,:3]<2).all(axis = 1)) &
+                             ((unitcellUn[:,3]>7) & (unitcellUn[:,3]<10))] = 6 
+        materialStableStates[((unitcellUn[:,[0,1,3]]<2).all(axis = 1)) &
+                             ((unitcellUn[:,2]>7) & (unitcellUn[:,2]<10))] = 6  
+        materialStableStates[((unitcellUn[:,0]<2)) &
+                             ((unitcellUn[:,1:]>7).all(axis = 1) & (unitcellUn[:,1:]<10).all(axis = 1))] = 6
+        
         
         #check for grain boundary mat2
         #twin
-        materialStableStates[(unitcellUn == [2,2,2,2]).all(axis = 1)] = 6
-        materialStableStates[(unitcellUn == [3,3,3,3]).all(axis = 1)] = 6
-        materialStableStates[(unitcellUn == [4,4,4,4]).all(axis = 1)] = 6
-        materialStableStates[(unitcellUn == [5,5,5,5]).all(axis = 1)] = 6
+        materialStableStates[(unitcellUn == [2,2,2,2]).all(axis = 1)] = 7
+        materialStableStates[(unitcellUn == [3,3,3,3]).all(axis = 1)] = 7
+        materialStableStates[(unitcellUn == [4,4,4,4]).all(axis = 1)] = 7
+        materialStableStates[(unitcellUn == [5,5,5,5]).all(axis = 1)] = 7
+        
         #slip
-        materialStableStates[(unitcellUn == [2,3,3,2]).all(axis = 1)] = 7
-        materialStableStates[(unitcellUn == [4,5,5,4]).all(axis = 1)] = 7
+        materialStableStates[(unitcellUn == [2,3,3,2]).all(axis = 1)] = 8
+        materialStableStates[(unitcellUn == [4,5,5,4]).all(axis = 1)] = 8
         #corner slip and twin
-        materialStableStates[(unitcellUn == [2,2,3,3]).all(axis = 1) & (unitcellshiftUn%2 == 1)] = 7
-        materialStableStates[(unitcellUn == [4,4,5,5]).all(axis = 1) & (unitcellshiftUn%2 == 0)] = 7      
+        materialStableStates[(unitcellUn == [2,2,3,3]).all(axis = 1) & (unitcellshiftUn%2 == 1)] = 8
+        materialStableStates[(unitcellUn == [4,4,5,5]).all(axis = 1) & (unitcellshiftUn%2 == 0)] = 8   
+        
         #rotation
         materialStableStates[((unitcellUn[:,:2]>1).all(axis = 1) & (unitcellUn[:,:2]<4).all(axis = 1)) &
-                             ((unitcellUn[:,2:]>3).all(axis = 1) & (unitcellUn[:,2:]<6).all(axis = 1))] = 8   
+                             ((unitcellUn[:,2:]>3).all(axis = 1) & (unitcellUn[:,2:]<6).all(axis = 1))] = 9   
         #rotation at corners
         materialStableStates[((unitcellUn[:,:3]>1).all(axis = 1) & (unitcellUn[:,:3]<4).all(axis = 1)) &
-                             ((unitcellUn[:,3]>3) & (unitcellUn[:,3]<6))] = 8  
+                             ((unitcellUn[:,3]>3) & (unitcellUn[:,3]<6))] = 9  
         materialStableStates[((unitcellUn[:,[0,1,3]]>1).all(axis = 1) & (unitcellUn[:,[0,1,3]]<4).all(axis = 1)) &
-                             ((unitcellUn[:,2]>3) & (unitcellUn[:,2]<6))] = 8  
+                             ((unitcellUn[:,2]>3) & (unitcellUn[:,2]<6))] = 9  
         materialStableStates[((unitcellUn[:,0]>1) & (unitcellUn[:,0]<4)) &
-                             ((unitcellUn[:,1:]>3).all(axis = 1) & (unitcellUn[:,1:]<6).all(axis = 1))] = 8  
+                             ((unitcellUn[:,1:]>3).all(axis = 1) & (unitcellUn[:,1:]<6).all(axis = 1))] = 9
         #rotation at double corners
         materialStableStates[((unitcellUn[:,[0,3]]>1).all(axis = 1) & (unitcellUn[:,[0,3]]<4).all(axis = 1)) &
-                             ((unitcellUn[:,1:3]>3).all(axis = 1) & (unitcellUn[:,1:3]<6).all(axis = 1))] = 8  
+                             ((unitcellUn[:,1:3]>3).all(axis = 1) & (unitcellUn[:,1:3]<6).all(axis = 1))] = 9  
  
         
         #check interface material 2 and 3
         materialStableStates[((unitcellUn[:,:2]>1).all(axis = 1) & (unitcellUn[:,:2]<6).all(axis = 1)) &
-                             ((unitcellUn[:,2:]>7).all(axis = 1) & (unitcellUn[:,2:]<10).all(axis = 1))] = 9 
+                             ((unitcellUn[:,2:]>7).all(axis = 1) & (unitcellUn[:,2:]<10).all(axis = 1))] = 10
         #interfaces at corners
         materialStableStates[((unitcellUn[:,:3]>1).all(axis = 1) & (unitcellUn[:,:3]<6).all(axis = 1)) &
-                             ((unitcellUn[:,3]>7) & (unitcellUn[:,3]<10))] = 9 
+                             ((unitcellUn[:,3]>7) & (unitcellUn[:,3]<10))] = 10
         materialStableStates[((unitcellUn[:,[0,1,3]]>1).all(axis = 1) & (unitcellUn[:,[0,1,3]]<6).all(axis = 1)) &
-                             ((unitcellUn[:,2]>7) & (unitcellUn[:,2]<10))] = 9  
+                             ((unitcellUn[:,2]>7) & (unitcellUn[:,2]<10))] = 10 
         materialStableStates[((unitcellUn[:,0]>1) & (unitcellUn[:,0]<6)) &
-                             ((unitcellUn[:,1:]>7).all(axis = 1) & (unitcellUn[:,1:]<10).all(axis = 1))] = 9 
+                             ((unitcellUn[:,1:]>7).all(axis = 1) & (unitcellUn[:,1:]<10).all(axis = 1))] = 10
         
         #check interface between material 1, 2 and 3
         materialStableStates[(unitcellUn < 2).any(axis = 1) & 
                              ((unitcellUn > 1) & (unitcellUn < 6)).any(axis = 1)  &
-                             ((unitcellUn > 7) & (unitcellUn < 10)).any(axis = 1)] = 10
+                             ((unitcellUn > 7) & (unitcellUn < 10)).any(axis = 1)] = 11
         
         #check if vertex is in impossible state
-        materialStableStates[(unitcellUn == 6).any(axis = 1) | (unitcellUn == 7).any(axis = 1)] = 11
+        materialStableStates[(unitcellUn == 6).any(axis = 1) | (unitcellUn == 7).any(axis = 1)] = 12
+        
         
         simMatAna[i,:,:] = materialStableStates[unitcellLoc].reshape(*tessellation-1)
         
@@ -864,15 +880,15 @@ def getPureMatComp(simStSt, tessellation):
         here = here[np.round(np.sum(matType,axis = 1),5) != 1]
         
     material = np.zeros((simulations,3))
-    material[:,0] = np.sum(matType[:,[0,3]], axis = 1) + matType[:,4]/2 + matType[:,9]/3
-    material[:,1] = np.sum(matType[:,[1,5,6,7]], axis = 1) + np.sum(matType[:,[4,8]], axis = 1)/2 + matType[:,9]/3
-    material[:,2] = matType[:,2]+matType[:,8]/2 + matType[:,9]/3
+    material[:,0] = np.sum(matType[:,[0,3]], axis = 1) + np.sum(matType[:,[4,5]], axis = 1)/2 + matType[:,10]/3
+    material[:,1] = np.sum(matType[:,[1,6,7,8]], axis = 1) + np.sum(matType[:,[4,9]], axis = 1)/2 + matType[:,10]/3
+    material[:,2] = matType[:,2]+ np.sum(matType[:,[5,9]], axis = 1)/2 + matType[:,10]/3
         
     purity = ~(matType[:,3:]>0).any(axis = 1)
     matName = np.argmax(material, axis = 1)+1
     matName[~purity] += 3
     
-    nomat = (np.max(material, axis = 1) == 0) | (matType[:,10] != 0)
+    nomat = (np.max(material, axis = 1) == 0) | (matType[:,11] != 0)
     matName[nomat] = 0
     
     grainSizes, grainDis = calculateGrainSize(simMatAna)

@@ -1192,11 +1192,11 @@ def DefectsApperance(allMat, x, xname, save = False, Folder_name = '', NameFig =
     
     allMat = allMat.round(8)
     
-    defTypes = [[11,12,17], [13,14,15,16,17],[16,17]]
-    defNames = [['GB Twin', 'Precipitation', 'Interface all'], 
-                ['GB Twin', 'GB Slip', 'GB Rotation', 'Interface fold', 'Interface all'], 
-                ['Interface fold', 'Interface all']]
-    defColors = [[0,1,2],[3,4,5,6,2],[6,2]]
+    defTypes = [[11,12,13,18], [12,14,15,16,17,18],[13,17,18]]
+    defNames = [['GB Twin', 'Interface ds-miura', 'Interface ds-fold', 'Interface all'], 
+                ['Interface ds-miura', 'GB Twin', 'GB Slip', 'GB Rotation', 'Interface miura-fold', 'Interface all'], 
+                ['Interface ds-fold','Interface miura-fold', 'Interface all']]
+    defColors = [[0,1,2,3],[1,4,5,6,7,3],[2,7,3]]
     
     color = ['#41A584', '#E26B3C', '#6177AA',  
               '#66c2a5', '#fc8d62', '#8da0cb',             
@@ -1270,7 +1270,7 @@ wspace=0.2)
         thisState = allMat[thisStateBool] 
             
         ax1.scatter(thisState.iloc[:,x], 
-                    thisState.iloc[:,18+i], c = color[i], s = 8, label = MatNames[i])
+                    thisState.iloc[:,19+i], c = color[i], s = 8, label = MatNames[i])
         
         CreateLegend(ax1)  
         
