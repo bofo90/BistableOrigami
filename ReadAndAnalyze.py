@@ -761,20 +761,24 @@ def getPureMatComp(simStSt, tessellation):
         stableStateVert[i,stver] = numstst
         
         unitcellmat = np.zeros((*tessellation-1,4))
+        unitcellshift = np.zeros(tessellation-1)
         for x in np.arange(np.size(simStSt[i,:,:],0)-1):
             for y in np.arange(np.size(simStSt[i,:,:],1)-1):
                 unitcell = simStSt[i,x:x+2,y:y+2]
-                unitcellmat[x,y,:] = orderUnitCell(unitcell).flatten()
-        unitcellmat = unitcellmat.reshape(numUCmat,4)
+                orunitcell, unitcellshift[x,y] = orderUnitCell(unitcell)
+                unitcellmat[x,y,:] = orunitcell.flatten()
+        unitcellComb = np.concatenate([unitcellmat.reshape(numUCmat,4), unitcellshift.reshape(numUCmat,1)], axis = 1)
         
-        unitcellUn, unitcellLoc = np.unique(unitcellmat, axis = 0, return_inverse = True)
+        unitcellCombUn, unitcellLoc = np.unique(unitcellComb, axis = 0, return_inverse = True)
+        unitcellUn = unitcellCombUn[:,:4]
+        unitcellshiftUn = unitcellCombUn[:,4]
         
         materialStableStates = np.zeros(np.size(unitcellUn,0))
         
         #check for main materials
         materialStableStates[(unitcellUn == [0,1,1,0]).all(axis = 1)] = 1
-        materialStableStates[(unitcellUn == [2,2,3,3]).all(axis = 1)] = 2
-        materialStableStates[(unitcellUn == [4,4,5,5]).all(axis = 1)] = 2
+        materialStableStates[(unitcellUn == [2,2,3,3]).all(axis = 1) & (unitcellshiftUn%2 == 0)] = 2
+        materialStableStates[(unitcellUn == [4,4,5,5]).all(axis = 1) & (unitcellshiftUn%2 == 1)] = 2
         materialStableStates[(unitcellUn == [8,8,8,8]).all(axis = 1)] = 3
         materialStableStates[(unitcellUn == [9,9,9,9]).all(axis = 1)] = 3
         
@@ -806,6 +810,9 @@ def getPureMatComp(simStSt, tessellation):
         #slip
         materialStableStates[(unitcellUn == [2,3,3,2]).all(axis = 1)] = 7
         materialStableStates[(unitcellUn == [4,5,5,4]).all(axis = 1)] = 7
+        #corner slip and twin
+        materialStableStates[(unitcellUn == [2,2,3,3]).all(axis = 1) & (unitcellshiftUn%2 == 1)] = 7
+        materialStableStates[(unitcellUn == [4,4,5,5]).all(axis = 1) & (unitcellshiftUn%2 == 0)] = 7      
         #rotation
         materialStableStates[((unitcellUn[:,:2]>1).all(axis = 1) & (unitcellUn[:,:2]<4).all(axis = 1)) &
                              ((unitcellUn[:,2:]>3).all(axis = 1) & (unitcellUn[:,2:]<6).all(axis = 1))] = 8   
@@ -882,8 +889,9 @@ def orderUnitCell(unitcell):
     
     if unitcell[1,0] < unitcell[0,1]:
         unitcell = unitcell.T
+        shift += 1
         
-    return unitcell
+    return unitcell, shift
 
 def calculateGrainSize(simMatAna):
     
