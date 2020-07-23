@@ -177,7 +177,7 @@ allMat = allMat.round(8)
 thetas = np.unique(allMat.iloc[:,1])
 for t in thetas:
     here = (allMat.iloc[:,1] == t).values
-    plot.GrainSize(allMat.iloc[here,:], 2, r'$matSize$', save = True, Folder_name = Folder_name, NameFig = 'GrainSizevsMatSize_ang%.2f_sel' %t)
+    plot.GrainSize(allMat.iloc[here,:], 2, r'$matSize$', save = True, Folder_name = Folder_name, NameFig = 'GrainSizevsMatSize_ang%.2f' %t)
 
 #%%
 allMat_copy = allMat.copy()

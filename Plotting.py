@@ -1272,13 +1272,13 @@ wspace=0.2)
         ax1.scatter(thisState.iloc[:,x], 
                     thisState.iloc[:,19+i], c = color[i], s = 8, label = MatNames[i])
         
-        CreateLegend(ax1)  
-        
-        fig1.show()
-        if save:
-            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %(i+1) +'.pdf', transparent = True)
-            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %(i+1) +'.png', transparent = True)
-            print(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %(i+1))
+    CreateLegend(ax1)  
+    
+    fig1.show()
+    if save:
+        fig1.savefig(Folder_name + '/Images/' + NameFig + '.pdf', transparent = True)
+        fig1.savefig(Folder_name + '/Images/' + NameFig + '.png', transparent = True)
+        print(Folder_name + '/Images/' + NameFig )
             
     return
 

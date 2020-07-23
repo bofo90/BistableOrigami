@@ -56,94 +56,92 @@ allCountMat = pd.DataFrame()
 allMat = pd.DataFrame()
 allEne = np.array([[0,0]])
 
-for i in np.arange(4,5)[::-1]:
-
-    Folder_name = "Results/Tessellation4/25/2CFF/19-Jun-2020_%d_%d_" %(i,i) #with no B.C.
-    # Folder_name = "Results/Tessellation4/25/2CFF/07-Jul-2020_%d_%d_" %(i,i) #with no B.C.
+Folder_name = "Results/Tessellation4/25/2CFF/19-Jun-2020_4_4_" #with no B.C.
+# Folder_name = "Results/Tessellation4/25/2CFF/07-Jul-2020_8_8_" #with no B.C.
     
-    if not os.path.isdir(Folder_name):
+if not os.path.isdir(Folder_name + '/Images/'):
+    os.mkdir(Folder_name + '/Images/')
+       
+tessellation = np.array(Folder_name.split('_')[-3:-1]).astype(int)
+numUC = np.prod(tessellation)
+numvertex = np.int(Folder_name.split('/')[1][-1])
+  
+for subdir in os.listdir(Folder_name):
+    if subdir == 'Images':
+        continue    
+    # if subdir == 'RestAng_2.356': #'RestAng_1.571':
+    #     continue
+    # if subdir != 'RestAng_2.356': #'RestAng_1.571': #'RestAng_0.785': #
+    #     continue
+    if (subdir != 'RestAng_2.356') & (subdir != 'RestAng_0.785') & (subdir != 'RestAng_1.571'):
         continue
-    
-    if not os.path.isdir(Folder_name + '/Images/'):
-        os.mkdir(Folder_name + '/Images/')
-           
-    tessellation = np.array(Folder_name.split('_')[-3:-1]).astype(int)
-    numUC = np.prod(tessellation)
-    numvertex = np.int(Folder_name.split('/')[1][-1])
-      
-    for subdir in os.listdir(Folder_name):
-        if subdir == 'Images':
-            continue    
-        # if subdir == 'RestAng_2.356': #'RestAng_1.571':
+        
+    for subdir2 in os.listdir(Folder_name+'/'+subdir):
+        # if subdir2 !='kappa_1.00000':
         #     continue
-        # if subdir != 'RestAng_2.356': #'RestAng_1.571': #'RestAng_0.785': #
-        #     continue
-        if (subdir != 'RestAng_2.356') & (subdir != 'RestAng_0.785') & (subdir != 'RestAng_1.571'):
+        folder_name = Folder_name+'/'+subdir+'/'+subdir2+'/energy'
+        print('Analysing: ' + folder_name)
+        
+        ThisEnergyOR, ThisAnglesOR, ThisCurvOR, ThisDataOR, simLen = raa.ReadFileMat(folder_name)
+        ThisDataOR["TotalEnergy"] = np.mean(ThisEnergyOR, axis = 1)
+        ThisDataMa, ThisMask, ThisFlags = raa.maskBadResults(ThisDataOR, returnMask = True, returnStad = True)  
+        ThisFlags['tes'] = tessellation[0]
+        # print('Converged simulations',  np.sum(ThisMask))
+        
+        if ~ThisMask.any():
             continue
-            
-        for subdir2 in os.listdir(Folder_name+'/'+subdir):
-            # if subdir2 !='kappa_1.00000':
-            #     continue
-            folder_name = Folder_name+'/'+subdir+'/'+subdir2+'/energy'
-            print('Analysing: ' + folder_name)
-            
-            ThisEnergyOR, ThisAnglesOR, ThisCurvOR, ThisDataOR, simLen = raa.ReadFileMat(folder_name)
-            ThisDataOR["TotalEnergy"] = np.mean(ThisEnergyOR, axis = 1)
-            ThisDataMa, ThisMask, ThisFlags = raa.maskBadResults(ThisDataOR, returnMask = True, returnStad = True)  
-            ThisFlags['tes'] = tessellation[0]
-            # print('Converged simulations',  np.sum(ThisMask))
-            
-            ThisEnergyMa = ThisEnergyOR[ThisMask]
-            ThisAnglesMa = ThisAnglesOR[ThisMask]
-            ThisCurvMa = ThisCurvOR[ThisMask]
-            
-            simLen = np.size(ThisDataMa,0)
-            allAngles = np.resize(ThisAnglesMa,(simLen*numUC,numvertex))
-            
-            ### Different types of clustering the vertex' stable state
-            # vertexStSt = raa.countStableStatesKmean(allAngles, 0.5, reduceFit = True)
-            # vertexStSt = raa.countStableStatesDBSCAN(allAngles, 0.26, minpoints = 5, reduceFit = True)
-            vertexStSt = raa.countStableStatesDistance(allAngles, 1.5)
-            simStStMa = np.resize(vertexStSt, (simLen,numUC))
-            
-            maskPureMat, typePureMat, perPure, mat1Lines, grainsize = raa.getPureMatComp(simStStMa, tessellation)
-            ThisDataMa['StableStateMat'] = typePureMat
-            ThisDataMa['Purity'] = perPure
-            
-            grainsize = pd.DataFrame(grainsize, columns = ['GSMat1', 'GSMat2', 'GSMat3']) 
+        
+        ThisEnergyMa = ThisEnergyOR[ThisMask]
+        ThisAnglesMa = ThisAnglesOR[ThisMask]
+        ThisCurvMa = ThisCurvOR[ThisMask]
+        
+        simLen = np.size(ThisDataMa,0)
+        allAngles = np.resize(ThisAnglesMa,(simLen*numUC,numvertex))
+        
+        ### Different types of clustering the vertex' stable state
+        # vertexStSt = raa.countStableStatesKmean(allAngles, 0.5, reduceFit = True)
+        # vertexStSt = raa.countStableStatesDBSCAN(allAngles, 0.26, minpoints = 5, reduceFit = True)
+        vertexStSt = raa.countStableStatesDistance(allAngles, 1.5)
+        simStStMa = np.resize(vertexStSt, (simLen,numUC))
+        
+        maskPureMat, typePureMat, perPure, mat1Lines, grainsize = raa.getPureMatComp(simStStMa, tessellation)
+        ThisDataMa['StableStateMat'] = typePureMat
+        ThisDataMa['Purity'] = perPure
+        
+        grainsize = pd.DataFrame(grainsize, columns = ['GSMat1', 'GSMat2', 'GSMat3']) 
 
-            ThisDataDef = pd.concat([ThisDataMa.reset_index(level=0, drop =True),pd.DataFrame(mat1Lines), grainsize], axis=1, sort = True)
-            selDataMat = raa.makeSelectionPerStStMa(ThisDataDef)
-            allMat = allMat.append(selDataMat)
-            
-            # plot.Angles3D(allAngles, vertexStSt, 'jet')
-            simStStPure, ThisDataPure, ThisEnergyPure, ThisAnglesPure, ThisCurvPure = raa.applyMask(maskPureMat, simStStMa, ThisDataMa, ThisEnergyMa, ThisAnglesMa, ThisCurvMa)
-            
-            selCountMat = raa.makeSelectionPureMat(ThisDataPure, ThisFlags, typePureMat)
-            allCountMat = allCountMat.append(selCountMat)
+        ThisDataDef = pd.concat([ThisDataMa.reset_index(level=0, drop =True),pd.DataFrame(mat1Lines), grainsize], axis=1, sort = True)
+        selDataMat = raa.makeSelectionPerStStMa(ThisDataDef)
+        allMat = allMat.append(selDataMat)
+        
+        # plot.Angles3D(allAngles, vertexStSt, 'jet')
+        simStStPure, ThisDataPure, ThisEnergyPure, ThisAnglesPure, ThisCurvPure = raa.applyMask(maskPureMat, simStStMa, ThisDataMa, ThisEnergyMa, ThisAnglesMa, ThisCurvMa)
+        
+        selCountMat = raa.makeSelectionPureMat(ThisDataPure, ThisFlags, typePureMat)
+        allCountMat = allCountMat.append(selCountMat)
 
-            if ThisDataPure.empty:
-                print("No pure material found")
-                continue
-            
-            ### select just 500 simulations per parameter selection
-            # selData = ThisDataMa.sample(500, random_state = 10)
-            # allDesigns = allDesigns.append(selData)
-            ### select all simulations per parameter selection
-            allDesigns = allDesigns.append(ThisDataDef)
-            
-            
-            ### save all energies
-            # thisEne = np.concatenate(([np.ones(np.size(ThisEnergyMa.flatten()))*tessellation[0]], [ThisEnergyMa.flatten()]), axis = 0).T
-            ### save pure energies
-            # thisEne = np.concatenate(([np.ones(np.size(ThisEnergyPure.flatten()))*tessellation[0]], [ThisEnergyPure.flatten()]), axis = 0).T
-            ### save non pure energies
-            ThisEnergyNonPure = ThisEnergyMa[~maskPureMat,:]
-            thisEne = np.concatenate(([np.ones(np.size(ThisEnergyNonPure.flatten()))*tessellation[0]], [ThisEnergyNonPure.flatten()]), axis = 0).T
-            ### save center vertex energy
-            # thisEneVert = ThisEnergyPure[:,np.int(np.floor(np.prod(tessellation)/2))]
-            # thisEne = np.concatenate(([np.ones(np.size(thisEneVert))*tessellation[0]], [thisEneVert]), axis = 0).T
-            allEne = np.concatenate((allEne, thisEne ), axis = 0)
+        if ThisDataPure.empty:
+            print("No pure material found")
+            continue
+        
+        ### select just 500 simulations per parameter selection
+        # selData = ThisDataMa.sample(500, random_state = 10)
+        # allDesigns = allDesigns.append(selData)
+        ### select all simulations per parameter selection
+        allDesigns = allDesigns.append(ThisDataDef)
+        
+        
+        ### save all energies
+        # thisEne = np.concatenate(([np.ones(np.size(ThisEnergyMa.flatten()))*tessellation[0]], [ThisEnergyMa.flatten()]), axis = 0).T
+        ### save pure energies
+        # thisEne = np.concatenate(([np.ones(np.size(ThisEnergyPure.flatten()))*tessellation[0]], [ThisEnergyPure.flatten()]), axis = 0).T
+        ### save non pure energies
+        ThisEnergyNonPure = ThisEnergyMa[~maskPureMat,:]
+        thisEne = np.concatenate(([np.ones(np.size(ThisEnergyNonPure.flatten()))*tessellation[0]], [ThisEnergyNonPure.flatten()]), axis = 0).T
+        ### save center vertex energy
+        # thisEneVert = ThisEnergyPure[:,np.int(np.floor(np.prod(tessellation)/2))]
+        # thisEne = np.concatenate(([np.ones(np.size(thisEneVert))*tessellation[0]], [thisEneVert]), axis = 0).T
+        allEne = np.concatenate((allEne, thisEne ), axis = 0)
 
         
 allDesigns = allDesigns.reset_index(level=0, drop =True)
@@ -193,7 +191,7 @@ allMat = allMat.round(8)
 thetas = np.unique(allMat.iloc[:,1])
 for t in thetas:
     here = (allMat.iloc[:,1] == t).values
-    plot.GrainSize(allMat.iloc[here,:], 0, r'$\kappa$', save = True, Folder_name = Folder_name, NameFig = 'GrainSizevsKappa_ang%.2f_sel' %t)
+    plot.GrainSize(allMat.iloc[here,:], 0, r'$\kappa$', save = True, Folder_name = Folder_name, NameFig = 'GrainSizevsKappa_ang%.2f' %t)
 
 
 #%%
