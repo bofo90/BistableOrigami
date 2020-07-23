@@ -12,42 +12,42 @@ import os.path
 import ReadAndAnalyze as raa
 import Plotting as plot
 
-#%%
-plt.close('all')
+# #%%
+# plt.close('all')
 
-Folder_name = "Results/SingleVertex4/2CFF/24-Jun-2020_0.00_ 90.00_180.00_270.00_"
+# Folder_name = "Results/SingleVertex4/2CFF/24-Jun-2020_0.00_ 90.00_180.00_270.00_"
 
-allDesignsSingleVer = pd.DataFrame()
+# allDesignsSingleVer = pd.DataFrame()
 
-if not os.path.isdir(Folder_name + '/Images/'):
-    os.mkdir(Folder_name + '/Images/')
+# if not os.path.isdir(Folder_name + '/Images/'):
+#     os.mkdir(Folder_name + '/Images/')
     
-numvertex = np.int(Folder_name.split('/')[1][-1])
+# numvertex = np.int(Folder_name.split('/')[1][-1])
   
-for subdir in os.listdir(Folder_name):
-    if subdir == 'Images':
-        continue      
+# for subdir in os.listdir(Folder_name):
+#     if subdir == 'Images':
+#         continue      
     
-    for subdir2 in os.listdir(Folder_name+'/'+subdir):
-        folder_name = Folder_name+'/'+subdir+'/'+subdir2+'/energy'
+#     for subdir2 in os.listdir(Folder_name+'/'+subdir):
+#         folder_name = Folder_name+'/'+subdir+'/'+subdir2+'/energy'
         
-        ThisData, simLen = raa.ReadFile(folder_name)
-        ThisData, ThisFlags = raa.maskBadResults(ThisData, returnStad = True) 
+#         ThisData, simLen = raa.ReadFile(folder_name)
+#         ThisData, ThisFlags = raa.maskBadResults(ThisData, returnStad = True) 
         
-        simLen = np.size(ThisData,0)
-        ThisData.iloc[:,-numvertex::],sym = raa.orderAngles(ThisData.iloc[:,-numvertex::].to_numpy(), numvertex, simLen)
-        ThisData['StableStates'] = raa.countStableStatesDBSCAN(ThisData.iloc[:,-numvertex::], 0.1, 5)
+#         simLen = np.size(ThisData,0)
+#         ThisData.iloc[:,-numvertex::],sym = raa.orderAngles(ThisData.iloc[:,-numvertex::].to_numpy(), numvertex, simLen)
+#         ThisData['StableStates'] = raa.countStableStatesDBSCAN(ThisData.iloc[:,-numvertex::], 0.1, 5)
         
-        selData = raa.makeSelectionPerStSt(ThisData, simLen*0.0)
-        clusData, clusFlags = raa.deleteNonClustered(selData,ThisFlags)
+#         selData = raa.makeSelectionPerStSt(ThisData, simLen*0.0)
+#         clusData, clusFlags = raa.deleteNonClustered(selData,ThisFlags)
         
-        allDesignsSingleVer = allDesignsSingleVer.append(clusData)
+#         allDesignsSingleVer = allDesignsSingleVer.append(clusData)
     
-allDesignsSingleVer = allDesignsSingleVer.reset_index(level=0, drop =True)
-allDesignsSingleVer = np.round(allDesignsSingleVer,8)
+# allDesignsSingleVer = allDesignsSingleVer.reset_index(level=0, drop =True)
+# allDesignsSingleVer = np.round(allDesignsSingleVer,8)
 
-# ### Get stable states of vertices
-# allDesignsSingleVer['StableStateAll'] =raa.countStableStatesDistance(allDesignsSingleVer.iloc[:,8:8+numvertex].values, 1.5)
+# # ### Get stable states of vertices
+# # allDesignsSingleVer['StableStateAll'] =raa.countStableStatesDistance(allDesignsSingleVer.iloc[:,8:8+numvertex].values, 1.5)
 
 
 #%%
@@ -108,9 +108,9 @@ for subdir in os.listdir(Folder_name):
         ThisDataMa['StableStateMat'] = typePureMat
         ThisDataMa['Purity'] = perPure
         
-        grainsize = pd.DataFrame(grainsize, columns = ['GSMat1', 'GSMat2', 'GSMat3']) 
+        grainsize = pd.DataFrame([grainsize.mean(axis = 0)], columns = ['GSMat1', 'GSMat2', 'GSMat3']) 
 
-        ThisDataDef = pd.concat([ThisDataMa.reset_index(level=0, drop =True),pd.DataFrame(mat1Lines), grainsize], axis=1, sort = True)
+        ThisDataDef = pd.concat([ThisDataMa.reset_index(level=0, drop =True),pd.DataFrame(mat1Lines)], axis=1, sort = True)
         selDataMat = raa.makeSelectionPerStStMa(ThisDataDef)
         allMat = allMat.append(selDataMat)
         
@@ -118,7 +118,7 @@ for subdir in os.listdir(Folder_name):
         simStStPure, ThisDataPure, ThisEnergyPure, ThisAnglesPure, ThisCurvPure = raa.applyMask(maskPureMat, simStStMa, ThisDataMa, ThisEnergyMa, ThisAnglesMa, ThisCurvMa)
         
         selCountMat = raa.makeSelectionPureMat(ThisDataPure, ThisFlags, typePureMat)
-        allCountMat = allCountMat.append(selCountMat)
+        allCountMat = allCountMat.append(pd.concat([selCountMat, grainsize], axis=1, sort = True))
 
         if ThisDataPure.empty:
             print("No pure material found")
@@ -187,11 +187,11 @@ for t in thetas:
 plt.close('all')
 
 #### Plotting kappa against num of simulations for all the different defects
-allMat = allMat.round(8)
-thetas = np.unique(allMat.iloc[:,1])
+allCountMat = allCountMat.round(8)
+thetas = np.unique(allCountMat.iloc[:,1])
 for t in thetas:
-    here = (allMat.iloc[:,1] == t).values
-    plot.GrainSize(allMat.iloc[here,:], 0, r'$\kappa$', save = True, Folder_name = Folder_name, NameFig = 'GrainSizevsKappa_ang%.2f' %t)
+    here = (allCountMat.iloc[:,1] == t).values
+    plot.GrainSize(allCountMat.iloc[here,:], 0, r'$\kappa$', save = True, Folder_name = Folder_name, NameFig = 'GrainSizevsKappa_ang%.2f' %t)
 
 
 #%%

@@ -939,12 +939,36 @@ def calculateGrainSize(simMatAna):
             matGrainDis[i,:,:] = convertToMaterial(matUCTemp)
             matUCTemp = matUCTemp*0
             
-            grain, grainsize = np.unique(matGrainDis[i,:,:], return_counts = True)
-            if (grain == 0).any():
-                grainsize = np.delete(grainsize, np.where(grain == 0))
-                grain = np.delete(grain, np.where(grain == 0))
             
-            sizes[i,m] = np.mean(grainsize)
+            grainsizeTempX = 0
+            xTemp = x
+            for j in np.arange(x):
+                grain, grainsize = np.unique(matGrainDis[i,j,:], return_counts = True)
+                if (grain == 0).any():
+                    grainsize = np.delete(grainsize, np.where(grain == 0))      
+                if (grain == 0).all():
+                    xTemp -= 1
+                else:
+                    grainsizeTempX += np.mean(grainsize)
+                
+            grainsizeTempY = 0
+            yTemp = y
+            for k in np.arange(y):
+                grain, grainsize = np.unique(matGrainDis[i,:,k], return_counts = True)
+                if (grain == 0).any():
+                    grainsize = np.delete(grainsize, np.where(grain == 0))
+                if (grain == 0).all():
+                    yTemp -= 1
+                else:
+                    grainsizeTempY += np.mean(grainsize)
+                    
+            sizes[i,m] = (grainsizeTempX/xTemp+grainsizeTempY/yTemp)/2
+                    
+            # grain, grainsize = np.unique(matGrainDis[i,:,:], return_counts = True)
+            # if (grain == 0).any():
+            #     grainsize = np.delete(grainsize, np.where(grain == 0))
+            #     grain = np.delete(grain, np.where(grain == 0))
+            # sizes[i,m] = np.mean(grainsize)
     
     return sizes, matGrainDis
 

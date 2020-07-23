@@ -1266,11 +1266,8 @@ wspace=0.2)
         
     for i in np.arange(3):
     
-        thisStateBool = allMat['StableStateMat'] == i+1+3
-        thisState = allMat[thisStateBool] 
-            
-        ax1.scatter(thisState.iloc[:,x], 
-                    thisState.iloc[:,19+i], c = color[i], s = 8, label = MatNames[i])
+        ax1.scatter(allMat.iloc[:,x], 
+                    allMat.iloc[:,12+i], c = color[i], s = 8, label = MatNames[i])
         
     CreateLegend(ax1)  
     

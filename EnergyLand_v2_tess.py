@@ -87,9 +87,9 @@ for i in np.arange(2,16)[::-1]:
             ThisDataMa['StableStateMat'] = typePureMat
             ThisDataMa['Purity'] = perPure
             
-            grainsize = pd.DataFrame(grainsize, columns = ['GSMat1', 'GSMat2', 'GSMat3']) 
+            grainsize = pd.DataFrame([grainsize.mean(axis = 0)], columns = ['GSMat1', 'GSMat2', 'GSMat3']) 
 
-            ThisDataDef = pd.concat([ThisDataMa.reset_index(level=0, drop =True),pd.DataFrame(mat1Lines), grainsize], axis=1, sort = True)
+            ThisDataDef = pd.concat([ThisDataMa.reset_index(level=0, drop =True),pd.DataFrame(mat1Lines)], axis=1, sort = True)
             selDataMat = raa.makeSelectionPerStStMa(ThisDataDef)
             allMat = allMat.append(selDataMat)
             
@@ -98,7 +98,7 @@ for i in np.arange(2,16)[::-1]:
             simStStPure, ThisDataPure, ThisEnergyPure, ThisAnglesPure, ThisCurvPure = raa.applyMask(maskPureMat, simStStMa, ThisDataMa, ThisEnergyMa, ThisAnglesMa, ThisCurvMa)
             
             selCountMat = raa.makeSelectionPureMat(ThisDataPure, ThisFlags, typePureMat)
-            allCountMat = allCountMat.append(selCountMat)
+            allCountMat = allCountMat.append(pd.concat([selCountMat, grainsize], axis=1, sort = True))
 
             if ThisDataPure.empty:
                 print("No pure material found")
@@ -173,11 +173,11 @@ for t in thetas:
 plt.close('all')
 
 #### Plotting kappa against num of simulations for all the different defects
-allMat = allMat.round(8)
-thetas = np.unique(allMat.iloc[:,1])
+allCountMat = allCountMat.round(8)
+thetas = np.unique(allCountMat.iloc[:,1])
 for t in thetas:
-    here = (allMat.iloc[:,1] == t).values
-    plot.GrainSize(allMat.iloc[here,:], 2, r'$matSize$', save = True, Folder_name = Folder_name, NameFig = 'GrainSizevsMatSize_ang%.2f' %t)
+    here = (allCountMat.iloc[:,1] == t).values
+    plot.GrainSize(allCountMat.iloc[here,:], 2, r'$matSize$', save = True, Folder_name = Folder_name, NameFig = 'GrainSizevsMatSize_ang%.2f' %t)
 
 #%%
 allMat_copy = allMat.copy()
