@@ -12,9 +12,10 @@ import os.path
 import ReadAndAnalyze as raa
 import Plotting as plot
 
-# #%%
-# plt.close('all')
 
+plt.close('all')
+
+# #%%
 # Folder_name = "Results/SingleVertex4/2CFF/24-Jun-2020_0.00_ 90.00_180.00_270.00_"
 
 # allDesignsSingleVer = pd.DataFrame()

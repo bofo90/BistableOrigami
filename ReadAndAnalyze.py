@@ -140,7 +140,8 @@ def oldSample(folder_name):
 
 def maskBadResults(ThisData, printFlags = False, returnStad = False, returnMask = False):
     
-    minFaceFlag = (ThisData['minFace']<=0.105).values
+    # minFaceFlag = (ThisData['minFace']<=0.105).values
+    minFaceFlag = (ThisData['minFace']<=0.0).values
     
     if printFlags:
         print(ThisData['Flags'].value_counts())
