@@ -126,15 +126,15 @@ plt.close('all')
 
 ###ploting scatter points of the presence of each stabel state
 colormap = 'coolwarm'
-plot.StableStatesCounturPlotPaper(allDesignsRed,1, r'$\Theta/\pi$', 0, r'$\kappa$', -1, 6, r'$K_\mathregular{G}$', colormap, [-3,3], save = True, Folder_name = Folder_name, NameFig = 'StStAppearance')
+plot.StableStatesCounturPlotCurvature(allDesignsRed,1, r'$\Theta/\pi$', 0, r'$\kappa$', -1, 6, r'$K_\mathregular{G}$', colormap, [-3,3], save = True, Folder_name = Folder_name, NameFig = 'StStAppearance')
 colormap = 'Set2'
 
 #%%
 plt.close('all')
 
 ###ploting scatter points of the presence of each stabel state
-colormap = 'BuPu'
-plot.StableStatesCounturPlot(allDesignsRed,1, r'$\Theta/\pi$', 0, r'$\kappa$', -1, 5, r'$Log(Energy)$', colormap, [-6,0.2], save = True, Folder_name = Folder_name, NameFig = 'StStEnergy')
+colormap = 'viridis'
+plot.StableStatesCounturPlotPaper(allDesignsRed,1, r'$\Theta/\pi$', 0, r'$\kappa$', -1, 5, r'$E$', colormap, [-3,0], save = True, Folder_name = Folder_name, NameFig = 'StStEnergy')
 colormap = 'Set2'
 
 #%%
@@ -142,8 +142,8 @@ plt.close('all')
 
 ###ploting scatter points of the presence of each stabel state
 colormap = 'jet'
-plot.StableStatesCounturPlot(allFlags,3, r'$\Theta/\pi$', 2, r'$\kappa$', 0, 1, r'% of Simulations', colormap, [0,1000], save = True, Folder_name = Folder_name, NameFig = 'FlagsAppearance')
-plot.StableStatesCounturPlot(allDesignsRed,1, r'$\Theta/\pi$', 0, r'$\kappa$', -1, -2, r'% of Simulations', colormap, [0,1000], save = True, Folder_name = Folder_name, NameFig = 'StStNumSim')
+plot.StableStatesCounturPlot(allFlagsRed,3, r'$\Theta/\pi$', 2, r'$\kappa$', 0, 1, r'$n/n_\mathregular{sim}$', colormap, [0,1], save = True, Folder_name = Folder_name, NameFig = 'FlagsAppearance')
+plot.StableStatesCounturPlot(allDesignsRed,1, r'$\Theta/\pi$', 0, r'$\kappa$', -1, -2, r'$n/n_\mathregular{sim}$', colormap, [0,1], save = True, Folder_name = Folder_name, NameFig = 'StStNumSim')
 
 colormap = 'Set2'
 
@@ -151,7 +151,7 @@ colormap = 'Set2'
 # plt.close('all')  
 
 #### Plot first three angles of all vertices with different colors representing the stable state
-plot.Angles3D(allDesAng, allDesigns['StableStateAll'].values, colormap)
+plot.Angles3D(allDesAngRed, allDesignsRed['StableStateAll'].values, colormap)
 
 #%%
 # allDes_copy = allDesigns.copy()
