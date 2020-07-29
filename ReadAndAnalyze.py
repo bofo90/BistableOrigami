@@ -140,30 +140,24 @@ def oldSample(folder_name):
 
 def maskBadResults(ThisData, printFlags = False, returnStad = False, returnMask = False):
     
-    # minFaceFlag = (ThisData['minFace']<=0.105).values
-    minFaceFlag = (ThisData['minFace']<=0.0).values
+    minFaceFlag = (ThisData['minFace']<=0.105).values
     
     if printFlags:
         print(ThisData['Flags'].value_counts())
          
     exfl = ThisData.Flags.values
     flagmask = (exfl !=1) & (exfl !=2) & (exfl !=5) #& (exfl !=0)
-    # flagmask = ~flagmask.any(axis= 1)
     
-    #### asign -5 to converged results with min area
+    #### assign flag 1 to converged simulations and 
+    ThisData.loc[~flagmask, 'Flags'] = 1
+    
+    #### assign -5 to converged results with min area
     onlyminArea = minFaceFlag & ~flagmask  
     ThisData.loc[onlyminArea,'Flags'] = -5
     
-    #### mask the results that either don't have a convered flag or have min area
-    MaskedData = ThisData.iloc[~(flagmask | minFaceFlag),:]
-    MaskedData = MaskedData.drop(['Flags'], axis = 1)
-    # MaskedData = ThisData
+    #### assign -1 to non-converged ones
+    ThisData.loc[flagmask, 'Flags'] = -1
     
-    #### asign flag 1 to convered simulations and -1 to non-converged ones
-    ThisData.loc[~(flagmask | minFaceFlag), 'Flags'] = 1
-    flagmask2 = (flagmask | minFaceFlag) & ~onlyminArea
-    # flagmask2 = (flagmask & ~minFaceFlag)
-    ThisData.loc[flagmask2, 'Flags'] = -1
     
     flagStad = ThisData['Flags'].value_counts()
     flagStad = flagStad.reset_index(level=0)
@@ -171,12 +165,27 @@ def maskBadResults(ThisData, printFlags = False, returnStad = False, returnMask 
     flagStad['kappa'] = np.ones((np.size(flagStad,0),1))*ThisData.iloc[0,0]
     flagStad['restang'] = np.ones((np.size(flagStad,0),1))*ThisData.iloc[0,1]
     
+    #add the flag -5 to the flag 1 since it is considered converged
+    here_minFace = flagStad.iloc[:,0].values == -5
+    here_conv = flagStad.iloc[:,0].values == 1
+    if here_minFace.any() & here_conv.any():
+        flagStad.iloc[here_conv,1] += flagStad.iloc[here_minFace,1].values
+    if here_minFace.any() & ~here_conv.any():
+        flagStad = flagStad.append(flagStad.iloc[here_minFace,:], ignore_index = True)
+        flagStad.iloc[-1,0] = 1
+    
+    #### mask the results 
+    convmask = ((ThisData.Flags.values) == 1) | ((ThisData.Flags.values) == -5)
+    MaskedData = ThisData.iloc[convmask,:]
+    MaskedData = MaskedData.drop(['Flags'], axis = 1)
+    # MaskedData = ThisData
+    
     if returnMask & ~returnStad:
-        return MaskedData, ~(flagmask | minFaceFlag)
+        return MaskedData, convmask
     if returnStad & ~returnMask:
         return MaskedData, flagStad
     if returnStad & returnMask:
-        return MaskedData, ~(flagmask | minFaceFlag), flagStad
+        return MaskedData, convmask, flagStad
     else:
         return MaskedData
     
@@ -1024,6 +1033,18 @@ def makeSelectionPerStSt(allData, simBound):
    
     return kappasStSt
 
+def makeSelectionPerStSt2(allData):
+    
+    
+    kappasStSt = allData.groupby('StableStateAll').apply(lambda _df: _df.mean())
+        
+    kappasStSt['Hinge Number'] =  allData.groupby('StableStateAll')[['Hinge Number']].apply(lambda _df2: _df2.sample(1, random_state = 0)).to_numpy()
+    
+    ####Only select stable states that have more than 10% appearance in each simulation
+    kappasStSt['amountStSt'] = allData.groupby('StableStateAll')[['amountStSt']].sum()
+   
+    return kappasStSt
+
 def makeSelectionPerStStMa(allData, simBound = 0):
     
     
@@ -1145,16 +1166,16 @@ def deleteNonClustered(selData,ThisFlags):
     
     if (~converg).any():
         non_clustered = selData.iloc[~converg,[-2,-1,0,1]].values.flatten()
-        non_clustered[0] = -4
+        non_clustered[0] = -3
         
         ThisFlags.iloc[(ThisFlags['Flags']==1).values,1] -= non_clustered[1]
         ThisFlags.loc[len(ThisFlags)]=non_clustered
     
     return clusData, ThisFlags
 
-def deleteNonClustered2(allDesigns, allFlags):
+def makeSelectionClustered(allDesigns, allFlags, simTresh):
     
-    mask = (allDesigns['StableStateAll'] != -1)
+    allDesignsRed = pd.DataFrame()
     
     allDesigns = allDesigns.round(8)
     allFlags = allFlags.round(8)
@@ -1168,18 +1189,40 @@ def deleteNonClustered2(allDesigns, allFlags):
             
             thisDes = allDesigns[thisDesBool]
             
-            herenonconv = (thisDes['StableStateAll'] == -1).values
+            thisDesRed = makeSelectionPerStSt2(thisDes)
+            
+            herenonconv = (thisDesRed['StableStateAll'] == -1).values
             
             if (herenonconv).any():
-                non_clustered = thisDes.iloc[herenonconv,[-1,-2,0,1]].values.flatten()
+                non_clustered = thisDesRed.iloc[herenonconv,[-1,-2,0,1]].values.flatten()
                 non_clustered[0] = -4
                 
                 if np.sum(thisConvFlag) != 1:
                     print('Theres a problem with the flag counting\n')
                 allFlags.iloc[thisConvFlag.values,1] -= non_clustered[1]
                 allFlags.loc[len(allFlags)]=non_clustered
+                
+            herenonconv = ((thisDesRed['StableStateAll'] != -1) & (thisDesRed['amountStSt']<= simTresh)).values
+            
+            if (herenonconv).any():
+                non_clustered_all = thisDesRed.iloc[herenonconv,[-1,-2,0,1]].values
+                non_clustered = np.sum(non_clustered_all,axis = 0)
+                non_clustered[0] = -6
+                non_clustered[[2,3]] = non_clustered_all[0,[2,3]]
+                
+                if np.sum(thisConvFlag) != 1:
+                    print('Theres a problem with the flag counting\n')
+                allFlags.iloc[thisConvFlag.values,1] -= non_clustered[1]
+                allFlags.loc[len(allFlags)]=non_clustered
+                
+            
+            allDesignsRed = allDesignsRed.append(thisDesRed)
     
-    return mask, allFlags
+    allDesignsRed = allDesignsRed.reset_index(level=0, drop =True)
+    
+    mask = (allDesignsRed['StableStateAll'] == -1) | (allDesignsRed['amountStSt'] <= simTresh)
+    
+    return allFlags, allDesignsRed[~mask]
 
 def getStableStatesMat(data, tessellation):
     

@@ -46,7 +46,6 @@ for subdir in os.listdir(Folder_name):
         # ThisData['StableStates'] = raa.countStableStatesDistance(ThisData.iloc[:,-numvertex::], 0.01)
         
         selData = raa.makeSelectionPerStSt(ThisData, simLen*0.0)
-        # selData = ThisData
         clusData, clusFlags = raa.deleteNonClustered(selData,ThisFlags)
         
         allDesigns = allDesigns.append(clusData)
@@ -61,19 +60,21 @@ allDesAng = allDesigns.iloc[:,8:8+numvertex].values
 # allDesigns['StableStateAll'] = raa.countstandardStableStates(allDesAng, onlysign = False)
 # allDesigns['StableStateAll'] = raa.standarizeStableStates(allDesigns['StableStateAll'], allDesAng, onlysign = False)
 
-ang_4D = raa.getAng4D(allDesAng)
-ang_4D_wpbc = np.concatenate((np.sin(ang_4D/[np.pi, np.pi, np.pi*2]*np.pi*2),np.cos(ang_4D/[np.pi, np.pi, np.pi*2]*np.pi*2)), axis = 1)
-# allDesigns['StableStateAll'] = raa.countStableStatesKmean(ang_4D_wpbc, 0.07)
+# ang_4D = raa.getAng4D(allDesAng)
+# ang_4D_wpbc = np.concatenate((np.sin(ang_4D/[np.pi, np.pi, np.pi*2]*np.pi*2),np.cos(ang_4D/[np.pi, np.pi, np.pi*2]*np.pi*2)), axis = 1)
+# # allDesigns['StableStateAll'] = raa.countStableStatesKmean(ang_4D_wpbc, 0.07)
 
-allDesigns['StableStateAll'] = raa.countStableStatesDBSCAN(ang_4D_wpbc, 0.1,7)
-allDesigns['StableStateAll'] = raa.getFlatStates(allDesAng, allDesigns['StableStateAll'].values)
+# allDesigns['StableStateAll'] = raa.countStableStatesDBSCAN(ang_4D_wpbc, 0.1,7)
+# allDesigns['StableStateAll'] = raa.getFlatStates(allDesAng, allDesigns['StableStateAll'].values)
 
-clustDes, allFlagsRev = raa.deleteNonClustered2(allDesigns, allFlags)
-mask2 = (allDesigns['amountStSt']>50).values
+allDesigns['StableStateAll'] = raa.countStableStatesDistance(allDesAng, 1.5)
 
-mask = clustDes.values & mask2
-allDesignsRed = allDesigns.iloc[mask,:]
-allDesAngRed = allDesAng[mask,:]
+allFlagsRed , allDesignsRed = raa.makeSelectionClustered(allDesigns, allFlags, 50)
+
+allDesAngRed = allDesignsRed.iloc[:,8:8+numvertex].values
+
+allFlagsRed.iloc[:,1] /= 1000
+allDesignsRed.iloc[:,13] /= 1000
 
 
 colormap = 'Set2'
