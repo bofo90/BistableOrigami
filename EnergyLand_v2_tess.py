@@ -131,7 +131,7 @@ colormap = 'jet'
 #%%
 plt.close('all') 
 
-plot.ColorbarPerZ(allCountMat,2, np.arange(9)+3, 1, save = True, Folder_name = Folder_name, NameFig = 'SimulationsConvergence')
+plot.ColorbarPerZ(allCountMat,2, np.array([3,6,4,7,5,8,9,10]), 1, save = True, Folder_name = Folder_name, NameFig = 'SimulationsConvergence')
 
 # #%%
 # plt.close('all')   

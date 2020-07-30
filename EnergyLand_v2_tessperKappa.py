@@ -150,11 +150,13 @@ allCountMat = allCountMat.reset_index(level = 0, drop = True)
 allMat = allMat.reset_index(level = 0, drop = True)
 allEne = allEne[1:,:]
 
+allCountMat.iloc[:,np.arange(9)+3] /= 1000
+
 #%%
 plt.close('all') 
 
 ##### plot appearance of material types with errors
-plot.ColorbarPerZKappa(allCountMat,0, np.arange(9)+3, 1, save = True, Folder_name = Folder_name, NameFig = 'SimulationsConvergence')
+plot.ColorbarPerZKappaPaper(allCountMat,0, np.array([3,6,4,7,5,8,9,10]), 1, save = True, Folder_name = Folder_name, NameFig = 'SimulationsConvergence')
 
 #%%
 # plt.close('all')   

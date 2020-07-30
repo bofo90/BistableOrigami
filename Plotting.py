@@ -843,9 +843,10 @@ def ColorbarPerZKappa(allMat, x, colorbar, z, save = False, Folder_name = '', Na
     #          '#7f7f7f', '#bcbd22']
     # cmap = matl.cm.get_cmap('Set3',np.size(colorbar))
     # color = cmap(np.linspace(0,1,np.size(colorbar)))   '#D663A9','#e78ac3',  
-    color = ['#41A584', '#E26B3C', '#6177AA',  
-             '#66c2a5', '#fc8d62', '#8da0cb',             
-             '#ffd92f', '#e5c494', '#b3b3b3']
+    color = ['#41A584', '#66c2a5',
+             '#E26B3C', '#fc8d62',
+             '#6177AA', '#8da0cb',             
+             '#b3b3b3', '#b3b3b3']#, '#ffd92f', '#e5c494', '#b3b3b3']
     
     for j in z_values:
         fig = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
@@ -878,6 +879,58 @@ right=0.982)
             
     return
 
+def ColorbarPerZKappaPaper(allMat, x, colorbar, z, save = False, Folder_name = '', NameFig = ''):
+    
+    import matplotlib.ticker as ticker
+    
+    allMat = allMat.round(8)
+    
+    z_values = np.unique(allMat.iloc[:,z])
+    x_values = np.log10(np.unique(allMat.iloc[:,x]))
+    
+    # color = ['#66C2A5', '#FFD92F', '#E4BB05', '#B3B3B3', '#339568','#D7704A','#414596'] 
+    # color = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', 
+    #          '#aec7e8', '#ffbb78', '#98df8a', '#ff9896', '#c5b0d5', '#c49c94', '#f7b6d2', 
+    #          '#7f7f7f', '#bcbd22']
+    # cmap = matl.cm.get_cmap('Set3',np.size(colorbar))
+    # color = cmap(np.linspace(0,1,np.size(colorbar)))   '#D663A9','#e78ac3',  
+    color = ['#41A584', '#66c2a5',
+             '#E26B3C', '#fc8d62',
+             '#6177AA', '#8da0cb',             
+             '#b3b3b3', '#b3b3b3']#, '#ffd92f', '#e5c494', '#b3b3b3']
+    
+    for j in z_values:
+        fig1 = plt.figure(figsize=(cm2inch(4.4), cm2inch(4.0)))
+        ax1 = plt.subplot(111)
+        fig1.subplots_adjust(top=0.972,
+bottom=0.19,
+left=0.22,
+right=0.96)
+        
+        NiceGraph2D(ax1, r'$\kappa$', r'$n/n_\mathregular{sim}$', mincoord = [np.min(x_values),0], 
+                    maxcoord = [np.max(x_values),1], divisions = [[-3,-2,-1,0],[0,0.5,1]], buffer = [0.1, 0.02])
+        
+        # kap = np.array(ax1.get_xticks())
+        # kapname = [r'$10^{%d}$' %label for label in kap]
+        # ax1.xticks(kap, kapname)
+        ax1.xaxis.set_major_formatter(ticker.FormatStrFormatter(r'$\mathregular{10}^\mathregular{%d}$'))
+            
+        thisMatBool = allMat.iloc[:,z] == j
+        thisMat = allMat[thisMatBool]  
+        
+        for i in np.arange(np.size(colorbar)):
+            ax1.bar(np.log10(thisMat.iloc[:,x]), thisMat.iloc[:,colorbar[i]],bottom=np.sum(thisMat.iloc[:,colorbar[0:i]], axis = 1), width = 0.201,
+                    color = color[i], label = thisMat.columns[colorbar[i]], align = 'center') #
+            
+        # CreateLegend(ax1)
+        
+        if save: 
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %j + '.pdf', transparent = True)
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %j + '.png', transparent = True)
+            
+    return
+
+
 def ColorbarPerZ(allMat, x, colorbar, z, save = False, Folder_name = '', NameFig = ''):
     
     allMat = allMat.round(8)
@@ -891,9 +944,10 @@ def ColorbarPerZ(allMat, x, colorbar, z, save = False, Folder_name = '', NameFig
     #          '#7f7f7f', '#bcbd22']
     # cmap = matl.cm.get_cmap('Set3',np.size(colorbar))
     # color = cmap(np.linspace(0,1,np.size(colorbar)))   '#D663A9','#e78ac3',  
-    color = ['#41A584', '#E26B3C', '#6177AA',  
-             '#66c2a5', '#fc8d62', '#8da0cb',             
-             '#ffd92f', '#e5c494', '#b3b3b3']
+    color = ['#41A584', '#66c2a5',
+             '#E26B3C', '#fc8d62',
+             '#6177AA', '#8da0cb',             
+             '#b3b3b3', '#b3b3b3']#, '#ffd92f', '#e5c494', '#b3b3b3']
     
     for j in z_values:
         fig = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
