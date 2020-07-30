@@ -863,6 +863,9 @@ def getPureMatComp(simStSt, tessellation):
                              ((unitcellUn[:,2]>7) & (unitcellUn[:,2]<10))] = 10 
         materialStableStates[((unitcellUn[:,0]>1) & (unitcellUn[:,0]<6)) &
                              ((unitcellUn[:,1:]>7).all(axis = 1) & (unitcellUn[:,1:]<10).all(axis = 1))] = 10
+        #interface at double corners
+        materialStableStates[((unitcellUn[:,[0,3]]>1).all(axis = 1) & (unitcellUn[:,[0,3]]<6).all(axis = 1)) &
+                             ((unitcellUn[:,1:3]>7).all(axis = 1) & (unitcellUn[:,1:3]<10).all(axis = 1))] = 9 
         
         #check interface between material 1, 2 and 3
         materialStableStates[(unitcellUn < 2).any(axis = 1) & 

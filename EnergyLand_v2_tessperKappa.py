@@ -102,7 +102,7 @@ for subdir in os.listdir(Folder_name):
         ### Different types of clustering the vertex' stable state
         # vertexStSt = raa.countStableStatesKmean(allAngles, 0.5, reduceFit = True)
         # vertexStSt = raa.countStableStatesDBSCAN(allAngles, 0.26, minpoints = 5, reduceFit = True)
-        vertexStSt = raa.countStableStatesDistance(allAngles, 1.5)
+        vertexStSt = raa.countStableStatesDistance(allAngles, 10)
         simStStMa = np.resize(vertexStSt, (simLen,numUC))
         
         maskPureMat, typePureMat, perPure, mat1Lines, grainsize = raa.getPureMatComp(simStStMa, tessellation)
