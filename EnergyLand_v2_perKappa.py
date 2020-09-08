@@ -154,7 +154,7 @@ colormap = 'Set2'
 plot.Angles3D(allDesAngRed, allDesignsRed['StableStateAll'].values, colormap)
 
 #%%
-# allDes_copy = allDesigns.copy()
-# allDes_copy['restang'] = allDes_copy['restang']*np.pi
-# raa.SaveForPlot(allDes_copy, Folder_name)
+allDes_copy = allDesignsRed.copy()
+allDes_copy['restang'] = allDes_copy['restang']*np.pi
+raa.SaveForPlot(allDes_copy, Folder_name)
 

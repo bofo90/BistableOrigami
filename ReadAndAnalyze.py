@@ -1401,8 +1401,8 @@ def SaveForPlot(s, Folder_name):
     if oldSample(Folder_name):
         des['kappa'] = des['kappa']*4
     
-    des[['kappa','Hinge Number','StableStateMat','restang','Curvature']].to_csv(Folder_name + '/Images/InfoforAllImages.csv', index = False)
-    des.groupby('StableStateMat').apply(lambda df: df.sample(1, random_state = 0))[['kappa','Hinge Number','StableStateMat','restang','Curvature']].to_csv(Folder_name + '/Images/InfoforStableStatesImages.csv', index = False)
+    des[['kappa','Hinge Number','StableStateAll','restang','Curvature']].to_csv(Folder_name + '/Images/InfoforAllImages.csv', index = False)
+    des.groupby('StableStateAll').apply(lambda df: df.sample(1, random_state = 0))[['kappa','Hinge Number','StableStateAll','restang','Curvature']].to_csv(Folder_name + '/Images/InfoforStableStatesImages.csv', index = False)
        
     return
 
