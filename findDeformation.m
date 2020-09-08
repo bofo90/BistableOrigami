@@ -10,7 +10,7 @@ for d = des
     
     for x = xrep
         opt.xrep = x;
-%         y = x;
+        yrep = x;
         for y = yrep
             opt.yrep = y;
 
