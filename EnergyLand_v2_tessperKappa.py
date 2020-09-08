@@ -109,28 +109,27 @@ for subdir in os.listdir(Folder_name):
         ThisDataMa['StableStateMat'] = typePureMat
         ThisDataMa['Purity'] = perPure
         
-        grainsize = pd.DataFrame([grainsize.mean(axis = 0)], columns = ['GSMat1', 'GSMat2', 'GSMat3']) 
+        grainsizeCountMat = pd.DataFrame([grainsize.min(axis = 0)], columns = ['GSMat1', 'GSMat2', 'GSMat3']) 
 
-        ThisDataDef = pd.concat([ThisDataMa.reset_index(level=0, drop =True),pd.DataFrame(mat1Lines)], axis=1, sort = True)
+        ThisDataDef = pd.concat([ThisDataMa.reset_index(level=0, drop =True),pd.DataFrame(mat1Lines), pd.DataFrame(grainsize, columns = ['GSMat1', 'GSMat2', 'GSMat3'])], axis=1, sort = True)
         selDataMat = raa.makeSelectionPerStStMa(ThisDataDef)
         allMat = allMat.append(selDataMat)
-        
+
         # plot.Angles3D(allAngles, vertexStSt, 'jet')
         simStStPure, ThisDataPure, ThisEnergyPure, ThisAnglesPure, ThisCurvPure = raa.applyMask(maskPureMat, simStStMa, ThisDataMa, ThisEnergyMa, ThisAnglesMa, ThisCurvMa)
         
         selCountMat = raa.makeSelectionPureMat(ThisDataPure, ThisFlags, typePureMat)
-        allCountMat = allCountMat.append(pd.concat([selCountMat, grainsize], axis=1, sort = True))
+        allCountMat = allCountMat.append(pd.concat([selCountMat, grainsizeCountMat], axis=1, sort = True))
 
-        if ThisDataPure.empty:
-            print("No pure material found")
-            continue
-        
         ### select just 500 simulations per parameter selection
         # selData = ThisDataMa.sample(500, random_state = 10)
         # allDesigns = allDesigns.append(selData)
         ### select all simulations per parameter selection
         allDesigns = allDesigns.append(ThisDataDef)
-        
+
+        if ThisDataPure.empty:
+            print("No pure material found")
+            continue
         
         ### save all energies
         # thisEne = np.concatenate(([np.ones(np.size(ThisEnergyMa.flatten()))*tessellation[0]], [ThisEnergyMa.flatten()]), axis = 0).T

@@ -87,27 +87,25 @@ for i in np.arange(2,16)[::-1]:
             ThisDataMa['StableStateMat'] = typePureMat
             ThisDataMa['Purity'] = perPure
             
-            grainsize = pd.DataFrame([grainsize.mean(axis = 0)], columns = ['GSMat1', 'GSMat2', 'GSMat3']) 
+            grainsizeCountMat = pd.DataFrame([grainsize.min(axis = 0)], columns = ['GSMat1', 'GSMat2', 'GSMat3']) 
 
-            ThisDataDef = pd.concat([ThisDataMa.reset_index(level=0, drop =True),pd.DataFrame(mat1Lines)], axis=1, sort = True)
+            ThisDataDef = pd.concat([ThisDataMa.reset_index(level=0, drop =True),pd.DataFrame(mat1Lines), pd.DataFrame(grainsize, columns = ['GSMat1', 'GSMat2', 'GSMat3'])], axis=1, sort = True)
             selDataMat = raa.makeSelectionPerStStMa(ThisDataDef)
             allMat = allMat.append(selDataMat)
-            
             
             # plot.Angles3D(allAngles, vertexStSt, 'jet')
             simStStPure, ThisDataPure, ThisEnergyPure, ThisAnglesPure, ThisCurvPure = raa.applyMask(maskPureMat, simStStMa, ThisDataMa, ThisEnergyMa, ThisAnglesMa, ThisCurvMa)
             
             selCountMat = raa.makeSelectionPureMat(ThisDataPure, ThisFlags, typePureMat)
-            allCountMat = allCountMat.append(pd.concat([selCountMat, grainsize], axis=1, sort = True))
+            allCountMat = allCountMat.append(pd.concat([selCountMat, grainsizeCountMat], axis=1, sort = True))
+
+            # selData = ThisDataMa.sample(500, random_state = 10)
+            # allDesigns = allDesigns.append(selData)
+            allDesigns = allDesigns.append(ThisDataDef)
 
             if ThisDataPure.empty:
                 print("No pure material found")
                 continue
-            
-            # selData = ThisDataMa.sample(500, random_state = 10)
-            # allDesigns = allDesigns.append(selData)
-            allDesigns = allDesigns.append(ThisDataDef)
-            
             
             # pos = [0,np.int(np.floor(tessellation[0]/2)),np.int(np.floor(np.prod(tessellation)/2))]
             # thisEne = np.concatenate(([np.ones(np.size(ThisEnergyMa.flatten()))*tessellation[0]], [ThisEnergyMa.flatten()]), axis = 0).T
