@@ -35,7 +35,7 @@ for i in np.arange(2,16)[::-1]:
     if not os.path.isdir(Folder_name + '/Images/'):
         os.mkdir(Folder_name + '/Images/')
         
-    # if i != 15:
+    # if i != 4:
     #     continue
         
     tessellation = np.array(Folder_name.split('_')[-3:-1]).astype(int)
@@ -47,7 +47,7 @@ for i in np.arange(2,16)[::-1]:
             continue    
         # if subdir == 'RestAng_1.571':
         #     continue
-        # if subdir != 'RestAng_2.356': #'RestAng_1.571': #'RestAng_0.785': #
+        # if subdir != 'RestAng_0.785': #'RestAng_2.356': #'RestAng_1.571': #
         #     continue
             
         for subdir2 in os.listdir(Folder_name+'/'+subdir):
@@ -131,19 +131,24 @@ plt.close('all')
 
 plot.ColorbarPerZ(allCountMat,2, np.array([3,6,4,7,5,8,9,10]), 1, save = True, Folder_name = Folder_name, NameFig = 'SimulationsConvergence')
 
-# #%%
-# plt.close('all')   
+#%%
+plt.close('all')   
     
-# #### Plotting the Curvature and Energy of materials against neighbours for restang
+#### Plotting the Curvature and Energy of materials against neighbours for restang
 # plot.XSizePlot(allDesigns, 2, r'$matSize$', 7, r'$K_\mathregular{G}$', 9, 10, save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvatureMat_sel')
-# plot.XSizePlot(allDesigns, 2, r'$matSize$', 6, r'$E_{norm}$', 9, 10, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergyMat_sel')
+plot.XSizePlot(allDesigns, 2, r'$matSize$', 6, r'$E_{norm}$', 9, 10, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergyMat_sel')
 
+
+#%%
+plt.close('all')   
+    
+##### Plotting the Curvature and Energy of materials against neighbours for restang
+plot.violinPlotGrainSizePaper(allDesigns, 2, r'$n_\mathregular{size}$',  r'$n_\mathregular{crys}$', 9, save = True, Folder_name = Folder_name, NameFig = 'NeighvsGrainSize1_viol')
 
 # #%%
 # plt.close('all')   
     
 # ##### Plotting the Curvature and Energy of materials against neighbours for restang
-# plot.violinPlot(allDesigns, 2, r'$matSize$', 7, r'$K_\mathregular{G}$', 9, 9, save = True, Folder_name = Folder_name, NameFig = 'NeighvsCurvatureMat_viol')
 # plot.violinPlot(allDesigns, 2, r'$matSize$', 6, r'$E_{norm}$', 9, 9, save = True, Folder_name = Folder_name, NameFig = 'NeighvsEnergyMat_viol')
 
 # #%%
@@ -176,6 +181,10 @@ thetas = np.unique(allCountMat.iloc[:,1])
 for t in thetas:
     here = (allCountMat.iloc[:,1] == t).values
     plot.GrainSize(allCountMat.iloc[here,:], 2, r'$matSize$', save = True, Folder_name = Folder_name, NameFig = 'GrainSizevsMatSize_ang%.2f' %t)
+
+#%%
+
+plot.GrainSizePaper2(allCountMat, 2, r'$n_\mathregular{size}$', save = True, Folder_name = Folder_name, NameFig = 'GrainSizevsMatSize')
 
 #%%
 allMat_copy = allMat.copy()

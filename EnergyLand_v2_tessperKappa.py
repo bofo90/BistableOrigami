@@ -57,8 +57,8 @@ allCountMat = pd.DataFrame()
 allMat = pd.DataFrame()
 allEne = np.array([[0,0]])
 
-Folder_name = "Results/Tessellation4/25/2CFF/19-Jun-2020_4_4_" #with no B.C.
-# Folder_name = "Results/Tessellation4/25/2CFF/07-Jul-2020_8_8_" #with no B.C.
+# Folder_name = "Results/Tessellation4/25/2CFF/19-Jun-2020_4_4_" #with no B.C.
+Folder_name = "Results/Tessellation4/25/2CFF/07-Jul-2020_8_8_" #with no B.C.
     
 if not os.path.isdir(Folder_name + '/Images/'):
     os.mkdir(Folder_name + '/Images/')
@@ -72,7 +72,7 @@ for subdir in os.listdir(Folder_name):
         continue    
     # if subdir == 'RestAng_2.356': #'RestAng_1.571':
     #     continue
-    # if subdir != 'RestAng_2.356': #'RestAng_1.571': #'RestAng_0.785': #
+    # if subdir != 'RestAng_0.785': #'RestAng_2.356': #'RestAng_1.571': #
     #     continue
     if (subdir != 'RestAng_2.356') & (subdir != 'RestAng_0.785') & (subdir != 'RestAng_1.571'):
         continue
@@ -183,7 +183,14 @@ allMat = allMat.round(8)
 thetas = np.unique(allMat.iloc[:,1])
 for t in thetas:
     here = (allMat.iloc[:,1] == t).values
-    plot.DefectsApperance(allMat.iloc[here,:], 0, r'$\kappa$', save = True, Folder_name = Folder_name, NameFig = 'DefectsvsKappa_ang%.2f_sel' %t)
+    plot.DefectsApperancePaper(allMat.iloc[here,:], 0, r'$\kappa$', save = True, Folder_name = Folder_name, NameFig = 'DefectsvsKappa_ang%.2f_sel' %t)
+
+#%%
+plt.close('all')
+
+#### Plotting kappa against num of simulations for all the different defects
+plot.SumDefectsApperancePaper(allMat, 0, r'$\kappa$', save = True, Folder_name = Folder_name, NameFig = 'SumDefectsvsKappa')
+
 
 #%%
 plt.close('all')
@@ -194,6 +201,15 @@ thetas = np.unique(allCountMat.iloc[:,1])
 for t in thetas:
     here = (allCountMat.iloc[:,1] == t).values
     plot.GrainSize(allCountMat.iloc[here,:], 0, r'$\kappa$', save = True, Folder_name = Folder_name, NameFig = 'GrainSizevsKappa_ang%.2f' %t)
+
+#%%
+plot.GrainSizePaper(allCountMat, 0, r'$\kappa$', save = True, Folder_name = Folder_name, NameFig = 'GrainSizevsKappa')
+
+#%%
+plt.close('all')   
+    
+##### Plotting the Curvature and Energy of materials against neighbours for restang
+plot.violinPlotGrainSizeKappaPaper(allDesigns, 0, r'$\kappa$', r'$n_\mathregular{crys}$', 9, save = True, Folder_name = Folder_name, NameFig = 'NeighvsGrainSize1_viol')
 
 
 #%%

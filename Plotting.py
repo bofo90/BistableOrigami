@@ -11,6 +11,7 @@ import matplotlib as matl
 from matplotlib.colors import from_levels_and_colors
 from mpl_toolkits import mplot3d
 import ternary #from https://github.com/marcharper/python-ternary
+import matplotlib.ticker as ticker
 matl.rcParams['pdf.fonttype'] = 42
 matl.rcParams['ps.fonttype'] = 42
 matl.rcParams['font.family'] = 'sans-serif'
@@ -707,12 +708,12 @@ def StableStatesCounturPlotPaper(allDesigns,x, xname, y, yname, z, color, colorN
 
     for i in np.arange(np.size(stst)):
         
-        fig1 = plt.figure(figsize=(cm2inch(3.3), cm2inch(3.0)))
+        fig1 = plt.figure(figsize=(cm2inch(3.5), cm2inch(3.2)))
         ax1 = plt.subplot(111)
-        fig1.subplots_adjust(top=0.962,
-        bottom=0.26,
-        left=0.305,
-        right=0.935)
+        fig1.subplots_adjust(top=0.972,
+bottom=0.22,
+left=0.27,
+right=0.945)
         
         thisDesBool = allDesigns.iloc[:,z] == stst[i]
         thisDes = allDesigns[thisDesBool]    
@@ -727,7 +728,7 @@ def StableStatesCounturPlotPaper(allDesigns,x, xname, y, yname, z, color, colorN
         ax1.set_ylim([0.0007,1.5])
             
         ax1.scatter(thisDes.iloc[:,x], thisDes.iloc[:,y], marker = 's', cmap = colormap, c = np.log10(thisDes.iloc[:, color]), 
-                    vmin = minCol, vmax = maxCol, s = 2)
+                    vmin = minCol, vmax = maxCol, s = 3)
     
         fig1.show()
         if save:
@@ -880,9 +881,7 @@ right=0.982)
     return
 
 def ColorbarPerZKappaPaper(allMat, x, colorbar, z, save = False, Folder_name = '', NameFig = ''):
-    
-    import matplotlib.ticker as ticker
-    
+       
     allMat = allMat.round(8)
     
     z_values = np.unique(allMat.iloc[:,z])
@@ -899,15 +898,31 @@ def ColorbarPerZKappaPaper(allMat, x, colorbar, z, save = False, Folder_name = '
              '#6177AA', '#8da0cb',             
              '#b3b3b3', '#b3b3b3']#, '#ffd92f', '#e5c494', '#b3b3b3']
     
+    color = ['#89BF32', '#A6D854',
+             '#D663A9', '#E78AC2',
+             '#E26B3C', '#FC8E62',
+             '#E5C494', '#E5C494']
+    
+    color = ['#8ca252', '#b5cf6b',
+             '#bd9e39', '#e7ba52',
+             '#5254a3', '#6b6ecf',
+             '#d6616b', '#d6616b']
+    
     for j in z_values:
-        fig1 = plt.figure(figsize=(cm2inch(4.4), cm2inch(4.0)))
+#         fig1 = plt.figure(figsize=(cm2inch(4.4), cm2inch(4.0)))
+#         ax1 = plt.subplot(111)
+#         fig1.subplots_adjust(top=0.972,
+# bottom=0.19,
+# left=0.22,
+# right=0.96)
+        fig1 = plt.figure(figsize=(cm2inch(5.), cm2inch(4.2)))
         ax1 = plt.subplot(111)
-        fig1.subplots_adjust(top=0.972,
-bottom=0.19,
-left=0.22,
-right=0.96)
+        fig1.subplots_adjust(top=0.982,
+bottom=0.165,
+left=0.195,
+right=0.97)
         
-        NiceGraph2D(ax1, r'$\kappa$', r'$n/n_\mathregular{sim}$', mincoord = [np.min(x_values),0], 
+        NiceGraph2D(ax1, r'$\kappa$', r'$n/N_\mathregular{sim}$', mincoord = [np.min(x_values),0], 
                     maxcoord = [np.max(x_values),1], divisions = [[-3,-2,-1,0],[0,0.5,1]], buffer = [0.1, 0.02])
         
         # kap = np.array(ax1.get_xticks())
@@ -919,7 +934,7 @@ right=0.96)
         thisMat = allMat[thisMatBool]  
         
         for i in np.arange(np.size(colorbar)):
-            ax1.bar(np.log10(thisMat.iloc[:,x]), thisMat.iloc[:,colorbar[i]],bottom=np.sum(thisMat.iloc[:,colorbar[0:i]], axis = 1), width = 0.201,
+            ax1.bar(np.log10(thisMat.iloc[:,x]), thisMat.iloc[:,colorbar[i]],bottom=np.sum(thisMat.iloc[:,colorbar[0:i]], axis = 1), width = 0.22,
                     color = color[i], label = thisMat.columns[colorbar[i]], align = 'center') #
             
         # CreateLegend(ax1)
@@ -1023,6 +1038,107 @@ wspace=0.2)
             fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i] +'.pdf', transparent = True)
             fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i] +'.png', transparent = True)
             print(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %variables[i])
+    
+    return
+
+def violinPlotGrainSizePaper(allDesigns, x, xname, yname, stst_col, save = False, Folder_name = '', NameFig = ''):
+    
+    allDesigns = allDesigns.round(8)
+    
+    color = ['#41A584', '#E26B3C', '#6177AA',  
+             '#66c2a5', '#fc8d62', '#8da0cb',             
+             '#ffd92f', '#e5c494', '#b3b3b3']
+    
+    xval = np.unique(allDesigns.iloc[:,x])
+    thetas = np.array([0.24987326, 0.74993809, 0.50006483])
+    
+    for i in np.arange(3):
+    
+        fig1 = plt.figure(figsize=(cm2inch(4.3), cm2inch(3.7)))
+        ax1 = plt.subplot(111)
+        fig1.subplots_adjust(top=0.995,
+bottom=0.195,
+left=0.15,
+right=0.965)
+        
+        thisDesBool = ((allDesigns.iloc[:,9] == i+1) | (allDesigns.iloc[:,9] == i+4)) & (allDesigns.iloc[:,1] == thetas[i])
+        thisDes = allDesigns[thisDesBool]    
+        
+        NiceGraph2D(ax1, xname, yname, [2, 2], [14, 14], [4, 4], [1.5, 1])
+               
+        for j in np.arange(np.size(xval)):
+            thisstst = thisDes[thisDes.iloc[:, x] == xval[j]]
+            if np.size(thisstst,0)<2:
+                continue
+            vio = ax1.violinplot(thisstst.iloc[:,19+i], [xval[j]], widths = 0.9, showextrema = False)#, c = matl.colors.rgb2hex(color[k]), s = 8)
+            for part in vio['bodies']:
+                part.set_facecolor(color[i])
+                part.set_edgecolor('0.2')
+                part.set_linewidth(0.4)
+                part.set_alpha(1)
+        
+        
+        fig1.show()
+        if save:
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %thetas[i] +'.pdf', transparent = True)
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %thetas[i] +'.png', transparent = True)
+            print(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %thetas[i])
+    
+    return
+
+def violinPlotGrainSizeKappaPaper(allDesignsOR, x, xname, yname, stst_col, save = False, Folder_name = '', NameFig = ''):
+    
+    
+    allDesigns = allDesignsOR.copy()
+    allDesigns.iloc[:,x] = np.log10(allDesigns.iloc[:,x])
+    allDesigns = allDesigns.round(8)
+    
+    color = ['#41A584', '#E26B3C', '#6177AA',  
+             '#66c2a5', '#fc8d62', '#8da0cb',             
+             '#ffd92f', '#e5c494', '#b3b3b3']
+    
+    color = ['#b5cf6b',
+             '#e7ba52',
+             '#6b6ecf',
+             '#d6616b']
+    
+    xval = np.unique(allDesigns.iloc[:,x])
+    thetas = np.array([0.24987326, 0.74993809, 0.50006483])
+    
+    for i in np.arange(3):
+    
+        fig1 = plt.figure(figsize=(cm2inch(4.3), cm2inch(3.7)))
+        ax1 = plt.subplot(111)
+        fig1.subplots_adjust(top=0.995,
+bottom=0.195,
+left=0.15,
+right=0.965)
+        
+        thisDesBool = ((allDesigns.iloc[:,9] == i+1) | (allDesigns.iloc[:,9] == i+4)) & (allDesigns.iloc[:,1] == thetas[i])
+        thisDes = allDesigns[thisDesBool]    
+        
+        NiceGraph2D(ax1, xname, yname, [-3, 0], [0, allDesigns['tes'][0]], [4, 5], [0.1, 0.3])
+        
+        ax1.xaxis.set_major_formatter(ticker.FormatStrFormatter(r'$\mathregular{10}^\mathregular{%d}$'))
+               
+        for j in np.arange(np.size(xval)):
+            thisstst = thisDes[thisDes.iloc[:, x] == xval[j]]
+            if np.size(thisstst,0)<2:
+                continue
+            vio = ax1.violinplot(thisstst.iloc[:,19+i], [xval[j]], widths = 0.17, showextrema = False)#, c = matl.colors.rgb2hex(color[k]), s = 8)
+            for part in vio['bodies']:
+                part.set_facecolor(color[i])
+                part.set_edgecolor('0.2')
+                part.set_linewidth(0.4)
+                part.set_alpha(1)
+            ax1.scatter(xval[j], np.mean(thisstst.iloc[:,19+i]), marker = 's' , c = '0.2', s = 2)
+        
+        
+        fig1.show()
+        if save:
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %thetas[i] +'.pdf', transparent = True)
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %thetas[i] +'.png', transparent = True)
+            print(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %thetas[i])
     
     return
 
@@ -1363,6 +1479,114 @@ wspace=0.2)
             
     return
 
+def DefectsApperancePaper(allMat, x, xname, save = False, Folder_name = '', NameFig = ''):
+    
+    allMat = allMat.round(8)
+    
+    defTypes = [[11,12], [14,12,15,16,17]]
+    defNames = [['DSt', 'MDinter'], 
+                ['AMt','MDinter',  'AMs', 'AMr', 'MFinter']]
+    defColors = [[0,1],[4,1,5,6,7]]
+    
+    color = ['#41A584', '#E26B3C', '#6177AA',  
+              '#66c2a5', '#fc8d62', '#8da0cb',             
+              '#ffd92f', '#e5c494', '#b3b3b3']
+    
+    for i in np.array([0,1]):
+    
+        fig1 = plt.figure(figsize=(cm2inch(4.3), cm2inch(3.7)))
+        ax1 = plt.subplot(111)
+        fig1.subplots_adjust(top=0.992,
+bottom=0.23,
+left=0.2,
+right=0.975)
+        
+        thisStateBool = allMat['StableStateMat'] == i+1+3
+        thisState = allMat[thisStateBool] 
+        
+        NiceGraph2D(ax1, xname, r'$n_\mathregular{def}/n_\mathregular{ver}$')
+        
+        ax1.set_xscale('log')
+        ax1.set_xticks([0.001,0.01,0.1,1])
+        ax1.set_xlim([0.0007,1.5])
+        
+        for j in np.arange(np.size(defTypes[i])):
+            
+            ax1.scatter(thisState.iloc[:,x], 
+                        thisState.iloc[:,defTypes[i][j]], c = color[defColors[i][j]], s = 8)#, label = defNames[i][j])
+        
+        # CreateLegend(ax1)  
+        
+        fig1.show()
+        if save:
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %(i+1) +'.pdf', transparent = True)
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %(i+1) +'.png', transparent = True)
+            print(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %(i+1))
+            
+    return
+
+def SumDefectsApperancePaper(allMat, x, xname, save = False, Folder_name = '', NameFig = ''):
+    
+    allMat = allMat.round(8)
+    
+    defTypes = [[11,12], [14,12,15,16,17]]
+    defNames = [['DSt', 'MDinter'], 
+                ['AMt','MDinter',  'AMs', 'AMr', 'MFinter']]
+    
+    color = ['#41A584', '#E26B3C', '#6177AA',  
+              '#66c2a5', '#fc8d62', '#8da0cb',             
+              '#ffd92f', '#e5c494', '#b3b3b3']
+    
+    color = ['#8ca252', '#b5cf6b',
+             '#bd9e39', '#e7ba52',
+             '#5254a3', '#6b6ecf',
+             '#d6616b', '#d6616b']
+    
+    color = ['#b5cf6b',
+             '#e7ba52',
+             '#6b6ecf',
+             '#d6616b']
+    
+    thetas = np.unique(allMat.iloc[:,1])
+    thetas = np.delete(thetas,1)
+    matType = ['pcDS', 'pcAM']
+    
+    fig1 = plt.figure(figsize=(cm2inch(4.3), cm2inch(3.7)))
+    ax1 = plt.subplot(111)
+    fig1.subplots_adjust(top=0.995,
+bottom=0.195,
+left=0.22,
+right=0.975)
+        
+    NiceGraph2D(ax1, xname, r'$n_\mathregular{def}/n_\mathregular{ver}$', 
+                mincoord = [np.nan,0], maxcoord = [np.nan,1], divisions = [np.nan, 3], buffer = [np.nan, 0.1])
+    
+    ax1.set_xscale('log')
+    ax1.set_xticks([0.001,0.01,0.1,1])
+    ax1.set_xlim([0.0007,1.5])
+    
+    for i in np.array([0,1]):
+        
+        thisStateBool = (allMat['StableStateMat'] == i+1+3) & (allMat['restang'] == thetas[i])
+        thisState = allMat[thisStateBool] 
+
+        ax1.scatter(thisState.iloc[:,x], np.sum(thisState.iloc[:,defTypes[i]],axis = 1), 
+                    c = color[i], s = 8, label = r'$\Theta$=%.2f$\pi$ ' %thetas[i]+matType[i])
+        
+    leg = ax1.legend(loc = 2, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False, 
+               borderpad = 0.3, labelspacing = 0.1, handlelength = 0.6, handletextpad = 0.4)
+               #bbox_to_anchor=(-0.025,-0.04), scatteryoffsets = [0.7])
+    plt.setp(leg.get_texts(), color='0.2')
+    leg.get_frame().set_linewidth(0.4) 
+    
+    fig1.show()
+    if save:
+        fig1.savefig(Folder_name + '/Images/' + NameFig + '.pdf', transparent = True)
+        fig1.savefig(Folder_name + '/Images/' + NameFig + '.png', transparent = True)
+        print(Folder_name + '/Images/' + NameFig)
+            
+    return
+
 def GrainSize(allMat, x, xname, save = False, Folder_name = '', NameFig = ''):
     
     allMat = allMat.round(8)
@@ -1403,4 +1627,77 @@ wspace=0.2)
             
     return
 
+def GrainSizePaper(allMat, x, xname, save = False, Folder_name = '', NameFig = ''):
+    
+    allMat = allMat.round(8)
+    
+    fig1 = plt.figure(figsize=(cm2inch(4.3), cm2inch(3.7)))
+    ax1 = plt.subplot(111)
+    fig1.subplots_adjust(top=0.992,
+bottom=0.23,
+left=0.2,
+right=0.975)
+    
+    NiceGraph2D(ax1, xname, r'$n_\mathregular{grain}$', [np.nan, 1], [np.nan, 4], [np.nan, 4], [np.nan, 0.1])
+    
+    MatNames = ['Dome-Saddle','All-Miura-ori', 'All-Fold']
+    color = ['#66c2a5', '#fc8d62', '#8da0cb']
+    
+    ax1.set_xscale('log')
+    ax1.set_xticks([0.001,0.01,0.1,1])
+    ax1.set_xlim([0.0007,1.5])
+        
+    thetas = [0.24987326, 0.50006483, 0.74993809]
+    shapes = ['o', '*',  'v', 's']
+    materials = [0,2,1]
+    for t in np.array([0,2]):
+        here = (allMat.iloc[:,1] == thetas[t]).values
+        
+        ax1.scatter(allMat.iloc[here,x], allMat.iloc[here,12+materials[t]], 
+                        marker = shapes[t], c = color[materials[t]], s = 8, label = MatNames[materials[t]])
+        
+    # CreateLegend(ax1)  
+    
+    fig1.show()
+    if save:
+        fig1.savefig(Folder_name + '/Images/' + NameFig + '.pdf', transparent = True)
+        fig1.savefig(Folder_name + '/Images/' + NameFig + '.png', transparent = True)
+        print(Folder_name + '/Images/' + NameFig )
+            
+    return
 
+def GrainSizePaper2(allMat, x, xname, save = False, Folder_name = '', NameFig = ''):
+    
+    allMat = allMat.round(8)
+    
+    fig1 = plt.figure(figsize=(cm2inch(4.3), cm2inch(3.7)))
+    ax1 = plt.subplot(111)
+    fig1.subplots_adjust(top=0.992,
+bottom=0.23,
+left=0.2,
+right=0.975)
+    
+    NiceGraph2D(ax1, xname, r'$n_\mathregular{grain}$', [2, 2], [14, 14], [4, 4], [1.5, 1])
+    
+    MatNames = ['Dome-Saddle','All-Miura-ori', 'All-Fold']
+    color = ['#66c2a5', '#fc8d62', '#8da0cb']
+          
+    thetas = [0.24987326, 0.50006483, 0.74993809]
+    shapes = ['o', '*',  'v', 's']
+    for t in np.array([0,1,2]):
+        here = (allMat.iloc[:,1] == thetas[t]).values
+        
+        for i in np.arange(3):
+        
+            ax1.scatter(allMat.iloc[here,x], allMat.iloc[here,12+i], 
+                        marker = shapes[t], c = color[i], s = 8, label = MatNames[i])
+        
+    # CreateLegend(ax1)  
+    
+    fig1.show()
+    if save:
+        fig1.savefig(Folder_name + '/Images/' + NameFig + '.pdf', transparent = True)
+        fig1.savefig(Folder_name + '/Images/' + NameFig + '.png', transparent = True)
+        print(Folder_name + '/Images/' + NameFig )
+            
+    return

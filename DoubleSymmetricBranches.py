@@ -59,15 +59,15 @@ def NiceGraph2D(axes, nameX, nameY, mincoord = [np.NaN, np.NaN], maxcoord = [np.
 
 plt.close('all')  
 shift = 0.08
-das = 0.2
+das = 0.25
 mo = 1-das
 #%%
-fig1 = plt.figure(figsize=(cm2inch(3.3), cm2inch(3.1)))
+fig1 = plt.figure(figsize=(cm2inch(3.0), cm2inch(2.8)))
 ax1 = plt.subplot(111)
-fig1.subplots_adjust(top=0.992,
-bottom=0.255,
-left=0.27,
-right=0.98)
+fig1.subplots_adjust(top=0.987,
+bottom=0.275,
+left=0.28,
+right=0.985)
 
 NiceGraph2D(ax1, r'$\theta_1/\pi$', r'$\theta_2/\pi$', mincoord = [-1,-1], maxcoord = [1,1], 
             divisions = [3,3], buffer = [0.1, 0.1])
@@ -84,11 +84,11 @@ ax1.plot([1,1],[-1+shift,1-shift], '--', color = '#FFD92F', linewidth = 1)
 ax1.plot([-1,-1],[-1+shift,1-shift], '--', color = '#FFD92F', linewidth = 1)
 
 #Dome State
-ax1.scatter([das, -das],[das, -das], color = '#66C2A5', marker = 's', s = 20)
+ax1.scatter([das, -das],[das, -das], color = '#66C2A5', marker = 'o', s = 20)
 #Saddle State
-ax1.scatter([das, -das],[-das, das], color = '#8DA0CB', marker = 's', s = 20)
+ax1.scatter([das, -das],[-das, das], color = '#8DA0CB', marker = 'o', s = 20)
 #MiuraOriState
-ax1.scatter([mo, mo, -mo, -mo],[mo, -mo, mo, -mo], color = '#FFD92F', marker = '^', s = 20)
+ax1.scatter([mo, mo, -mo, -mo],[mo, -mo, mo, -mo], color = '#FFD92F', marker = 'v', s = 20)
 
 fig1.savefig('D:/Documents/Git Programs/nonlinear-bas_Origami/Results/BranchPlot_1.pdf', transparent = True)
 fig1.savefig('D:/Documents/Git Programs/nonlinear-bas_Origami/Results/BranchPlot_1.png', transparent = True)
@@ -115,11 +115,11 @@ ax2.plot([-1+shift/np.sqrt(2)/2,1+shift/np.sqrt(2)/2],[1+shift/np.sqrt(2)/2,-1+s
 ax2.plot([-1-shift/np.sqrt(2)/2,1-shift/np.sqrt(2)/2],[1-shift/np.sqrt(2)/2,-1-shift/np.sqrt(2)/2], '--', color = '#FFD92F', linewidth = 1, zorder = 12)
 
 #Dome State
-ax2.scatter([das, -das],[das, -das], color = '#66C2A5', marker = 's', s = 20, zorder = 15)
+ax2.scatter([das, -das],[das, -das], color = '#66C2A5', marker = 'o', s = 20, zorder = 15)
 # #Saddle State
-# ax2.scatter([das, -das],[-das, das], color = '#8DA0CB', marker = 's', s = 20)
+# ax2.scatter([das, -das],[-das, das], color = '#8DA0CB', marker = 'o', s = 20)
 #MiuraOriState
-ax2.scatter([mo, mo, -mo, -mo],[mo, -mo, mo, -mo], color = '#FFD92F', marker = '^', s = 20, zorder = 20)
+ax2.scatter([mo, mo, -mo, -mo],[mo, -mo, mo, -mo], color = '#FFD92F', marker = 'v', s = 20, zorder = 20)
 
 fig2.savefig('D:/Documents/Git Programs/nonlinear-bas_Origami/Results/BranchPlot_2.pdf', transparent = True)
 fig2.savefig('D:/Documents/Git Programs/nonlinear-bas_Origami/Results/BranchPlot_2.png', transparent = True)
