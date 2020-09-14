@@ -9,20 +9,26 @@ close all
 clc
 format long
 clearvars -global
+%%%%%% to use when camview variable is going to be used
+% close all
+% clc
+% format long
+% clearvars -global poop
+% clearvars -except camview camLightPos
 tic
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %CHOOSE PREDEFINED GEOMETRY, SIMULATION AND PLOT OPTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-opt=initOpt('template','Tessellation','numVert', 4,'vertexType', "2CFF",...
-            'tessellationType', '25','xrep', 8, 'yrep', 8, 'periodic', 'off',...
-            'restang', pi/4, 'angDesign', [0.00 90 180.00 270]*pi/180,...%2.356 %1.571 %0.785
-            'analysis','plot','analysisType','randomPert',...
+opt=initOpt('template','SingleVertex','numVert', 4,'vertexType', "2CFF",...
+            'tessellationType', '25','xrep', 4, 'yrep', 4, 'periodic', 'off',...
+            'restang', 1.933, 'angDesign', [0.00 90 180.00 270]*pi/180,...%2.356 %1.571 %0.785
+            'analysis','info','analysisType','randomPert',...
             'numIterations', 1000,'RandstDev', 0.2,...
             'figDPI',200, 'saveMovie', 'off', 'safeMovieAntiAlias', 0,...
             'folAlgor', 'sqp','relAlgor', 'sqp',...
             'gethistory', 'off', 'plotAll', 'off',...
             'constrEdge','off','constrFace','on','constAnglePerc',0.99,... 
-            'Khinge',1 ,'Kedge',1,'Kdiag',1,'Kface',100,'KtargetAngle',1000,...%10^-1.5
+            'Khinge',0.03162 ,'Kedge',1,'Kdiag',1,'Kface',100,'KtargetAngle',1000,...%10^-1.5
             'maxStretch', nan,'steps',3,...
             'maxArea', 0.1);    
 
@@ -34,7 +40,7 @@ opt.options=optimoptions('fmincon','GradConstr','on','GradObj','on',...
                          'Algorithm', opt.folAlgor, 'OutputFcn',@outfun,...               
                          'RelLineSrchBnd', 0.01, 'RelLineSrchBndDuration', 5000);
                      
-opt.file = '/07-Jul-2020_8_8_';
+opt.file = '/19-Mar-2020_0.00_ 90.00_180.00_270.00_';
 switch opt.analysis
     case{'info'}
         [extrudedUnitCell,opt]=obtainOrigami(opt);
@@ -59,7 +65,15 @@ switch opt.analysis
         ReadAndPlot(opt,'oneDes', des) %other option is 'allDes', 'oneDes'
         end
     case{'plot'}
-        opt.sim = 150;   %only used when selecting option 'oneRes'
+        %%% camview is a variable that can be used to define the camera position for
+        %%% a nice view of the structure. Needs to be defined by the user. You can
+        %%% use the following code to get it from an already created image.
+        %%% camview = get(gca,{'CameraPosition', 'CameraTarget', 'CameraUpVector', 'CameraViewAngle'})
+        %%% camlight1 = findobj(gcf,'Type','Light'); camLightPos = camlight1.Position
+%         opt.camview = camview;
+%         opt.camlight = camLightPos;
+        
+        opt.sim = 134;   %only used when selecting option 'oneRes'
         PlotResults(opt,'oneRes') %other options is 'allRes','ststRes','oneRes','everyRes'
 end
 

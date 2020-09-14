@@ -406,7 +406,7 @@ if strcmp(opt.analysis,'plot')
                             c=(plotextrudedUnitCell.mode(nMode).frame(framMode).polFace(i).normal*viewCoor'>0);
                             viewCoor=get(gca,'view');
                             viewCoor=[sind(viewCoor(1)) -cosd(viewCoor(1)) sind(viewCoor(2))];
-                            set(hs{nc,i},'Vertices',plotextrudedUnitCell.mode(nMode).frame(framMode).lat(nc).coor,'facecolor','flat','facevertexCData',c*colt(4,:)+abs(1-c)*colt(5,:),'facealpha',1.0);
+                            set(hs{nc,i},'Vertices',plotextrudedUnitCell.mode(nMode).frame(framMode).lat(nc).coor,'facecolor','flat','facevertexCData',c*colt(4,:)+abs(1-c)*colt(4,:),'facealpha',1.0);
                         end
                     end
                     printGif(opt,framMode,f,nameFolder,[filename,'_',num2str(nMode),'_deformed']);%'_',sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge),
@@ -421,7 +421,7 @@ if strcmp(opt.analysis,'plot')
                         c=(plotextrudedUnitCell.mode(nMode).frame(framMode).polFace(i).normal*viewCoor'>0);
                         viewCoor=get(gca,'view');
                         viewCoor=[sind(viewCoor(1)) -cosd(viewCoor(1)) sind(viewCoor(2))];
-                        set(hs{nc,i},'Vertices',plotextrudedUnitCell.mode(nMode).frame(framMode).lat(nc).coor,'facecolor','flat','facevertexCData',c*colt(4,:)+abs(1-c)*colt(5,:),'facealpha',1.0);
+                        set(hs{nc,i},'Vertices',plotextrudedUnitCell.mode(nMode).frame(framMode).lat(nc).coor,'facecolor','flat','facevertexCData',c*colt(4,:)+abs(1-c)*colt(4,:),'facealpha',1.0);
                     end
                 end
                 printGif(opt,framMode,f,nameFolder,[filename,'_',num2str(nMode),'_deformed']);%'_',sprintf('%2.3f_%2.3f_%2.3f', opt.Khinge,opt.KtargetAngle,opt.Kedge),
@@ -526,12 +526,18 @@ function hl2=plotOpt(opt)
     axis off; 
     view(opt.AZ,opt.EL);
     hl2=camlight(-15,30); 
-    set(gcf,'color','w');
     hl2.Style='infinite';
+    if isfield(opt, 'camlight')
+        hl2.Position = opt.camlight; 
+    end
+    set(gcf,'color','w');
     material dull;
-    set(gca,'cameraviewanglemode','manual');
-    %set(gca,'outerposition',[0 0 1.0 1.0])
-    
+    if isfield(opt, 'camview')
+        set(gca, {'CameraPosition', 'CameraTarget', 'CameraUpVector', 'CameraViewAngle'}, opt.camview)
+    else
+        set(gca,'cameraviewanglemode','manual');
+    end
+        
 function printGif(opt,fram,f,nameFolder,nam)
     pause(1/opt.frames)
     if strcmp(opt.saveMovie,'on')
