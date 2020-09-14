@@ -1131,7 +1131,7 @@ right=0.965)
                 part.set_edgecolor('0.2')
                 part.set_linewidth(0.4)
                 part.set_alpha(1)
-            ax1.scatter(xval[j], np.mean(thisstst.iloc[:,19+i]), marker = 's' , c = '0.2', s = 2)
+            ax1.scatter(xval[j], np.mean(thisstst.iloc[:,19+i]), marker = 's' , c = '0.2', s = 4)
         
         
         fig1.show()
@@ -1542,14 +1542,15 @@ def SumDefectsApperancePaper(allMat, x, xname, save = False, Folder_name = '', N
              '#5254a3', '#6b6ecf',
              '#d6616b', '#d6616b']
     
-    color = ['#b5cf6b',
+    color = ['#8ca252',
              '#e7ba52',
-             '#6b6ecf',
+             '#5254a3',
              '#d6616b']
     
     thetas = np.unique(allMat.iloc[:,1])
     thetas = np.delete(thetas,1)
     matType = ['pcDS', 'pcAM']
+    markerType = ['o', '^']
     
     fig1 = plt.figure(figsize=(cm2inch(4.3), cm2inch(3.7)))
     ax1 = plt.subplot(111)
@@ -1570,7 +1571,7 @@ right=0.975)
         thisStateBool = (allMat['StableStateMat'] == i+1+3) & (allMat['restang'] == thetas[i])
         thisState = allMat[thisStateBool] 
 
-        ax1.scatter(thisState.iloc[:,x], np.sum(thisState.iloc[:,defTypes[i]],axis = 1), 
+        ax1.scatter(thisState.iloc[:,x], np.sum(thisState.iloc[:,defTypes[i]],axis = 1), marker = markerType[i],
                     c = color[i], s = 8, label = r'$\Theta$=%.2f$\pi$ ' %thetas[i]+matType[i])
         
     leg = ax1.legend(loc = 2, fontsize = 7, framealpha = 0.8, edgecolor = 'inherit', fancybox = False, 

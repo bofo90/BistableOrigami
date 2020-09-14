@@ -86,7 +86,7 @@ ax1.plot([-1,-1],[-1+shift,1-shift], '--', color = '#FFD92F', linewidth = 1)
 #Dome State
 ax1.scatter([das, -das],[das, -das], color = '#66C2A5', marker = 'o', s = 20)
 #Saddle State
-ax1.scatter([das, -das],[-das, das], color = '#8DA0CB', marker = 'o', s = 20)
+ax1.scatter([das, -das],[-das, das], color = '#6177AA', marker = 'o', s = 20)
 #MiuraOriState
 ax1.scatter([mo, mo, -mo, -mo],[mo, -mo, mo, -mo], color = '#FFD92F', marker = 'v', s = 20)
 
@@ -117,7 +117,7 @@ ax2.plot([-1-shift/np.sqrt(2)/2,1-shift/np.sqrt(2)/2],[1-shift/np.sqrt(2)/2,-1-s
 #Dome State
 ax2.scatter([das, -das],[das, -das], color = '#66C2A5', marker = 'o', s = 20, zorder = 15)
 # #Saddle State
-# ax2.scatter([das, -das],[-das, das], color = '#8DA0CB', marker = 'o', s = 20)
+# ax2.scatter([das, -das],[-das, das], color = '#6177AA', marker = 'o', s = 20)
 #MiuraOriState
 ax2.scatter([mo, mo, -mo, -mo],[mo, -mo, mo, -mo], color = '#FFD92F', marker = 'v', s = 20, zorder = 20)
 
