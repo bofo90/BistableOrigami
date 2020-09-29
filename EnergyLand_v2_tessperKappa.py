@@ -209,7 +209,7 @@ plot.GrainSizePaper(allCountMat, 0, r'$\kappa$', save = True, Folder_name = Fold
 plt.close('all')   
     
 ##### Plotting the Curvature and Energy of materials against neighbours for restang
-plot.violinPlotGrainSizeKappaPaper(allDesigns, 0, r'$\kappa$', r'$n_\mathregular{crys}$', 9, save = True, Folder_name = Folder_name, NameFig = 'NeighvsGrainSize1_viol')
+plot.violinPlotGrainSizeKappaPaper(allDesigns, 0, r'$\kappa$', r'$v_\mathregular{crys}$', 9, save = True, Folder_name = Folder_name, NameFig = 'NeighvsGrainSize1_viol')
 
 
 #%%

@@ -917,13 +917,13 @@ def ColorbarPerZKappaPaper(allMat, x, colorbar, z, save = False, Folder_name = '
 # right=0.96)
         fig1 = plt.figure(figsize=(cm2inch(5.), cm2inch(4.2)))
         ax1 = plt.subplot(111)
-        fig1.subplots_adjust(top=0.982,
+        fig1.subplots_adjust(top=0.967,
 bottom=0.165,
 left=0.195,
 right=0.97)
         
         NiceGraph2D(ax1, r'$\kappa$', r'$n/N_\mathregular{sim}$', mincoord = [np.min(x_values),0], 
-                    maxcoord = [np.max(x_values),1], divisions = [[-3,-2,-1,0],[0,0.5,1]], buffer = [0.1, 0.02])
+                    maxcoord = [np.max(x_values),1], divisions = [[-3,-2,-1,0],[0,0.5,1]], buffer = [0.1, 0])
         
         # kap = np.array(ax1.get_xticks())
         # kapname = [r'$10^{%d}$' %label for label in kap]
@@ -1049,6 +1049,11 @@ def violinPlotGrainSizePaper(allDesigns, x, xname, yname, stst_col, save = False
              '#66c2a5', '#fc8d62', '#8da0cb',             
              '#ffd92f', '#e5c494', '#b3b3b3']
     
+    color = ['#b5cf6b',
+             '#e7ba52',
+             '#6b6ecf',
+             '#d6616b']
+    
     xval = np.unique(allDesigns.iloc[:,x])
     thetas = np.array([0.24987326, 0.74993809, 0.50006483])
     
@@ -1057,14 +1062,14 @@ def violinPlotGrainSizePaper(allDesigns, x, xname, yname, stst_col, save = False
         fig1 = plt.figure(figsize=(cm2inch(4.3), cm2inch(3.7)))
         ax1 = plt.subplot(111)
         fig1.subplots_adjust(top=0.995,
-bottom=0.195,
-left=0.15,
-right=0.965)
+bottom=0.170,
+left=0.19,
+right=0.98)
         
         thisDesBool = ((allDesigns.iloc[:,9] == i+1) | (allDesigns.iloc[:,9] == i+4)) & (allDesigns.iloc[:,1] == thetas[i])
         thisDes = allDesigns[thisDesBool]    
         
-        NiceGraph2D(ax1, xname, yname, [2, 2], [14, 14], [4, 4], [1.5, 1])
+        NiceGraph2D(ax1, xname, yname, [2, 0], [15, 15], [[2,5,10,15], [0,5,10,15]], [0.7, 1])
                
         for j in np.arange(np.size(xval)):
             thisstst = thisDes[thisDes.iloc[:, x] == xval[j]]
@@ -1076,6 +1081,7 @@ right=0.965)
                 part.set_edgecolor('0.2')
                 part.set_linewidth(0.4)
                 part.set_alpha(1)
+            ax1.scatter(xval[j], np.mean(thisstst.iloc[:,19+i]), marker = 's' , c = '0.2', s = 4)
         
         
         fig1.show()
@@ -1504,7 +1510,7 @@ right=0.975)
         thisStateBool = allMat['StableStateMat'] == i+1+3
         thisState = allMat[thisStateBool] 
         
-        NiceGraph2D(ax1, xname, r'$n_\mathregular{def}/n_\mathregular{ver}$')
+        NiceGraph2D(ax1, xname, r'$v_\mathregular{def}/v_\mathregular{tot}$')
         
         ax1.set_xscale('log')
         ax1.set_xticks([0.001,0.01,0.1,1])
@@ -1559,7 +1565,7 @@ bottom=0.195,
 left=0.22,
 right=0.975)
         
-    NiceGraph2D(ax1, xname, r'$n_\mathregular{def}/n_\mathregular{ver}$', 
+    NiceGraph2D(ax1, xname, r'$v_\mathregular{def}/v_\mathregular{tot}$', 
                 mincoord = [np.nan,0], maxcoord = [np.nan,1], divisions = [np.nan, 3], buffer = [np.nan, 0.1])
     
     ax1.set_xscale('log')
@@ -1639,7 +1645,7 @@ bottom=0.23,
 left=0.2,
 right=0.975)
     
-    NiceGraph2D(ax1, xname, r'$n_\mathregular{grain}$', [np.nan, 1], [np.nan, 4], [np.nan, 4], [np.nan, 0.1])
+    NiceGraph2D(ax1, xname, r'$v_\mathregular{grain}$', [np.nan, 1], [np.nan, 4], [np.nan, 4], [np.nan, 0.1])
     
     MatNames = ['Dome-Saddle','All-Miura-ori', 'All-Fold']
     color = ['#66c2a5', '#fc8d62', '#8da0cb']
@@ -1678,7 +1684,7 @@ bottom=0.23,
 left=0.2,
 right=0.975)
     
-    NiceGraph2D(ax1, xname, r'$n_\mathregular{grain}$', [2, 2], [14, 14], [4, 4], [1.5, 1])
+    NiceGraph2D(ax1, xname, r'$v_\mathregular{grain}$', [2, 2], [14, 14], [4, 4], [1.5, 1])
     
     MatNames = ['Dome-Saddle','All-Miura-ori', 'All-Fold']
     color = ['#66c2a5', '#fc8d62', '#8da0cb']

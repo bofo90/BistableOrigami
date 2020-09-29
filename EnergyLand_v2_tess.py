@@ -45,8 +45,8 @@ for i in np.arange(2,16)[::-1]:
     for subdir in os.listdir(Folder_name):
         if subdir == 'Images':
             continue    
-        # if subdir == 'RestAng_1.571':
-        #     continue
+        if subdir == 'RestAng_1.571':
+            continue
         # if subdir != 'RestAng_0.785': #'RestAng_2.356': #'RestAng_1.571': #
         #     continue
             
@@ -143,7 +143,7 @@ plot.XSizePlot(allDesigns, 2, r'$matSize$', 6, r'$E_{norm}$', 9, 10, save = True
 plt.close('all')   
     
 ##### Plotting the Curvature and Energy of materials against neighbours for restang
-plot.violinPlotGrainSizePaper(allDesigns, 2, r'$n_\mathregular{size}$',  r'$n_\mathregular{crys}$', 9, save = True, Folder_name = Folder_name, NameFig = 'NeighvsGrainSize1_viol')
+plot.violinPlotGrainSizePaper(allDesigns, 2, r'$v_\mathregular{size}$',  r'$v_\mathregular{crys}$', 9, save = True, Folder_name = Folder_name, NameFig = 'NeighvsGrainSize1_viol')
 
 # #%%
 # plt.close('all')   
@@ -184,18 +184,18 @@ for t in thetas:
 
 #%%
 
-plot.GrainSizePaper2(allCountMat, 2, r'$n_\mathregular{size}$', save = True, Folder_name = Folder_name, NameFig = 'GrainSizevsMatSize')
+plot.GrainSizePaper2(allCountMat, 2, r'$v_\mathregular{size}$', save = True, Folder_name = Folder_name, NameFig = 'GrainSizevsMatSize')
 
 #%%
-allMat_copy = allMat.copy()
-allMat_copy['restang'] = allMat_copy['restang']*np.pi
-raa.SaveForPlotMat(allMat_copy, Folder_name[:42])
+# allMat_copy = allMat.copy()
+# allMat_copy['restang'] = allMat_copy['restang']*np.pi
+# raa.SaveForPlotMat(allMat_copy, Folder_name[:42])
 
 
-x = 9
-a = np.zeros((x,x))
-for i in np.arange(x):
-    a[i,np.arange(i,x-i)] = i
-    a[x-1-i,np.arange(i,x-i)] = i
-    a[np.arange(i+1,x-1-i), i] = i
-    a[np.arange(i+1,x-1-i), x-1-i] = i
+# x = 9
+# a = np.zeros((x,x))
+# for i in np.arange(x):
+#     a[i,np.arange(i,x-i)] = i
+#     a[x-1-i,np.arange(i,x-i)] = i
+#     a[np.arange(i+1,x-1-i), i] = i
+#     a[np.arange(i+1,x-1-i), x-1-i] = i
