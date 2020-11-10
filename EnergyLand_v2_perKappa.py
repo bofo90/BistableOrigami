@@ -143,7 +143,7 @@ plt.close('all')
 ###ploting scatter points of the presence of each stabel state
 colormap = 'cividis_r'
 plot.StableStatesCounturPlot(allFlagsRed,3, r'$\Theta/\pi$', 2, r'$\kappa$', 0, 1, r'$n/N_\mathregular{sim}$', colormap, [0,1], save = True, Folder_name = Folder_name, NameFig = 'FlagsAppearance')
-plot.StableStatesCounturPlot(allDesignsRed,1, r'$\Theta/\pi$', 0, r'$\kappa$', -1, -2, r'$n/N_\mathregular{sim}$', colormap, [0,1], save = True, Folder_name = Folder_name, NameFig = 'StStNumSim')
+plot.StableStatesCounturPlotPaper2(allDesignsRed,1, r'$\Theta/\pi$', 0, r'$\kappa$', -1, -2, r'$n/N_\mathregular{sim}$', colormap, [0,1], save = True, Folder_name = Folder_name, NameFig = 'StStNumSim')
 
 colormap = 'Set2'
 
