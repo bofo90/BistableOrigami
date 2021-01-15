@@ -1015,6 +1015,65 @@ right=0.97)
             
     return
 
+def ColorbarPerZKappaPaperShort(allMat, x, colorbar, z, save = False, Folder_name = '', NameFig = ''):
+       
+    allMat = allMat.round(8)
+    
+    z_values = np.unique(allMat.iloc[:,z])
+    x_values = np.log10(np.unique(allMat.iloc[:,x]))
+    
+    # color = ['#66C2A5', '#FFD92F', '#E4BB05', '#B3B3B3', '#339568','#D7704A','#414596'] 
+    # color = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', 
+    #          '#aec7e8', '#ffbb78', '#98df8a', '#ff9896', '#c5b0d5', '#c49c94', '#f7b6d2', 
+    #          '#7f7f7f', '#bcbd22']
+    # cmap = matl.cm.get_cmap('Set3',np.size(colorbar))
+    # color = cmap(np.linspace(0,1,np.size(colorbar)))   '#D663A9','#e78ac3',  
+    color = ['#41A584', '#66c2a5',
+             '#E26B3C', '#fc8d62',
+             '#6177AA', '#8da0cb',             
+             '#b3b3b3', '#b3b3b3']#, '#ffd92f', '#e5c494', '#b3b3b3']
+    
+    color = ['#89BF32', '#A6D854',
+             '#D663A9', '#E78AC2',
+             '#E26B3C', '#FC8E62',
+             '#E5C494', '#E5C494']
+    
+    color = ['#8ca252', '#b5cf6b',
+             '#bd9e39', '#e7ba52',
+             '#5254a3', '#6b6ecf',
+             '#d6616b', '#d6616b']
+    
+    for j in z_values:
+        fig1 = plt.figure(figsize=(cm2inch(4.5), cm2inch(3.9)))
+        ax1 = plt.subplot(111)
+        fig1.subplots_adjust(top=0.965,
+bottom=0.185,
+left=0.21,
+right=0.97)
+        
+        NiceGraph2D(ax1, r'$\kappa$', r'$n/N_\mathregular{sim}$', mincoord = [np.min(x_values),0], 
+                    maxcoord = [np.max(x_values),1], divisions = [[-3,-2,-1,0],[0,0.5,1]], buffer = [0.1, 0])
+        
+        # kap = np.array(ax1.get_xticks())
+        # kapname = [r'$10^{%d}$' %label for label in kap]
+        # ax1.xticks(kap, kapname)
+        ax1.xaxis.set_major_formatter(ticker.FormatStrFormatter(r'$\mathregular{10}^\mathregular{%d}$'))
+            
+        thisMatBool = allMat.iloc[:,z] == j
+        thisMat = allMat[thisMatBool]  
+        
+        for i in np.arange(np.size(colorbar)):
+            ax1.bar(np.log10(thisMat.iloc[:,x]), thisMat.iloc[:,colorbar[i]],bottom=np.sum(thisMat.iloc[:,colorbar[0:i]], axis = 1), width = 0.22,
+                    color = color[i], label = thisMat.columns[colorbar[i]], align = 'center') #
+            
+        # CreateLegend(ax1)
+        
+        if save: 
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %j + '.pdf', transparent = True)
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_' + '%.4f' %j + '.png', transparent = True)
+            
+    return
+
 
 def ColorbarPerZ(allMat, x, colorbar, z, save = False, Folder_name = '', NameFig = ''):
     
@@ -1183,12 +1242,18 @@ def violinPlotGrainSizeKappaPaper(allDesignsOR, x, xname, yname, stst_col, save 
     
     for i in np.arange(3):
     
-        fig1 = plt.figure(figsize=(cm2inch(4.3), cm2inch(3.7)))
+#         fig1 = plt.figure(figsize=(cm2inch(4.3), cm2inch(3.7)))
+#         ax1 = plt.subplot(111)
+#         fig1.subplots_adjust(top=0.995,
+# bottom=0.195,
+# left=0.15,
+# right=0.965)
+        fig1 = plt.figure(figsize=(cm2inch(4.5), cm2inch(3.9)))
         ax1 = plt.subplot(111)
-        fig1.subplots_adjust(top=0.995,
-bottom=0.195,
-left=0.15,
-right=0.965)
+        fig1.subplots_adjust(top=0.965,
+bottom=0.185,
+left=0.21,
+right=0.97)
         
         thisDesBool = ((allDesigns.iloc[:,9] == i+1) | (allDesigns.iloc[:,9] == i+4)) & (allDesigns.iloc[:,1] == thetas[i])
         thisDes = allDesigns[thisDesBool]    

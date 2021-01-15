@@ -57,8 +57,8 @@ allCountMat = pd.DataFrame()
 allMat = pd.DataFrame()
 allEne = np.array([[0,0]])
 
-Folder_name = "Results/Tessellation4/25/2CFF/19-Jun-2020_4_4_" #with no B.C.
-# Folder_name = "Results/Tessellation4/25/2CFF/07-Jul-2020_8_8_" #with no B.C.
+# Folder_name = "Results/Tessellation4/25/2CFF/19-Jun-2020_4_4_" #with no B.C.
+Folder_name = "Results/Tessellation4/25/2CFF/07-Jul-2020_8_8_" #with no B.C.
     
 if not os.path.isdir(Folder_name + '/Images/'):
     os.mkdir(Folder_name + '/Images/')
@@ -156,6 +156,7 @@ plt.close('all')
 
 ##### plot appearance of material types with errors
 plot.ColorbarPerZKappaPaper(allCountMat,0, np.array([3,6,4,7,5,8,9,10]), 1, save = True, Folder_name = Folder_name, NameFig = 'SimulationsConvergence')
+plot.ColorbarPerZKappaPaperShort(allCountMat,0, np.array([3,6,4,7,5,8,9,10]), 1, save = True, Folder_name = Folder_name, NameFig = 'SimulationsConvergence_short')
 
 #%%
 # plt.close('all')   
