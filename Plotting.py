@@ -324,12 +324,14 @@ def CreateLegend(ax, location = 0):
 
     return
 
-def ConvSim(redDesign,redFlags, colormap, save = False, Folder_name = '', NameFig = ''):
+def ConvSim(redDesign,redFlags, flag, save = False, Folder_name = '', NameFig = ''):
     
     flags = np.unique(redFlags['Flags'])
     flags = flags[flags < 0]
+    flags = [-1]
     
-    stst = np.unique(redDesign['StableStateAll'])
+    # stst = np.unique(redDesign['StableStates'])
+    stst = np.array([6,14,9,0,1,5])
     
     stddev = np.unique(redDesign['StdDev'])
     
@@ -346,36 +348,72 @@ def ConvSim(redDesign,redFlags, colormap, save = False, Folder_name = '', NameFi
                 totsim[i,j] = redFlags.loc[hereFlag,'amountFlags'].values
             j += 1
         for s in stst:
-            hereStSt = (redDesign['StdDev'] == sd) & (redDesign['StableStateAll'] == s)
+            hereStSt = (redDesign['StdDev'] == sd) & (redDesign['StableStates'] == s)
             hereStSt = hereStSt.to_numpy()
             if np.sum(hereStSt) >= 1:
                 totsim[i,j] = np.sum(redDesign.loc[hereStSt,'amountStSt'].values)
             j += 1
     
+    totsim = totsim/1000
     allStates = np.concatenate((flags,stst))
     
-    cmap = matl.cm.get_cmap(colormap,np.size(allStates))
-    color = cmap(np.linspace(0,1,np.size(allStates)))   
+    # cmap = matl.cm.get_cmap(colormap,np.size(allStates))
+    # color = cmap(np.linspace(0,1,np.size(allStates)))   
+    color = ['#8F1924', '#d6616b', '#FABFC5',
+             '#B3B3B3', '#66C2A5', '#6177AA', '#FFD92F']
     
-    fig = plt.figure(figsize=(cm2inch(8), cm2inch(6)))
+    
+    fig = plt.figure(figsize=(cm2inch(4.5), cm2inch(3.9)))
     ax1 = plt.subplot(111)
-    fig.subplots_adjust(top=0.968,
-bottom=0.099,
-left=0.136,
-right=0.982)
+    fig.subplots_adjust(top=0.965,
+bottom=0.185,
+left=0.21,
+right=0.97)
     
-    NiceGraph2D(ax1, 'Std.Dev.', 'Sim. Amount')
+    NiceGraph2D(ax1, r'$\sigma$ [$L$]', r'$n/N_\mathregular{sim}$', mincoord = [0,0], 
+                maxcoord = [np.max(stddev),1], divisions = [5,[0,0.5,1]], buffer = [0.05, 0])
     
     for i in np.arange(np.size(totsim,1)):
-        ax1.bar(stddev, totsim[:,i],bottom=np.sum(totsim[:,:i],axis = 1), width = 0.05,
+        ax1.bar(stddev, totsim[:,i],bottom=np.sum(totsim[:,:i],axis = 1), width = 0.06,
                 color = color[i], label = allStates[i], align = 'center')
-    
-    CreateLegend(ax1, location = 2)
+        
+    ax1.axvline(0.2, ls = '--', lw = '1', c = '0.2')
     
     if save: 
-        fig.savefig(Folder_name + '/Images/' + NameFig + '_CB.pdf', transparent = True)
-        fig.savefig(Folder_name + '/Images/' + NameFig + '_CB.png', transparent = True)
+        fig.savefig(Folder_name + '/Images/' + NameFig + '.pdf', transparent = True)
+        fig.savefig(Folder_name + '/Images/' + NameFig + '.png', transparent = True)
+
+    if flag:
+    
+        fig1 = plt.figure(figsize=(cm2inch(1.5), cm2inch(8.8)))
+        fig1.subplots_adjust(top=0.884,
+        bottom=0.116,
+        left=0.039,
+        right=0.961)
+        ax1 = plt.subplot(111)
+        
+        cmap = matl.colors.ListedColormap(color)
+        bounds = np.arange(np.size(allStates)+1)
+        norm = matl.colors.BoundaryNorm(bounds, cmap.N)
+        
+        cbar = plt.colorbar(matl.cm.ScalarMappable(norm=norm, cmap=cmap), ax = ax1, fraction=0.99, pad=0.01, orientation='vertical')
+        # cbar.set_ticks(bounds+0.5)
+        cbar.set_ticks([])
+        # cbar.ax.set_xticklabels(ststname.astype(int))
+        # cbar.set_label('Stable State', fontsize = 9, color = '0.2',labelpad = 0)
+        cbar.ax.tick_params(colors='0.2', pad=2)
+        cbar.outline.set_edgecolor('0.2')
+        cbar.outline.set_linewidth(0.4)
+        ax1.remove()   
+        
+        if save: 
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_CB.pdf', transparent = True)
+            fig1.savefig(Folder_name + '/Images/' + NameFig + '_CB.png', transparent = True)
+        
     return
+
+
+
 
 def TotEnergyperZ(allDesigns, x, xname, z, stst_col, colormap, save = False, Folder_name = ''):
     
